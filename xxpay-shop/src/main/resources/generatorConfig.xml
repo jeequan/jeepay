@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration>
+
+    <!-- 配置文件 -->
+    <properties resource="generator.properties"></properties>
+
+    <!-- 驱动包 -->
+    <classPathEntry location="${classPathEntry}" />
+
+    <context id="MysqlContext" targetRuntime="MyBatis3" defaultModelType="flat">
+
+        <property name="javaFileEncoding" value="UTF-8"/>
+        <!-- 由于beginningDelimiter和endingDelimiter的默认值为双引号(")，在Mysql中不能这么写，所以还要将这两个默认值改为`  -->
+        <property name="beginningDelimiter" value="`"/>
+        <property name="endingDelimiter" value="`"/>
+
+        <property name="useActualColumnNames" value="false" />
+
+        <!-- 为生成的Java模型创建一个toString方法 -->
+        <plugin type="org.mybatis.generator.plugins.ToStringPlugin"></plugin>
+
+        <!-- 为生成的Java模型类添加序列化接口，并生成serialVersionUID字段 -->
+        <plugin type="org.xxpay.shop.dao.plugin.SerializablePlugin">
+            <property name="suppressJavaInterface" value="false"/>
+        </plugin>
+
+        <!-- 生成一个新的selectByExample方法，这个方法可以接收offset和limit参数，主要用来实现分页 -->
+        <plugin type="org.xxpay.shop.dao.plugin.PaginationPlugin"></plugin>
+
+        <!-- Java模型生成equals和hashcode方法 -->
+        <plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin"></plugin>
+
+        <!-- 生成的代码去掉注释 -->
+        <commentGenerator type="org.xxpay.shop.dao.plugin.CommentGenerator">
+            <property name="suppressAllComments" value="true"/>
+            <property name="suppressDate" value="true"/>
+        </commentGenerator>
+
+        <!-- 数据库连接 -->
+        <jdbcConnection driverClass="${generator.jdbc.driver}"
+                        connectionURL="${generator.jdbc.url}"
+                        userId="${generator.jdbc.username}"
+                        password="${generator.jdbc.password}"/>
+
+        <!-- model生成 -->
+        <javaModelGenerator targetPackage="org.xxpay.shop.dao.model" targetProject="src/main/java"/>
+
+        <!-- MapperXML生成 -->
+        <sqlMapGenerator targetPackage="org.xxpay.shop.dao.mapper" targetProject="src/main/resources"/>
+
+        <!-- Mapper接口生成 -->
+        <javaClientGenerator targetPackage="org.xxpay.shop.dao.mapper" targetProject="src/main/java" type="XMLMAPPER"/>
+
+        <!-- 需要映射的表 -->
+        <table tableName="t_goods_order" domainObjectName="GoodsOrder"><property name="useActualColumnNames" value="true" /></table>
+    </context>
+</generatorConfiguration>

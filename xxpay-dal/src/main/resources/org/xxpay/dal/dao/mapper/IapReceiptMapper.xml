@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.xxpay.dal.dao.mapper.IapReceiptMapper" >
+  <resultMap id="BaseResultMap" type="org.xxpay.dal.dao.model.IapReceipt" >
+    <id column="PayOrderId" property="payOrderId" jdbcType="VARCHAR" />
+    <result column="MchId" property="mchId" jdbcType="VARCHAR" />
+    <result column="TransactionId" property="transactionId" jdbcType="VARCHAR" />
+    <result column="Status" property="status" jdbcType="TINYINT" />
+    <result column="HandleCount" property="handleCount" jdbcType="TINYINT" />
+    <result column="CreateTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="UpdateTime" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="org.xxpay.dal.dao.model.IapReceipt" extends="BaseResultMap" >
+    <result column="ReceiptData" property="receiptData" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    PayOrderId, MchId, TransactionId, Status, HandleCount, CreateTime, UpdateTime
+  </sql>
+  <sql id="Blob_Column_List" >
+    ReceiptData
+  </sql>
+  <select id="selectByExampleWithBLOBs" resultMap="ResultMapWithBLOBs" parameterType="org.xxpay.dal.dao.model.IapReceiptExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_iap_receipt
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="org.xxpay.dal.dao.model.IapReceiptExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_iap_receipt
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null" >
+      <if test="offset != null" >
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null" >
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_iap_receipt
+    where PayOrderId = #{payOrderId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_iap_receipt
+    where PayOrderId = #{payOrderId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="org.xxpay.dal.dao.model.IapReceiptExample" >
+    delete from t_iap_receipt
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="org.xxpay.dal.dao.model.IapReceipt" >
+    insert into t_iap_receipt (PayOrderId, MchId, TransactionId, 
+      Status, HandleCount, CreateTime, 
+      UpdateTime, ReceiptData)
+    values (#{payOrderId,jdbcType=VARCHAR}, #{mchId,jdbcType=VARCHAR}, #{transactionId,jdbcType=VARCHAR}, 
+      #{status,jdbcType=TINYINT}, #{handleCount,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{receiptData,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="org.xxpay.dal.dao.model.IapReceipt" >
+    insert into t_iap_receipt
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="payOrderId != null" >
+        PayOrderId,
+      </if>
+      <if test="mchId != null" >
+        MchId,
+      </if>
+      <if test="transactionId != null" >
+        TransactionId,
+      </if>
+      <if test="status != null" >
+        Status,
+      </if>
+      <if test="handleCount != null" >
+        HandleCount,
+      </if>
+      <if test="createTime != null" >
+        CreateTime,
+      </if>
+      <if test="updateTime != null" >
+        UpdateTime,
+      </if>
+      <if test="receiptData != null" >
+        ReceiptData,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="payOrderId != null" >
+        #{payOrderId,jdbcType=VARCHAR},
+      </if>
+      <if test="mchId != null" >
+        #{mchId,jdbcType=VARCHAR},
+      </if>
+      <if test="transactionId != null" >
+        #{transactionId,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=TINYINT},
+      </if>
+      <if test="handleCount != null" >
+        #{handleCount,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="receiptData != null" >
+        #{receiptData,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="org.xxpay.dal.dao.model.IapReceiptExample" resultType="java.lang.Integer" >
+    select count(*) from t_iap_receipt
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_iap_receipt
+    <set >
+      <if test="record.payOrderId != null" >
+        PayOrderId = #{record.payOrderId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.mchId != null" >
+        MchId = #{record.mchId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.transactionId != null" >
+        TransactionId = #{record.transactionId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.status != null" >
+        Status = #{record.status,jdbcType=TINYINT},
+      </if>
+      <if test="record.handleCount != null" >
+        HandleCount = #{record.handleCount,jdbcType=TINYINT},
+      </if>
+      <if test="record.createTime != null" >
+        CreateTime = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateTime != null" >
+        UpdateTime = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.receiptData != null" >
+        ReceiptData = #{record.receiptData,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map" >
+    update t_iap_receipt
+    set PayOrderId = #{record.payOrderId,jdbcType=VARCHAR},
+      MchId = #{record.mchId,jdbcType=VARCHAR},
+      TransactionId = #{record.transactionId,jdbcType=VARCHAR},
+      Status = #{record.status,jdbcType=TINYINT},
+      HandleCount = #{record.handleCount,jdbcType=TINYINT},
+      CreateTime = #{record.createTime,jdbcType=TIMESTAMP},
+      UpdateTime = #{record.updateTime,jdbcType=TIMESTAMP},
+      ReceiptData = #{record.receiptData,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_iap_receipt
+    set PayOrderId = #{record.payOrderId,jdbcType=VARCHAR},
+      MchId = #{record.mchId,jdbcType=VARCHAR},
+      TransactionId = #{record.transactionId,jdbcType=VARCHAR},
+      Status = #{record.status,jdbcType=TINYINT},
+      HandleCount = #{record.handleCount,jdbcType=TINYINT},
+      CreateTime = #{record.createTime,jdbcType=TIMESTAMP},
+      UpdateTime = #{record.updateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="org.xxpay.dal.dao.model.IapReceipt" >
+    update t_iap_receipt
+    <set >
+      <if test="mchId != null" >
+        MchId = #{mchId,jdbcType=VARCHAR},
+      </if>
+      <if test="transactionId != null" >
+        TransactionId = #{transactionId,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        Status = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="handleCount != null" >
+        HandleCount = #{handleCount,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null" >
+        CreateTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        UpdateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="receiptData != null" >
+        ReceiptData = #{receiptData,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where PayOrderId = #{payOrderId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="org.xxpay.dal.dao.model.IapReceipt" >
+    update t_iap_receipt
+    set MchId = #{mchId,jdbcType=VARCHAR},
+      TransactionId = #{transactionId,jdbcType=VARCHAR},
+      Status = #{status,jdbcType=TINYINT},
+      HandleCount = #{handleCount,jdbcType=TINYINT},
+      CreateTime = #{createTime,jdbcType=TIMESTAMP},
+      UpdateTime = #{updateTime,jdbcType=TIMESTAMP},
+      ReceiptData = #{receiptData,jdbcType=LONGVARCHAR}
+    where PayOrderId = #{payOrderId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="org.xxpay.dal.dao.model.IapReceipt" >
+    update t_iap_receipt
+    set MchId = #{mchId,jdbcType=VARCHAR},
+      TransactionId = #{transactionId,jdbcType=VARCHAR},
+      Status = #{status,jdbcType=TINYINT},
+      HandleCount = #{handleCount,jdbcType=TINYINT},
+      CreateTime = #{createTime,jdbcType=TIMESTAMP},
+      UpdateTime = #{updateTime,jdbcType=TIMESTAMP}
+    where PayOrderId = #{payOrderId,jdbcType=VARCHAR}
+  </update>
+</mapper>

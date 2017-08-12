@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.xxpay.shop.dao.mapper.GoodsOrderMapper" >
+  <resultMap id="BaseResultMap" type="org.xxpay.shop.dao.model.GoodsOrder" >
+    <id column="GoodsOrderId" property="goodsOrderId" jdbcType="VARCHAR" />
+    <result column="GoodsId" property="goodsId" jdbcType="VARCHAR" />
+    <result column="GoodsName" property="goodsName" jdbcType="VARCHAR" />
+    <result column="Amount" property="amount" jdbcType="BIGINT" />
+    <result column="UserId" property="userId" jdbcType="VARCHAR" />
+    <result column="Status" property="status" jdbcType="TINYINT" />
+    <result column="PayOrderId" property="payOrderId" jdbcType="VARCHAR" />
+    <result column="ChannelId" property="channelId" jdbcType="VARCHAR" />
+    <result column="ChannelUserId" property="channelUserId" jdbcType="VARCHAR" />
+    <result column="CreateTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="UpdateTime" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    GoodsOrderId, GoodsId, GoodsName, Amount, UserId, Status, PayOrderId, ChannelId, 
+    ChannelUserId, CreateTime, UpdateTime
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="org.xxpay.shop.dao.model.GoodsOrderExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_goods_order
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null" >
+      <if test="offset != null" >
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null" >
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_goods_order
+    where GoodsOrderId = #{goodsOrderId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_goods_order
+    where GoodsOrderId = #{goodsOrderId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="org.xxpay.shop.dao.model.GoodsOrderExample" >
+    delete from t_goods_order
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="org.xxpay.shop.dao.model.GoodsOrder" >
+    insert into t_goods_order (GoodsOrderId, GoodsId, GoodsName, 
+      Amount, UserId, Status, 
+      PayOrderId, ChannelId, ChannelUserId, 
+      CreateTime, UpdateTime)
+    values (#{goodsOrderId,jdbcType=VARCHAR}, #{goodsId,jdbcType=VARCHAR}, #{goodsName,jdbcType=VARCHAR}, 
+      #{amount,jdbcType=BIGINT}, #{userId,jdbcType=VARCHAR}, #{status,jdbcType=TINYINT}, 
+      #{payOrderId,jdbcType=VARCHAR}, #{channelId,jdbcType=VARCHAR}, #{channelUserId,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="org.xxpay.shop.dao.model.GoodsOrder" >
+    insert into t_goods_order
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="goodsOrderId != null" >
+        GoodsOrderId,
+      </if>
+      <if test="goodsId != null" >
+        GoodsId,
+      </if>
+      <if test="goodsName != null" >
+        GoodsName,
+      </if>
+      <if test="amount != null" >
+        Amount,
+      </if>
+      <if test="userId != null" >
+        UserId,
+      </if>
+      <if test="status != null" >
+        Status,
+      </if>
+      <if test="payOrderId != null" >
+        PayOrderId,
+      </if>
+      <if test="channelId != null" >
+        ChannelId,
+      </if>
+      <if test="channelUserId != null" >
+        ChannelUserId,
+      </if>
+      <if test="createTime != null" >
+        CreateTime,
+      </if>
+      <if test="updateTime != null" >
+        UpdateTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="goodsOrderId != null" >
+        #{goodsOrderId,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsId != null" >
+        #{goodsId,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsName != null" >
+        #{goodsName,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=TINYINT},
+      </if>
+      <if test="payOrderId != null" >
+        #{payOrderId,jdbcType=VARCHAR},
+      </if>
+      <if test="channelId != null" >
+        #{channelId,jdbcType=VARCHAR},
+      </if>
+      <if test="channelUserId != null" >
+        #{channelUserId,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="org.xxpay.shop.dao.model.GoodsOrderExample" resultType="java.lang.Integer" >
+    select count(*) from t_goods_order
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_goods_order
+    <set >
+      <if test="record.goodsOrderId != null" >
+        GoodsOrderId = #{record.goodsOrderId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.goodsId != null" >
+        GoodsId = #{record.goodsId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.goodsName != null" >
+        GoodsName = #{record.goodsName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.amount != null" >
+        Amount = #{record.amount,jdbcType=BIGINT},
+      </if>
+      <if test="record.userId != null" >
+        UserId = #{record.userId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.status != null" >
+        Status = #{record.status,jdbcType=TINYINT},
+      </if>
+      <if test="record.payOrderId != null" >
+        PayOrderId = #{record.payOrderId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.channelId != null" >
+        ChannelId = #{record.channelId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.channelUserId != null" >
+        ChannelUserId = #{record.channelUserId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null" >
+        CreateTime = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateTime != null" >
+        UpdateTime = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_goods_order
+    set GoodsOrderId = #{record.goodsOrderId,jdbcType=VARCHAR},
+      GoodsId = #{record.goodsId,jdbcType=VARCHAR},
+      GoodsName = #{record.goodsName,jdbcType=VARCHAR},
+      Amount = #{record.amount,jdbcType=BIGINT},
+      UserId = #{record.userId,jdbcType=VARCHAR},
+      Status = #{record.status,jdbcType=TINYINT},
+      PayOrderId = #{record.payOrderId,jdbcType=VARCHAR},
+      ChannelId = #{record.channelId,jdbcType=VARCHAR},
+      ChannelUserId = #{record.channelUserId,jdbcType=VARCHAR},
+      CreateTime = #{record.createTime,jdbcType=TIMESTAMP},
+      UpdateTime = #{record.updateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="org.xxpay.shop.dao.model.GoodsOrder" >
+    update t_goods_order
+    <set >
+      <if test="goodsId != null" >
+        GoodsId = #{goodsId,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsName != null" >
+        GoodsName = #{goodsName,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null" >
+        Amount = #{amount,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null" >
+        UserId = #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        Status = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="payOrderId != null" >
+        PayOrderId = #{payOrderId,jdbcType=VARCHAR},
+      </if>
+      <if test="channelId != null" >
+        ChannelId = #{channelId,jdbcType=VARCHAR},
+      </if>
+      <if test="channelUserId != null" >
+        ChannelUserId = #{channelUserId,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        CreateTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        UpdateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where GoodsOrderId = #{goodsOrderId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="org.xxpay.shop.dao.model.GoodsOrder" >
+    update t_goods_order
+    set GoodsId = #{goodsId,jdbcType=VARCHAR},
+      GoodsName = #{goodsName,jdbcType=VARCHAR},
+      Amount = #{amount,jdbcType=BIGINT},
+      UserId = #{userId,jdbcType=VARCHAR},
+      Status = #{status,jdbcType=TINYINT},
+      PayOrderId = #{payOrderId,jdbcType=VARCHAR},
+      ChannelId = #{channelId,jdbcType=VARCHAR},
+      ChannelUserId = #{channelUserId,jdbcType=VARCHAR},
+      CreateTime = #{createTime,jdbcType=TIMESTAMP},
+      UpdateTime = #{updateTime,jdbcType=TIMESTAMP}
+    where GoodsOrderId = #{goodsOrderId,jdbcType=VARCHAR}
+  </update>
+</mapper>
