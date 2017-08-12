@@ -11,12 +11,14 @@ V1.0 |2017-08-11 |创建 |丁志伟
 ## 2. 项目结构
 
 - xxpay项目使用java语言开发，jdk版本为1.8（其他版本没有测试过），项目使用maven编译。
-- 项目计划使用种架构开发：（1）spring-cloud架构（2）spring-boot-dubbo架构（3）spring-mvc
-- 
+- 项目计划使用种架构开发：
+（1）spring-cloud架构
+（2）spring-boot-dubbo架构
+（3）spring-mvc
 
 ### 2.1 xxpay-master
 | 项目  | server-port | 描述
-|---|---|---|---|---|---
+|---|---|---
 |xxpay-common |  | 公共模块(常量、工具类等)，jar发布
 |xxpay-dal |  | 支付数据访问层，jar发布
 |xxpay-mgr | 8092 | 支付运营平台
@@ -26,7 +28,7 @@ V1.0 |2017-08-11 |创建 |丁志伟
 |xxpay4spring-mvc |  | 支付中心spring-mvc架构实现
 ### 2.2 xxpay4spring-cloud
 | 项目  | server-port | 描述
-|---|---|---|---|---|---
+|---|---|---
 |xxpay-config | 2020 | 支付服务配置中心
 |xxpay-gateway | 3020 | 支付服务API网关
 |xxpay-server | 2000 | 支付服务注册中心
@@ -39,11 +41,11 @@ V1.0 |2017-08-11 |创建 |丁志伟
 
 ### 2.3 xxpay4spring-boot-dubbo
 | 项目  | server-port | 描述
-|---|---|---|---|---|---
+|---|---|---
 |... |  | 
 ### 2.4 xxpay4spring-mvc
 | 项目  | server-port | 描述
-|---|---|---|---|---|---
+|---|---|---
 |... |  | 
 ## 3. 第三方依赖
 
