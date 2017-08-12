@@ -24,7 +24,7 @@ spring:
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000  # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
 
   activemq:
-    broker-url: failover:(tcp://101.200.130.72:61616?wireFormat.maxInactivityDuration=0)
+    broker-url: failover:(tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0)
     in-memory: true
     pool:
       enabled: true
