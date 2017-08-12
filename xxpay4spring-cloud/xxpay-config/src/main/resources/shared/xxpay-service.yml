@@ -5,9 +5,9 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://139.129.231.219:3306/xxpaydb?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=true
+    url: jdbc:mysql://127.0.0.1:3306/xxpaydb?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=true
     username: xxpay
-    password: xxpay3qw13uM
+    password: xxpay
     initialSize: 5    # 初始化大小
     minIdle: 5        # 最小
     maxActive: 20     # 最大
