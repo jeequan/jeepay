@@ -28,4 +28,5 @@ zuul:
         path: /notify/**
         serviceId: xxpay-service
 
-
+logging:
+  file: ./log/xxpay-gateway.log
