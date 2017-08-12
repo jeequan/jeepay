@@ -10,7 +10,7 @@ V1.0 |2017-08-11 |创建 |丁志伟
 
 ## 2. 项目结构
 
-- xxpay项目使用java语言开发，jdk版本为1.8（其他版本没有测试过），项目使用maven编译。
+- xxpay项目使用java语言开发，jdk版本为1.8，项目使用maven编译。
 - 项目计划使用种架构开发：
 （1）spring-cloud架构
 （2）spring-boot-dubbo架构
