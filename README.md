@@ -1,6 +1,12 @@
 ## 1. 项目简介
 xxpay-master是一个使用spring-cloud开发的分布式聚合支付系统,集成微信,支付宝,易宝支付,京东支付,IAP支付等第三方支付渠道.
 
+[项目网站(http://www.xxpay.org)](http://www.xxpay.org "xxpay官方网站")
+
+[支付流程体验(http://shop.xxpay.org/goods/openQrPay.html)](http://shop.xxpay.org/goods/openQrPay.html "xxpay支付体验")
+
+![输入图片说明](https://git.oschina.net/uploads/images/2017/0813/033151_f920110d_430718.png "xxpay支付体验")
+
 ## 2. 功能特性
 支持分布式集群部署,适用于高并发场景.
 
@@ -10,6 +16,7 @@ xxpay-master是一个使用spring-cloud开发的分布式聚合支付系统,集�
 ## 4. 部署步骤
 
 [xxpay表结构](https://gitee.com/jmdhappy/xxpay-master/wikis/xxpay表结构 "xxpay表结构")
+
 [xxpay部署步骤](https://gitee.com/jmdhappy/xxpay-master/wikis/xxpay部署步骤 "xxpay部署步骤")
 
 ## 5. 目录结构描述
