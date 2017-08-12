@@ -9,7 +9,8 @@ xxpay-master是一个使用spring-cloud开发的分布式聚合支付系统,集�
 
 ## 4. 部署步骤
 
-[xxpay表结构说明](https://gitee.com/jmdhappy/xxpay-master/wikis/xxpay表结构说明 "xxpay表结构")
+[xxpay表结构](https://gitee.com/jmdhappy/xxpay-master/wikis/xxpay表结构 "xxpay表结构")
+[xxpay部署步骤](https://gitee.com/jmdhappy/xxpay-master/wikis/xxpay部署步骤 "xxpay部署步骤")
 
 ## 5. 目录结构描述
 - xxpay项目使用java语言开发，jdk版本为1.8，项目使用maven编译。
