@@ -5,11 +5,12 @@
 - xxpay是一个聚合支付的角色,业务系统只需对接几个接口,就可完成所有与第三方支付渠道交互的后端逻辑处理;
 - xxpay也是一个标准的分布式系统开发脚手架,后期会陆续完成spring-mvc,及dubbo版本的开发;
 
-[项目网站:http://www.xxpay.org](http://www.xxpay.org "xxpay官方网站")
+[XxPay官网：http://www.xxpay.org](http://www.xxpay.org "xxpay官方网站")
 
-[支付流程体验:http://shop.xxpay.org/goods/openQrPay.html](http://shop.xxpay.org/goods/openQrPay.html "xxpay支付体验")
+[支付体验&捐助：http://shop.xxpay.org/goods/openQrPay.html](http://shop.xxpay.org/goods/openQrPay.html "xxpay支付体验")
 
-![输入图片说明](https://git.oschina.net/uploads/images/2017/0813/033151_f920110d_430718.png "xxpay支付体验")
+可以用微信或支付宝客户端扫描下面二维码，完成支付流程体验。体验的同时也是捐助我哦！！！
+![体验xxpay支付流程，手机扫一扫可体验](https://git.oschina.net/uploads/images/2017/0813/230918_96b80c69_430718.png "xxpay支付体验")
 
 
 ### 项目部署
@@ -47,9 +48,10 @@
 |xxpay-service | 3000 | 支付服务端
 |xxpay-web | 3010 | 支付客户端
 
-说明:
-
-- 项目启动顺序：xxpay-server > xxpay-config > xxpay-service > xxpay-web > xxpay-gateway
+项目启动顺序：
+```
+xxpay-server > xxpay-config > xxpay-service > xxpay-web > xxpay-gateway
+```
 
 #### xxpay4spring-boot-dubbo
 | 项目  | server-port | 描述
@@ -62,10 +64,13 @@
 
 
 ### 版本内容更新
+***
 
 版本 |日期 |描述 |作者
 ------- | ------- | ------- | -------
 V1.0 |2017-08-11 |创建 |丁志伟
 
 ### 关于作者
-
+***
+QQ：29093576
+Email：jmdhappy@126.com
