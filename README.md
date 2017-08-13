@@ -7,11 +7,19 @@
 
 [XxPay官网：http://www.xxpay.org](http://www.xxpay.org "xxpay官方网站")
 
-[支付体验&捐助：http://shop.xxpay.org/goods/openQrPay.html](http://shop.xxpay.org/goods/openQrPay.html "xxpay支付体验")
+[支付体验&捐赠我：http://shop.xxpay.org/goods/openQrPay.html](http://shop.xxpay.org/goods/openQrPay.html "xxpay支付体验")
 
-可以用微信或支付宝客户端扫描下面二维码，完成支付流程体验。体验的同时也是捐助我哦！！！
+[XxPay运营平台演示：http://mgr.xxpay.org](http://mgr.xxpay.org "xxpay运营平台")
+
+可以用微信或支付宝客户端扫描下面二维码，完成支付流程体验。体验的同时也是捐赠我哦！！！
+支付的订单数据可以到[XxPay运营平台](http://mgr.xxpay.org "xxpay运营平台")中查看。
 ![体验xxpay支付流程，手机扫一扫可体验](https://git.oschina.net/uploads/images/2017/0813/230918_96b80c69_430718.png "xxpay支付体验")
 
+【运营平台截图】
+
+![输入图片说明](https://git.oschina.net/uploads/images/2017/0814/015506_5b5871eb_430718.png "Xxpay运营平台")
+
+![输入图片说明](https://git.oschina.net/uploads/images/2017/0814/015531_b34e63aa_430718.png "Xxpay运营平台")
 
 ### 项目部署
 ***
