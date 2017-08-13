@@ -68,7 +68,7 @@ xxpay-server > xxpay-config > xxpay-service > xxpay-web > xxpay-gateway
 
 版本 |日期 |描述 |作者
 ------- | ------- | ------- | -------
-V1.0 |2017-08-11 |创建 |丁志伟
+V1.0.0 |2017-08-11 |创建 |丁志伟
 
 ### 关于作者
 ***
