@@ -63,7 +63,7 @@ xxpay-server > xxpay-config > xxpay-service > xxpay-web > xxpay-gateway
 |... |  |
 
 
-### 版本内容更新
+### 版本更新
 ***
 
 版本 |日期 |描述 |作者
