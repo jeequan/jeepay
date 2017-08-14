@@ -14,6 +14,10 @@
 
 [XxPay运营平台演示：http://mgr.xxpay.org](http://mgr.xxpay.org "xxpay运营平台")
 
+[XxPay支付中心API文档：https://gitee.com/jmdhappy/xxpay-master/wikis/XxPay支付中心API文档](https://gitee.com/jmdhappy/xxpay-master/wikis/XxPay支付中心API文档 "xxpay支付中心API文档")
+
+有些同学反馈说,没用三方支付商户信息.可以按照上面的接口对接支付中心,体验商户测业务流程.后续作者申请到能测试的三方支付号,再公布.
+
 可以用微信或支付宝客户端扫描下面二维码，完成支付流程体验。体验的同时也是捐赠我哦！！！
 支付的订单数据可以到[XxPay运营平台](http://mgr.xxpay.org "xxpay运营平台")中查看。
 ![体验xxpay支付流程，手机扫一扫可体验](https://git.oschina.net/uploads/images/2017/0813/230918_96b80c69_430718.png "xxpay支付体验")
