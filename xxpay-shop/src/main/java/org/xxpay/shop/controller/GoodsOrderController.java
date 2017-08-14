@@ -46,7 +46,7 @@ public class GoodsOrderController {
     static final String reqKey = "M86l522AV6q613Ii4W6u8K48uW8vM1N6bFgyv769220MdYe9u37N4y7rI5mQ";
     // 验签key
     static final String resKey = "Hpcl522AV6q613KIi46u6g6XuW8vM1N8bFgyv769770MdYe9u37M4y7rIpl8";
-    static final String baseUrl = "http://api.xxpay.org";
+    static final String baseUrl = "http://api.xxpay.org/api";
     //static final String baseUrl = "http://xxpay.ngrok.cc";
 
     private AtomicLong seq = new AtomicLong(0L);
@@ -261,7 +261,7 @@ public class GoodsOrderController {
 
     GoodsOrder createGoodsOrder(String goodsId, Long amount) {
         // 先插入订单数据
-        String goodsOrderId = String.format("%s%s%06d", "G", DateUtil.getSeqString(), (int) seq.getAndIncrement() % 1000000);
+        String goodsOrderId =  String.format("%s%s%06d", "G", DateUtil.getSeqString(), (int) seq.getAndIncrement() % 1000000);
         GoodsOrder goodsOrder = new GoodsOrder();
         goodsOrder.setGoodsOrderId(goodsOrderId);
         goodsOrder.setGoodsId(goodsId);
