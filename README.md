@@ -44,7 +44,7 @@ xxpay-master
 ```
 
 #### xxpay-master
-| 项目  | server-port | 描述
+| 项目  | 端口 | 描述
 |---|---|---
 |xxpay-common |  | 公共模块(常量、工具类等)，jar发布
 |xxpay-dal |  | 支付数据持久层，jar发布
@@ -54,7 +54,7 @@ xxpay-master
 |xxpay4spring-boot-dubbo |  | 支付中心spring-boot-dubbo架构实现
 |xxpay4spring-mvc |  | 支付中心spring-mvc架构实现
 #### xxpay4spring-cloud
-| 项目  | server-port | 描述
+| 项目  | 端口 | 描述
 |---|---|---
 |xxpay-config | 2020 | 支付服务配置中心
 |xxpay-gateway | 3020 | 支付服务API网关
@@ -73,15 +73,13 @@ xxpay-server > xxpay-config > xxpay-service > xxpay-web > xxpay-gateway
 
 网友写的项目部署文档：[项目部署[网友:娑娜] ](http://docs.xxpay.org/docs/deploy_1 "xxpay部署")
 
-进QQ群（206119456）有更详细的部署交流。
-
-作者已成功将项目部署在阿里云主机上，配置为：
+作者已成功将项目部署在阿里云主机上，服务器配置为：
 
 | CPU  | 内存 | 操作系统
 |---|---|---
 |1核 | 2 GB | CentOS 6.8 64位
 
-对应的各软件版本为（仅供参考）：
+安装的各软件对应的版本为（仅供参考）：
 
 | 软件  | 版本 | 说明
 |---|---|---
@@ -113,4 +111,4 @@ V1.0.0 |2017-08-20 |升级spring boot为1.5.6，修复通知bug
 ### 关于我们
 ***
 微信扫描下面二维码，关注公众号：XxPay聚合支付，获取更多精彩内容。
-![XxPay聚合支付公众号](/uploads/201708/attach_14dc8f1fac0a36a1.jpg "XxPay聚合支付公众号")
+![XxPay聚合支付公众号](http://docs.xxpay.org/uploads/201708/attach_14dc8f1fac0a36a1.jpg "XxPay聚合支付公众号")
