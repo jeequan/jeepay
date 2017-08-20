@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.xxpay.common.constant.PayConstant;
 import org.xxpay.common.util.DateUtil;
 import org.xxpay.common.util.MyLog;
 import org.xxpay.dal.dao.model.PayChannel;
@@ -69,14 +70,26 @@ public class PayChannelController {
     @ResponseBody
     public String save(@RequestParam String params) {
         JSONObject po = JSONObject.parseObject(params);
+        String channelId = po.getString("channelId");
+        String param = po.getString("param");
+        // 对于配置支付宝参数时,前端将+号转为空格bug处理
+        if(PayConstant.PAY_CHANNEL_ALIPAY_MOBILE.equals(channelId) ||
+                PayConstant.PAY_CHANNEL_ALIPAY_PC.equals(channelId) ||
+                PayConstant.PAY_CHANNEL_ALIPAY_WAP.equals(channelId)) {
+            JSONObject paramObj = po.getJSONObject("param");
+            paramObj.put("private_key", paramObj.getString("private_key").replaceAll(" ", "+"));
+            paramObj.put("public_key", paramObj.getString("public_key").replaceAll(" ", "+"));
+            param = paramObj.toJSONString();
+        }
+
         PayChannel payChannel = new PayChannel();
         Integer id = po.getInteger("id");
-        payChannel.setChannelId(po.getString("channelId"));
+        payChannel.setChannelId(channelId);
         payChannel.setMchId(po.getString("mchId"));
         payChannel.setChannelName(po.getString("channelName"));
         payChannel.setChannelMchId(po.getString("channelMchId"));
         payChannel.setState((byte) ("on".equalsIgnoreCase(po.getString("state")) ? 1 : 0));
-        payChannel.setParam(po.getString("param"));
+        payChannel.setParam(param);
         payChannel.setRemark(po.getString("remark"));
         int result;
         if(id == null) {
