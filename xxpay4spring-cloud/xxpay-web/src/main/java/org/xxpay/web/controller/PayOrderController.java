@@ -55,7 +55,7 @@ public class PayOrderController {
      * @param params
      * @return
      */
-    @RequestMapping(value = "/pay/create_order", method = RequestMethod.POST)
+    @RequestMapping(value = "/pay/create_order")
     public String payOrder(@RequestParam String params) {
         ServiceInstance instance = client.getLocalServiceInstance();
         _log.info("###### 开始接收商户统一下单请求 ######");
@@ -242,16 +242,6 @@ public class PayOrderController {
         payOrder.put("notifyUrl", notifyUrl);
         return payOrder;
     }
-
-    /*String makeRetData(Map retMap) {
-        if(retMap.get(PayConstant.RETURN_PARAM_RETCODE).equals(PayConstant.RETURN_VALUE_SUCCESS)) {
-            String repKey = "Hpcl522AV6q613KIi46u6g6XuW8vM1N8bFgyv769770MdYe9u37M4y7rIpl8";
-            String sign = PayDigestUtil.getSign(retMap, repKey, "payParams");
-            retMap.put(PayConstant.RESULT_PARAM_SIGN, sign);
-        }
-        _log.info("生成响应数据:{}", retMap);
-        return JSON.toJSONString(retMap);
-    }*/
 
     String getJsonParam(String[] names, Object[] values) {
         JSONObject jsonParam = new JSONObject();

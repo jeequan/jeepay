@@ -4,15 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.xxpay.common.constant.PayConstant;
 import org.xxpay.common.util.IPUtility;
 import org.xxpay.common.util.MyLog;
-import org.xxpay.common.util.PropertiesFileUtil;
 
+import java.io.File;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * User: rizenguo
@@ -30,13 +27,12 @@ public class Configure {
 		JSONObject paramObj = JSON.parseObject(configParam);
 		this.setMchID(paramObj.getString("mchId"));
 		this.setAppID(paramObj.getString("appId"));
-		this.setCertLocalPath(Configure.class.getClassLoader().getResource(paramObj.getString("certLocalPath")).getPath());
+		this.setCertLocalPath(certRootPath + File.separator + paramObj.getString("certLocalPath"));
 		this.setCertPassword(paramObj.getString("certPassword"));
 		this.setKey(paramObj.getString("key"));
 		this.setIp(IPUtility.getLocalIP());
 		return this;
 	}
-
 
 	// 这个就是自己要保管好的私有Key了（切记只能放在自己的后台代码里，不能放在任何可能被看到源代码的客户端程序中）
 	// 每次自己Post数据给API的时候都要用这个key来对所有字段进行签名，生成的签名会放在Sign这个字段，API收到Post数据的时候也会用同样的签名算法对Post过来的数据进行签名和验证
@@ -64,6 +60,9 @@ public class Configure {
 
 	//机器IP
 	private String ip;
+
+	@Value("${cert.root.path}")
+	private String certRootPath;
 
 	//以下是几个API的路径：
 	//1）被扫支付API

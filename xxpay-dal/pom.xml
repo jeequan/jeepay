@@ -7,15 +7,13 @@
 	<artifactId>xxpay-dal</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
-
 	<name>xxpay-dal</name>
-	<description>xxpay-master</description>
+	<description>xxpay-dal</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.3.5.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>1.5.6.RELEASE</version>
 	</parent>
 
 	<properties>
@@ -59,27 +57,15 @@
 			<artifactId>druid</artifactId>
 			<version>1.0.26</version>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-autoconfigure</artifactId>
-			<version>1.3.6.RELEASE</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter -->
 		<dependency>
 			<groupId>org.mybatis.spring.boot</groupId>
 			<artifactId>mybatis-spring-boot-starter</artifactId>
-			<version>1.1.1</version>
+			<version>1.3.0</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
 		<!-- mybatis 分页插件 -->
 		<dependency>
 			<groupId>com.github.pagehelper</groupId>

@@ -38,9 +38,6 @@ public class GoodsOrderController {
     @Autowired
     private GoodsOrderService goodsOrderService;
 
-    @Value("${application.message:Hello World}")
-    private String message = "Hello World";
-
     static final String mchId = "20001223";
     // 加签key
     static final String reqKey = "M86l522AV6q613Ii4W6u8K48uW8vM1N6bFgyv769220MdYe9u37N4y7rI5mQ";
@@ -173,24 +170,19 @@ public class GoodsOrderController {
 
     @RequestMapping("/openQrPay.html")
     public String openQrPay(ModelMap model) {
-        model.put("time", new Date());
-        model.put("message", this.message);
         return "openQrPay";
     }
 
     @RequestMapping("/qrPay.html")
     public String qrPay(ModelMap model, HttpServletRequest request, Long amount) {
-
         String logPrefix = "【二维码扫码支付】";
         String view = "qrPay";
         _log.info("====== 开始接收二维码扫码支付请求 ======");
-
         String ua = request.getHeader("User-Agent");
         String goodsId = "G_0001";
         _log.info("{}接收参数:goodsId={},amount={},ua={}", logPrefix, goodsId, amount, ua);
         String client = "alipay";
         String channelId = "ALIPAY_WAP";
-
         if(StringUtils.isBlank(ua)) {
             String errorMessage = "User-Agent为空！";
             _log.info("{}信息：{}", logPrefix, errorMessage);
@@ -213,7 +205,6 @@ public class GoodsOrderController {
             model.put("resMsg", errorMessage);
             return view;
         }
-
         // 先插入订单数据
         GoodsOrder goodsOrder = null;
         Map<String, String> orderMap = null;

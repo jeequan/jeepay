@@ -21,3 +21,6 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:2000/eureka/
 
+logging:
+  file: ./log/xxpay-config.log
+

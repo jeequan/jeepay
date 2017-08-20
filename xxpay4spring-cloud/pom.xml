@@ -5,8 +5,10 @@
 
   <groupId>org.xxpay</groupId>
   <artifactId>xxpay4spring-cloud</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>pom</packaging>
+  <name>xxpay4spring-cloud</name>
+  <description>xxpay4spring-cloud</description>
 
   <modules>
     <module>xxpay-server</module>
@@ -16,24 +18,45 @@
     <module>xxpay-gateway</module>
   </modules>
 
-  <!-- 使用最新的spring-boot版本 -->
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>1.4.0.RELEASE</version>
+    <version>1.5.6.RELEASE</version>
   </parent>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.xxpay</groupId>
+      <artifactId>xxpay-common</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-eureka</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
-        <version>Brixton.SR5</version>
+        <version>Dalston.SR2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

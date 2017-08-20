@@ -8,6 +8,7 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.xxpay.common.util.MyLog;
 import org.xxpay.service.service.PayOrderService;
@@ -37,13 +38,13 @@ import java.util.Date;
 public class Mq4PayNotify {
 
     @Autowired
-    private JmsTemplate jmsTemplate;
-
-    @Autowired
     private Queue payNotifyQueue;
 
     @Autowired
     private PayOrderService payOrderService;
+
+    @Autowired
+    private JmsTemplate jmsTemplate;
 
     private static final MyLog _log = MyLog.getLog(Mq4PayNotify.class);
 
@@ -155,6 +156,13 @@ public class Mq4PayNotify {
                     _log.info("修改payOrderId={},订单状态为处理完成->{}", orderId, result == 1 ? "成功" : "失败");
                 } catch (Exception e) {
                     _log.error(e, "修改订单状态为处理完成异常");
+                }
+                // 修改通知次数
+                try {
+                    int result = payOrderService.updateNotify(orderId);
+                    _log.info("修改payOrderId={},通知业务系统次数->{}", orderId, result == 1 ? "成功" : "失败");
+                }catch (Exception e) {
+                    _log.error(e, "修改通知次数异常");
                 }
                 return ; // 通知成功结束
             }else {

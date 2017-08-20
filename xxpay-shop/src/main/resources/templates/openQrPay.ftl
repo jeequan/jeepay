@@ -28,15 +28,6 @@
     <div class="page-header">
         <h1>【XxPay】分布式开源聚合支付系统</h1>
     </div>
-    <!--
-    <div>
-        Date: ${time?date}
-        <br>
-        Time: ${time?time}
-        <br>
-        Message: ${message}
-    </div>
-    -->
     <div class="main" align="center">
         <div class="inwrap">
             <h3>#扫码测试#</h3>
