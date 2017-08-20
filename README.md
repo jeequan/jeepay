@@ -69,9 +69,7 @@ xxpay-server > xxpay-config > xxpay-service > xxpay-web > xxpay-gateway
 ### 项目部署
 ***
 
-官方项目部署文档：[XxPay项目部署](http://docs.xxpay.org/docs/deploy "xxpay部署")
-
-网友写的项目部署文档：[项目部署[网友:娑娜] ](http://docs.xxpay.org/docs/deploy_1 "xxpay部署")
+项目部署文档：[XxPay项目部署](http://docs.xxpay.org/docs/deploy "xxpay部署")
 
 作者已成功将项目部署在阿里云主机上，服务器配置为：
 
