@@ -4,7 +4,7 @@
 ### 项目介绍
 ***
 
-- `XxpPay聚合支付` 使用Java开发，分为spring-cloud和dubbo分布式架构版本，已接入微信、支付宝等主流支付渠道，可直接用于生产环境。
+- `XxPay聚合支付` 使用Java开发，分为spring-cloud和dubbo分布式架构版本，已接入微信、支付宝等主流支付渠道，可直接用于生产环境。
 - 目前已经接入支付渠道：微信(公众号支付、扫码支付、APP支付)、支付宝(电脑网站支付、手机网站支付、APP支付)；
 
 > [XxPay官网：http://www.xxpay.org](http://www.xxpay.org "xxpay官方网站")
