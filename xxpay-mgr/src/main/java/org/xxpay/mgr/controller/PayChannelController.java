@@ -76,12 +76,18 @@ public class PayChannelController {
         if(PayConstant.PAY_CHANNEL_ALIPAY_MOBILE.equals(channelId) ||
                 PayConstant.PAY_CHANNEL_ALIPAY_PC.equals(channelId) ||
                 PayConstant.PAY_CHANNEL_ALIPAY_WAP.equals(channelId)) {
-            JSONObject paramObj = po.getJSONObject("param");
-            paramObj.put("private_key", paramObj.getString("private_key").replaceAll(" ", "+"));
-            paramObj.put("public_key", paramObj.getString("public_key").replaceAll(" ", "+"));
-            param = paramObj.toJSONString();
+            JSONObject paramObj = null;
+            try{
+                paramObj = JSON.parseObject(po.getString("param"));
+            }catch (Exception e) {
+                _log.info("param is not json");
+            }
+            if(paramObj != null) {
+                paramObj.put("private_key", paramObj.getString("private_key").replaceAll(" ", "+"));
+                paramObj.put("public_key", paramObj.getString("public_key").replaceAll(" ", "+"));
+                param = paramObj.toJSONString();
+            }
         }
-
         PayChannel payChannel = new PayChannel();
         Integer id = po.getInteger("id");
         payChannel.setChannelId(channelId);
