@@ -5,6 +5,7 @@
 ***
 
 - `XxPay聚合支付` 使用Java开发，分为spring-cloud和dubbo分布式架构版本，已接入微信、支付宝等主流支付渠道，可直接用于生产环境。
+
 - 目前已经接入支付渠道：微信(公众号支付、扫码支付、APP支付)、支付宝(电脑网站支付、手机网站支付、APP支付)；
 
 > [XxPay官网：http://www.xxpay.org](http://www.xxpay.org "xxpay官方网站")
@@ -15,7 +16,8 @@
 
 > [XxPay文档库：http://docs.xxpay.org](http://docs.xxpay.org "xxpay文档库")
 
-- 如何获取支付体验账号？关注官方公众号（搜索：XxPay聚合支付），回复：测试账号。
+- 如何获取支付体验账号？关注官方公众号（搜索：XxPay），回复：测试账号。
+- 支付宝沙箱测试：[XxPay支付宝沙箱测试](http://docs.xxpay.org/docs/deploy/41 "XxPay支付宝沙箱测试")
 
 ![体验xxpay支付流程，手机扫一扫可体验](https://git.oschina.net/uploads/images/2017/0813/230918_96b80c69_430718.png "xxpay支付体验")
 
@@ -92,6 +94,7 @@ xxpay-server > xxpay-config > xxpay-service > xxpay-web > xxpay-gateway
 ------- | ------- | -------
 V1.0.0 |2017-08-11 |完成spring-cloud架构，集成微信、支付宝渠道
 V1.0.0 |2017-08-20 |升级spring boot为1.5.6，修复通知bug
+V1.0.0 |2017-08-23 |升级支付宝为最新接口
 
 接下来的版本开发计划：
 ```html
@@ -108,6 +111,6 @@ V1.0.0 |2017-08-20 |升级spring boot为1.5.6，修复通知bug
 
 ### 关于我们
 ***
-微信扫描下面二维码，关注公众号：XxPay聚合支付，获取更多精彩内容。
+微信扫描下面二维码，关注公众号：XxPay，获取更多精彩内容。
 
-![XxPay聚合支付公众号](http://docs.xxpay.org/uploads/201708/attach_14dc8f1fac0a36a1.jpg "XxPay聚合支付公众号")
+![XxPay聚合支付公众号](http://docs.xxpay.org/uploads/201708/attach_14dc8f1fac0a36a1.jpg "XxPay公众号")
