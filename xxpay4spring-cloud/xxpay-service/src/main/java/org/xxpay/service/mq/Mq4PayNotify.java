@@ -159,7 +159,7 @@ public class Mq4PayNotify {
                 }
                 // 修改通知次数
                 try {
-                    int result = payOrderService.updateNotify(orderId);
+                    int result = payOrderService.updateNotify(orderId, (byte) 1);
                     _log.info("修改payOrderId={},通知业务系统次数->{}", orderId, result == 1 ? "成功" : "失败");
                 }catch (Exception e) {
                     _log.error(e, "修改通知次数异常");
@@ -167,20 +167,21 @@ public class Mq4PayNotify {
                 return ; // 通知成功结束
             }else {
                 // 通知失败，延时再通知
-                int cnt = count++;
+                int cnt = count+1;
+                _log.info("notify count={}", cnt);
                 if (cnt > 5) {
                     _log.info("notify count>5 stop. url={}", respUrl);
                     return ;
                 }
                 // 修改通知次数
                 try {
-                    int result = payOrderService.updateNotify(orderId);
+                    int result = payOrderService.updateNotify(orderId, (byte) cnt);
                     _log.info("修改payOrderId={},通知业务系统次数->{}", orderId, result == 1 ? "成功" : "失败");
                 }catch (Exception e) {
                     _log.error(e, "修改通知次数异常");
                 }
                 msgObj.put("count", cnt);
-                this.send(msgObj.toJSONString(), cnt*60*1000);
+                this.send(msgObj.toJSONString(), cnt * 60 * 1000);
             }
             _log.warn("notify failed. url:{}, response body:{}", respUrl, sb.toString());
         } catch(Exception e) {

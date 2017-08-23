@@ -53,7 +53,7 @@ public class PayConstant {
 	public static final String RETURN_VALUE_FAIL = "FAIL";
 
 	public static final String RETURN_ALIPAY_VALUE_SUCCESS = "success";
-	public static final String RETURN_ALIPAY_VALUE_FAIL = "failed";
+	public static final String RETURN_ALIPAY_VALUE_FAIL = "fail";
 
 	public static class JdConstant {
 		public final static String CONFIG_PATH = "jd" + File.separator + "jd";	// 京东支付配置文件路径

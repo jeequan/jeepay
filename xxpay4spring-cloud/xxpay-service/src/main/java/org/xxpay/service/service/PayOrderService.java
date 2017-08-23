@@ -63,10 +63,10 @@ public class PayOrderService {
         return payOrderMapper.updateByExampleSelective(payOrder, example);
     }
 
-    public int updateNotify(String payOrderId) {
-        PayOrder payOrder = selectPayOrder(payOrderId);
+    public int updateNotify(String payOrderId, byte count) {
         PayOrder newPayOrder = new PayOrder();
-        newPayOrder.setNotifyCount((byte) (payOrder.getNotifyCount()+1));
+        // TODO 并发下次数问题待解决
+        newPayOrder.setNotifyCount(count);
         newPayOrder.setLastNotifyTime(System.currentTimeMillis());
         newPayOrder.setPayOrderId(payOrderId);
         return payOrderMapper.updateByPrimaryKeySelective(newPayOrder);

@@ -119,7 +119,7 @@ public class Notify4BasePay {
 			pw = response.getWriter();
 			pw.print(message);
 		} catch (IOException e) {
-			_log.error("JDPay response write exception.", e);
+			_log.error("Pay response write exception.", e);
 		}
 		_log.info(">>>>>> PAY回调通知业务系统完成 <<<<<<");
 	}

@@ -13,14 +13,14 @@ import java.util.Map;
 public class PayOrderDemo {
 
     // 商户ID
-    static final String mchId = "20001223";
+    static final String mchId = "20001223";//20001223,20001245
     // 加签key
     static final String reqKey = "M86l522AV6q613Ii4W6u8K48uW8vM1N6bFgyv769220MdYe9u37N4y7rI5mQ";
     // 验签key
     static final String repKey = "Hpcl522AV6q613KIi46u6g6XuW8vM1N8bFgyv769770MdYe9u37M4y7rIpl8";
 
-    //static final String baseUrl = "http://api.xxpay.org/api";
-    static final String baseUrl = "http://localhost:3020/api";
+    static final String baseUrl = "http://api.xxpay.org/api";
+    //static final String baseUrl = "http://localhost:3020/api";
     static final String notifyUrl = "http://www.baidu.com"; // 本地环境测试,可到ngrok.cc网站注册
 
     public static void main(String[] args) {
@@ -32,8 +32,8 @@ public class PayOrderDemo {
         JSONObject paramMap = new JSONObject();
         paramMap.put("mchId", mchId);                               // 商户ID
         paramMap.put("mchOrderNo", System.currentTimeMillis());     // 商户订单号
-        paramMap.put("channelId", "WX_NATIVE");                     // 支付渠道ID, WX_NATIVE,ALIPAY_WAP
-        paramMap.put("amount", 100);                                // 支付金额,单位分
+        paramMap.put("channelId", "ALIPAY_PC");                 // 支付渠道ID, WX_NATIVE,ALIPAY_WAP,ALIPAY_PC,ALIPAY_MOBILE
+        paramMap.put("amount", 1);                                  // 支付金额,单位分
         paramMap.put("currency", "cny");                            // 币种, cny-人民币
         paramMap.put("clientIp", "114.112.124.236");                // 用户地址
         paramMap.put("device", "WEB");                              // 设备

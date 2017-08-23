@@ -1,19 +1,16 @@
 package org.xxpay.service.controller;
 
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.internal.util.AlipaySignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.xxpay.common.constant.PayConstant;
 import org.xxpay.common.util.MyLog;
 import org.xxpay.dal.dao.model.PayChannel;
 import org.xxpay.dal.dao.model.PayOrder;
-import org.xxpay.service.channel.alipay.config.AlipayConfig;
-import org.xxpay.service.channel.alipay.util.AlipayNotify;
-import org.xxpay.service.channel.tencent.common.Util;
-import org.xxpay.service.channel.tencent.protocol.notify_protocol.NotifyUnifiedOrderResData;
+import org.xxpay.service.channel.alipay.AlipayConfig;
 import org.xxpay.service.service.PayChannelService;
 import org.xxpay.service.service.PayOrderService;
 
@@ -21,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -56,16 +54,28 @@ public class Notify4AliPayController extends Notify4BasePay {
 	 * @throws IOException
      */
 	@RequestMapping(value = "/pay/aliPayNotifyRes.htm")
-	@ResponseBody
-	public String aliPayNotifyRes(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		return doAliPayRes(request, response);
+	public void aliPayNotifyRes(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String result =  doAliPayRes(request, response);
+		if(result != null) {
+			_log.info("alipay notify response: {}", result);
+			response.setContentType("text/html");
+			PrintWriter pw;
+			try {
+				pw = response.getWriter();
+				pw.print(result);
+
+			} catch (IOException e) {
+				_log.error("Pay response write exception.", e);
+			}
+		}
+
 	}
 
 	public String doAliPayRes(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String logPrefix = "【支付宝支付回调通知】";
 		_log.info("====== 开始接收支付宝支付回调通知 ======");
 		//获取支付宝POST过来反馈信息
-		Map<String,String> params = new HashMap<>();
+		Map<String,String> params = new HashMap<String,String>();
 		Map requestParams = request.getParameterMap();
 		for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext();) {
 			String name = (String) iter.next();
@@ -82,23 +92,17 @@ public class Notify4AliPayController extends Notify4BasePay {
 		_log.info("{}通知请求数据:reqStr={}", logPrefix, params);
 		if(params.isEmpty()) {
 			_log.error("{}请求参数为空", logPrefix);
-			return makeRetData(PayConstant.RETURN_VALUE_FAIL, "请求参数为空");
+			return PayConstant.RETURN_ALIPAY_VALUE_FAIL;
 		}
-
 		Map<String, Object> payContext = new HashMap();
 		PayOrder payOrder;
 		payContext.put("parameters", params);
 
 		if(!verifyAliPayParams(payContext)) {
-			return makeRetData(PayConstant.RETURN_VALUE_FAIL, (String) payContext.get("retMsg"));
+			return PayConstant.RETURN_ALIPAY_VALUE_FAIL;
 		}
 		_log.info("{}验证请求数据及签名通过", logPrefix);
-
-		String out_trade_no = params.get("out_trade_no");		// 商户订单号
-		String trade_no = params.get("trade_no");				// 支付宝订单号
 		String trade_status = params.get("trade_status");		// 交易状态
-		String buyer_email = params.get("buyer_email");			// 买家支付宝账号
-
 		// 支付状态成功或者完成
 		if (trade_status.equals(PayConstant.AlipayConstant.TRADE_STATUS_SUCCESS) ||
 				trade_status.equals(PayConstant.AlipayConstant.TRADE_STATUS_FINISHED)) {
@@ -133,38 +137,18 @@ public class Notify4AliPayController extends Notify4BasePay {
 	public boolean verifyAliPayParams(Map<String, Object> payContext) {
 		Map<String,String> params = (Map<String,String>)payContext.get("parameters");
 		String out_trade_no = params.get("out_trade_no");		// 商户订单号
-		String seller_email = params.get("seller_email"); 		// 卖家支付宝账号
-		String total_fee = params.get("total_fee"); 			// 支付金额
-		String buyer_email = params.get("buyer_email");			// 买家支付宝账号
-		String sign = params.get("sign"); 						// 签名
+		String total_amount = params.get("total_amount"); 		// 支付金额
 		if (StringUtils.isEmpty(out_trade_no)) {
 			_log.error("AliPay Notify parameter out_trade_no is empty. out_trade_no={}", out_trade_no);
 			payContext.put("retMsg", "out_trade_no is empty");
 			return false;
 		}
-		if (StringUtils.isEmpty(seller_email)) {
-			_log.error("AliPay Notify parameter seller_email is empty. seller_email={}", seller_email);
-			payContext.put("retMsg", "seller_email is empty");
+		if (StringUtils.isEmpty(total_amount)) {
+			_log.error("AliPay Notify parameter total_amount is empty. total_fee={}", total_amount);
+			payContext.put("retMsg", "total_amount is empty");
 			return false;
 		}
-		if (StringUtils.isEmpty(total_fee)) {
-			_log.error("AliPay Notify parameter total_fee is empty. total_fee={}", total_fee);
-			payContext.put("retMsg", "total_fee is empty");
-			return false;
-		}
-		if (StringUtils.isEmpty(buyer_email)) {
-			_log.error("AliPay Notify parameter buyer_email is empty. buyer_email={}", buyer_email);
-			payContext.put("retMsg", "buyer_email is empty");
-			return false;
-		}
-		if (StringUtils.isEmpty(sign)) {
-			_log.error("AliPay Notify parameter sign is empty. sign={}", sign);
-			payContext.put("retMsg", "sign is empty");
-			return false;
-		}
-
 		String errorMessage;
-
 		// 查询payOrder记录
 		String payOrderId = out_trade_no;
 		PayOrder payOrder = payOrderService.selectPayOrder(payOrderId);
@@ -173,7 +157,6 @@ public class Notify4AliPayController extends Notify4BasePay {
 			payContext.put("retMsg", "Can't found payOrder");
 			return false;
 		}
-
 		// 查询payChannel记录
 		String mchId = payOrder.getMchId();
 		String channelId = payOrder.getChannelId();
@@ -183,36 +166,31 @@ public class Notify4AliPayController extends Notify4BasePay {
 			payContext.put("retMsg", "Can't found payChannel");
 			return false;
 		}
+		boolean verify_result = false;
+		try {
+			verify_result = AlipaySignature.rsaCheckV1(params, alipayConfig.init(payChannel.getParam()).getAlipay_public_key(), AlipayConfig.CHARSET, "RSA2");
+		} catch (AlipayApiException e) {
+			_log.error(e, "AlipaySignature.rsaCheckV1 error");
+		}
 
 		// 验证签名
-		if (!AlipayNotify.verify(alipayConfig.init(payChannel.getParam()), params)) {
-			errorMessage = "Verify VV pay sign failed.";
+		if (!verify_result) {
+			errorMessage = "rsaCheckV1 failed.";
 			_log.error("AliPay Notify parameter {}", errorMessage);
 			payContext.put("retMsg", errorMessage);
 			return false;
 		}
 
 		// 核对金额
-		long aliPayAmt = new BigDecimal(total_fee).movePointRight(2).longValue();
+		long aliPayAmt = new BigDecimal(total_amount).movePointRight(2).longValue();
 		long dbPayAmt = payOrder.getAmount().longValue();
 		if (dbPayAmt != aliPayAmt) {
-			_log.error("db payOrder record payPrice not equals total_fee. total_fee={},payOrderId={}", total_fee, payOrderId);
+			_log.error("db payOrder record payPrice not equals total_amount. total_amount={},payOrderId={}", total_amount, payOrderId);
 			payContext.put("retMsg", "");
 			return false;
 		}
 		payContext.put("payOrder", payOrder);
 		return true;
-	}
-
-	String makeRetData(String retCode, String retMsg) {
-		NotifyUnifiedOrderResData data = new NotifyUnifiedOrderResData();
-		data.setReturn_code(retCode);
-		data.setReturn_msg(retMsg);
-		return Util.objectToXML(data);
-	}
-
-	String makeRetData(String retCode) {
-		return makeRetData(retCode, "");
 	}
 
 }

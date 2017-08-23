@@ -20,7 +20,7 @@ CREATE TABLE `t_pay_channel` (
   `ChannelMchId` varchar(32) NOT NULL COMMENT '渠道商户ID',
   `MchId` varchar(30) NOT NULL COMMENT '商户ID',
   `State` tinyint(6) NOT NULL DEFAULT '1' COMMENT '渠道状态,0-停止使用,1-使用中',
-  `Param` varchar(2048) NOT NULL COMMENT '配置参数,json字符串',
+  `Param` varchar(4096) NOT NULL COMMENT '配置参数,json字符串',
   `Remark` varchar(128) DEFAULT NULL COMMENT '备注',
   `CreateTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `UpdateTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

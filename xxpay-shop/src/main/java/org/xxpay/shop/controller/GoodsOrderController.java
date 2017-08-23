@@ -5,13 +5,13 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.xxpay.common.constant.PayConstant;
 import org.xxpay.common.util.*;
 import org.xxpay.shop.dao.model.GoodsOrder;
 import org.xxpay.shop.service.GoodsOrderService;
@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -381,6 +380,32 @@ public class GoodsOrderController {
         _log.info("响应支付中心通知结果:{},payOrderId={},mchOrderNo={}", resStr, payOrderId, mchOrderNo);
         outResult(response, resStr);
         _log.info("====== 支付中心通知处理完成 ======");
+    }
+
+    @RequestMapping("/toAliPay.html")
+    @ResponseBody
+    public String toAliPay(HttpServletRequest request, Long amount, String channelId) {
+        String logPrefix = "【支付宝支付】";
+        _log.info("====== 开始接收支付宝支付请求 ======");
+        String goodsId = "G_0001";
+        _log.info("{}接收参数:goodsId={},amount={},channelId={}", logPrefix, goodsId, amount, channelId);
+        // 先插入订单数据
+        Map params = new HashMap<>();
+        params.put("channelId", channelId);
+        // 下单
+        GoodsOrder goodsOrder = createGoodsOrder(goodsId, amount);
+        Map<String, String> orderMap = createPayOrder(goodsOrder, params);
+        if(orderMap != null && "success".equalsIgnoreCase(orderMap.get("resCode"))) {
+            String payOrderId = orderMap.get("payOrderId");
+            GoodsOrder go = new GoodsOrder();
+            go.setGoodsOrderId(goodsOrder.getGoodsOrderId());
+            go.setPayOrderId(payOrderId);
+            go.setChannelId(channelId);
+            int ret = goodsOrderService.update(go);
+            _log.info("修改商品订单,返回:{}", ret);
+        }
+        if(PayConstant.PAY_CHANNEL_ALIPAY_MOBILE.equalsIgnoreCase(channelId)) return orderMap.get("payParams");
+        return orderMap.get("payUrl");
     }
 
     void outResult(HttpServletResponse response, String content) {

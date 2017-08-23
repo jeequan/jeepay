@@ -32,9 +32,7 @@
     </table>
 </div>
     <#if (client == 'alipay')>
-    <script>
-        location.href = '${orderMap.payUrl}';
-    </script>
+    ${orderMap.payUrl}
     </#if>
     <#if (client == 'wx')>
     <script>
