@@ -84,7 +84,7 @@ public class PayChannelController {
             }
             if(paramObj != null) {
                 paramObj.put("private_key", paramObj.getString("private_key").replaceAll(" ", "+"));
-                paramObj.put("public_key", paramObj.getString("public_key").replaceAll(" ", "+"));
+                paramObj.put("alipay_public_key", paramObj.getString("alipay_public_key").replaceAll(" ", "+"));
                 param = paramObj.toJSONString();
             }
         }
