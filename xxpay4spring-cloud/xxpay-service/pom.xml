@@ -76,6 +76,9 @@
 				<directory>src/main/resources</directory>
 				<targetPath>BOOT-INF/classes/</targetPath>
 			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
 		</resources>
 		<plugins>
 			<plugin>
