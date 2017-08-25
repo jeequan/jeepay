@@ -116,6 +116,6 @@ xxpay-server > xxpay-config > xxpay-service > xxpay-web > xxpay-gateway
 
 ### 关于我们
 ***
-微信扫描下面二维码，关注公众号：XxPay，获取更多精彩内容。
+微信扫描下面二维码，关注官方公众号：XxPay，获取更多精彩内容。
 
 ![XxPay聚合支付公众号](http://docs.xxpay.org/uploads/201708/attach_14dc8f1fac0a36a1.jpg "XxPay公众号")
