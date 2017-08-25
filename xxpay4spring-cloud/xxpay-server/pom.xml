@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.xxpay</groupId>
-	<artifactId>xxpay-service</artifactId>
+	<artifactId>xxpay-server</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
-	<name>xxpay-service</name>
-	<description>xxpay-service</description>
+	<name>xxpay-server</name>
+	<description>xxpay-server</description>
 
 	<parent>
 		<groupId>org.xxpay</groupId>
