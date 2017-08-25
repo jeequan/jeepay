@@ -1,4 +1,4 @@
->XxPay'官方交流群：206119456（加群暗号：xxpay交流）
+>XxPay'官方交流群：206119456（加群暗号：xxpay交流）。
 ***
 
 ### 项目介绍
@@ -95,6 +95,7 @@ xxpay-server > xxpay-config > xxpay-service > xxpay-web > xxpay-gateway
 V1.0.0 |2017-08-11 |完成spring-cloud架构，集成微信、支付宝渠道
 V1.0.0 |2017-08-20 |升级spring boot为1.5.6，修复通知bug
 V1.0.0 |2017-08-23 |升级支付宝为最新接口
+V1.0.0 |2017-08-25 |微信支付SDK更换为weixin-java-pay，增加微信H5支付
 
 接下来的版本开发计划：
 ```html
