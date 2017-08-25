@@ -24,22 +24,6 @@
 	</dependencies>
 
 	<build>
-		<resources>
-			<resource>
-				<directory>src/main/webapp/WEB-INF/lib/</directory>
-				<targetPath>BOOT-INF/lib/</targetPath>
-				<includes>
-					<include>**/*.jar</include>
-				</includes>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-				<targetPath>BOOT-INF/classes/</targetPath>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-			</resource>
-		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

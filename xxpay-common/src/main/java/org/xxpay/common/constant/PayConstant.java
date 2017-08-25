@@ -16,6 +16,7 @@ public class PayConstant {
 	public final static String PAY_CHANNEL_WX_JSAPI = "WX_JSAPI"; 				// 微信公众号支付
 	public final static String PAY_CHANNEL_WX_NATIVE = "WX_NATIVE";				// 微信原生扫码支付
 	public final static String PAY_CHANNEL_WX_APP = "WX_APP";					// 微信APP支付
+	public final static String PAY_CHANNEL_WX_MWEB = "WX_MWEB";					// 微信H5支付
 	public final static String PAY_CHANNEL_IAP = "IAP";							// 苹果应用内支付
 	public final static String PAY_CHANNEL_ALIPAY_MOBILE = "ALIPAY_MOBILE";		// 支付宝移动支付
 	public final static String PAY_CHANNEL_ALIPAY_PC = "ALIPAY_PC";	    		// 支付宝PC支付
@@ -61,8 +62,10 @@ public class PayConstant {
 
 	public static class WxConstant {
 		public final static String TRADE_TYPE_APP = "APP";									// APP支付
-		public final static String TRADE_TYPE_JSPAI = "JSAPI";								// 公众号支付
+		public final static String TRADE_TYPE_JSPAI = "JSAPI";								// 公众号支付或小程序支付
 		public final static String TRADE_TYPE_NATIVE = "NATIVE";							// 原生扫码支付
+		public final static String TRADE_TYPE_MWEB = "MWEB";								// H5支付
+
 	}
 
 	public static class IapConstant {

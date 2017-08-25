@@ -19,8 +19,8 @@ public class PayOrderDemo {
     // 验签key
     static final String repKey = "Hpcl522AV6q613KIi46u6g6XuW8vM1N8bFgyv769770MdYe9u37M4y7rIpl8";
 
-    static final String baseUrl = "http://api.xxpay.org/api";
-    //static final String baseUrl = "http://localhost:3020/api";
+    //static final String baseUrl = "http://api.xxpay.org/api";
+    static final String baseUrl = "http://localhost:3020/api";
     static final String notifyUrl = "http://www.baidu.com"; // 本地环境测试,可到ngrok.cc网站注册
 
     public static void main(String[] args) {
@@ -32,17 +32,31 @@ public class PayOrderDemo {
         JSONObject paramMap = new JSONObject();
         paramMap.put("mchId", mchId);                               // 商户ID
         paramMap.put("mchOrderNo", System.currentTimeMillis());     // 商户订单号
-        paramMap.put("channelId", "ALIPAY_PC");                 // 支付渠道ID, WX_NATIVE,ALIPAY_WAP,ALIPAY_PC,ALIPAY_MOBILE
+        // 支付渠道ID, WX_NATIVE(微信扫码),WX_JSAPI(微信公众号或微信小程序),WX_APP(微信APP),WX_MWEB(微信H5),ALIPAY_WAP(支付宝手机支付),ALIPAY_PC(支付宝网站支付),ALIPAY_MOBILE(支付宝移动支付)
+        paramMap.put("channelId", "WX_MWEB");
         paramMap.put("amount", 1);                                  // 支付金额,单位分
         paramMap.put("currency", "cny");                            // 币种, cny-人民币
-        paramMap.put("clientIp", "114.112.124.236");                // 用户地址
+        paramMap.put("clientIp", "211.94.116.218");                 // 用户地址,微信H5支付时要真实的
         paramMap.put("device", "WEB");                              // 设备
         paramMap.put("subject", "XXPAY支付测试");
         paramMap.put("body", "XXPAY支付测试");
         paramMap.put("notifyUrl", notifyUrl);                       // 回调URL
         paramMap.put("param1", "");                                 // 扩展参数1
         paramMap.put("param2", "");                                 // 扩展参数2
-        paramMap.put("extra", "{\"productId\":\"120989823\",\"openId\":\"o2RvowBf7sOVJf8kJksUEMceaDqo\"}");  // 附加参数
+        paramMap.put("extra", "{\n" +
+                "  \"productId\": \"120989823\",\n" +
+                "  \"openId\": \"o2RvowBf7sOVJf8kJksUEMceaDqo\",\n" +
+                "  \"sceneInfo\": {\n" +
+                "    \"h5_info\": {\n" +
+                "      \"type\": \"Wap\",\n" +
+                "      \"wap_url\": \"http://shop.xxpay.org\",\n" +
+                "      \"wap_name\": \"xxpay充值\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}");  // 附加参数
+
+        //{"h5_info": {"type":"Wap","wap_url": "https://pay.qq.com","wap_name": "腾讯充值"}}
+
         String reqSign = PayDigestUtil.getSign(paramMap, reqKey);
         paramMap.put("sign", reqSign);                              // 签名
         String reqData = "params=" + paramMap.toJSONString();

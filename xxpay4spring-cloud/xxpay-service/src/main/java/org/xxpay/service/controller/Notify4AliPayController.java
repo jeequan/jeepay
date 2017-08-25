@@ -125,9 +125,9 @@ public class Notify4AliPayController extends Notify4BasePay {
 			_log.info("{}响应给支付宝结果：{}", logPrefix, PayConstant.RETURN_ALIPAY_VALUE_SUCCESS);
 			return PayConstant.RETURN_ALIPAY_VALUE_SUCCESS;
 		}
-		doNotify(payOrder, response, PayConstant.RETURN_ALIPAY_VALUE_SUCCESS);
+		doNotify(payOrder);
 		_log.info("====== 完成接收支付宝支付回调通知 ======");
-		return null;
+		return PayConstant.RETURN_ALIPAY_VALUE_SUCCESS;
 	}
 	
 	/**

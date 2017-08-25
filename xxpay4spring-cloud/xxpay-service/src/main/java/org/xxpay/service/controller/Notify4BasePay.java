@@ -102,7 +102,7 @@ public class Notify4BasePay {
 	/**
 	 * 处理支付结果后台服务器通知
 	 */
-	public void doNotify(PayOrder payOrder, HttpServletResponse response, String message) {
+	public void doNotify(PayOrder payOrder) {
 		_log.info(">>>>>> PAY开始回调通知业务系统 <<<<<<");
 		// 发起后台通知业务系统
 		JSONObject object = createNotifyInfo(payOrder);
@@ -111,7 +111,7 @@ public class Notify4BasePay {
 		} catch (Exception e) {
 			_log.error("payOrderId={},sendMessage error.", payOrder != null ? payOrder.getPayOrderId() : "", e);
 		}
-		// 响应给支付公司
+		/*// 响应给支付公司
 		_log.info("payOrderId={},channelId={}，响应支付公司结果：{}", payOrder != null ? payOrder.getPayOrderId() : "", payOrder != null ? payOrder.getChannelId() : "", message);
 		response.setContentType("text/html");
 		PrintWriter pw;
@@ -120,7 +120,7 @@ public class Notify4BasePay {
 			pw.print(message);
 		} catch (IOException e) {
 			_log.error("Pay response write exception.", e);
-		}
+		}*/
 		_log.info(">>>>>> PAY回调通知业务系统完成 <<<<<<");
 	}
 

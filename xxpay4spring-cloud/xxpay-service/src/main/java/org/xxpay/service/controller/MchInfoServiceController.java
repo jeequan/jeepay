@@ -2,6 +2,7 @@ package org.xxpay.service.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,8 +35,15 @@ public class MchInfoServiceController {
         String mchId = paramObj.getString("mchId");
         MchInfo mchInfo = mchInfoService.selectMchInfo(mchId);
         JSONObject retObj = new JSONObject();
+        retObj.put("code", "0000");
+        if(StringUtils.isBlank(jsonParam)) {
+            retObj.put("code", "0001"); // 参数错误
+            retObj.put("msg", "缺少参数");
+            return retObj.toJSONString();
+        }
         if(mchInfo == null) {
-            retObj.put("result", "");
+            retObj.put("code", "0002");
+            retObj.put("msg", "数据对象不存在");
             return retObj.toJSONString();
         }
         retObj.put("result", JSON.toJSON(mchInfo));

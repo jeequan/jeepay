@@ -36,18 +36,19 @@ public class PayChannelServiceController {
         retObj.put("code", "0000");
         if(StringUtils.isBlank(jsonParam)) {
             retObj.put("code", "0001"); // 参数错误
+            retObj.put("msg", "缺少参数");
+            return retObj.toJSONString();
         }
         JSONObject paramObj = JSON.parseObject(new String(MyBase64.decode(jsonParam)));
         String channelId = paramObj.getString("channelId");
         String mchId = paramObj.getString("mchId");
         PayChannel payChannel = payChannelService.selectPayChannel(channelId, mchId);
-
         if(payChannel == null) {
-            retObj.put("result", "");
-        }else {
-            retObj.put("result", JSON.toJSON(payChannel));
+            retObj.put("code", "0002");
+            retObj.put("msg", "数据对象不存在");
+            return retObj.toJSONString();
         }
-
+        retObj.put("result", JSON.toJSON(payChannel));
         _log.info("selectPayChannel >> {}", retObj);
         return retObj.toJSONString();
     }
