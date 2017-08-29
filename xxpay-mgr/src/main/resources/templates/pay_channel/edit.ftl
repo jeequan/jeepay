@@ -20,6 +20,7 @@
                     <option value="WX_APP" <#if (item.channelId!"") == "WX_APP">selected="selected"</#if>>WX_APP</option>
                     <option value="WX_JSAPI" <#if (item.channelId!"") == "WX_JSAPI">selected="selected"</#if>>WX_JSAPI</option>
                     <option value="WX_NATIVE" <#if (item.channelId!"") == "WX_NATIVE">selected="selected"</#if>>WX_NATIVE</option>
+                    <option value="WX_MWEB" <#if (item.channelId!"") == "WX_MWEB">selected="selected"</#if>>WX_MWEB</option>
 				</select>
 			</div>
 		</div>
