@@ -40,7 +40,7 @@
             WeixinJSBridge.invoke(
                     'getBrandWCPayRequest', {
                         "appId" : "${orderMap.payParams.appId}",     //公众号名称，由商户传入
-                        "timeStamp" : "${orderMap.payParams.timeStamp?c}",         //时间戳，自1970年以来的秒数
+                        "timeStamp" : "${orderMap.payParams.timeStamp}",         //时间戳，自1970年以来的秒数
                         "nonceStr" : "${orderMap.payParams.nonceStr}", //随机串
                         "package" : "${orderMap.payParams.package}",
                         "signType" : "${orderMap.payParams.signType}",         //微信签名方式：

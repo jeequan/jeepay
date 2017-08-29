@@ -93,36 +93,15 @@ public class PayChannel4WxController{
                         break;
                     }
                     case PayConstant.WxConstant.TRADE_TYPE_APP : {
-                        Map<String, Object> m = new HashMap<>();
-                        m.put("appid", wxPayUnifiedOrderResult.getAppid());
-                        m.put("partnerid", wxPayUnifiedOrderResult.getMchId());
-                        m.put("prepayid", wxPayUnifiedOrderResult.getPrepayId());
-                        m.put("package", "Sign=WXPay");
-                        m.put("noncestr", wxPayUnifiedOrderResult.getNonceStr());
-                        m.put("timestamp", System.currentTimeMillis()/1000);
-                        String wxSign = SignUtils.createSign(m, wxPayConfig.getMchKey());
-                        m.put("sign", wxSign);
-                        map.put("payParams", m);
-                        map.put("payPrice", payOrder.getAmount());
+                        map.put("payParams", wxPayService.getPayInfo(wxPayUnifiedOrderRequest));
                         break;
                     }
                     case PayConstant.WxConstant.TRADE_TYPE_JSPAI : {
-                        Map<String, Object> m = new HashMap<>();
-                        m.put("appId", wxPayConfig.getAppId());
-                        m.put("timeStamp", System.currentTimeMillis()/1000);
-                        m.put("nonceStr", wxPayUnifiedOrderResult.getNonceStr());
-                        m.put("package", "prepay_id=" + wxPayUnifiedOrderResult.getPrepayId());
-                        m.put("signType", "MD5");
-                        String wxSign = SignUtils.createSign(m, wxPayConfig.getMchKey());
-                        m.put("paySign", wxSign);
-                        map.put("payParams", m);
-                        map.put("payPrice", payOrder.getAmount());
+                        map.put("payParams", wxPayService.getPayInfo(wxPayUnifiedOrderRequest));
                         break;
                     }
                     case PayConstant.WxConstant.TRADE_TYPE_MWEB : {
-                        Map<String, Object> m = new HashMap<>();
                         map.put("payUrl", wxPayUnifiedOrderResult.getMwebUrl());    // h5支付链接地址
-                        map.put("payPrice", payOrder.getAmount());
                         break;
                     }
                 }
