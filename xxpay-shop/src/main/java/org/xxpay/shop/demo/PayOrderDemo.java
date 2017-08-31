@@ -13,14 +13,14 @@ import java.util.Map;
 public class PayOrderDemo {
 
     // 商户ID
-    static final String mchId = "20001223";//20001223,20001245
+    static final String mchId = "20001222";//20001223,20001245
     // 加签key
     static final String reqKey = "M86l522AV6q613Ii4W6u8K48uW8vM1N6bFgyv769220MdYe9u37N4y7rI5mQ";
     // 验签key
     static final String repKey = "Hpcl522AV6q613KIi46u6g6XuW8vM1N8bFgyv769770MdYe9u37M4y7rIpl8";
 
-    //static final String baseUrl = "http://api.xxpay.org/api";
-    static final String baseUrl = "http://localhost:3020/api";
+    static final String baseUrl = "http://api.xxpay.org/api";
+    //static final String baseUrl = "http://localhost:3020/api";
     static final String notifyUrl = "http://www.baidu.com"; // 本地环境测试,可到ngrok.cc网站注册
 
     public static void main(String[] args) {
@@ -33,7 +33,7 @@ public class PayOrderDemo {
         paramMap.put("mchId", mchId);                               // 商户ID
         paramMap.put("mchOrderNo", System.currentTimeMillis());     // 商户订单号
         // 支付渠道ID, WX_NATIVE(微信扫码),WX_JSAPI(微信公众号或微信小程序),WX_APP(微信APP),WX_MWEB(微信H5),ALIPAY_WAP(支付宝手机支付),ALIPAY_PC(支付宝网站支付),ALIPAY_MOBILE(支付宝移动支付)
-        paramMap.put("channelId", "WX_MWEB");
+        paramMap.put("channelId", "WX_JSAPI");
         paramMap.put("amount", 1);                                  // 支付金额,单位分
         paramMap.put("currency", "cny");                            // 币种, cny-人民币
         paramMap.put("clientIp", "211.94.116.218");                 // 用户地址,微信H5支付时要真实的
@@ -45,7 +45,7 @@ public class PayOrderDemo {
         paramMap.put("param2", "");                                 // 扩展参数2
         paramMap.put("extra", "{\n" +
                 "  \"productId\": \"120989823\",\n" +
-                "  \"openId\": \"o2RvowBf7sOVJf8kJksUEMceaDqo\",\n" +
+                "  \"openId\": \"oIkQuwhPgPUgl-TvQ48_UUpZUwMs\",\n" +
                 "  \"sceneInfo\": {\n" +
                 "    \"h5_info\": {\n" +
                 "      \"type\": \"Wap\",\n" +
