@@ -89,4 +89,18 @@ public class PayOrderServiceClient {
         return "error";
     }
 
+    /**
+     * 处理支付宝当面付扫码支付
+     * @param jsonParam
+     * @return
+     */
+    @HystrixCommand(fallbackMethod = "doAliPayQrReqFallback")
+    public String doAliPayQrReq(String jsonParam) {
+        return restTemplate.getForEntity("http://XXPAY-SERVICE/pay/channel/ali_qr?jsonParam=" + MyBase64.encode(jsonParam.getBytes()), String.class).getBody();
+    }
+
+    public String doAliPayQrReqFallback(String jsonParam) {
+        return "error";
+    }
+
 }

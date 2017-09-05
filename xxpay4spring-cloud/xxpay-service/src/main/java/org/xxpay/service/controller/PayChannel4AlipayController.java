@@ -7,9 +7,11 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.domain.AlipayTradePagePayModel;
+import com.alipay.api.domain.AlipayTradePrecreateModel;
 import com.alipay.api.domain.AlipayTradeWapPayModel;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
 import com.alipay.api.request.AlipayTradePagePayRequest;
+import com.alipay.api.request.AlipayTradePrecreateRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -229,4 +231,70 @@ public class PayChannel4AlipayController {
         map.put("payParams", payParams);
         return XXPayUtil.makeRetData(map, resKey);
     }
+
+    /**
+     * 支付宝当面付之扫码支付
+     * 文档：https://docs.open.alipay.com/api_1/alipay.trade.precreate
+     * @param jsonParam
+     * @return
+     */
+    @RequestMapping(value = "/pay/channel/ali_qr")
+    public String doAliPayQrReq(@RequestParam String jsonParam) {
+        String logPrefix = "【支付宝当面付之扫码支付下单】";
+        JSONObject paramObj = JSON.parseObject(new String(MyBase64.decode(jsonParam)));
+        PayOrder payOrder = paramObj.getObject("payOrder", PayOrder.class);
+        String payOrderId = payOrder.getPayOrderId();
+        String mchId = payOrder.getMchId();
+        String channelId = payOrder.getChannelId();
+        MchInfo mchInfo = mchInfoService.selectMchInfo(mchId);
+        String resKey = mchInfo == null ? "" : mchInfo.getResKey();
+        if("".equals(resKey)) return XXPayUtil.makeRetFail(XXPayUtil.makeRetMap(PayConstant.RETURN_VALUE_FAIL, "", PayConstant.RETURN_VALUE_FAIL, PayEnum.ERR_0001));
+        PayChannel payChannel = payChannelService.selectPayChannel(channelId, mchId);
+        alipayConfig.init(payChannel.getParam());
+        AlipayClient client = new DefaultAlipayClient(alipayConfig.getUrl(), alipayConfig.getApp_id(), alipayConfig.getRsa_private_key(), AlipayConfig.FORMAT, AlipayConfig.CHARSET, alipayConfig.getAlipay_public_key(), AlipayConfig.SIGNTYPE);
+        AlipayTradePrecreateRequest alipay_request = new AlipayTradePrecreateRequest();
+        // 封装请求支付信息
+        AlipayTradePrecreateModel model=new AlipayTradePrecreateModel();
+        model.setOutTradeNo(payOrderId);
+        model.setSubject(payOrder.getSubject());
+        model.setTotalAmount(AmountUtil.convertCent2Dollar(payOrder.getAmount().toString()));
+        model.setBody(payOrder.getBody());
+        // 获取objParams参数
+        String objParams = payOrder.getExtra();
+        if (StringUtils.isNotEmpty(objParams)) {
+            try {
+                JSONObject objParamsJson = JSON.parseObject(objParams);
+                if(StringUtils.isNotBlank(objParamsJson.getString("discountable_amount"))) {
+                    //可打折金额
+                    model.setDiscountableAmount(objParamsJson.getString("discountable_amount"));
+                }
+                if(StringUtils.isNotBlank(objParamsJson.getString("undiscountable_amount"))) {
+                    //不可打折金额
+                    model.setUndiscountableAmount(objParamsJson.getString("undiscountable_amount"));
+                }
+            } catch (Exception e) {
+                _log.error("{}objParams参数格式错误！", logPrefix);
+            }
+        }
+        alipay_request.setBizModel(model);
+        // 设置异步通知地址
+        alipay_request.setNotifyUrl(alipayConfig.getNotify_url());
+        // 设置同步地址
+        alipay_request.setReturnUrl(alipayConfig.getReturn_url());
+        String payUrl = null;
+        try {
+            payUrl = client.execute(alipay_request).getBody();
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+        }
+        _log.info("{}生成跳转路径：payUrl={}", logPrefix, payUrl);
+        payOrderService.updateStatus4Ing(payOrderId, null);
+        _log.info("{}生成请求支付宝数据,req={}", logPrefix, alipay_request.getBizModel());
+        _log.info("###### 商户统一下单处理完成 ######");
+        Map<String, Object> map = XXPayUtil.makeRetMap(PayConstant.RETURN_VALUE_SUCCESS, "", PayConstant.RETURN_VALUE_SUCCESS, null);
+        map.put("payOrderId", payOrderId);
+        map.put("payUrl", payUrl);
+        return XXPayUtil.makeRetData(map, resKey);
+    }
+
 }
