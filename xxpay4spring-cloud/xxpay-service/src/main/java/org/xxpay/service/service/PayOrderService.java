@@ -2,10 +2,13 @@ package org.xxpay.service.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.xxpay.common.constant.PayConstant;
 import org.xxpay.dal.dao.mapper.PayOrderMapper;
 import org.xxpay.dal.dao.model.PayOrder;
 import org.xxpay.dal.dao.model.PayOrderExample;
+
+import java.util.List;
 
 /**
  * @Description:
@@ -26,6 +29,24 @@ public class PayOrderService {
 
     public PayOrder selectPayOrder(String payOrderId) {
         return payOrderMapper.selectByPrimaryKey(payOrderId);
+    }
+
+    public PayOrder selectPayOrderByMchIdAndPayOrderId(String mchId, String payOrderId) {
+        PayOrderExample example = new PayOrderExample();
+        PayOrderExample.Criteria criteria = example.createCriteria();
+        criteria.andMchIdEqualTo(mchId);
+        criteria.andPayOrderIdEqualTo(payOrderId);
+        List<PayOrder> payOrderList = payOrderMapper.selectByExample(example);
+        return CollectionUtils.isEmpty(payOrderList) ? null : payOrderList.get(0);
+    }
+
+    public PayOrder selectPayOrderByMchIdAndMchOrderNo(String mchId, String mchOrderNo) {
+        PayOrderExample example = new PayOrderExample();
+        PayOrderExample.Criteria criteria = example.createCriteria();
+        criteria.andMchIdEqualTo(mchId);
+        criteria.andMchOrderNoEqualTo(mchOrderNo);
+        List<PayOrder> payOrderList = payOrderMapper.selectByExample(example);
+        return CollectionUtils.isEmpty(payOrderList) ? null : payOrderList.get(0);
     }
 
     public int updateStatus4Ing(String payOrderId, String channelOrderNo) {

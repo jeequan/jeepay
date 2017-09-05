@@ -61,9 +61,9 @@ public class PayOrderController {
         String logPrefix = "【商户统一下单】";
         ServiceInstance instance = client.getLocalServiceInstance();
         _log.info("{}/pay/create_order, host:{}, service_id:{}, params:{}", logPrefix, instance.getHost(), instance.getServiceId(), params);
-        JSONObject po = JSONObject.parseObject(params);
-        JSONObject payOrder = null;
         try {
+            JSONObject po = JSONObject.parseObject(params);
+            JSONObject payOrder = null;
             // 验证参数有效性
             Object object = validateParams(po);
             if (object instanceof String) {

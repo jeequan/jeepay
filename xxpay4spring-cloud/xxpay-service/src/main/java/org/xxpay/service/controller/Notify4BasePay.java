@@ -98,7 +98,7 @@ public class Notify4BasePay {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * 处理支付结果后台服务器通知
 	 */
@@ -111,16 +111,6 @@ public class Notify4BasePay {
 		} catch (Exception e) {
 			_log.error("payOrderId={},sendMessage error.", payOrder != null ? payOrder.getPayOrderId() : "", e);
 		}
-		/*// 响应给支付公司
-		_log.info("payOrderId={},channelId={}，响应支付公司结果：{}", payOrder != null ? payOrder.getPayOrderId() : "", payOrder != null ? payOrder.getChannelId() : "", message);
-		response.setContentType("text/html");
-		PrintWriter pw;
-		try {
-			pw = response.getWriter();
-			pw.print(message);
-		} catch (IOException e) {
-			_log.error("Pay response write exception.", e);
-		}*/
 		_log.info(">>>>>> PAY回调通知业务系统完成 <<<<<<");
 	}
 
@@ -129,7 +119,7 @@ public class Notify4BasePay {
 		object.put("method", "GET");
 		object.put("url", createNotifyUrl(payOrder, "2"));
 		object.put("orderId", payOrder.getPayOrderId());
-		object.put("count", 0);
+		object.put("count", payOrder.getNotifyCount());
 		object.put("createTime", System.currentTimeMillis());
 		return object;
 	}

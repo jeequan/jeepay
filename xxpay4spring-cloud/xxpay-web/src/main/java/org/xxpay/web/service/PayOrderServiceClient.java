@@ -34,6 +34,20 @@ public class PayOrderServiceClient {
     }
 
     /**
+     * 查询支付订单
+     * @param jsonParam
+     * @return
+     */
+    @HystrixCommand(fallbackMethod = "queryPayOrderFallback")
+    public String queryPayOrder(String jsonParam) {
+        return restTemplate.getForEntity("http://XXPAY-SERVICE/pay/query?jsonParam=" + MyBase64.encode(jsonParam.getBytes()), String.class).getBody();
+    }
+
+    public String queryPayOrderFallback(String jsonParam) {
+        return "error";
+    }
+
+    /**
      * 处理微信支付
      * @param jsonParam
      * @return
