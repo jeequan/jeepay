@@ -32,7 +32,7 @@ public class PayOrderDemo {
         JSONObject paramMap = new JSONObject();
         paramMap.put("mchId", mchId);                               // 商户ID
         paramMap.put("mchOrderNo", System.currentTimeMillis());     // 商户订单号
-        // 支付渠道ID, WX_NATIVE(微信扫码),WX_JSAPI(微信公众号或微信小程序),WX_APP(微信APP),WX_MWEB(微信H5),ALIPAY_WAP(支付宝手机支付),ALIPAY_PC(支付宝网站支付),ALIPAY_MOBILE(支付宝移动支付)
+        // 支付渠道ID, WX_NATIVE(微信扫码),WX_JSAPI(微信公众号或微信小程序),WX_APP(微信APP),WX_MWEB(微信H5),ALIPAY_WAP(支付宝手机支付),ALIPAY_PC(支付宝网站支付),ALIPAY_MOBILE(支付宝移动支付),ALIPAY_QR(支付宝当面付之扫码支付)
         paramMap.put("channelId", "ALIPAY_QR");
         paramMap.put("amount", 1);                                  // 支付金额,单位分
         paramMap.put("currency", "cny");                            // 币种, cny-人民币
