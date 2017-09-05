@@ -19,8 +19,8 @@ public class PayOrderDemo {
     // 验签key
     static final String repKey = "Hpcl522AV6q613KIi46u6g6XuW8vM1N8bFgyv769770MdYe9u37M4y7rIpl8";
 
-    //static final String baseUrl = "http://api.xxpay.org/api";
-    static final String baseUrl = "http://localhost:3020/api";
+    static final String baseUrl = "http://api.xxpay.org/api";
+    //static final String baseUrl = "http://localhost:3020/api";
     static final String notifyUrl = "http://www.baidu.com"; // 本地环境测试,可到ngrok.cc网站注册
 
     public static void main(String[] args) {
@@ -54,6 +54,8 @@ public class PayOrderDemo {
                 "      \"wap_name\": \"xxpay充值\"\n" +
                 "    }\n" +
                 "  }\n" +
+                " ,\"discountable_amount\":\"0.00\"," + //面对面支付扫码参数：可打折金额 可打折金额+不可打折金额=总金额
+                "  \"undiscountable_amount\":\"0.00\"," + //面对面支付扫码参数：不可打折金额
                 "}");  // 附加参数
 
         //{"h5_info": {"type":"Wap","wap_url": "https://pay.qq.com","wap_name": "腾讯充值"}}

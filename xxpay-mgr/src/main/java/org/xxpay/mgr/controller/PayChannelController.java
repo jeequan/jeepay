@@ -75,7 +75,8 @@ public class PayChannelController {
         // 对于配置支付宝参数时,前端将+号转为空格bug处理
         if(PayConstant.PAY_CHANNEL_ALIPAY_MOBILE.equals(channelId) ||
                 PayConstant.PAY_CHANNEL_ALIPAY_PC.equals(channelId) ||
-                PayConstant.PAY_CHANNEL_ALIPAY_WAP.equals(channelId)) {
+                PayConstant.PAY_CHANNEL_ALIPAY_WAP.equals(channelId) ||
+                PayConstant.PAY_CHANNEL_ALIPAY_QR.equals(channelId)) {
             JSONObject paramObj = null;
             try{
                 paramObj = JSON.parseObject(po.getString("param"));
