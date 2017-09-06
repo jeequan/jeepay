@@ -1,7 +1,7 @@
 package org.xxpay.service.controller;
 
-import com.github.binarywang.wxpay.bean.WxPayOrderNotifyResponse;
-import com.github.binarywang.wxpay.bean.result.WxPayOrderNotifyResult;
+import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
+import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
@@ -70,7 +70,7 @@ public class Notify4WxPayController extends Notify4BasePay {
 			payContext.put("parameters", result);
 			// 验证业务数据是否正确,验证通过后返回PayOrder和WxPayConfig对象
 			if(!verifyWxPayParams(payContext)) {
-				return WxPayOrderNotifyResponse.fail((String) payContext.get("retMsg"));
+				return WxPayNotifyResponse.fail((String) payContext.get("retMsg"));
 			}
 			PayOrder payOrder = (PayOrder) payContext.get("payOrder");
 			WxPayConfig wxPayConfig = (WxPayConfig) payContext.get("wxPayConfig");
@@ -83,7 +83,7 @@ public class Notify4WxPayController extends Notify4BasePay {
 				int updatePayOrderRows = payOrderService.updateStatus4Success(payOrder.getPayOrderId());
 				if (updatePayOrderRows != 1) {
 					_log.error("{}更新支付状态失败,将payOrderId={},更新payStatus={}失败", logPrefix, payOrder.getPayOrderId(), PayConstant.PAY_STATUS_SUCCESS);
-					return WxPayOrderNotifyResponse.fail("处理订单失败");
+					return WxPayNotifyResponse.fail("处理订单失败");
 				}
 				_log.error("{}更新支付状态成功,将payOrderId={},更新payStatus={}成功", logPrefix, payOrder.getPayOrderId(), PayConstant.PAY_STATUS_SUCCESS);
 				payOrder.setStatus(PayConstant.PAY_STATUS_SUCCESS);
@@ -91,17 +91,17 @@ public class Notify4WxPayController extends Notify4BasePay {
 			// 业务系统后端通知
 			doNotify(payOrder);
 			_log.info("====== 完成接收微信支付回调通知 ======");
-			return WxPayOrderNotifyResponse.success("处理成功");
+			return WxPayNotifyResponse.success("处理成功");
 		} catch (WxPayException e) {
 			//出现业务错误
 			_log.error(e, "微信回调结果异常,异常原因");
 			_log.info("{}请求数据result_code=FAIL", logPrefix);
 			_log.info("err_code:", e.getErrCode());
 			_log.info("err_code_des:", e.getErrCodeDes());
-			return WxPayOrderNotifyResponse.fail(e.getMessage());
+			return WxPayNotifyResponse.fail(e.getMessage());
 		} catch (Exception e) {
 			_log.error(e, "微信回调结果异常,异常原因");
-			return WxPayOrderNotifyResponse.fail(e.getMessage());
+			return WxPayNotifyResponse.fail(e.getMessage());
 		}
 	}
 	
