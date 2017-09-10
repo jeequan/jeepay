@@ -11,10 +11,14 @@
 	<description>xxpay-common</description>
 
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.8</java.version>
 		<fastjson.version>1.2.7</fastjson.version>
 		<logback-classic.version>1.1.7</logback-classic.version>
 		<slf4j-api.version>1.7.7</slf4j-api.version>
-		<commons-lang3.version>3.4</commons-lang3.version>
+		<commons-lang3.version>3.5</commons-lang3.version>
+		<commons.beanutils.version>1.7.0</commons.beanutils.version>
+		<commons.collections.version>3.2.2</commons.collections.version>
 	</properties>
 
 	<dependencies>
@@ -42,6 +46,16 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>${commons-lang3.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>${commons.beanutils.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>${commons.collections.version}</version>
 		</dependency>
 	</dependencies>
 

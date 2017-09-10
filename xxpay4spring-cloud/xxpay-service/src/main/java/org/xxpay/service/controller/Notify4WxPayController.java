@@ -76,7 +76,7 @@ public class Notify4WxPayController extends Notify4BasePay {
 			WxPayConfig wxPayConfig = (WxPayConfig) payContext.get("wxPayConfig");
 			wxPayService.setConfig(wxPayConfig);
 			// 这里做了签名校验(这里又做了一次xml转换对象,可以考虑优化)
-			wxPayService.getOrderNotifyResult(xmlResult);
+			wxPayService.parseOrderNotifyResult(xmlResult);
 			// 处理订单
 			byte payStatus = payOrder.getStatus(); // 0：订单生成，1：支付中，-1：支付失败，2：支付成功，3：业务处理完成，-2：订单过期
 			if (payStatus != PayConstant.PAY_STATUS_SUCCESS && payStatus != PayConstant.PAY_STATUS_COMPLETE) {
