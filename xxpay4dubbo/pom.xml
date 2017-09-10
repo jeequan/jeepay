@@ -27,7 +27,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <springboot.version>1.5.6.RELEASE</springboot.version>
-        <springboot.dubbo.version>1.5.6.RELEASE</springboot.dubbo.version>
+        <springboot.dubbo.version>1.0.0</springboot.dubbo.version>
     </properties>
 
     <dependencyManagement>
