@@ -25,6 +25,7 @@ V1.0.0 |2017-08-11 |完成spring-cloud架构，集成微信、支付宝渠道
 V1.0.0 |2017-08-20 |升级spring boot为1.5.6，修复通知bug
 V1.0.0 |2017-08-23 |升级支付宝为最新接口
 V1.0.0 |2017-08-25 |微信支付SDK更换为weixin-java-pay，增加微信H5支付，增加docker部署支持
+V1.0.0 |2017-09-10 |完成dubbo架构，增加支付订单查询接口
 
 接下来的版本开发计划：
 ```html
@@ -58,7 +59,10 @@ V1.0.0 |2017-08-25 |微信支付SDK更换为weixin-java-pay，增加微信H5支�
 ***
 ```
 xxpay-master
-├── xxpay4spring-boot-dubbo -- spring-boot-dubbo架构实现
+├── xxpay4dubbo -- spring-boot-dubbo架构实现
+|    ├── xxpay4dubbo-api -- 接口定义
+|    ├── xxpay4dubbo-service -- 服务生产者
+|    ├── xxpay4dubbo-web -- 服务消费者
 ├── xxpay4spring-cloud -- spring-cloud架构实现
 |    ├── xxpay-config -- 配置中心
 |    ├── xxpay-gateway -- API网关
@@ -80,7 +84,7 @@ xxpay-master
 |xxpay-mgr | 8092 | 支付运营平台
 |xxpay-shop | 8081 | 支付商城演示系统
 |xxpay4spring-cloud |  | 支付中心spring-cloud架构实现
-|xxpay4spring-boot-dubbo |  | 支付中心spring-boot-dubbo架构实现
+|xxpay4dubbo |  | 支付中心spring-boot-dubbo架构实现
 |xxpay4spring-mvc |  | 支付中心spring-mvc架构实现
 #### xxpay4spring-cloud
 | 项目  | 端口 | 描述
@@ -90,10 +94,19 @@ xxpay-master
 |xxpay-server | 2000 | 支付服务注册中心
 |xxpay-service | 3000 | 支付服务生产者
 |xxpay-web | 3010 | 支付服务消费者
-
 项目启动顺序：
 ```
 xxpay-server > xxpay-config > xxpay-service > xxpay-web > xxpay-gateway
+```
+#### xxpay4dubbo
+| 项目  | 端口 | 描述
+|---|---|---
+|xxpay4dubbo-api |  | API接口定义
+|xxpay4dubbo-service | 20880 | 支付服务生产者
+|xxpay4dubbo-web | 3020 | 支付服务消费者
+项目启动顺序：
+```
+xxpay4dubbo-service > xxpay4dubbo-web
 ```
 ### 项目部署
 ***
