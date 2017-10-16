@@ -47,7 +47,7 @@ public class PayOrderService {
             paramMap.put("mchId", mchId);
             paramMap.put("mchOrderNo", mchOrderNo);
             String jsonParam = RpcUtil.createBaseParam(paramMap);
-            result = rpcCommonService.rpcPayOrderService.selectPayOrderByMchIdAndPayOrderId(jsonParam);
+            result = rpcCommonService.rpcPayOrderService.selectPayOrderByMchIdAndMchOrderNo(jsonParam);
         }
         String s = RpcUtil.mkRet(result);
         if(s == null) return null;
