@@ -1,6 +1,5 @@
-package org.xxpay.dubbo.service.impl;
+package org.xxpay.boot.service.impl;
 
-import com.alibaba.dubbo.config.annotation.Service;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
@@ -10,7 +9,12 @@ import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.xxpay.boot.service.INotifyPayService;
+import org.xxpay.boot.service.Notify4BasePay;
+import org.xxpay.boot.service.channel.alipay.AlipayConfig;
+import org.xxpay.boot.service.channel.wechat.WxPayUtil;
 import org.xxpay.common.constant.PayConstant;
 import org.xxpay.common.domain.BaseParam;
 import org.xxpay.common.enumm.RetEnum;
@@ -20,10 +24,6 @@ import org.xxpay.common.util.ObjectValidUtil;
 import org.xxpay.common.util.RpcUtil;
 import org.xxpay.dal.dao.model.PayChannel;
 import org.xxpay.dal.dao.model.PayOrder;
-import org.xxpay.dubbo.api.service.INotifyPayService;
-import org.xxpay.dubbo.service.Notify4BasePay;
-import org.xxpay.dubbo.service.channel.alipay.AlipayConfig;
-import org.xxpay.dubbo.service.channel.wechat.WxPayUtil;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ import java.util.Map;
  * @date: 17/9/10
  * @description:
  */
-@Service(version = "1.0.0")
+@Service
 public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPayService {
 
     private static final MyLog _log = MyLog.getLog(NotifyPayServiceImpl.class);

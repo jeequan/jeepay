@@ -17,6 +17,7 @@
     <module>xxpay-shop</module>
     <module>xxpay4spring-cloud</module>
     <module>xxpay4dubbo</module>
+    <module>xxpay4spring-boot</module>
   </modules>
 
   <properties>

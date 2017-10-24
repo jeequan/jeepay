@@ -1,4 +1,4 @@
-package org.xxpay.dubbo.api.service;
+package org.xxpay.boot.service;
 
 import java.util.Map;
 

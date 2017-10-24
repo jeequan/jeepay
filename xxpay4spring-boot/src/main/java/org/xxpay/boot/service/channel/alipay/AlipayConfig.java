@@ -1,4 +1,4 @@
-package org.xxpay.dubbo.service.channel.alipay;
+package org.xxpay.boot.service.channel.alipay;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
