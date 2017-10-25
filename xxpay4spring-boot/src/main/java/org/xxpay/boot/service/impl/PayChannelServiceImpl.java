@@ -1,5 +1,6 @@
 package org.xxpay.boot.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.xxpay.boot.service.BaseService;
 import org.xxpay.boot.service.IPayChannelService;
@@ -11,6 +12,7 @@ import org.xxpay.common.util.ObjectValidUtil;
 import org.xxpay.common.util.RpcUtil;
 import org.xxpay.dal.dao.model.PayChannel;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -41,5 +43,16 @@ public class PayChannelServiceImpl extends BaseService implements IPayChannelSer
         if(payChannel == null) return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_DATA_NOT_EXISTS);
         String jsonResult = JsonUtil.object2Json(payChannel);
         return RpcUtil.createBizResult(baseParam, jsonResult);
+    }
+
+    public JSONObject getByMchIdAndChannelId(String mchId, String channelId) {
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("mchId", mchId);
+        paramMap.put("channelId", channelId);
+        String jsonParam = RpcUtil.createBaseParam(paramMap);
+        Map<String, Object> result = selectPayChannel(jsonParam);
+        String s = RpcUtil.mkRet(result);
+        if(s == null) return null;
+        return JSONObject.parseObject(s);
     }
 }

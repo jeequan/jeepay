@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.xxpay.boot.web.MchInfoService;
-import org.xxpay.boot.web.PayChannelService;
-import org.xxpay.boot.web.PayOrderService;
+import org.xxpay.boot.service.IMchInfoService;
+import org.xxpay.boot.service.IPayChannelService;
+import org.xxpay.boot.service.IPayOrderService;
 import org.xxpay.common.constant.PayConstant;
 import org.xxpay.common.util.MyLog;
 import org.xxpay.common.util.MySeq;
@@ -29,13 +29,13 @@ public class PayOrderController {
     private final MyLog _log = MyLog.getLog(PayOrderController.class);
 
     @Autowired
-    private PayOrderService payOrderService;
+    private IPayOrderService payOrderService;
 
     @Autowired
-    private PayChannelService payChannelService;
+    private IPayChannelService payChannelService;
 
     @Autowired
-    private MchInfoService mchInfoService;
+    private IMchInfoService mchInfoService;
 
     /**
      * 统一下单接口:

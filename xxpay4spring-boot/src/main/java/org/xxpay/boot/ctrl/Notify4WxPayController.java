@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.xxpay.boot.web.NotifyPayService;
+import org.xxpay.boot.service.INotifyPayService;
 import org.xxpay.common.util.MyLog;
 
 import javax.servlet.ServletException;
@@ -25,7 +25,7 @@ public class Notify4WxPayController {
 	private static final MyLog _log = MyLog.getLog(Notify4WxPayController.class);
 
 	@Autowired
-	private NotifyPayService notifyPayService;
+	private INotifyPayService notifyPayService;
 
 	/**
 	 * 微信支付(统一下单接口)后台通知响应
@@ -48,7 +48,7 @@ public class Notify4WxPayController {
 		String logPrefix = "【微信支付回调通知】";
 		String xmlResult = IOUtils.toString(request.getInputStream(), request.getCharacterEncoding());
 		_log.info("{}通知请求数据:reqStr={}", logPrefix, xmlResult);
-		return notifyPayService.doWxPayNotify(xmlResult);
+		return notifyPayService.handleWxPayNotify(xmlResult);
 	}
 
 }

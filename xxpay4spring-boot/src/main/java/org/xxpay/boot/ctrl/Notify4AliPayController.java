@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.xxpay.boot.web.NotifyPayService;
+import org.xxpay.boot.service.INotifyPayService;
 import org.xxpay.common.constant.PayConstant;
 import org.xxpay.common.util.MyLog;
 
@@ -28,7 +28,7 @@ public class Notify4AliPayController {
 	private static final MyLog _log = MyLog.getLog(Notify4AliPayController.class);
 
 	@Autowired
-	private NotifyPayService notifyPayService;
+	private INotifyPayService notifyPayService;
 
 	/**
 	 * 支付宝移动支付后台通知响应
@@ -69,7 +69,7 @@ public class Notify4AliPayController {
 			_log.error("{}请求参数为空", logPrefix);
 			return PayConstant.RETURN_ALIPAY_VALUE_FAIL;
 		}
-		return notifyPayService.doAliPayNotify(params);
+		return notifyPayService.handleAliPayNotify(params);
 	}
 	
 }

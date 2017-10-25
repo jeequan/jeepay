@@ -14,4 +14,8 @@ public interface INotifyPayService {
     Map doWxPayNotify(String jsonParam);
 
     Map sendBizPayNotify(String jsonParam);
+
+    String handleAliPayNotify(Map params);
+
+    String handleWxPayNotify(String xmlResult);
 }

@@ -1,5 +1,7 @@
 package org.xxpay.boot.service;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.util.Map;
 
 /**
@@ -24,5 +26,13 @@ public interface IPayOrderService {
     Map updateStatus4Complete(String jsonParam);
 
     Map updateNotify(String jsonParam);
+
+    int createPayOrder(JSONObject payOrder);
+
+    JSONObject queryPayOrder(String mchId, String payOrderId, String mchOrderNo, String executeNotify);
+
+    String doWxPayReq(String tradeType, JSONObject payOrder, String resKey);
+
+    String doAliPayReq(String channelId, JSONObject payOrder, String resKey);
 
 }

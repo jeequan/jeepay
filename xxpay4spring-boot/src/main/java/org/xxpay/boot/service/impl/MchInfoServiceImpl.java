@@ -1,5 +1,6 @@
 package org.xxpay.boot.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.xxpay.boot.service.BaseService;
 import org.xxpay.boot.service.IMchInfoService;
@@ -11,6 +12,7 @@ import org.xxpay.common.util.ObjectValidUtil;
 import org.xxpay.common.util.RpcUtil;
 import org.xxpay.dal.dao.model.MchInfo;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -40,5 +42,15 @@ public class MchInfoServiceImpl extends BaseService implements IMchInfoService {
         if(mchInfo == null) return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_DATA_NOT_EXISTS);
         String jsonResult = JsonUtil.object2Json(mchInfo);
         return RpcUtil.createBizResult(baseParam, jsonResult);
+    }
+
+    public JSONObject getByMchId(String mchId) {
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("mchId", mchId);
+        String jsonParam = RpcUtil.createBaseParam(paramMap);
+        Map<String, Object> result = selectMchInfo(jsonParam);
+        String s = RpcUtil.mkRet(result);
+        if(s==null) return null;
+        return JSONObject.parseObject(s);
     }
 }
