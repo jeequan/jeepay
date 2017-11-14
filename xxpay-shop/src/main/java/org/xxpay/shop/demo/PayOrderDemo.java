@@ -24,7 +24,8 @@ public class PayOrderDemo {
     static final String notifyUrl = "http://www.baidu.com"; // 本地环境测试,可到ngrok.cc网站注册
 
     public static void main(String[] args) {
-        payOrderTest();
+        //payOrderTest();
+        quryPayOrderTest("1494774484058", "P0020170514230805000000");
     }
 
     // 统一下单
@@ -53,6 +54,8 @@ public class PayOrderDemo {
                 "      \"wap_name\": \"xxpay充值\"\n" +
                 "    }\n" +
                 "  }\n" +
+                " ,\"discountable_amount\":\"0.00\"," + //面对面支付扫码参数：可打折金额 可打折金额+不可打折金额=总金额
+                "  \"undiscountable_amount\":\"0.00\"," + //面对面支付扫码参数：不可打折金额
                 "}");  // 附加参数
 
         //{"h5_info": {"type":"Wap","wap_url": "https://pay.qq.com","wap_name": "腾讯充值"}}
@@ -73,6 +76,35 @@ public class PayOrderDemo {
                 System.out.println("=========支付中心下单验签成功=========");
             }else {
                 System.err.println("=========支付中心下单验签失败=========");
+                return null;
+            }
+        }
+        return retMap.get("payOrderId")+"";
+    }
+
+    static String quryPayOrderTest(String mchOrderNo, String payOrderId) {
+        JSONObject paramMap = new JSONObject();
+        paramMap.put("mchId", mchId);                               // 商户ID
+        paramMap.put("mchOrderNo", mchOrderNo);                     // 商户订单号
+        paramMap.put("payOrderId", payOrderId);                     // 支付订单号
+        paramMap.put("executeNotify", "false");                      // 是否执行回调,true或false,如果为true当订单状态为支付成功(2)时,支付中心会再次回调一次业务系统
+
+        String reqSign = PayDigestUtil.getSign(paramMap, reqKey);
+        paramMap.put("sign", reqSign);                              // 签名
+        String reqData = "params=" + paramMap.toJSONString();
+        System.out.println("请求支付中心查单接口,请求数据:" + reqData);
+        String url = baseUrl + "/pay/query_order?";
+        String result = XXPayUtil.call4Post(url + reqData);
+        System.out.println("请求支付中心查单接口,响应数据:" + result);
+        Map retMap = JSON.parseObject(result);
+        if("SUCCESS".equals(retMap.get("retCode")) && "SUCCESS".equalsIgnoreCase(retMap.get("resCode").toString())) {
+            // 验签
+            String checkSign = PayDigestUtil.getSign(retMap, repKey, "sign", "payParams");
+            String retSign = (String) retMap.get("sign");
+            if(checkSign.equals(retSign)) {
+                System.out.println("=========支付中心查单验签成功=========");
+            }else {
+                System.err.println("=========支付中心查单验签失败=========");
                 return null;
             }
         }

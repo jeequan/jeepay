@@ -61,9 +61,9 @@ public class PayOrderController {
         String logPrefix = "【商户统一下单】";
         ServiceInstance instance = client.getLocalServiceInstance();
         _log.info("{}/pay/create_order, host:{}, service_id:{}, params:{}", logPrefix, instance.getHost(), instance.getServiceId(), params);
-        JSONObject po = JSONObject.parseObject(params);
-        JSONObject payOrder = null;
         try {
+            JSONObject po = JSONObject.parseObject(params);
+            JSONObject payOrder = null;
             // 验证参数有效性
             Object object = validateParams(po);
             if (object instanceof String) {
@@ -95,6 +95,8 @@ public class PayOrderController {
                     return payOrderServiceClient.doAliPayPcReq(getJsonParam("payOrder", payOrder));
                 case PayConstant.PAY_CHANNEL_ALIPAY_WAP :
                     return payOrderServiceClient.doAliPayWapReq(getJsonParam("payOrder", payOrder));
+                case PayConstant.PAY_CHANNEL_ALIPAY_QR :
+                    return payOrderServiceClient.doAliPayQrReq(getJsonParam("payOrder", payOrder));
                 default:
                     return XXPayUtil.makeRetFail(XXPayUtil.makeRetMap(PayConstant.RETURN_VALUE_FAIL, "不支持的支付渠道类型[channelId="+channelId+"]", null, null));
             }

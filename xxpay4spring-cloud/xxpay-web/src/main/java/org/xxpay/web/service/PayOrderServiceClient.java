@@ -34,6 +34,20 @@ public class PayOrderServiceClient {
     }
 
     /**
+     * 查询支付订单
+     * @param jsonParam
+     * @return
+     */
+    @HystrixCommand(fallbackMethod = "queryPayOrderFallback")
+    public String queryPayOrder(String jsonParam) {
+        return restTemplate.getForEntity("http://XXPAY-SERVICE/pay/query?jsonParam=" + MyBase64.encode(jsonParam.getBytes()), String.class).getBody();
+    }
+
+    public String queryPayOrderFallback(String jsonParam) {
+        return "error";
+    }
+
+    /**
      * 处理微信支付
      * @param jsonParam
      * @return
@@ -86,6 +100,20 @@ public class PayOrderServiceClient {
     }
 
     public String doAliPayMobileReqFallback(String jsonParam) {
+        return "error";
+    }
+
+    /**
+     * 处理支付宝当面付扫码支付
+     * @param jsonParam
+     * @return
+     */
+    @HystrixCommand(fallbackMethod = "doAliPayQrReqFallback")
+    public String doAliPayQrReq(String jsonParam) {
+        return restTemplate.getForEntity("http://XXPAY-SERVICE/pay/channel/ali_qr?jsonParam=" + MyBase64.encode(jsonParam.getBytes()), String.class).getBody();
+    }
+
+    public String doAliPayQrReqFallback(String jsonParam) {
         return "error";
     }
 
