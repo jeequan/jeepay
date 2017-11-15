@@ -3,22 +3,26 @@ package org.xxpay.dubbo.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
-import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderResult;
+import com.github.binarywang.wxpay.bean.request.*;
+import com.github.binarywang.wxpay.bean.result.*;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
 import com.github.binarywang.wxpay.util.SignUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.xxpay.common.constant.PayConstant;
 import org.xxpay.common.domain.BaseParam;
 import org.xxpay.common.enumm.RetEnum;
 import org.xxpay.common.util.*;
 import org.xxpay.dal.dao.model.PayChannel;
 import org.xxpay.dal.dao.model.PayOrder;
+import org.xxpay.dal.dao.model.RefundOrder;
+import org.xxpay.dal.dao.model.TransOrder;
 import org.xxpay.dubbo.api.service.IPayChannel4WxService;
 import org.xxpay.dubbo.service.BaseService;
+import org.xxpay.dubbo.service.BaseService4PayOrder;
 import org.xxpay.dubbo.service.channel.wechat.WxPayProperties;
 import org.xxpay.dubbo.service.channel.wechat.WxPayUtil;
 
@@ -41,6 +45,9 @@ public class PayChannel4WxServiceImpl extends BaseService implements IPayChannel
     @Resource
     private WxPayProperties wxPayProperties;
 
+    @Autowired
+    private BaseService4PayOrder baseService4PayOrder;
+
     public Map doWxPayReq(String jsonParam) {
         String logPrefix = "【微信支付统一下单】";
         BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
@@ -52,7 +59,7 @@ public class PayChannel4WxServiceImpl extends BaseService implements IPayChannel
             }
             JSONObject payOrderObj = baseParam.isNullValue("payOrder") ? null : JSONObject.parseObject(bizParamMap.get("payOrder").toString());
             String tradeType = baseParam.isNullValue("tradeType") ? null : bizParamMap.get("tradeType").toString();
-            PayOrder payOrder = BeanConvertUtils.map2Bean(payOrderObj, PayOrder.class);
+            PayOrder payOrder = JSON.toJavaObject(payOrderObj, PayOrder.class);
             if (ObjectValidUtil.isInvalid(payOrder, tradeType)) {
                 _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
                 return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
@@ -72,7 +79,7 @@ public class PayChannel4WxServiceImpl extends BaseService implements IPayChannel
                 Map<String, Object> map = new HashMap<>();
                 map.put("payOrderId", payOrderId);
                 map.put("prepayId", wxPayUnifiedOrderResult.getPrepayId());
-                int result = super.baseUpdateStatus4Ing(payOrderId, wxPayUnifiedOrderResult.getPrepayId());
+                int result = baseService4PayOrder.baseUpdateStatus4Ing(payOrderId, null);
                 _log.info("更新第三方支付订单号:payOrderId={},prepayId={},result={}", payOrderId, wxPayUnifiedOrderResult.getPrepayId(), result);
                 switch (tradeType) {
                     case PayConstant.WxConstant.TRADE_TYPE_NATIVE : {
@@ -132,16 +139,206 @@ public class PayChannel4WxServiceImpl extends BaseService implements IPayChannel
                 _log.info("{}下单返回失败", logPrefix);
                 _log.info("err_code:{}", e.getErrCode());
                 _log.info("err_code_des:{}", e.getErrCodeDes());
-
                 return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_WX_PAY_CREATE_FAIL);
-
-               // return XXPayUtil.makeRetData(XXPayUtil.makeRetMap(PayConstant.RETURN_VALUE_SUCCESS, "", PayConstant.RETURN_VALUE_FAIL, "0111", "调用微信支付失败," + e.getErrCode() + ":" + e.getErrCodeDes()), resKey);
             }
         }catch (Exception e) {
             _log.error(e, "微信支付统一下单异常");
             return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_WX_PAY_CREATE_FAIL);
+        }
+    }
 
-            //return XXPayUtil.makeRetFail(XXPayUtil.makeRetMap(PayConstant.RETURN_VALUE_FAIL, "", PayConstant.RETURN_VALUE_FAIL, PayEnum.ERR_0001));
+    @Override
+    public Map doWxTransReq(String jsonParam) {
+        String logPrefix = "【微信企业付款】";
+        BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
+        Map<String, Object> bizParamMap = baseParam.getBizParamMap();
+        try{
+            if (ObjectValidUtil.isInvalid(bizParamMap)) {
+                _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_NOT_FOUND.getMessage(), jsonParam);
+                return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_NOT_FOUND);
+            }
+            JSONObject transOrderObj = baseParam.isNullValue("transOrder") ? null : JSONObject.parseObject(bizParamMap.get("transOrder").toString());
+            TransOrder transOrder = JSON.toJavaObject(transOrderObj, TransOrder.class);
+            if (ObjectValidUtil.isInvalid(transOrder)) {
+                _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
+                return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
+            }
+            String mchId = transOrder.getMchId();
+            String channelId = transOrder.getChannelId();
+            PayChannel payChannel = super.baseSelectPayChannel(mchId, channelId);
+            WxPayConfig wxPayConfig = WxPayUtil.getWxPayConfig(payChannel.getParam(), "", wxPayProperties.getCertRootPath(), wxPayProperties.getNotifyUrl());
+            WxPayService wxPayService = new WxPayServiceImpl();
+            wxPayService.setConfig(wxPayConfig);
+            WxEntPayRequest wxEntPayRequest = buildWxEntPayRequest(transOrder, wxPayConfig);
+            String transOrderId = transOrder.getTransOrderId();
+            Map<String, Object> map = new HashMap<>();
+            WxEntPayResult result;
+            try {
+                result = wxPayService.entPay(wxEntPayRequest);
+                _log.info("{} >>> 转账成功", logPrefix);
+                map.put("transOrderId", transOrderId);
+                map.put("isSuccess", true);
+                map.put("channelOrderNo", result.getPaymentNo());
+            } catch (WxPayException e) {
+                _log.error(e, "转账失败");
+                //出现业务错误
+                _log.info("{}转账返回失败", logPrefix);
+                _log.info("err_code:{}", e.getErrCode());
+                _log.info("err_code_des:{}", e.getErrCodeDes());
+                map.put("transOrderId", transOrderId);
+                map.put("isSuccess", false);
+                map.put("channelErrCode", e.getErrCode());
+                map.put("channelErrMsg", e.getErrCodeDes());
+            }
+            return RpcUtil.createBizResult(baseParam, map);
+        }catch (Exception e) {
+            _log.error(e, "微信转账异常");
+            return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_WX_PAY_CREATE_FAIL);
+        }
+    }
+
+    @Override
+    public Map getWxTransReq(String jsonParam) {
+        String logPrefix = "【微信企业付款查询】";
+        BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
+        Map<String, Object> bizParamMap = baseParam.getBizParamMap();
+        try{
+            if (ObjectValidUtil.isInvalid(bizParamMap)) {
+                _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_NOT_FOUND.getMessage(), jsonParam);
+                return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_NOT_FOUND);
+            }
+            JSONObject transOrderObj = baseParam.isNullValue("transOrder") ? null : JSONObject.parseObject(bizParamMap.get("transOrder").toString());
+            TransOrder transOrder = JSON.toJavaObject(transOrderObj, TransOrder.class);
+            if (ObjectValidUtil.isInvalid(transOrder)) {
+                _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
+                return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
+            }
+            String mchId = transOrder.getMchId();
+            String channelId = transOrder.getChannelId();
+            PayChannel payChannel = super.baseSelectPayChannel(mchId, channelId);
+            WxPayConfig wxPayConfig = WxPayUtil.getWxPayConfig(payChannel.getParam(), "", wxPayProperties.getCertRootPath(), wxPayProperties.getNotifyUrl());
+            WxPayService wxPayService = new WxPayServiceImpl();
+            wxPayService.setConfig(wxPayConfig);
+            String transOrderId = transOrder.getTransOrderId();
+            Map<String, Object> map = new HashMap<>();
+            WxEntPayQueryResult result;
+            try {
+                result = wxPayService.queryEntPay(transOrderId);
+                _log.info("{} >>> 成功", logPrefix);
+                map.putAll((Map) JSON.toJSON(result));
+                map.put("isSuccess", true);
+                map.put("transOrderId", transOrderId);
+            } catch (WxPayException e) {
+                _log.error(e, "失败");
+                //出现业务错误
+                _log.info("{}返回失败", logPrefix);
+                _log.info("err_code:{}", e.getErrCode());
+                _log.info("err_code_des:{}", e.getErrCodeDes());
+                map.put("channelErrCode", e.getErrCode());
+                map.put("channelErrMsg", e.getErrCodeDes());
+                map.put("isSuccess", false);
+            }
+            return RpcUtil.createBizResult(baseParam, map);
+        }catch (Exception e) {
+            _log.error(e, "微信企业付款查询异常");
+            return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_WX_PAY_CREATE_FAIL);
+        }
+    }
+
+    @Override
+    public Map doWxRefundReq(String jsonParam) {
+        String logPrefix = "【微信退款】";
+        BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
+        Map<String, Object> bizParamMap = baseParam.getBizParamMap();
+        try{
+            if (ObjectValidUtil.isInvalid(bizParamMap)) {
+                _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_NOT_FOUND.getMessage(), jsonParam);
+                return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_NOT_FOUND);
+            }
+            JSONObject refundOrderObj = baseParam.isNullValue("refundOrder") ? null : JSONObject.parseObject(bizParamMap.get("refundOrder").toString());
+            RefundOrder refundOrder = JSON.toJavaObject(refundOrderObj, RefundOrder.class);
+            if (ObjectValidUtil.isInvalid(refundOrder)) {
+                _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
+                return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
+            }
+            String mchId = refundOrder.getMchId();
+            String channelId = refundOrder.getChannelId();
+            PayChannel payChannel = super.baseSelectPayChannel(mchId, channelId);
+            WxPayConfig wxPayConfig = WxPayUtil.getWxPayConfig(payChannel.getParam(), "", wxPayProperties.getCertRootPath(), wxPayProperties.getNotifyUrl());
+            WxPayService wxPayService = new WxPayServiceImpl();
+            wxPayService.setConfig(wxPayConfig);
+            WxPayRefundRequest wxPayRefundRequest = buildWxPayRefundRequest(refundOrder, wxPayConfig);
+            String refundOrderId = refundOrder.getRefundOrderId();
+            Map<String, Object> map = new HashMap<>();
+            WxPayRefundResult result;
+            try {
+                result = wxPayService.refund(wxPayRefundRequest);
+                _log.info("{} >>> 下单成功", logPrefix);
+                map.put("isSuccess", true);
+                map.put("refundOrderId", refundOrderId);
+                map.put("channelOrderNo", result.getRefundId());
+            } catch (WxPayException e) {
+                _log.error(e, "下单失败");
+                //出现业务错误
+                _log.info("{}下单返回失败", logPrefix);
+                _log.info("err_code:{}", e.getErrCode());
+                _log.info("err_code_des:{}", e.getErrCodeDes());
+                map.put("isSuccess", false);
+                map.put("channelErrCode", e.getErrCode());
+                map.put("channelErrMsg", e.getErrCodeDes());
+            }
+            return RpcUtil.createBizResult(baseParam, map);
+        }catch (Exception e) {
+            _log.error(e, "微信退款异常");
+            return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_WX_PAY_CREATE_FAIL);
+        }
+    }
+
+    @Override
+    public Map getWxRefundReq(String jsonParam) {
+        String logPrefix = "【微信退款查询】";
+        BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
+        Map<String, Object> bizParamMap = baseParam.getBizParamMap();
+        try{
+            if (ObjectValidUtil.isInvalid(bizParamMap)) {
+                _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_NOT_FOUND.getMessage(), jsonParam);
+                return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_NOT_FOUND);
+            }
+            JSONObject refundOrderObj = baseParam.isNullValue("refundOrder") ? null : JSONObject.parseObject(bizParamMap.get("refundOrder").toString());
+            RefundOrder refundOrder = JSON.toJavaObject(refundOrderObj, RefundOrder.class);
+            if (ObjectValidUtil.isInvalid(refundOrder)) {
+                _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
+                return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
+            }
+            String mchId = refundOrder.getMchId();
+            String channelId = refundOrder.getChannelId();
+            PayChannel payChannel = super.baseSelectPayChannel(mchId, channelId);
+            WxPayConfig wxPayConfig = WxPayUtil.getWxPayConfig(payChannel.getParam(), "", wxPayProperties.getCertRootPath(), wxPayProperties.getNotifyUrl());
+            WxPayService wxPayService = new WxPayServiceImpl();
+            wxPayService.setConfig(wxPayConfig);
+            String refundOrderId = refundOrder.getRefundOrderId();
+            Map<String, Object> map = new HashMap<>();
+            WxPayRefundQueryResult result;
+            try {
+                result = wxPayService.refundQuery(refundOrder.getChannelPayOrderNo(), refundOrder.getPayOrderId(), refundOrder.getRefundOrderId(), refundOrder.getChannelOrderNo());
+                _log.info("{} >>> 成功", logPrefix);
+                map.putAll((Map) JSON.toJSON(result));
+                map.put("isSuccess", true);
+                map.put("refundOrderId", refundOrderId);
+            } catch (WxPayException e) {
+                _log.error(e, "失败");
+                //出现业务错误
+                _log.info("{}返回失败", logPrefix);
+                _log.info("err_code:{}", e.getErrCode());
+                _log.info("err_code_des:{}", e.getErrCodeDes());
+                map.put("channelErrCode", e.getErrCode());
+                map.put("channelErrMsg", e.getErrCodeDes());
+                map.put("isSuccess", false);
+            }
+            return RpcUtil.createBizResult(baseParam, map);
+        }catch (Exception e) {
+            _log.error(e, "微信退款查询异常");
+            return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_WX_PAY_CREATE_FAIL);
         }
     }
 
@@ -192,7 +389,49 @@ public class PayChannel4WxServiceImpl extends BaseService implements IPayChannel
         request.setLimitPay(limitPay);
         request.setOpenid(openId);
         request.setSceneInfo(sceneInfo);
-
         return request;
     }
+
+    /**
+     * 构建微信企业付款请求数据
+     * @param transOrder
+     * @param wxPayConfig
+     * @return
+     */
+    WxEntPayRequest buildWxEntPayRequest(TransOrder transOrder, WxPayConfig wxPayConfig) {
+        // 微信企业付款请求对象
+        WxEntPayRequest request = new WxEntPayRequest();
+        request.setAmount(transOrder.getAmount().intValue()); // 金额,单位分
+        String checkName = "NO_CHECK";
+        if(transOrder.getExtra() != null) checkName = JSON.parseObject(transOrder.getExtra()).getString("checkName");
+        request.setCheckName(checkName);
+        request.setDescription(transOrder.getRemarkInfo());
+        request.setReUserName(transOrder.getUserName());
+        request.setPartnerTradeNo(transOrder.getTransOrderId());
+        request.setDeviceInfo(transOrder.getDevice());
+        request.setSpbillCreateIp(transOrder.getClientIp());
+        request.setOpenid(transOrder.getChannelUser());
+        return request;
+    }
+
+    /**
+     * 构建微信退款请求数据
+     * @param refundOrder
+     * @param wxPayConfig
+     * @return
+     */
+    WxPayRefundRequest buildWxPayRefundRequest(RefundOrder refundOrder, WxPayConfig wxPayConfig) {
+        // 微信退款请求对象
+        WxPayRefundRequest request = new WxPayRefundRequest();
+        request.setTransactionId(refundOrder.getChannelPayOrderNo());
+        request.setOutTradeNo(refundOrder.getPayOrderId());
+        request.setDeviceInfo(refundOrder.getDevice());
+        request.setOutRefundNo(refundOrder.getRefundOrderId());
+        request.setRefundDesc(refundOrder.getRemarkInfo());
+        request.setRefundFee(refundOrder.getRefundAmount().intValue());
+        request.setRefundFeeType("CNY");
+        request.setTotalFee(refundOrder.getPayAmount().intValue());
+        return request;
+    }
+
 }

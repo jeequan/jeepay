@@ -57,12 +57,6 @@
                 <input type="text" disabled="disabled" class="layui-input" value="${item.body!"" }">
             </div>
         </div>
-        <div class="layui-form-item layui-form-text">
-            <label class="layui-form-label">扩展参数</label>
-            <div class="layui-input-block">
-                <textarea disabled="disabled" class="layui-textarea">${item.extra!"" }</textarea>
-            </div>
-        </div>
         <div class="layui-form-item">
             <label class="layui-form-label">渠道商户ID</label>
             <div class="layui-input-block">
@@ -87,6 +81,12 @@
                 <input type="text" disabled="disabled" class="layui-input" value="${item.errMsg!"" }">
             </div>
         </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">扩展参数</label>
+            <div class="layui-input-block">
+                <textarea disabled="disabled" class="layui-textarea">${item.extra!"" }</textarea>
+            </div>
+        </div>
         <div class="layui-form-item">
             <label class="layui-form-label">参数1</label>
             <div class="layui-input-block">
@@ -103,18 +103,6 @@
             <label class="layui-form-label">通知地址</label>
             <div class="layui-input-block">
                 <input type="text" disabled="disabled" class="layui-input" value="${item.notifyUrl!"" }">
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">通知次数</label>
-            <div class="layui-input-block">
-                <input type="text" disabled="disabled" class="layui-input" value="${item.notifyCount!"" }">
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">最后通知</label>
-            <div class="layui-input-block">
-                <input type="text" disabled="disabled" class="layui-input" value="${item.lastNotifyTime!"" }">
             </div>
         </div>
         <div class="layui-form-item">

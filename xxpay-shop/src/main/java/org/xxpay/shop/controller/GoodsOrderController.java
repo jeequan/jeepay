@@ -42,9 +42,10 @@ public class GoodsOrderController {
     static final String reqKey = "M86l522AV6q613Ii4W6u8K48uW8vM1N6bFgyv769220MdYe9u37N4y7rI5mQ";
     // 验签key
     static final String resKey = "Hpcl522AV6q613KIi46u6g6XuW8vM1N8bFgyv769770MdYe9u37M4y7rIpl8";
-    static final String baseUrl = "http://api.xxpay.org/api";
-    //static final String baseUrl = "http://xxpay.ngrok.cc";
-
+    //static final String baseUrl = "http://api.xxpay.org/api";
+    static final String baseUrl = "http://127.0.0.1:3020/api";
+    //static final String notifyUrl = "http://shop.xxpay.org/goods/payNotify";
+    static final String notifyUrl = "http://127.0.0.1:8081/goods/payNotify";
     private AtomicLong seq = new AtomicLong(0L);
     private final static String QR_PAY_URL = "http://shop.xxpay.org/goods/qrPay.html";
     static final String AppID = "wx077cb62e341f8a5c";
@@ -91,7 +92,7 @@ public class GoodsOrderController {
         paramMap.put("device", "WEB");                      // 设备
         paramMap.put("subject", goodsOrder.getGoodsName());
         paramMap.put("body", goodsOrder.getGoodsName());
-        paramMap.put("notifyUrl", "http://shop.xxpay.org/goods/payNotify");         // 回调URL
+        paramMap.put("notifyUrl", notifyUrl);         // 回调URL
         paramMap.put("param1", "");                         // 扩展参数1
         paramMap.put("param2", "");                         // 扩展参数2
         paramMap.put("extra", "{\"productId\":\"120989823\",\"openId\":\"o2RvowBf7sOVJf8kJksUEMceaDqo\"}");  // 附加参数
@@ -137,7 +138,7 @@ public class GoodsOrderController {
         paramMap.put("device", "WEB");                      // 设备
         paramMap.put("subject", goodsOrder.getGoodsName());
         paramMap.put("body", goodsOrder.getGoodsName());
-        paramMap.put("notifyUrl", "http://shop.xxpay.org/goods/payNotify");         // 回调URL
+        paramMap.put("notifyUrl", notifyUrl);         // 回调URL
         paramMap.put("param1", "");                         // 扩展参数1
         paramMap.put("param2", "");                         // 扩展参数2
 
@@ -382,6 +383,11 @@ public class GoodsOrderController {
         _log.info("====== 支付中心通知处理完成 ======");
     }
 
+    @RequestMapping("/notify_test")
+    public void notifyTest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        outResult(response, "success");
+    }
+
     @RequestMapping("/toAliPay.html")
     @ResponseBody
     public String toAliPay(HttpServletRequest request, Long amount, String channelId) {
@@ -465,7 +471,7 @@ public class GoodsOrderController {
         // 根据payOrderId查询业务订单,验证订单是否存在
         GoodsOrder goodsOrder = goodsOrderService.getGoodsOrder(mchOrderNo);
         if(goodsOrder == null) {
-            _log.warn("业务订单不存在,payOrderId={},mchOrderNo", payOrderId, mchOrderNo);
+            _log.warn("业务订单不存在,payOrderId={},mchOrderNo={}", payOrderId, mchOrderNo);
             return false;
         }
         // 核对金额

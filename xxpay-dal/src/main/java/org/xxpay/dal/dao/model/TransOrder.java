@@ -19,11 +19,11 @@ public class TransOrder implements Serializable {
     private String mchId;
 
     /**
-     * 商户订单号
+     * 商户转账单号
      *
      * @mbggenerated
      */
-    private String mchOrderNo;
+    private String mchTransNo;
 
     /**
      * 渠道ID
@@ -47,11 +47,18 @@ public class TransOrder implements Serializable {
     private String currency;
 
     /**
-     * 支付状态:0-订单生成,1-转账中,2-转账成功,3-转账失败,4-业务处理完成,5-确认失败,6-不确认结果,7-等待手动处理,8-手动处理提现成功,9-手动处理提现失败
+     * 转账状态:0-订单生成,1-转账中,2-转账成功,3-转账失败,4-业务处理完成
      *
      * @mbggenerated
      */
     private Byte status;
+
+    /**
+     * 转账结果:0-不确认结果,1-等待手动处理,2-确认成功,3-确认失败
+     *
+     * @mbggenerated
+     */
+    private Byte result;
 
     /**
      * 客户端IP
@@ -75,18 +82,11 @@ public class TransOrder implements Serializable {
     private String remarkInfo;
 
     /**
-     * 渠道用户标识,如微信openId
+     * 渠道用户标识,如微信openId,支付宝账号
      *
      * @mbggenerated
      */
-    private String openId;
-
-    /**
-     * 校验姓名:0-不校验真实姓名,1-强校验真实姓名,2-针对已实名认证的用户才校验真实姓名
-     *
-     * @mbggenerated
-     */
-    private Byte checkName;
+    private String channelUser;
 
     /**
      * 用户姓名
@@ -94,13 +94,6 @@ public class TransOrder implements Serializable {
      * @mbggenerated
      */
     private String userName;
-
-    /**
-     * 特定渠道发起时额外参数
-     *
-     * @mbggenerated
-     */
-    private String extra;
 
     /**
      * 渠道商户ID
@@ -117,18 +110,32 @@ public class TransOrder implements Serializable {
     private String channelOrderNo;
 
     /**
-     * 渠道支付错误码
+     * 渠道错误码
      *
      * @mbggenerated
      */
-    private String errCode;
+    private String channelErrCode;
 
     /**
-     * 渠道支付错误描述
+     * 渠道错误描述
      *
      * @mbggenerated
      */
-    private String errMsg;
+    private String channelErrMsg;
+
+    /**
+     * 特定渠道发起时额外参数
+     *
+     * @mbggenerated
+     */
+    private String extra;
+
+    /**
+     * 通知地址
+     *
+     * @mbggenerated
+     */
+    private String notifyUrl;
 
     /**
      * 扩展参数1
@@ -145,39 +152,18 @@ public class TransOrder implements Serializable {
     private String param2;
 
     /**
-     * 通知地址
-     *
-     * @mbggenerated
-     */
-    private String notifyUrl;
-
-    /**
-     * 通知次数
-     *
-     * @mbggenerated
-     */
-    private Byte notifyCount;
-
-    /**
-     * 最后一次通知时间
-     *
-     * @mbggenerated
-     */
-    private Long lastNotifyTime;
-
-    /**
      * 订单失效时间
      *
      * @mbggenerated
      */
-    private Long expireTime;
+    private Date expireTime;
 
     /**
      * 订单转账成功时间
      *
      * @mbggenerated
      */
-    private Long transSuccTime;
+    private Date transSuccTime;
 
     /**
      * 创建时间
@@ -211,12 +197,12 @@ public class TransOrder implements Serializable {
         this.mchId = mchId;
     }
 
-    public String getMchOrderNo() {
-        return mchOrderNo;
+    public String getMchTransNo() {
+        return mchTransNo;
     }
 
-    public void setMchOrderNo(String mchOrderNo) {
-        this.mchOrderNo = mchOrderNo;
+    public void setMchTransNo(String mchTransNo) {
+        this.mchTransNo = mchTransNo;
     }
 
     public String getChannelId() {
@@ -251,6 +237,14 @@ public class TransOrder implements Serializable {
         this.status = status;
     }
 
+    public Byte getResult() {
+        return result;
+    }
+
+    public void setResult(Byte result) {
+        this.result = result;
+    }
+
     public String getClientIp() {
         return clientIp;
     }
@@ -275,20 +269,12 @@ public class TransOrder implements Serializable {
         this.remarkInfo = remarkInfo;
     }
 
-    public String getOpenId() {
-        return openId;
+    public String getChannelUser() {
+        return channelUser;
     }
 
-    public void setOpenId(String openId) {
-        this.openId = openId;
-    }
-
-    public Byte getCheckName() {
-        return checkName;
-    }
-
-    public void setCheckName(Byte checkName) {
-        this.checkName = checkName;
+    public void setChannelUser(String channelUser) {
+        this.channelUser = channelUser;
     }
 
     public String getUserName() {
@@ -297,14 +283,6 @@ public class TransOrder implements Serializable {
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public String getExtra() {
-        return extra;
-    }
-
-    public void setExtra(String extra) {
-        this.extra = extra;
     }
 
     public String getChannelMchId() {
@@ -323,20 +301,36 @@ public class TransOrder implements Serializable {
         this.channelOrderNo = channelOrderNo;
     }
 
-    public String getErrCode() {
-        return errCode;
+    public String getChannelErrCode() {
+        return channelErrCode;
     }
 
-    public void setErrCode(String errCode) {
-        this.errCode = errCode;
+    public void setChannelErrCode(String channelErrCode) {
+        this.channelErrCode = channelErrCode;
     }
 
-    public String getErrMsg() {
-        return errMsg;
+    public String getChannelErrMsg() {
+        return channelErrMsg;
     }
 
-    public void setErrMsg(String errMsg) {
-        this.errMsg = errMsg;
+    public void setChannelErrMsg(String channelErrMsg) {
+        this.channelErrMsg = channelErrMsg;
+    }
+
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(String extra) {
+        this.extra = extra;
+    }
+
+    public String getNotifyUrl() {
+        return notifyUrl;
+    }
+
+    public void setNotifyUrl(String notifyUrl) {
+        this.notifyUrl = notifyUrl;
     }
 
     public String getParam1() {
@@ -355,43 +349,19 @@ public class TransOrder implements Serializable {
         this.param2 = param2;
     }
 
-    public String getNotifyUrl() {
-        return notifyUrl;
-    }
-
-    public void setNotifyUrl(String notifyUrl) {
-        this.notifyUrl = notifyUrl;
-    }
-
-    public Byte getNotifyCount() {
-        return notifyCount;
-    }
-
-    public void setNotifyCount(Byte notifyCount) {
-        this.notifyCount = notifyCount;
-    }
-
-    public Long getLastNotifyTime() {
-        return lastNotifyTime;
-    }
-
-    public void setLastNotifyTime(Long lastNotifyTime) {
-        this.lastNotifyTime = lastNotifyTime;
-    }
-
-    public Long getExpireTime() {
+    public Date getExpireTime() {
         return expireTime;
     }
 
-    public void setExpireTime(Long expireTime) {
+    public void setExpireTime(Date expireTime) {
         this.expireTime = expireTime;
     }
 
-    public Long getTransSuccTime() {
+    public Date getTransSuccTime() {
         return transSuccTime;
     }
 
-    public void setTransSuccTime(Long transSuccTime) {
+    public void setTransSuccTime(Date transSuccTime) {
         this.transSuccTime = transSuccTime;
     }
 
@@ -419,27 +389,25 @@ public class TransOrder implements Serializable {
         sb.append("Hash = ").append(hashCode());
         sb.append(", transOrderId=").append(transOrderId);
         sb.append(", mchId=").append(mchId);
-        sb.append(", mchOrderNo=").append(mchOrderNo);
+        sb.append(", mchTransNo=").append(mchTransNo);
         sb.append(", channelId=").append(channelId);
         sb.append(", amount=").append(amount);
         sb.append(", currency=").append(currency);
         sb.append(", status=").append(status);
+        sb.append(", result=").append(result);
         sb.append(", clientIp=").append(clientIp);
         sb.append(", device=").append(device);
         sb.append(", remarkInfo=").append(remarkInfo);
-        sb.append(", openId=").append(openId);
-        sb.append(", checkName=").append(checkName);
+        sb.append(", channelUser=").append(channelUser);
         sb.append(", userName=").append(userName);
-        sb.append(", extra=").append(extra);
         sb.append(", channelMchId=").append(channelMchId);
         sb.append(", channelOrderNo=").append(channelOrderNo);
-        sb.append(", errCode=").append(errCode);
-        sb.append(", errMsg=").append(errMsg);
+        sb.append(", channelErrCode=").append(channelErrCode);
+        sb.append(", channelErrMsg=").append(channelErrMsg);
+        sb.append(", extra=").append(extra);
+        sb.append(", notifyUrl=").append(notifyUrl);
         sb.append(", param1=").append(param1);
         sb.append(", param2=").append(param2);
-        sb.append(", notifyUrl=").append(notifyUrl);
-        sb.append(", notifyCount=").append(notifyCount);
-        sb.append(", lastNotifyTime=").append(lastNotifyTime);
         sb.append(", expireTime=").append(expireTime);
         sb.append(", transSuccTime=").append(transSuccTime);
         sb.append(", createTime=").append(createTime);
@@ -462,27 +430,25 @@ public class TransOrder implements Serializable {
         TransOrder other = (TransOrder) that;
         return (this.getTransOrderId() == null ? other.getTransOrderId() == null : this.getTransOrderId().equals(other.getTransOrderId()))
             && (this.getMchId() == null ? other.getMchId() == null : this.getMchId().equals(other.getMchId()))
-            && (this.getMchOrderNo() == null ? other.getMchOrderNo() == null : this.getMchOrderNo().equals(other.getMchOrderNo()))
+            && (this.getMchTransNo() == null ? other.getMchTransNo() == null : this.getMchTransNo().equals(other.getMchTransNo()))
             && (this.getChannelId() == null ? other.getChannelId() == null : this.getChannelId().equals(other.getChannelId()))
             && (this.getAmount() == null ? other.getAmount() == null : this.getAmount().equals(other.getAmount()))
             && (this.getCurrency() == null ? other.getCurrency() == null : this.getCurrency().equals(other.getCurrency()))
             && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
+            && (this.getResult() == null ? other.getResult() == null : this.getResult().equals(other.getResult()))
             && (this.getClientIp() == null ? other.getClientIp() == null : this.getClientIp().equals(other.getClientIp()))
             && (this.getDevice() == null ? other.getDevice() == null : this.getDevice().equals(other.getDevice()))
             && (this.getRemarkInfo() == null ? other.getRemarkInfo() == null : this.getRemarkInfo().equals(other.getRemarkInfo()))
-            && (this.getOpenId() == null ? other.getOpenId() == null : this.getOpenId().equals(other.getOpenId()))
-            && (this.getCheckName() == null ? other.getCheckName() == null : this.getCheckName().equals(other.getCheckName()))
+            && (this.getChannelUser() == null ? other.getChannelUser() == null : this.getChannelUser().equals(other.getChannelUser()))
             && (this.getUserName() == null ? other.getUserName() == null : this.getUserName().equals(other.getUserName()))
-            && (this.getExtra() == null ? other.getExtra() == null : this.getExtra().equals(other.getExtra()))
             && (this.getChannelMchId() == null ? other.getChannelMchId() == null : this.getChannelMchId().equals(other.getChannelMchId()))
             && (this.getChannelOrderNo() == null ? other.getChannelOrderNo() == null : this.getChannelOrderNo().equals(other.getChannelOrderNo()))
-            && (this.getErrCode() == null ? other.getErrCode() == null : this.getErrCode().equals(other.getErrCode()))
-            && (this.getErrMsg() == null ? other.getErrMsg() == null : this.getErrMsg().equals(other.getErrMsg()))
+            && (this.getChannelErrCode() == null ? other.getChannelErrCode() == null : this.getChannelErrCode().equals(other.getChannelErrCode()))
+            && (this.getChannelErrMsg() == null ? other.getChannelErrMsg() == null : this.getChannelErrMsg().equals(other.getChannelErrMsg()))
+            && (this.getExtra() == null ? other.getExtra() == null : this.getExtra().equals(other.getExtra()))
+            && (this.getNotifyUrl() == null ? other.getNotifyUrl() == null : this.getNotifyUrl().equals(other.getNotifyUrl()))
             && (this.getParam1() == null ? other.getParam1() == null : this.getParam1().equals(other.getParam1()))
             && (this.getParam2() == null ? other.getParam2() == null : this.getParam2().equals(other.getParam2()))
-            && (this.getNotifyUrl() == null ? other.getNotifyUrl() == null : this.getNotifyUrl().equals(other.getNotifyUrl()))
-            && (this.getNotifyCount() == null ? other.getNotifyCount() == null : this.getNotifyCount().equals(other.getNotifyCount()))
-            && (this.getLastNotifyTime() == null ? other.getLastNotifyTime() == null : this.getLastNotifyTime().equals(other.getLastNotifyTime()))
             && (this.getExpireTime() == null ? other.getExpireTime() == null : this.getExpireTime().equals(other.getExpireTime()))
             && (this.getTransSuccTime() == null ? other.getTransSuccTime() == null : this.getTransSuccTime().equals(other.getTransSuccTime()))
             && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
@@ -495,27 +461,25 @@ public class TransOrder implements Serializable {
         int result = 1;
         result = prime * result + ((getTransOrderId() == null) ? 0 : getTransOrderId().hashCode());
         result = prime * result + ((getMchId() == null) ? 0 : getMchId().hashCode());
-        result = prime * result + ((getMchOrderNo() == null) ? 0 : getMchOrderNo().hashCode());
+        result = prime * result + ((getMchTransNo() == null) ? 0 : getMchTransNo().hashCode());
         result = prime * result + ((getChannelId() == null) ? 0 : getChannelId().hashCode());
         result = prime * result + ((getAmount() == null) ? 0 : getAmount().hashCode());
         result = prime * result + ((getCurrency() == null) ? 0 : getCurrency().hashCode());
         result = prime * result + ((getStatus() == null) ? 0 : getStatus().hashCode());
+        result = prime * result + ((getResult() == null) ? 0 : getResult().hashCode());
         result = prime * result + ((getClientIp() == null) ? 0 : getClientIp().hashCode());
         result = prime * result + ((getDevice() == null) ? 0 : getDevice().hashCode());
         result = prime * result + ((getRemarkInfo() == null) ? 0 : getRemarkInfo().hashCode());
-        result = prime * result + ((getOpenId() == null) ? 0 : getOpenId().hashCode());
-        result = prime * result + ((getCheckName() == null) ? 0 : getCheckName().hashCode());
+        result = prime * result + ((getChannelUser() == null) ? 0 : getChannelUser().hashCode());
         result = prime * result + ((getUserName() == null) ? 0 : getUserName().hashCode());
-        result = prime * result + ((getExtra() == null) ? 0 : getExtra().hashCode());
         result = prime * result + ((getChannelMchId() == null) ? 0 : getChannelMchId().hashCode());
         result = prime * result + ((getChannelOrderNo() == null) ? 0 : getChannelOrderNo().hashCode());
-        result = prime * result + ((getErrCode() == null) ? 0 : getErrCode().hashCode());
-        result = prime * result + ((getErrMsg() == null) ? 0 : getErrMsg().hashCode());
+        result = prime * result + ((getChannelErrCode() == null) ? 0 : getChannelErrCode().hashCode());
+        result = prime * result + ((getChannelErrMsg() == null) ? 0 : getChannelErrMsg().hashCode());
+        result = prime * result + ((getExtra() == null) ? 0 : getExtra().hashCode());
+        result = prime * result + ((getNotifyUrl() == null) ? 0 : getNotifyUrl().hashCode());
         result = prime * result + ((getParam1() == null) ? 0 : getParam1().hashCode());
         result = prime * result + ((getParam2() == null) ? 0 : getParam2().hashCode());
-        result = prime * result + ((getNotifyUrl() == null) ? 0 : getNotifyUrl().hashCode());
-        result = prime * result + ((getNotifyCount() == null) ? 0 : getNotifyCount().hashCode());
-        result = prime * result + ((getLastNotifyTime() == null) ? 0 : getLastNotifyTime().hashCode());
         result = prime * result + ((getExpireTime() == null) ? 0 : getExpireTime().hashCode());
         result = prime * result + ((getTransSuccTime() == null) ? 0 : getTransSuccTime().hashCode());
         result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());

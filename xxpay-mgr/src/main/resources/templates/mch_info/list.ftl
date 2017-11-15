@@ -77,8 +77,8 @@
 				</td>
 				<td>{{ item.createTime }}</td>
 				<td>
-					<a href="javascript:;" data-id="{{ item.mchId }}" data-opt="view" class="layui-btn layui-btn-normal layui-btn-mini">预览</a>
-					<a href="javascript:;" data-id="{{ item.mchId }}" data-opt="edit" class="layui-btn layui-btn-mini">编辑</a>
+					<a href="javascript:;" data-id="{{ item.mchId }}" data-opt="view" class="layui-btn layui-btn-normal layui-btn-mini">详情</a>
+					<a href="javascript:;" data-id="{{ item.mchId }}" data-opt="notify" class="layui-btn layui-btn-mini">编辑</a>
 					<!--<a href="javascript:;" data-id="{{ item.mchId }}" data-opt="del" class="layui-btn layui-btn-danger layui-btn-mini">删除</a>-->
 				</td>
 			</tr>
@@ -133,7 +133,7 @@
 						//绑定所有编辑按钮事件						
 						$('#content').children('tr').each(function() {
 							var $that = $(this);
-							$that.children('td:last-child').children('a[data-opt=edit]').on('click', function() {
+							$that.children('td:last-child').children('a[data-opt=notify]').on('click', function() {
                                 editForm($(this).data('id'));
 							});
 						});
@@ -205,7 +205,7 @@
                             offset: ['100px', '30%'],
                             area: ['600px', '550px'],
                             zIndex: 19950924,
-                            maxmin: true,
+                            maxmin: false,
 
                             full: function(elem) {
                                 var win = window.top === window.self ? window : parent.window;
@@ -222,6 +222,7 @@
                                 addBoxIndex = -1;
                             }
                         });
+                        layer.full(addBoxIndex);
                     });
                 }
 
@@ -237,7 +238,7 @@
                             offset: ['100px', '30%'],
                             area: ['600px', '450px'],
                             zIndex: 19950924,
-                            maxmin: true,
+                            maxmin: false,
                             yes: function(index) {
                                 //触发表单的提交事件
                                 $('form.layui-form').find('button[lay-filter=edit]').click();
@@ -282,6 +283,7 @@
                                 addBoxIndex = -1;
                             }
                         });
+                        layer.full(addBoxIndex);
                     });
 				}
 			});

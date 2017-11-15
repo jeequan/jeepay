@@ -58,7 +58,7 @@ public class QueryPayOrderController {
             String mchOrderNo = po.getString("mchOrderNo"); 	// 商户订单号
             String payOrderId = po.getString("payOrderId"); 	// 支付订单号
             String executeNotify = po.getString("executeNotify");   // 是否执行回调
-            JSONObject payOrder = payOrderService.queryPayOrder(mchId, payOrderId, mchOrderNo, executeNotify);
+            JSONObject payOrder = payOrderService.query(mchId, payOrderId, mchOrderNo, executeNotify);
             _log.info("{}查询支付订单,结果:{}", logPrefix, payOrder);
             if (payOrder == null) {
                 return XXPayUtil.makeRetFail(XXPayUtil.makeRetMap(PayConstant.RETURN_VALUE_FAIL, "支付订单不存在", null, null));

@@ -17,7 +17,7 @@ public class MgrDemo {
        addPayChannel();
     }
 
-    // 统一下单
+    // 添加商户
     static void addMchInfo() {
         JSONObject params = new JSONObject();
         params.put("mchId", "20001226");
@@ -33,7 +33,7 @@ public class MgrDemo {
 
     }
 
-    // 统一下单
+    // 添加渠道
     static void addPayChannel() {
         JSONObject params = new JSONObject();
         params.put("channelId", "WX_NATIVE");//WX_NATIVE

@@ -7,7 +7,7 @@ import org.xxpay.common.enumm.RetEnum;
 import org.xxpay.common.util.*;
 import org.xxpay.dal.dao.model.PayOrder;
 import org.xxpay.dubbo.api.service.IPayOrderService;
-import org.xxpay.dubbo.service.BaseService;
+import org.xxpay.dubbo.service.BaseService4PayOrder;
 
 import java.util.Map;
 
@@ -17,12 +17,12 @@ import java.util.Map;
  * @description:
  */
 @Service(version = "1.0.0")
-public class PayOrderServiceImpl extends BaseService implements IPayOrderService {
+public class PayOrderServiceImpl extends BaseService4PayOrder implements IPayOrderService {
 
     private static final MyLog _log = MyLog.getLog(PayOrderServiceImpl.class);
 
     @Override
-    public Map createPayOrder(String jsonParam) {
+    public Map create(String jsonParam) {
         BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
         Map<String, Object> bizParamMap = baseParam.getBizParamMap();
         if (ObjectValidUtil.isInvalid(bizParamMap)) {
@@ -44,7 +44,7 @@ public class PayOrderServiceImpl extends BaseService implements IPayOrderService
     }
 
     @Override
-    public Map selectPayOrder(String jsonParam) {
+    public Map select(String jsonParam) {
         BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
         Map<String, Object> bizParamMap = baseParam.getBizParamMap();
         if (ObjectValidUtil.isInvalid(bizParamMap)) {
@@ -63,7 +63,7 @@ public class PayOrderServiceImpl extends BaseService implements IPayOrderService
     }
 
     @Override
-    public Map selectPayOrderByMchIdAndPayOrderId(String jsonParam) {
+    public Map selectByMchIdAndPayOrderId(String jsonParam) {
         BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
         Map<String, Object> bizParamMap = baseParam.getBizParamMap();
         if (ObjectValidUtil.isInvalid(bizParamMap)) {
@@ -76,14 +76,14 @@ public class PayOrderServiceImpl extends BaseService implements IPayOrderService
             _log.warn("根据商户号和支付订单号查询支付订单失败, {}. jsonParam={}", RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
             return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
         }
-        PayOrder payOrder = super.baseSelectPayOrderByMchIdAndPayOrderId(mchId, payOrderId);
+        PayOrder payOrder = super.baseSelectByMchIdAndPayOrderId(mchId, payOrderId);
         if(payOrder == null) return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_DATA_NOT_EXISTS);
         String jsonResult = JsonUtil.object2Json(payOrder);
         return RpcUtil.createBizResult(baseParam, jsonResult);
     }
 
     @Override
-    public Map selectPayOrderByMchIdAndMchOrderNo(String jsonParam) {
+    public Map selectByMchIdAndMchOrderNo(String jsonParam) {
         BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
         Map<String, Object> bizParamMap = baseParam.getBizParamMap();
         if (ObjectValidUtil.isInvalid(bizParamMap)) {
@@ -96,7 +96,7 @@ public class PayOrderServiceImpl extends BaseService implements IPayOrderService
             _log.warn("根据商户号和商户订单号查询支付订单失败, {}. jsonParam={}", RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
             return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
         }
-        PayOrder payOrder = super.baseSelectPayOrderByMchIdAndMchOrderNo(mchId, mchOrderNo);
+        PayOrder payOrder = super.baseSelectByMchIdAndMchOrderNo(mchId, mchOrderNo);
         if(payOrder == null) return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_DATA_NOT_EXISTS);
         String jsonResult = JsonUtil.object2Json(payOrder);
         return RpcUtil.createBizResult(baseParam, jsonResult);

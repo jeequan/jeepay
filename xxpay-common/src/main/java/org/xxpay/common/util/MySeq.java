@@ -16,6 +16,8 @@ public class MySeq {
 	private static String pay_seq_prefix = "P";
 	private static AtomicLong trans_seq = new AtomicLong(0L);
 	private static String trans_seq_prefix = "T";
+	private static AtomicLong refund_seq = new AtomicLong(0L);
+	private static String refund_seq_prefix = "R";
 
 	private static String node = "00";
 	static {
@@ -37,6 +39,9 @@ public class MySeq {
 		return getSeq(trans_seq_prefix, trans_seq);
 	}
 
+	public static String getRefund() {
+		return getSeq(refund_seq_prefix, refund_seq);
+	}
 
 	private static String getSeq(String prefix, AtomicLong seq) {
 		prefix += node;
@@ -47,6 +52,7 @@ public class MySeq {
 		for (int i = 0; i < 100; i++) {
 			System.out.println("pay=" + getPay());
 			System.out.println("trans=" + getTrans());
+			System.out.println("refund=" + getRefund());
 		}
 
 	}

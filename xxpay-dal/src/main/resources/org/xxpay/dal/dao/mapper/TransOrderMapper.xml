@@ -4,29 +4,27 @@
   <resultMap id="BaseResultMap" type="org.xxpay.dal.dao.model.TransOrder" >
     <id column="TransOrderId" property="transOrderId" jdbcType="VARCHAR" />
     <result column="MchId" property="mchId" jdbcType="VARCHAR" />
-    <result column="MchOrderNo" property="mchOrderNo" jdbcType="VARCHAR" />
+    <result column="MchTransNo" property="mchTransNo" jdbcType="VARCHAR" />
     <result column="ChannelId" property="channelId" jdbcType="VARCHAR" />
     <result column="Amount" property="amount" jdbcType="BIGINT" />
     <result column="Currency" property="currency" jdbcType="VARCHAR" />
     <result column="Status" property="status" jdbcType="TINYINT" />
+    <result column="Result" property="result" jdbcType="TINYINT" />
     <result column="ClientIp" property="clientIp" jdbcType="VARCHAR" />
     <result column="Device" property="device" jdbcType="VARCHAR" />
     <result column="RemarkInfo" property="remarkInfo" jdbcType="VARCHAR" />
-    <result column="OpenId" property="openId" jdbcType="VARCHAR" />
-    <result column="CheckName" property="checkName" jdbcType="TINYINT" />
+    <result column="ChannelUser" property="channelUser" jdbcType="VARCHAR" />
     <result column="UserName" property="userName" jdbcType="VARCHAR" />
-    <result column="Extra" property="extra" jdbcType="VARCHAR" />
     <result column="ChannelMchId" property="channelMchId" jdbcType="VARCHAR" />
     <result column="ChannelOrderNo" property="channelOrderNo" jdbcType="VARCHAR" />
-    <result column="ErrCode" property="errCode" jdbcType="VARCHAR" />
-    <result column="ErrMsg" property="errMsg" jdbcType="VARCHAR" />
+    <result column="ChannelErrCode" property="channelErrCode" jdbcType="VARCHAR" />
+    <result column="ChannelErrMsg" property="channelErrMsg" jdbcType="VARCHAR" />
+    <result column="Extra" property="extra" jdbcType="VARCHAR" />
+    <result column="NotifyUrl" property="notifyUrl" jdbcType="VARCHAR" />
     <result column="Param1" property="param1" jdbcType="VARCHAR" />
     <result column="Param2" property="param2" jdbcType="VARCHAR" />
-    <result column="NotifyUrl" property="notifyUrl" jdbcType="VARCHAR" />
-    <result column="NotifyCount" property="notifyCount" jdbcType="TINYINT" />
-    <result column="LastNotifyTime" property="lastNotifyTime" jdbcType="BIGINT" />
-    <result column="ExpireTime" property="expireTime" jdbcType="BIGINT" />
-    <result column="TransSuccTime" property="transSuccTime" jdbcType="BIGINT" />
+    <result column="ExpireTime" property="expireTime" jdbcType="TIMESTAMP" />
+    <result column="TransSuccTime" property="transSuccTime" jdbcType="TIMESTAMP" />
     <result column="CreateTime" property="createTime" jdbcType="TIMESTAMP" />
     <result column="UpdateTime" property="updateTime" jdbcType="TIMESTAMP" />
   </resultMap>
@@ -89,10 +87,10 @@
     </where>
   </sql>
   <sql id="Base_Column_List" >
-    TransOrderId, MchId, MchOrderNo, ChannelId, Amount, Currency, Status, ClientIp, Device, 
-    RemarkInfo, OpenId, CheckName, UserName, Extra, ChannelMchId, ChannelOrderNo, ErrCode, 
-    ErrMsg, Param1, Param2, NotifyUrl, NotifyCount, LastNotifyTime, ExpireTime, TransSuccTime, 
-    CreateTime, UpdateTime
+    TransOrderId, MchId, MchTransNo, ChannelId, Amount, Currency, Status, Result, ClientIp, 
+    Device, RemarkInfo, ChannelUser, UserName, ChannelMchId, ChannelOrderNo, ChannelErrCode, 
+    ChannelErrMsg, Extra, NotifyUrl, Param1, Param2, ExpireTime, TransSuccTime, CreateTime, 
+    UpdateTime
   </sql>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="org.xxpay.dal.dao.model.TransOrderExample" >
     select
@@ -133,26 +131,24 @@
     </if>
   </delete>
   <insert id="insert" parameterType="org.xxpay.dal.dao.model.TransOrder" >
-    insert into t_trans_order (TransOrderId, MchId, MchOrderNo, 
+    insert into t_trans_order (TransOrderId, MchId, MchTransNo, 
       ChannelId, Amount, Currency, 
-      Status, ClientIp, Device, 
-      RemarkInfo, OpenId, CheckName, 
-      UserName, Extra, ChannelMchId, 
-      ChannelOrderNo, ErrCode, ErrMsg, 
-      Param1, Param2, NotifyUrl, 
-      NotifyCount, LastNotifyTime, ExpireTime, 
-      TransSuccTime, CreateTime, UpdateTime
-      )
-    values (#{transOrderId,jdbcType=VARCHAR}, #{mchId,jdbcType=VARCHAR}, #{mchOrderNo,jdbcType=VARCHAR}, 
+      Status, Result, ClientIp, 
+      Device, RemarkInfo, ChannelUser, 
+      UserName, ChannelMchId, ChannelOrderNo, 
+      ChannelErrCode, ChannelErrMsg, Extra, 
+      NotifyUrl, Param1, Param2, 
+      ExpireTime, TransSuccTime, CreateTime, 
+      UpdateTime)
+    values (#{transOrderId,jdbcType=VARCHAR}, #{mchId,jdbcType=VARCHAR}, #{mchTransNo,jdbcType=VARCHAR}, 
       #{channelId,jdbcType=VARCHAR}, #{amount,jdbcType=BIGINT}, #{currency,jdbcType=VARCHAR}, 
-      #{status,jdbcType=TINYINT}, #{clientIp,jdbcType=VARCHAR}, #{device,jdbcType=VARCHAR}, 
-      #{remarkInfo,jdbcType=VARCHAR}, #{openId,jdbcType=VARCHAR}, #{checkName,jdbcType=TINYINT}, 
-      #{userName,jdbcType=VARCHAR}, #{extra,jdbcType=VARCHAR}, #{channelMchId,jdbcType=VARCHAR}, 
-      #{channelOrderNo,jdbcType=VARCHAR}, #{errCode,jdbcType=VARCHAR}, #{errMsg,jdbcType=VARCHAR}, 
-      #{param1,jdbcType=VARCHAR}, #{param2,jdbcType=VARCHAR}, #{notifyUrl,jdbcType=VARCHAR}, 
-      #{notifyCount,jdbcType=TINYINT}, #{lastNotifyTime,jdbcType=BIGINT}, #{expireTime,jdbcType=BIGINT}, 
-      #{transSuccTime,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
-      )
+      #{status,jdbcType=TINYINT}, #{result,jdbcType=TINYINT}, #{clientIp,jdbcType=VARCHAR}, 
+      #{device,jdbcType=VARCHAR}, #{remarkInfo,jdbcType=VARCHAR}, #{channelUser,jdbcType=VARCHAR}, 
+      #{userName,jdbcType=VARCHAR}, #{channelMchId,jdbcType=VARCHAR}, #{channelOrderNo,jdbcType=VARCHAR}, 
+      #{channelErrCode,jdbcType=VARCHAR}, #{channelErrMsg,jdbcType=VARCHAR}, #{extra,jdbcType=VARCHAR}, 
+      #{notifyUrl,jdbcType=VARCHAR}, #{param1,jdbcType=VARCHAR}, #{param2,jdbcType=VARCHAR}, 
+      #{expireTime,jdbcType=TIMESTAMP}, #{transSuccTime,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="org.xxpay.dal.dao.model.TransOrder" >
     insert into t_trans_order
@@ -163,8 +159,8 @@
       <if test="mchId != null" >
         MchId,
       </if>
-      <if test="mchOrderNo != null" >
-        MchOrderNo,
+      <if test="mchTransNo != null" >
+        MchTransNo,
       </if>
       <if test="channelId != null" >
         ChannelId,
@@ -178,6 +174,9 @@
       <if test="status != null" >
         Status,
       </if>
+      <if test="result != null" >
+        Result,
+      </if>
       <if test="clientIp != null" >
         ClientIp,
       </if>
@@ -187,17 +186,11 @@
       <if test="remarkInfo != null" >
         RemarkInfo,
       </if>
-      <if test="openId != null" >
-        OpenId,
-      </if>
-      <if test="checkName != null" >
-        CheckName,
+      <if test="channelUser != null" >
+        ChannelUser,
       </if>
       <if test="userName != null" >
         UserName,
-      </if>
-      <if test="extra != null" >
-        Extra,
       </if>
       <if test="channelMchId != null" >
         ChannelMchId,
@@ -205,26 +198,23 @@
       <if test="channelOrderNo != null" >
         ChannelOrderNo,
       </if>
-      <if test="errCode != null" >
-        ErrCode,
+      <if test="channelErrCode != null" >
+        ChannelErrCode,
       </if>
-      <if test="errMsg != null" >
-        ErrMsg,
+      <if test="channelErrMsg != null" >
+        ChannelErrMsg,
+      </if>
+      <if test="extra != null" >
+        Extra,
+      </if>
+      <if test="notifyUrl != null" >
+        NotifyUrl,
       </if>
       <if test="param1 != null" >
         Param1,
       </if>
       <if test="param2 != null" >
         Param2,
-      </if>
-      <if test="notifyUrl != null" >
-        NotifyUrl,
-      </if>
-      <if test="notifyCount != null" >
-        NotifyCount,
-      </if>
-      <if test="lastNotifyTime != null" >
-        LastNotifyTime,
       </if>
       <if test="expireTime != null" >
         ExpireTime,
@@ -246,8 +236,8 @@
       <if test="mchId != null" >
         #{mchId,jdbcType=VARCHAR},
       </if>
-      <if test="mchOrderNo != null" >
-        #{mchOrderNo,jdbcType=VARCHAR},
+      <if test="mchTransNo != null" >
+        #{mchTransNo,jdbcType=VARCHAR},
       </if>
       <if test="channelId != null" >
         #{channelId,jdbcType=VARCHAR},
@@ -261,6 +251,9 @@
       <if test="status != null" >
         #{status,jdbcType=TINYINT},
       </if>
+      <if test="result != null" >
+        #{result,jdbcType=TINYINT},
+      </if>
       <if test="clientIp != null" >
         #{clientIp,jdbcType=VARCHAR},
       </if>
@@ -270,17 +263,11 @@
       <if test="remarkInfo != null" >
         #{remarkInfo,jdbcType=VARCHAR},
       </if>
-      <if test="openId != null" >
-        #{openId,jdbcType=VARCHAR},
-      </if>
-      <if test="checkName != null" >
-        #{checkName,jdbcType=TINYINT},
+      <if test="channelUser != null" >
+        #{channelUser,jdbcType=VARCHAR},
       </if>
       <if test="userName != null" >
         #{userName,jdbcType=VARCHAR},
-      </if>
-      <if test="extra != null" >
-        #{extra,jdbcType=VARCHAR},
       </if>
       <if test="channelMchId != null" >
         #{channelMchId,jdbcType=VARCHAR},
@@ -288,11 +275,17 @@
       <if test="channelOrderNo != null" >
         #{channelOrderNo,jdbcType=VARCHAR},
       </if>
-      <if test="errCode != null" >
-        #{errCode,jdbcType=VARCHAR},
+      <if test="channelErrCode != null" >
+        #{channelErrCode,jdbcType=VARCHAR},
       </if>
-      <if test="errMsg != null" >
-        #{errMsg,jdbcType=VARCHAR},
+      <if test="channelErrMsg != null" >
+        #{channelErrMsg,jdbcType=VARCHAR},
+      </if>
+      <if test="extra != null" >
+        #{extra,jdbcType=VARCHAR},
+      </if>
+      <if test="notifyUrl != null" >
+        #{notifyUrl,jdbcType=VARCHAR},
       </if>
       <if test="param1 != null" >
         #{param1,jdbcType=VARCHAR},
@@ -300,20 +293,11 @@
       <if test="param2 != null" >
         #{param2,jdbcType=VARCHAR},
       </if>
-      <if test="notifyUrl != null" >
-        #{notifyUrl,jdbcType=VARCHAR},
-      </if>
-      <if test="notifyCount != null" >
-        #{notifyCount,jdbcType=TINYINT},
-      </if>
-      <if test="lastNotifyTime != null" >
-        #{lastNotifyTime,jdbcType=BIGINT},
-      </if>
       <if test="expireTime != null" >
-        #{expireTime,jdbcType=BIGINT},
+        #{expireTime,jdbcType=TIMESTAMP},
       </if>
       <if test="transSuccTime != null" >
-        #{transSuccTime,jdbcType=BIGINT},
+        #{transSuccTime,jdbcType=TIMESTAMP},
       </if>
       <if test="createTime != null" >
         #{createTime,jdbcType=TIMESTAMP},
@@ -338,8 +322,8 @@
       <if test="record.mchId != null" >
         MchId = #{record.mchId,jdbcType=VARCHAR},
       </if>
-      <if test="record.mchOrderNo != null" >
-        MchOrderNo = #{record.mchOrderNo,jdbcType=VARCHAR},
+      <if test="record.mchTransNo != null" >
+        MchTransNo = #{record.mchTransNo,jdbcType=VARCHAR},
       </if>
       <if test="record.channelId != null" >
         ChannelId = #{record.channelId,jdbcType=VARCHAR},
@@ -353,6 +337,9 @@
       <if test="record.status != null" >
         Status = #{record.status,jdbcType=TINYINT},
       </if>
+      <if test="record.result != null" >
+        Result = #{record.result,jdbcType=TINYINT},
+      </if>
       <if test="record.clientIp != null" >
         ClientIp = #{record.clientIp,jdbcType=VARCHAR},
       </if>
@@ -362,17 +349,11 @@
       <if test="record.remarkInfo != null" >
         RemarkInfo = #{record.remarkInfo,jdbcType=VARCHAR},
       </if>
-      <if test="record.openId != null" >
-        OpenId = #{record.openId,jdbcType=VARCHAR},
-      </if>
-      <if test="record.checkName != null" >
-        CheckName = #{record.checkName,jdbcType=TINYINT},
+      <if test="record.channelUser != null" >
+        ChannelUser = #{record.channelUser,jdbcType=VARCHAR},
       </if>
       <if test="record.userName != null" >
         UserName = #{record.userName,jdbcType=VARCHAR},
-      </if>
-      <if test="record.extra != null" >
-        Extra = #{record.extra,jdbcType=VARCHAR},
       </if>
       <if test="record.channelMchId != null" >
         ChannelMchId = #{record.channelMchId,jdbcType=VARCHAR},
@@ -380,11 +361,17 @@
       <if test="record.channelOrderNo != null" >
         ChannelOrderNo = #{record.channelOrderNo,jdbcType=VARCHAR},
       </if>
-      <if test="record.errCode != null" >
-        ErrCode = #{record.errCode,jdbcType=VARCHAR},
+      <if test="record.channelErrCode != null" >
+        ChannelErrCode = #{record.channelErrCode,jdbcType=VARCHAR},
       </if>
-      <if test="record.errMsg != null" >
-        ErrMsg = #{record.errMsg,jdbcType=VARCHAR},
+      <if test="record.channelErrMsg != null" >
+        ChannelErrMsg = #{record.channelErrMsg,jdbcType=VARCHAR},
+      </if>
+      <if test="record.extra != null" >
+        Extra = #{record.extra,jdbcType=VARCHAR},
+      </if>
+      <if test="record.notifyUrl != null" >
+        NotifyUrl = #{record.notifyUrl,jdbcType=VARCHAR},
       </if>
       <if test="record.param1 != null" >
         Param1 = #{record.param1,jdbcType=VARCHAR},
@@ -392,20 +379,11 @@
       <if test="record.param2 != null" >
         Param2 = #{record.param2,jdbcType=VARCHAR},
       </if>
-      <if test="record.notifyUrl != null" >
-        NotifyUrl = #{record.notifyUrl,jdbcType=VARCHAR},
-      </if>
-      <if test="record.notifyCount != null" >
-        NotifyCount = #{record.notifyCount,jdbcType=TINYINT},
-      </if>
-      <if test="record.lastNotifyTime != null" >
-        LastNotifyTime = #{record.lastNotifyTime,jdbcType=BIGINT},
-      </if>
       <if test="record.expireTime != null" >
-        ExpireTime = #{record.expireTime,jdbcType=BIGINT},
+        ExpireTime = #{record.expireTime,jdbcType=TIMESTAMP},
       </if>
       <if test="record.transSuccTime != null" >
-        TransSuccTime = #{record.transSuccTime,jdbcType=BIGINT},
+        TransSuccTime = #{record.transSuccTime,jdbcType=TIMESTAMP},
       </if>
       <if test="record.createTime != null" >
         CreateTime = #{record.createTime,jdbcType=TIMESTAMP},
@@ -422,29 +400,27 @@
     update t_trans_order
     set TransOrderId = #{record.transOrderId,jdbcType=VARCHAR},
       MchId = #{record.mchId,jdbcType=VARCHAR},
-      MchOrderNo = #{record.mchOrderNo,jdbcType=VARCHAR},
+      MchTransNo = #{record.mchTransNo,jdbcType=VARCHAR},
       ChannelId = #{record.channelId,jdbcType=VARCHAR},
       Amount = #{record.amount,jdbcType=BIGINT},
       Currency = #{record.currency,jdbcType=VARCHAR},
       Status = #{record.status,jdbcType=TINYINT},
+      Result = #{record.result,jdbcType=TINYINT},
       ClientIp = #{record.clientIp,jdbcType=VARCHAR},
       Device = #{record.device,jdbcType=VARCHAR},
       RemarkInfo = #{record.remarkInfo,jdbcType=VARCHAR},
-      OpenId = #{record.openId,jdbcType=VARCHAR},
-      CheckName = #{record.checkName,jdbcType=TINYINT},
+      ChannelUser = #{record.channelUser,jdbcType=VARCHAR},
       UserName = #{record.userName,jdbcType=VARCHAR},
-      Extra = #{record.extra,jdbcType=VARCHAR},
       ChannelMchId = #{record.channelMchId,jdbcType=VARCHAR},
       ChannelOrderNo = #{record.channelOrderNo,jdbcType=VARCHAR},
-      ErrCode = #{record.errCode,jdbcType=VARCHAR},
-      ErrMsg = #{record.errMsg,jdbcType=VARCHAR},
+      ChannelErrCode = #{record.channelErrCode,jdbcType=VARCHAR},
+      ChannelErrMsg = #{record.channelErrMsg,jdbcType=VARCHAR},
+      Extra = #{record.extra,jdbcType=VARCHAR},
+      NotifyUrl = #{record.notifyUrl,jdbcType=VARCHAR},
       Param1 = #{record.param1,jdbcType=VARCHAR},
       Param2 = #{record.param2,jdbcType=VARCHAR},
-      NotifyUrl = #{record.notifyUrl,jdbcType=VARCHAR},
-      NotifyCount = #{record.notifyCount,jdbcType=TINYINT},
-      LastNotifyTime = #{record.lastNotifyTime,jdbcType=BIGINT},
-      ExpireTime = #{record.expireTime,jdbcType=BIGINT},
-      TransSuccTime = #{record.transSuccTime,jdbcType=BIGINT},
+      ExpireTime = #{record.expireTime,jdbcType=TIMESTAMP},
+      TransSuccTime = #{record.transSuccTime,jdbcType=TIMESTAMP},
       CreateTime = #{record.createTime,jdbcType=TIMESTAMP},
       UpdateTime = #{record.updateTime,jdbcType=TIMESTAMP}
     <if test="_parameter != null" >
@@ -457,8 +433,8 @@
       <if test="mchId != null" >
         MchId = #{mchId,jdbcType=VARCHAR},
       </if>
-      <if test="mchOrderNo != null" >
-        MchOrderNo = #{mchOrderNo,jdbcType=VARCHAR},
+      <if test="mchTransNo != null" >
+        MchTransNo = #{mchTransNo,jdbcType=VARCHAR},
       </if>
       <if test="channelId != null" >
         ChannelId = #{channelId,jdbcType=VARCHAR},
@@ -472,6 +448,9 @@
       <if test="status != null" >
         Status = #{status,jdbcType=TINYINT},
       </if>
+      <if test="result != null" >
+        Result = #{result,jdbcType=TINYINT},
+      </if>
       <if test="clientIp != null" >
         ClientIp = #{clientIp,jdbcType=VARCHAR},
       </if>
@@ -481,17 +460,11 @@
       <if test="remarkInfo != null" >
         RemarkInfo = #{remarkInfo,jdbcType=VARCHAR},
       </if>
-      <if test="openId != null" >
-        OpenId = #{openId,jdbcType=VARCHAR},
-      </if>
-      <if test="checkName != null" >
-        CheckName = #{checkName,jdbcType=TINYINT},
+      <if test="channelUser != null" >
+        ChannelUser = #{channelUser,jdbcType=VARCHAR},
       </if>
       <if test="userName != null" >
         UserName = #{userName,jdbcType=VARCHAR},
-      </if>
-      <if test="extra != null" >
-        Extra = #{extra,jdbcType=VARCHAR},
       </if>
       <if test="channelMchId != null" >
         ChannelMchId = #{channelMchId,jdbcType=VARCHAR},
@@ -499,11 +472,17 @@
       <if test="channelOrderNo != null" >
         ChannelOrderNo = #{channelOrderNo,jdbcType=VARCHAR},
       </if>
-      <if test="errCode != null" >
-        ErrCode = #{errCode,jdbcType=VARCHAR},
+      <if test="channelErrCode != null" >
+        ChannelErrCode = #{channelErrCode,jdbcType=VARCHAR},
       </if>
-      <if test="errMsg != null" >
-        ErrMsg = #{errMsg,jdbcType=VARCHAR},
+      <if test="channelErrMsg != null" >
+        ChannelErrMsg = #{channelErrMsg,jdbcType=VARCHAR},
+      </if>
+      <if test="extra != null" >
+        Extra = #{extra,jdbcType=VARCHAR},
+      </if>
+      <if test="notifyUrl != null" >
+        NotifyUrl = #{notifyUrl,jdbcType=VARCHAR},
       </if>
       <if test="param1 != null" >
         Param1 = #{param1,jdbcType=VARCHAR},
@@ -511,20 +490,11 @@
       <if test="param2 != null" >
         Param2 = #{param2,jdbcType=VARCHAR},
       </if>
-      <if test="notifyUrl != null" >
-        NotifyUrl = #{notifyUrl,jdbcType=VARCHAR},
-      </if>
-      <if test="notifyCount != null" >
-        NotifyCount = #{notifyCount,jdbcType=TINYINT},
-      </if>
-      <if test="lastNotifyTime != null" >
-        LastNotifyTime = #{lastNotifyTime,jdbcType=BIGINT},
-      </if>
       <if test="expireTime != null" >
-        ExpireTime = #{expireTime,jdbcType=BIGINT},
+        ExpireTime = #{expireTime,jdbcType=TIMESTAMP},
       </if>
       <if test="transSuccTime != null" >
-        TransSuccTime = #{transSuccTime,jdbcType=BIGINT},
+        TransSuccTime = #{transSuccTime,jdbcType=TIMESTAMP},
       </if>
       <if test="createTime != null" >
         CreateTime = #{createTime,jdbcType=TIMESTAMP},
@@ -538,29 +508,27 @@
   <update id="updateByPrimaryKey" parameterType="org.xxpay.dal.dao.model.TransOrder" >
     update t_trans_order
     set MchId = #{mchId,jdbcType=VARCHAR},
-      MchOrderNo = #{mchOrderNo,jdbcType=VARCHAR},
+      MchTransNo = #{mchTransNo,jdbcType=VARCHAR},
       ChannelId = #{channelId,jdbcType=VARCHAR},
       Amount = #{amount,jdbcType=BIGINT},
       Currency = #{currency,jdbcType=VARCHAR},
       Status = #{status,jdbcType=TINYINT},
+      Result = #{result,jdbcType=TINYINT},
       ClientIp = #{clientIp,jdbcType=VARCHAR},
       Device = #{device,jdbcType=VARCHAR},
       RemarkInfo = #{remarkInfo,jdbcType=VARCHAR},
-      OpenId = #{openId,jdbcType=VARCHAR},
-      CheckName = #{checkName,jdbcType=TINYINT},
+      ChannelUser = #{channelUser,jdbcType=VARCHAR},
       UserName = #{userName,jdbcType=VARCHAR},
-      Extra = #{extra,jdbcType=VARCHAR},
       ChannelMchId = #{channelMchId,jdbcType=VARCHAR},
       ChannelOrderNo = #{channelOrderNo,jdbcType=VARCHAR},
-      ErrCode = #{errCode,jdbcType=VARCHAR},
-      ErrMsg = #{errMsg,jdbcType=VARCHAR},
+      ChannelErrCode = #{channelErrCode,jdbcType=VARCHAR},
+      ChannelErrMsg = #{channelErrMsg,jdbcType=VARCHAR},
+      Extra = #{extra,jdbcType=VARCHAR},
+      NotifyUrl = #{notifyUrl,jdbcType=VARCHAR},
       Param1 = #{param1,jdbcType=VARCHAR},
       Param2 = #{param2,jdbcType=VARCHAR},
-      NotifyUrl = #{notifyUrl,jdbcType=VARCHAR},
-      NotifyCount = #{notifyCount,jdbcType=TINYINT},
-      LastNotifyTime = #{lastNotifyTime,jdbcType=BIGINT},
-      ExpireTime = #{expireTime,jdbcType=BIGINT},
-      TransSuccTime = #{transSuccTime,jdbcType=BIGINT},
+      ExpireTime = #{expireTime,jdbcType=TIMESTAMP},
+      TransSuccTime = #{transSuccTime,jdbcType=TIMESTAMP},
       CreateTime = #{createTime,jdbcType=TIMESTAMP},
       UpdateTime = #{updateTime,jdbcType=TIMESTAMP}
     where TransOrderId = #{transOrderId,jdbcType=VARCHAR}
