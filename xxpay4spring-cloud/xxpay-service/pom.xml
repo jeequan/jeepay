@@ -50,7 +50,7 @@
 			<scope>system</scope>
 			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/alipay-sdk-java20170818173712.jar</systemPath>
 		</dependency>
-	</dependencies>paychan
+	</dependencies>
 
 	<build>
 		<resources>
