@@ -9,19 +9,17 @@ import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.xxpay.common.constant.PayConstant;
 import org.xxpay.common.domain.BaseParam;
 import org.xxpay.common.enumm.RetEnum;
-import org.xxpay.common.util.JsonUtil;
-import org.xxpay.common.util.MyLog;
-import org.xxpay.common.util.ObjectValidUtil;
-import org.xxpay.common.util.RpcUtil;
+import org.xxpay.common.util.*;
 import org.xxpay.dal.dao.model.PayChannel;
 import org.xxpay.dal.dao.model.PayOrder;
 import org.xxpay.dubbo.api.service.INotifyPayService;
-import org.xxpay.dubbo.service.Notify4BasePay;
+import org.xxpay.dubbo.service.BaseNotify4MchPay;
 import org.xxpay.dubbo.service.channel.alipay.AlipayConfig;
 import org.xxpay.dubbo.service.channel.wechat.WxPayUtil;
 
@@ -35,7 +33,7 @@ import java.util.Map;
  * @description:
  */
 @Service(version = "1.0.0")
-public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPayService {
+public class NotifyPayServiceImpl extends BaseNotify4MchPay implements INotifyPayService {
 
     private static final MyLog _log = MyLog.getLog(NotifyPayServiceImpl.class);
 
@@ -72,7 +70,7 @@ public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPaySe
             payOrder = (PayOrder)payContext.get("payOrder");
             byte payStatus = payOrder.getStatus(); // 0：订单生成，1：支付中，-1：支付失败，2：支付成功，3：业务处理完成，-2：订单过期
             if (payStatus != PayConstant.PAY_STATUS_SUCCESS && payStatus != PayConstant.PAY_STATUS_COMPLETE) {
-                updatePayOrderRows = super.baseUpdateStatus4Success(payOrder.getPayOrderId());
+                updatePayOrderRows = super.baseUpdateStatus4Success(payOrder.getPayOrderId(), StrUtil.toString(params.get("trade_no"), null));
                 if (updatePayOrderRows != 1) {
                     _log.error("{}更新支付状态失败,将payOrderId={},更新payStatus={}失败", logPrefix, payOrder.getPayOrderId(), PayConstant.PAY_STATUS_SUCCESS);
                     _log.info("{}响应给支付宝结果：{}", logPrefix, PayConstant.RETURN_ALIPAY_VALUE_FAIL);
@@ -87,7 +85,7 @@ public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPaySe
             _log.info("{}响应给支付宝结果：{}", logPrefix, PayConstant.RETURN_ALIPAY_VALUE_SUCCESS);
             return RpcUtil.createBizResult(baseParam, PayConstant.RETURN_ALIPAY_VALUE_SUCCESS);
         }
-        doNotify(payOrder);
+        doNotify(payOrder, true);
         _log.info("====== 完成处理支付宝支付回调通知 ======");
         return RpcUtil.createBizResult(baseParam, PayConstant.RETURN_ALIPAY_VALUE_SUCCESS);
     }
@@ -126,7 +124,7 @@ public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPaySe
             // 处理订单
             byte payStatus = payOrder.getStatus(); // 0：订单生成，1：支付中，-1：支付失败，2：支付成功，3：业务处理完成，-2：订单过期
             if (payStatus != PayConstant.PAY_STATUS_SUCCESS && payStatus != PayConstant.PAY_STATUS_COMPLETE) {
-                int updatePayOrderRows = super.baseUpdateStatus4Success(payOrder.getPayOrderId());
+                int updatePayOrderRows = super.baseUpdateStatus4Success(payOrder.getPayOrderId(), result.getTransactionId());
                 if (updatePayOrderRows != 1) {
                     _log.error("{}更新支付状态失败,将payOrderId={},更新payStatus={}失败", logPrefix, payOrder.getPayOrderId(), PayConstant.PAY_STATUS_SUCCESS);
                     return RpcUtil.createBizResult(baseParam, WxPayNotifyResponse.fail("处理订单失败"));
@@ -135,7 +133,7 @@ public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPaySe
                 payOrder.setStatus(PayConstant.PAY_STATUS_SUCCESS);
             }
             // 业务系统后端通知
-            doNotify(payOrder);
+            doNotify(payOrder, true);
             _log.info("====== 完成处理微信支付回调通知 ======");
             return RpcUtil.createBizResult(baseParam, WxPayNotifyResponse.success("OK"));
         } catch (WxPayException e) {
@@ -168,7 +166,7 @@ public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPaySe
         if(payOrder == null) return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_DATA_NOT_EXISTS);
         try {
             // 发送业务支付通知
-            super.doNotify(payOrder);
+            super.doNotify(payOrder, false);
         }catch (Exception e) {
             return RpcUtil.createBizResult(baseParam, 0);
         }

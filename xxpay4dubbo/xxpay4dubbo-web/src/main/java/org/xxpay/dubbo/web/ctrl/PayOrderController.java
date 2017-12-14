@@ -62,7 +62,7 @@ public class PayOrderController {
             }
             if (object instanceof JSONObject) payOrder = (JSONObject) object;
             if(payOrder == null) return XXPayUtil.makeRetFail(XXPayUtil.makeRetMap(PayConstant.RETURN_VALUE_FAIL, "支付中心下单失败", null, null));
-            int result = payOrderService.createPayOrder(payOrder);
+            int result = payOrderService.create(payOrder);
             _log.info("{}创建支付订单,结果:{}", logPrefix, result);
             if(result != 1) {
                 return XXPayUtil.makeRetFail(XXPayUtil.makeRetMap(PayConstant.RETURN_VALUE_FAIL, "创建支付订单失败", null, null));
@@ -249,20 +249,6 @@ public class PayOrderController {
         payOrder.put("param2", param2);
         payOrder.put("notifyUrl", notifyUrl);
         return payOrder;
-    }
-
-    String getJsonParam(String[] names, Object[] values) {
-        JSONObject jsonParam = new JSONObject();
-        for (int i = 0; i < names.length; i++) {
-            jsonParam.put(names[i], values[i]);
-        }
-        return jsonParam.toJSONString();
-    }
-
-    String getJsonParam(String name, Object value) {
-        JSONObject jsonParam = new JSONObject();
-        jsonParam.put(name, value);
-        return jsonParam.toJSONString();
     }
 
 }

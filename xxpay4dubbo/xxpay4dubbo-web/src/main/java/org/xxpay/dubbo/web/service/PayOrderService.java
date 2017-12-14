@@ -25,29 +25,29 @@ public class PayOrderService {
     @Autowired
     private RpcCommonService rpcCommonService;
 
-    public int createPayOrder(JSONObject payOrder) {
+    public int create(JSONObject payOrder) {
         Map<String,Object> paramMap = new HashMap<>();
         paramMap.put("payOrder", payOrder);
         String jsonParam = RpcUtil.createBaseParam(paramMap);
-        Map<String, Object> result = rpcCommonService.rpcPayOrderService.createPayOrder(jsonParam);
+        Map<String, Object> result = rpcCommonService.rpcPayOrderService.create(jsonParam);
         String s = RpcUtil.mkRet(result);
         if(s == null) return 0;
         return Integer.parseInt(s);
     }
 
-    public JSONObject queryPayOrder(String mchId, String payOrderId, String mchOrderNo, String executeNotify) {
+    public JSONObject query(String mchId, String payOrderId, String mchOrderNo, String executeNotify) {
         Map<String,Object> paramMap = new HashMap<>();
         Map<String, Object> result;
         if(StringUtils.isNotBlank(payOrderId)) {
             paramMap.put("mchId", mchId);
             paramMap.put("payOrderId", payOrderId);
             String jsonParam = RpcUtil.createBaseParam(paramMap);
-            result = rpcCommonService.rpcPayOrderService.selectPayOrderByMchIdAndPayOrderId(jsonParam);
+            result = rpcCommonService.rpcPayOrderService.selectByMchIdAndPayOrderId(jsonParam);
         }else {
             paramMap.put("mchId", mchId);
             paramMap.put("mchOrderNo", mchOrderNo);
             String jsonParam = RpcUtil.createBaseParam(paramMap);
-            result = rpcCommonService.rpcPayOrderService.selectPayOrderByMchIdAndMchOrderNo(jsonParam);
+            result = rpcCommonService.rpcPayOrderService.selectByMchIdAndMchOrderNo(jsonParam);
         }
         String s = RpcUtil.mkRet(result);
         if(s == null) return null;

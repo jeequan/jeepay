@@ -54,10 +54,13 @@
         <javaClientGenerator targetPackage="org.xxpay.dal.dao.mapper" targetProject="src/main/java" type="XMLMAPPER"/>
 
         <!-- 需要映射的表 -->
-        <table tableName="t_pay_order" domainObjectName="PayOrder"><property name="useActualColumnNames" value="true" /></table>
-        <table tableName="t_trans_order" domainObjectName="TransOrder"><property name="useActualColumnNames" value="true" /></table>
+        <!--<table tableName="t_pay_order" domainObjectName="PayOrder"><property name="useActualColumnNames" value="true" /></table>
         <table tableName="t_pay_channel" domainObjectName="PayChannel"><property name="useActualColumnNames" value="true" /></table>
         <table tableName="t_mch_info" domainObjectName="MchInfo"><property name="useActualColumnNames" value="true" /></table>
-        <table tableName="t_iap_receipt" domainObjectName="IapReceipt"><property name="useActualColumnNames" value="true" /></table>
+        <table tableName="t_iap_receipt" domainObjectName="IapReceipt"><property name="useActualColumnNames" value="true" /></table>-->
+
+        <table tableName="t_trans_order" domainObjectName="TransOrder"><property name="useActualColumnNames" value="true" /></table>
+        <table tableName="t_refund_order" domainObjectName="RefundOrder"><property name="useActualColumnNames" value="true" /></table>
+        <!--<table tableName="t_mch_notify" domainObjectName="MchNotify"><property name="useActualColumnNames" value="true" /></table>-->
     </context>
 </generatorConfiguration>

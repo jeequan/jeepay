@@ -268,73 +268,73 @@ public class TransOrderExample implements Serializable {
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoIsNull() {
-            addCriterion("MchOrderNo is null");
+        public Criteria andMchTransNoIsNull() {
+            addCriterion("MchTransNo is null");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoIsNotNull() {
-            addCriterion("MchOrderNo is not null");
+        public Criteria andMchTransNoIsNotNull() {
+            addCriterion("MchTransNo is not null");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoEqualTo(String value) {
-            addCriterion("MchOrderNo =", value, "mchOrderNo");
+        public Criteria andMchTransNoEqualTo(String value) {
+            addCriterion("MchTransNo =", value, "mchTransNo");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoNotEqualTo(String value) {
-            addCriterion("MchOrderNo <>", value, "mchOrderNo");
+        public Criteria andMchTransNoNotEqualTo(String value) {
+            addCriterion("MchTransNo <>", value, "mchTransNo");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoGreaterThan(String value) {
-            addCriterion("MchOrderNo >", value, "mchOrderNo");
+        public Criteria andMchTransNoGreaterThan(String value) {
+            addCriterion("MchTransNo >", value, "mchTransNo");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoGreaterThanOrEqualTo(String value) {
-            addCriterion("MchOrderNo >=", value, "mchOrderNo");
+        public Criteria andMchTransNoGreaterThanOrEqualTo(String value) {
+            addCriterion("MchTransNo >=", value, "mchTransNo");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoLessThan(String value) {
-            addCriterion("MchOrderNo <", value, "mchOrderNo");
+        public Criteria andMchTransNoLessThan(String value) {
+            addCriterion("MchTransNo <", value, "mchTransNo");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoLessThanOrEqualTo(String value) {
-            addCriterion("MchOrderNo <=", value, "mchOrderNo");
+        public Criteria andMchTransNoLessThanOrEqualTo(String value) {
+            addCriterion("MchTransNo <=", value, "mchTransNo");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoLike(String value) {
-            addCriterion("MchOrderNo like", value, "mchOrderNo");
+        public Criteria andMchTransNoLike(String value) {
+            addCriterion("MchTransNo like", value, "mchTransNo");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoNotLike(String value) {
-            addCriterion("MchOrderNo not like", value, "mchOrderNo");
+        public Criteria andMchTransNoNotLike(String value) {
+            addCriterion("MchTransNo not like", value, "mchTransNo");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoIn(List<String> values) {
-            addCriterion("MchOrderNo in", values, "mchOrderNo");
+        public Criteria andMchTransNoIn(List<String> values) {
+            addCriterion("MchTransNo in", values, "mchTransNo");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoNotIn(List<String> values) {
-            addCriterion("MchOrderNo not in", values, "mchOrderNo");
+        public Criteria andMchTransNoNotIn(List<String> values) {
+            addCriterion("MchTransNo not in", values, "mchTransNo");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoBetween(String value1, String value2) {
-            addCriterion("MchOrderNo between", value1, value2, "mchOrderNo");
+        public Criteria andMchTransNoBetween(String value1, String value2) {
+            addCriterion("MchTransNo between", value1, value2, "mchTransNo");
             return (Criteria) this;
         }
 
-        public Criteria andMchOrderNoNotBetween(String value1, String value2) {
-            addCriterion("MchOrderNo not between", value1, value2, "mchOrderNo");
+        public Criteria andMchTransNoNotBetween(String value1, String value2) {
+            addCriterion("MchTransNo not between", value1, value2, "mchTransNo");
             return (Criteria) this;
         }
 
@@ -598,6 +598,66 @@ public class TransOrderExample implements Serializable {
             return (Criteria) this;
         }
 
+        public Criteria andResultIsNull() {
+            addCriterion("Result is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andResultIsNotNull() {
+            addCriterion("Result is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andResultEqualTo(Byte value) {
+            addCriterion("Result =", value, "result");
+            return (Criteria) this;
+        }
+
+        public Criteria andResultNotEqualTo(Byte value) {
+            addCriterion("Result <>", value, "result");
+            return (Criteria) this;
+        }
+
+        public Criteria andResultGreaterThan(Byte value) {
+            addCriterion("Result >", value, "result");
+            return (Criteria) this;
+        }
+
+        public Criteria andResultGreaterThanOrEqualTo(Byte value) {
+            addCriterion("Result >=", value, "result");
+            return (Criteria) this;
+        }
+
+        public Criteria andResultLessThan(Byte value) {
+            addCriterion("Result <", value, "result");
+            return (Criteria) this;
+        }
+
+        public Criteria andResultLessThanOrEqualTo(Byte value) {
+            addCriterion("Result <=", value, "result");
+            return (Criteria) this;
+        }
+
+        public Criteria andResultIn(List<Byte> values) {
+            addCriterion("Result in", values, "result");
+            return (Criteria) this;
+        }
+
+        public Criteria andResultNotIn(List<Byte> values) {
+            addCriterion("Result not in", values, "result");
+            return (Criteria) this;
+        }
+
+        public Criteria andResultBetween(Byte value1, Byte value2) {
+            addCriterion("Result between", value1, value2, "result");
+            return (Criteria) this;
+        }
+
+        public Criteria andResultNotBetween(Byte value1, Byte value2) {
+            addCriterion("Result not between", value1, value2, "result");
+            return (Criteria) this;
+        }
+
         public Criteria andClientIpIsNull() {
             addCriterion("ClientIp is null");
             return (Criteria) this;
@@ -808,133 +868,73 @@ public class TransOrderExample implements Serializable {
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdIsNull() {
-            addCriterion("OpenId is null");
+        public Criteria andChannelUserIsNull() {
+            addCriterion("ChannelUser is null");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdIsNotNull() {
-            addCriterion("OpenId is not null");
+        public Criteria andChannelUserIsNotNull() {
+            addCriterion("ChannelUser is not null");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdEqualTo(String value) {
-            addCriterion("OpenId =", value, "openId");
+        public Criteria andChannelUserEqualTo(String value) {
+            addCriterion("ChannelUser =", value, "channelUser");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdNotEqualTo(String value) {
-            addCriterion("OpenId <>", value, "openId");
+        public Criteria andChannelUserNotEqualTo(String value) {
+            addCriterion("ChannelUser <>", value, "channelUser");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdGreaterThan(String value) {
-            addCriterion("OpenId >", value, "openId");
+        public Criteria andChannelUserGreaterThan(String value) {
+            addCriterion("ChannelUser >", value, "channelUser");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdGreaterThanOrEqualTo(String value) {
-            addCriterion("OpenId >=", value, "openId");
+        public Criteria andChannelUserGreaterThanOrEqualTo(String value) {
+            addCriterion("ChannelUser >=", value, "channelUser");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdLessThan(String value) {
-            addCriterion("OpenId <", value, "openId");
+        public Criteria andChannelUserLessThan(String value) {
+            addCriterion("ChannelUser <", value, "channelUser");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdLessThanOrEqualTo(String value) {
-            addCriterion("OpenId <=", value, "openId");
+        public Criteria andChannelUserLessThanOrEqualTo(String value) {
+            addCriterion("ChannelUser <=", value, "channelUser");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdLike(String value) {
-            addCriterion("OpenId like", value, "openId");
+        public Criteria andChannelUserLike(String value) {
+            addCriterion("ChannelUser like", value, "channelUser");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdNotLike(String value) {
-            addCriterion("OpenId not like", value, "openId");
+        public Criteria andChannelUserNotLike(String value) {
+            addCriterion("ChannelUser not like", value, "channelUser");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdIn(List<String> values) {
-            addCriterion("OpenId in", values, "openId");
+        public Criteria andChannelUserIn(List<String> values) {
+            addCriterion("ChannelUser in", values, "channelUser");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdNotIn(List<String> values) {
-            addCriterion("OpenId not in", values, "openId");
+        public Criteria andChannelUserNotIn(List<String> values) {
+            addCriterion("ChannelUser not in", values, "channelUser");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdBetween(String value1, String value2) {
-            addCriterion("OpenId between", value1, value2, "openId");
+        public Criteria andChannelUserBetween(String value1, String value2) {
+            addCriterion("ChannelUser between", value1, value2, "channelUser");
             return (Criteria) this;
         }
 
-        public Criteria andOpenIdNotBetween(String value1, String value2) {
-            addCriterion("OpenId not between", value1, value2, "openId");
-            return (Criteria) this;
-        }
-
-        public Criteria andCheckNameIsNull() {
-            addCriterion("CheckName is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andCheckNameIsNotNull() {
-            addCriterion("CheckName is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andCheckNameEqualTo(Byte value) {
-            addCriterion("CheckName =", value, "checkName");
-            return (Criteria) this;
-        }
-
-        public Criteria andCheckNameNotEqualTo(Byte value) {
-            addCriterion("CheckName <>", value, "checkName");
-            return (Criteria) this;
-        }
-
-        public Criteria andCheckNameGreaterThan(Byte value) {
-            addCriterion("CheckName >", value, "checkName");
-            return (Criteria) this;
-        }
-
-        public Criteria andCheckNameGreaterThanOrEqualTo(Byte value) {
-            addCriterion("CheckName >=", value, "checkName");
-            return (Criteria) this;
-        }
-
-        public Criteria andCheckNameLessThan(Byte value) {
-            addCriterion("CheckName <", value, "checkName");
-            return (Criteria) this;
-        }
-
-        public Criteria andCheckNameLessThanOrEqualTo(Byte value) {
-            addCriterion("CheckName <=", value, "checkName");
-            return (Criteria) this;
-        }
-
-        public Criteria andCheckNameIn(List<Byte> values) {
-            addCriterion("CheckName in", values, "checkName");
-            return (Criteria) this;
-        }
-
-        public Criteria andCheckNameNotIn(List<Byte> values) {
-            addCriterion("CheckName not in", values, "checkName");
-            return (Criteria) this;
-        }
-
-        public Criteria andCheckNameBetween(Byte value1, Byte value2) {
-            addCriterion("CheckName between", value1, value2, "checkName");
-            return (Criteria) this;
-        }
-
-        public Criteria andCheckNameNotBetween(Byte value1, Byte value2) {
-            addCriterion("CheckName not between", value1, value2, "checkName");
+        public Criteria andChannelUserNotBetween(String value1, String value2) {
+            addCriterion("ChannelUser not between", value1, value2, "channelUser");
             return (Criteria) this;
         }
 
@@ -1005,76 +1005,6 @@ public class TransOrderExample implements Serializable {
 
         public Criteria andUserNameNotBetween(String value1, String value2) {
             addCriterion("UserName not between", value1, value2, "userName");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraIsNull() {
-            addCriterion("Extra is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraIsNotNull() {
-            addCriterion("Extra is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraEqualTo(String value) {
-            addCriterion("Extra =", value, "extra");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraNotEqualTo(String value) {
-            addCriterion("Extra <>", value, "extra");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraGreaterThan(String value) {
-            addCriterion("Extra >", value, "extra");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraGreaterThanOrEqualTo(String value) {
-            addCriterion("Extra >=", value, "extra");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraLessThan(String value) {
-            addCriterion("Extra <", value, "extra");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraLessThanOrEqualTo(String value) {
-            addCriterion("Extra <=", value, "extra");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraLike(String value) {
-            addCriterion("Extra like", value, "extra");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraNotLike(String value) {
-            addCriterion("Extra not like", value, "extra");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraIn(List<String> values) {
-            addCriterion("Extra in", values, "extra");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraNotIn(List<String> values) {
-            addCriterion("Extra not in", values, "extra");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraBetween(String value1, String value2) {
-            addCriterion("Extra between", value1, value2, "extra");
-            return (Criteria) this;
-        }
-
-        public Criteria andExtraNotBetween(String value1, String value2) {
-            addCriterion("Extra not between", value1, value2, "extra");
             return (Criteria) this;
         }
 
@@ -1218,143 +1148,283 @@ public class TransOrderExample implements Serializable {
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeIsNull() {
-            addCriterion("ErrCode is null");
+        public Criteria andChannelErrCodeIsNull() {
+            addCriterion("ChannelErrCode is null");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeIsNotNull() {
-            addCriterion("ErrCode is not null");
+        public Criteria andChannelErrCodeIsNotNull() {
+            addCriterion("ChannelErrCode is not null");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeEqualTo(String value) {
-            addCriterion("ErrCode =", value, "errCode");
+        public Criteria andChannelErrCodeEqualTo(String value) {
+            addCriterion("ChannelErrCode =", value, "channelErrCode");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeNotEqualTo(String value) {
-            addCriterion("ErrCode <>", value, "errCode");
+        public Criteria andChannelErrCodeNotEqualTo(String value) {
+            addCriterion("ChannelErrCode <>", value, "channelErrCode");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeGreaterThan(String value) {
-            addCriterion("ErrCode >", value, "errCode");
+        public Criteria andChannelErrCodeGreaterThan(String value) {
+            addCriterion("ChannelErrCode >", value, "channelErrCode");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeGreaterThanOrEqualTo(String value) {
-            addCriterion("ErrCode >=", value, "errCode");
+        public Criteria andChannelErrCodeGreaterThanOrEqualTo(String value) {
+            addCriterion("ChannelErrCode >=", value, "channelErrCode");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeLessThan(String value) {
-            addCriterion("ErrCode <", value, "errCode");
+        public Criteria andChannelErrCodeLessThan(String value) {
+            addCriterion("ChannelErrCode <", value, "channelErrCode");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeLessThanOrEqualTo(String value) {
-            addCriterion("ErrCode <=", value, "errCode");
+        public Criteria andChannelErrCodeLessThanOrEqualTo(String value) {
+            addCriterion("ChannelErrCode <=", value, "channelErrCode");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeLike(String value) {
-            addCriterion("ErrCode like", value, "errCode");
+        public Criteria andChannelErrCodeLike(String value) {
+            addCriterion("ChannelErrCode like", value, "channelErrCode");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeNotLike(String value) {
-            addCriterion("ErrCode not like", value, "errCode");
+        public Criteria andChannelErrCodeNotLike(String value) {
+            addCriterion("ChannelErrCode not like", value, "channelErrCode");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeIn(List<String> values) {
-            addCriterion("ErrCode in", values, "errCode");
+        public Criteria andChannelErrCodeIn(List<String> values) {
+            addCriterion("ChannelErrCode in", values, "channelErrCode");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeNotIn(List<String> values) {
-            addCriterion("ErrCode not in", values, "errCode");
+        public Criteria andChannelErrCodeNotIn(List<String> values) {
+            addCriterion("ChannelErrCode not in", values, "channelErrCode");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeBetween(String value1, String value2) {
-            addCriterion("ErrCode between", value1, value2, "errCode");
+        public Criteria andChannelErrCodeBetween(String value1, String value2) {
+            addCriterion("ChannelErrCode between", value1, value2, "channelErrCode");
             return (Criteria) this;
         }
 
-        public Criteria andErrCodeNotBetween(String value1, String value2) {
-            addCriterion("ErrCode not between", value1, value2, "errCode");
+        public Criteria andChannelErrCodeNotBetween(String value1, String value2) {
+            addCriterion("ChannelErrCode not between", value1, value2, "channelErrCode");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgIsNull() {
-            addCriterion("ErrMsg is null");
+        public Criteria andChannelErrMsgIsNull() {
+            addCriterion("ChannelErrMsg is null");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgIsNotNull() {
-            addCriterion("ErrMsg is not null");
+        public Criteria andChannelErrMsgIsNotNull() {
+            addCriterion("ChannelErrMsg is not null");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgEqualTo(String value) {
-            addCriterion("ErrMsg =", value, "errMsg");
+        public Criteria andChannelErrMsgEqualTo(String value) {
+            addCriterion("ChannelErrMsg =", value, "channelErrMsg");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgNotEqualTo(String value) {
-            addCriterion("ErrMsg <>", value, "errMsg");
+        public Criteria andChannelErrMsgNotEqualTo(String value) {
+            addCriterion("ChannelErrMsg <>", value, "channelErrMsg");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgGreaterThan(String value) {
-            addCriterion("ErrMsg >", value, "errMsg");
+        public Criteria andChannelErrMsgGreaterThan(String value) {
+            addCriterion("ChannelErrMsg >", value, "channelErrMsg");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgGreaterThanOrEqualTo(String value) {
-            addCriterion("ErrMsg >=", value, "errMsg");
+        public Criteria andChannelErrMsgGreaterThanOrEqualTo(String value) {
+            addCriterion("ChannelErrMsg >=", value, "channelErrMsg");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgLessThan(String value) {
-            addCriterion("ErrMsg <", value, "errMsg");
+        public Criteria andChannelErrMsgLessThan(String value) {
+            addCriterion("ChannelErrMsg <", value, "channelErrMsg");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgLessThanOrEqualTo(String value) {
-            addCriterion("ErrMsg <=", value, "errMsg");
+        public Criteria andChannelErrMsgLessThanOrEqualTo(String value) {
+            addCriterion("ChannelErrMsg <=", value, "channelErrMsg");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgLike(String value) {
-            addCriterion("ErrMsg like", value, "errMsg");
+        public Criteria andChannelErrMsgLike(String value) {
+            addCriterion("ChannelErrMsg like", value, "channelErrMsg");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgNotLike(String value) {
-            addCriterion("ErrMsg not like", value, "errMsg");
+        public Criteria andChannelErrMsgNotLike(String value) {
+            addCriterion("ChannelErrMsg not like", value, "channelErrMsg");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgIn(List<String> values) {
-            addCriterion("ErrMsg in", values, "errMsg");
+        public Criteria andChannelErrMsgIn(List<String> values) {
+            addCriterion("ChannelErrMsg in", values, "channelErrMsg");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgNotIn(List<String> values) {
-            addCriterion("ErrMsg not in", values, "errMsg");
+        public Criteria andChannelErrMsgNotIn(List<String> values) {
+            addCriterion("ChannelErrMsg not in", values, "channelErrMsg");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgBetween(String value1, String value2) {
-            addCriterion("ErrMsg between", value1, value2, "errMsg");
+        public Criteria andChannelErrMsgBetween(String value1, String value2) {
+            addCriterion("ChannelErrMsg between", value1, value2, "channelErrMsg");
             return (Criteria) this;
         }
 
-        public Criteria andErrMsgNotBetween(String value1, String value2) {
-            addCriterion("ErrMsg not between", value1, value2, "errMsg");
+        public Criteria andChannelErrMsgNotBetween(String value1, String value2) {
+            addCriterion("ChannelErrMsg not between", value1, value2, "channelErrMsg");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraIsNull() {
+            addCriterion("Extra is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraIsNotNull() {
+            addCriterion("Extra is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraEqualTo(String value) {
+            addCriterion("Extra =", value, "extra");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraNotEqualTo(String value) {
+            addCriterion("Extra <>", value, "extra");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraGreaterThan(String value) {
+            addCriterion("Extra >", value, "extra");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraGreaterThanOrEqualTo(String value) {
+            addCriterion("Extra >=", value, "extra");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraLessThan(String value) {
+            addCriterion("Extra <", value, "extra");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraLessThanOrEqualTo(String value) {
+            addCriterion("Extra <=", value, "extra");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraLike(String value) {
+            addCriterion("Extra like", value, "extra");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraNotLike(String value) {
+            addCriterion("Extra not like", value, "extra");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraIn(List<String> values) {
+            addCriterion("Extra in", values, "extra");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraNotIn(List<String> values) {
+            addCriterion("Extra not in", values, "extra");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraBetween(String value1, String value2) {
+            addCriterion("Extra between", value1, value2, "extra");
+            return (Criteria) this;
+        }
+
+        public Criteria andExtraNotBetween(String value1, String value2) {
+            addCriterion("Extra not between", value1, value2, "extra");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlIsNull() {
+            addCriterion("NotifyUrl is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlIsNotNull() {
+            addCriterion("NotifyUrl is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlEqualTo(String value) {
+            addCriterion("NotifyUrl =", value, "notifyUrl");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlNotEqualTo(String value) {
+            addCriterion("NotifyUrl <>", value, "notifyUrl");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlGreaterThan(String value) {
+            addCriterion("NotifyUrl >", value, "notifyUrl");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlGreaterThanOrEqualTo(String value) {
+            addCriterion("NotifyUrl >=", value, "notifyUrl");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlLessThan(String value) {
+            addCriterion("NotifyUrl <", value, "notifyUrl");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlLessThanOrEqualTo(String value) {
+            addCriterion("NotifyUrl <=", value, "notifyUrl");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlLike(String value) {
+            addCriterion("NotifyUrl like", value, "notifyUrl");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlNotLike(String value) {
+            addCriterion("NotifyUrl not like", value, "notifyUrl");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlIn(List<String> values) {
+            addCriterion("NotifyUrl in", values, "notifyUrl");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlNotIn(List<String> values) {
+            addCriterion("NotifyUrl not in", values, "notifyUrl");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlBetween(String value1, String value2) {
+            addCriterion("NotifyUrl between", value1, value2, "notifyUrl");
+            return (Criteria) this;
+        }
+
+        public Criteria andNotifyUrlNotBetween(String value1, String value2) {
+            addCriterion("NotifyUrl not between", value1, value2, "notifyUrl");
             return (Criteria) this;
         }
 
@@ -1498,196 +1568,6 @@ public class TransOrderExample implements Serializable {
             return (Criteria) this;
         }
 
-        public Criteria andNotifyUrlIsNull() {
-            addCriterion("NotifyUrl is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlIsNotNull() {
-            addCriterion("NotifyUrl is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlEqualTo(String value) {
-            addCriterion("NotifyUrl =", value, "notifyUrl");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlNotEqualTo(String value) {
-            addCriterion("NotifyUrl <>", value, "notifyUrl");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlGreaterThan(String value) {
-            addCriterion("NotifyUrl >", value, "notifyUrl");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlGreaterThanOrEqualTo(String value) {
-            addCriterion("NotifyUrl >=", value, "notifyUrl");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlLessThan(String value) {
-            addCriterion("NotifyUrl <", value, "notifyUrl");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlLessThanOrEqualTo(String value) {
-            addCriterion("NotifyUrl <=", value, "notifyUrl");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlLike(String value) {
-            addCriterion("NotifyUrl like", value, "notifyUrl");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlNotLike(String value) {
-            addCriterion("NotifyUrl not like", value, "notifyUrl");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlIn(List<String> values) {
-            addCriterion("NotifyUrl in", values, "notifyUrl");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlNotIn(List<String> values) {
-            addCriterion("NotifyUrl not in", values, "notifyUrl");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlBetween(String value1, String value2) {
-            addCriterion("NotifyUrl between", value1, value2, "notifyUrl");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyUrlNotBetween(String value1, String value2) {
-            addCriterion("NotifyUrl not between", value1, value2, "notifyUrl");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyCountIsNull() {
-            addCriterion("NotifyCount is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyCountIsNotNull() {
-            addCriterion("NotifyCount is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyCountEqualTo(Byte value) {
-            addCriterion("NotifyCount =", value, "notifyCount");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyCountNotEqualTo(Byte value) {
-            addCriterion("NotifyCount <>", value, "notifyCount");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyCountGreaterThan(Byte value) {
-            addCriterion("NotifyCount >", value, "notifyCount");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyCountGreaterThanOrEqualTo(Byte value) {
-            addCriterion("NotifyCount >=", value, "notifyCount");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyCountLessThan(Byte value) {
-            addCriterion("NotifyCount <", value, "notifyCount");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyCountLessThanOrEqualTo(Byte value) {
-            addCriterion("NotifyCount <=", value, "notifyCount");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyCountIn(List<Byte> values) {
-            addCriterion("NotifyCount in", values, "notifyCount");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyCountNotIn(List<Byte> values) {
-            addCriterion("NotifyCount not in", values, "notifyCount");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyCountBetween(Byte value1, Byte value2) {
-            addCriterion("NotifyCount between", value1, value2, "notifyCount");
-            return (Criteria) this;
-        }
-
-        public Criteria andNotifyCountNotBetween(Byte value1, Byte value2) {
-            addCriterion("NotifyCount not between", value1, value2, "notifyCount");
-            return (Criteria) this;
-        }
-
-        public Criteria andLastNotifyTimeIsNull() {
-            addCriterion("LastNotifyTime is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andLastNotifyTimeIsNotNull() {
-            addCriterion("LastNotifyTime is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andLastNotifyTimeEqualTo(Long value) {
-            addCriterion("LastNotifyTime =", value, "lastNotifyTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andLastNotifyTimeNotEqualTo(Long value) {
-            addCriterion("LastNotifyTime <>", value, "lastNotifyTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andLastNotifyTimeGreaterThan(Long value) {
-            addCriterion("LastNotifyTime >", value, "lastNotifyTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andLastNotifyTimeGreaterThanOrEqualTo(Long value) {
-            addCriterion("LastNotifyTime >=", value, "lastNotifyTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andLastNotifyTimeLessThan(Long value) {
-            addCriterion("LastNotifyTime <", value, "lastNotifyTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andLastNotifyTimeLessThanOrEqualTo(Long value) {
-            addCriterion("LastNotifyTime <=", value, "lastNotifyTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andLastNotifyTimeIn(List<Long> values) {
-            addCriterion("LastNotifyTime in", values, "lastNotifyTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andLastNotifyTimeNotIn(List<Long> values) {
-            addCriterion("LastNotifyTime not in", values, "lastNotifyTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andLastNotifyTimeBetween(Long value1, Long value2) {
-            addCriterion("LastNotifyTime between", value1, value2, "lastNotifyTime");
-            return (Criteria) this;
-        }
-
-        public Criteria andLastNotifyTimeNotBetween(Long value1, Long value2) {
-            addCriterion("LastNotifyTime not between", value1, value2, "lastNotifyTime");
-            return (Criteria) this;
-        }
-
         public Criteria andExpireTimeIsNull() {
             addCriterion("ExpireTime is null");
             return (Criteria) this;
@@ -1698,52 +1578,52 @@ public class TransOrderExample implements Serializable {
             return (Criteria) this;
         }
 
-        public Criteria andExpireTimeEqualTo(Long value) {
+        public Criteria andExpireTimeEqualTo(Date value) {
             addCriterion("ExpireTime =", value, "expireTime");
             return (Criteria) this;
         }
 
-        public Criteria andExpireTimeNotEqualTo(Long value) {
+        public Criteria andExpireTimeNotEqualTo(Date value) {
             addCriterion("ExpireTime <>", value, "expireTime");
             return (Criteria) this;
         }
 
-        public Criteria andExpireTimeGreaterThan(Long value) {
+        public Criteria andExpireTimeGreaterThan(Date value) {
             addCriterion("ExpireTime >", value, "expireTime");
             return (Criteria) this;
         }
 
-        public Criteria andExpireTimeGreaterThanOrEqualTo(Long value) {
+        public Criteria andExpireTimeGreaterThanOrEqualTo(Date value) {
             addCriterion("ExpireTime >=", value, "expireTime");
             return (Criteria) this;
         }
 
-        public Criteria andExpireTimeLessThan(Long value) {
+        public Criteria andExpireTimeLessThan(Date value) {
             addCriterion("ExpireTime <", value, "expireTime");
             return (Criteria) this;
         }
 
-        public Criteria andExpireTimeLessThanOrEqualTo(Long value) {
+        public Criteria andExpireTimeLessThanOrEqualTo(Date value) {
             addCriterion("ExpireTime <=", value, "expireTime");
             return (Criteria) this;
         }
 
-        public Criteria andExpireTimeIn(List<Long> values) {
+        public Criteria andExpireTimeIn(List<Date> values) {
             addCriterion("ExpireTime in", values, "expireTime");
             return (Criteria) this;
         }
 
-        public Criteria andExpireTimeNotIn(List<Long> values) {
+        public Criteria andExpireTimeNotIn(List<Date> values) {
             addCriterion("ExpireTime not in", values, "expireTime");
             return (Criteria) this;
         }
 
-        public Criteria andExpireTimeBetween(Long value1, Long value2) {
+        public Criteria andExpireTimeBetween(Date value1, Date value2) {
             addCriterion("ExpireTime between", value1, value2, "expireTime");
             return (Criteria) this;
         }
 
-        public Criteria andExpireTimeNotBetween(Long value1, Long value2) {
+        public Criteria andExpireTimeNotBetween(Date value1, Date value2) {
             addCriterion("ExpireTime not between", value1, value2, "expireTime");
             return (Criteria) this;
         }
@@ -1758,52 +1638,52 @@ public class TransOrderExample implements Serializable {
             return (Criteria) this;
         }
 
-        public Criteria andTransSuccTimeEqualTo(Long value) {
+        public Criteria andTransSuccTimeEqualTo(Date value) {
             addCriterion("TransSuccTime =", value, "transSuccTime");
             return (Criteria) this;
         }
 
-        public Criteria andTransSuccTimeNotEqualTo(Long value) {
+        public Criteria andTransSuccTimeNotEqualTo(Date value) {
             addCriterion("TransSuccTime <>", value, "transSuccTime");
             return (Criteria) this;
         }
 
-        public Criteria andTransSuccTimeGreaterThan(Long value) {
+        public Criteria andTransSuccTimeGreaterThan(Date value) {
             addCriterion("TransSuccTime >", value, "transSuccTime");
             return (Criteria) this;
         }
 
-        public Criteria andTransSuccTimeGreaterThanOrEqualTo(Long value) {
+        public Criteria andTransSuccTimeGreaterThanOrEqualTo(Date value) {
             addCriterion("TransSuccTime >=", value, "transSuccTime");
             return (Criteria) this;
         }
 
-        public Criteria andTransSuccTimeLessThan(Long value) {
+        public Criteria andTransSuccTimeLessThan(Date value) {
             addCriterion("TransSuccTime <", value, "transSuccTime");
             return (Criteria) this;
         }
 
-        public Criteria andTransSuccTimeLessThanOrEqualTo(Long value) {
+        public Criteria andTransSuccTimeLessThanOrEqualTo(Date value) {
             addCriterion("TransSuccTime <=", value, "transSuccTime");
             return (Criteria) this;
         }
 
-        public Criteria andTransSuccTimeIn(List<Long> values) {
+        public Criteria andTransSuccTimeIn(List<Date> values) {
             addCriterion("TransSuccTime in", values, "transSuccTime");
             return (Criteria) this;
         }
 
-        public Criteria andTransSuccTimeNotIn(List<Long> values) {
+        public Criteria andTransSuccTimeNotIn(List<Date> values) {
             addCriterion("TransSuccTime not in", values, "transSuccTime");
             return (Criteria) this;
         }
 
-        public Criteria andTransSuccTimeBetween(Long value1, Long value2) {
+        public Criteria andTransSuccTimeBetween(Date value1, Date value2) {
             addCriterion("TransSuccTime between", value1, value2, "transSuccTime");
             return (Criteria) this;
         }
 
-        public Criteria andTransSuccTimeNotBetween(Long value1, Long value2) {
+        public Criteria andTransSuccTimeNotBetween(Date value1, Date value2) {
             addCriterion("TransSuccTime not between", value1, value2, "transSuccTime");
             return (Criteria) this;
         }

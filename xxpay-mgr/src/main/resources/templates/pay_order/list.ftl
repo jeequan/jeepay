@@ -50,7 +50,6 @@
 							<tr>
 								<th style="width: 30px;"><input type="checkbox" lay-filter="allselector" lay-skin="primary"></th>
                                 <th>支付单号</th>
-                                <th>商户单号</th>
                                 <th>商户ID</th>
                                 <th>渠道ID</th>
                                 <th>金额(元)</th>
@@ -75,7 +74,6 @@
 			<tr>
 				<td><input type="checkbox" lay-skin="primary"></td>
                 <td>{{ item.payOrderId }}</td>
-                <td>{{ item.mchOrderNo }}</td>
                 <td>{{ item.mchId }}</td>
                 <td>{{ item.channelId }}</td>
                 <td>{{ item.amount }}</td>
@@ -87,8 +85,8 @@
                 </td>
                 <td>{{ item.createTime }}</td>
 				<td>
-					<a href="javascript:;" data-id="{{ item.payOrderId }}" data-opt="view" class="layui-btn layui-btn-normal layui-btn-mini">预览</a>
-					<!--<a href="javascript:;" data-id="{{ item.payOrderId }}" data-opt="edit" class="layui-btn layui-btn-mini">编辑</a>-->
+					<a href="javascript:;" data-id="{{ item.payOrderId }}" data-opt="view" class="layui-btn layui-btn-normal layui-btn-mini">订单详情</a>
+					<#--<a href="javascript:;" data-id="{{ item.payOrderId }}" data-opt="refund" class="layui-btn layui-btn-mini">发起退款</a>-->
 					<!--<a href="javascript:;" data-id="{{ item.mchId }}" data-opt="del" class="layui-btn layui-btn-danger layui-btn-mini">删除</a>-->
 				</td>
 			</tr>
@@ -150,10 +148,15 @@
 
 						//绑定所有编辑按钮事件						
 						$('#content').children('tr').each(function() {
-							var $that = $(this);
-							$that.children('td:last-child').children('a[data-opt=edit]').on('click', function() {
-                                editForm($(this).data('id'));
-							});
+                            var $that = $(this);
+                            $that.children('td:last-child').children('a[data-opt=refund]').on('click', function() {
+                                layer.confirm('确定发起退款么？', {
+                                    btn: ['退款','放弃'] //按钮
+                                }, function(){
+                                    layer.msg('功能还再开发中...', {icon: 1});
+                                }, function(){
+                                });
+                            });
 						});
 
                         //绑定所有删除按钮事件
@@ -212,7 +215,7 @@
                             offset: ['100px', '30%'],
                             area: ['600px', '550px'],
                             zIndex: 19950924,
-                            maxmin: true,
+                            maxmin: false,
 
                             full: function(elem) {
                                 var win = window.top === window.self ? window : parent.window;
@@ -229,6 +232,7 @@
                                 addBoxIndex = -1;
                             }
                         });
+                        layer.full(addBoxIndex);
                     });
 				}
 			});

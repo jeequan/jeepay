@@ -9,13 +9,13 @@ import java.util.Map;
  */
 public interface IPayOrderService {
 
-    Map createPayOrder(String jsonParam);
+    Map create(String jsonParam);
 
-    Map selectPayOrder(String jsonParam);
+    Map select(String jsonParam);
 
-    Map selectPayOrderByMchIdAndPayOrderId(String jsonParam);
+    Map selectByMchIdAndPayOrderId(String jsonParam);
 
-    Map selectPayOrderByMchIdAndMchOrderNo(String jsonParam);
+    Map selectByMchIdAndMchOrderNo(String jsonParam);
 
     Map updateStatus4Ing(String jsonParam);
 

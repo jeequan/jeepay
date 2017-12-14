@@ -114,4 +114,11 @@ public class RpcUtil {
         return null;
     }
 
+    public static Boolean isSuccess(Map<String, Object> result) {
+        if(result == null) return false;
+        String retCode = (String) result.get("rpcRetCode");
+        if("0000".equals(retCode) && result.get("bizResult") != null) return true;
+        return false;
+    }
+
 }

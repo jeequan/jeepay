@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.xxpay.common.util.MyLog;
 import org.xxpay.dubbo.service.BaseService;
+import org.xxpay.dubbo.service.BaseService4PayOrder;
 
 import javax.jms.*;
 import javax.net.ssl.HttpsURLConnection;
@@ -34,7 +35,7 @@ import java.util.Date;
  * @Copyright: www.xxpay.org
  */
 @Component
-public class Mq4PayNotify extends BaseService {
+public class Mq4PayNotify extends BaseService4PayOrder {
 
     @Autowired
     private Queue payNotifyQueue;

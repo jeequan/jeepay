@@ -4,11 +4,13 @@
 ### 项目介绍
 ***
 
-- `XxPay聚合支付` 使用Java开发，包括spring-cloud、dubbo、spring-boot三个架构版本，已接入微信、支付宝等主流支付渠道，可直接用于生产环境。
+- `XxPay聚合支付` XxPay聚合支付使用Java开发，包括spring-cloud、dubbo、spring-boot三个架构版本，已接入微信、支付宝等主流支付渠道，可直接用于生产环境。
 
 - 目前已经接入支付渠道：微信(公众号支付、扫码支付、APP支付)、支付宝(电脑网站支付、手机网站支付、APP支付)；
 
 > [XxPay官网：http://www.xxpay.org](http://www.xxpay.org "xxpay官方网站")
+
+> [XxPay开发社区：http://pub.xxpay.org](http://pub.xxpay.org "xxpay开发社区")
 
 > [XxPay统一扫码支付体验：http://shop.xxpay.org/goods/openQrPay.html](http://shop.xxpay.org/goods/openQrPay.html "xxpay支付体验")
 
@@ -21,6 +23,7 @@
 
 版本 |日期 |描述
 ------- | ------- | -------
+V1.0.0 |2017-11-25 |在dubbo版本增加了转账、退款接口；重构了商户通知；修复了已知Bug
 V1.0.0 |2017-10-24 |提交xxpay4spring-boot版本
 V1.0.0 |2017-09-10 |完成dubbo架构，增加支付订单查询接口
 V1.0.0 |2017-08-25 |微信支付SDK更换为weixin-java-pay，增加微信H5支付，增加docker部署支持
@@ -68,7 +71,7 @@ xxpay-master
 |    ├── xxpay-server -- 服务注册中心
 |    ├── xxpay-service -- 服务生产者
 |    └── xxpay-web -- 服务消费者
-├── xxpay4spring-boot -- spring-boot架构实现
+├── xxpay4spring-mvc -- spring-mvc架构实现
 ├── xxpay-common -- 公共模块
 ├── xxpay-dal -- 数据持久层
 ├── xxpay-mgr -- 运营管理平台
@@ -106,14 +109,6 @@ xxpay-server > xxpay-config > xxpay-service > xxpay-web > xxpay-gateway
 项目启动顺序：
 ```
 xxpay4dubbo-service > xxpay4dubbo-web
-```
-#### xxpay4spring-boot
-| 项目  | 端口 | 描述
-|---|---|---
-|xxpay4spring-boot | 3020 | 支付服务
-项目启动顺序：
-```
-xxpay4spring-boot
 ```
 ### 项目部署
 ***
