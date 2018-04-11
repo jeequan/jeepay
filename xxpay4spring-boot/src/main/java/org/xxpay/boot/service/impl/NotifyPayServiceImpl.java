@@ -81,6 +81,7 @@ public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPaySe
                 }
                 _log.info("{}更新支付状态成功,将payOrderId={},更新payStatus={}成功", logPrefix, payOrder.getPayOrderId(), PayConstant.PAY_STATUS_SUCCESS);
                 payOrder.setStatus(PayConstant.PAY_STATUS_SUCCESS);
+                payOrder.setChannelOrderNo(trade_no);
             }
         }else{
             // 其他状态
@@ -134,6 +135,7 @@ public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPaySe
                 }
                 _log.error("{}更新支付状态成功,将payOrderId={},更新payStatus={}成功", logPrefix, payOrder.getPayOrderId(), PayConstant.PAY_STATUS_SUCCESS);
                 payOrder.setStatus(PayConstant.PAY_STATUS_SUCCESS);
+                payOrder.setChannelOrderNo(result.getTransactionId());
             }
             // 业务系统后端通知
             doNotify(payOrder);
