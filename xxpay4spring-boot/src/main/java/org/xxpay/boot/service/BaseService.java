@@ -81,10 +81,11 @@ public class BaseService {
         return payOrderMapper.updateByExampleSelective(payOrder, example);
     }
 
-    public int baseUpdateStatus4Success(String payOrderId) {
+    public int baseUpdateStatus4Success(String payOrderId, String channelOrderNo) {
         PayOrder payOrder = new PayOrder();
         payOrder.setPayOrderId(payOrderId);
         payOrder.setStatus(PayConstant.PAY_STATUS_SUCCESS);
+        if(channelOrderNo != null) payOrder.setChannelOrderNo(channelOrderNo);
         payOrder.setPaySuccTime(System.currentTimeMillis());
         PayOrderExample example = new PayOrderExample();
         PayOrderExample.Criteria criteria = example.createCriteria();

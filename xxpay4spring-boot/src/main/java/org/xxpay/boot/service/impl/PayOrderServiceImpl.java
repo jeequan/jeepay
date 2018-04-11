@@ -230,7 +230,7 @@ public class PayOrderServiceImpl extends BaseService implements IPayOrderService
             _log.warn("修改支付订单状态为支付成功失败, {}. jsonParam={}", RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
             return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
         }
-        int result = super.baseUpdateStatus4Success(payOrderId);
+        int result = super.baseUpdateStatus4Success(payOrderId, null);
         return RpcUtil.createBizResult(baseParam, result);
     }
 
