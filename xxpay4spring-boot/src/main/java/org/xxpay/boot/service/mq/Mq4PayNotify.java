@@ -2,18 +2,12 @@ package org.xxpay.boot.service.mq;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.activemq.ScheduledMessage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.annotation.JmsListener;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.xxpay.common.util.MyLog;
 import org.xxpay.boot.service.BaseService;
 
-import javax.jms.*;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,44 +19,22 @@ import java.util.Date;
  * @version V1.0
  * @Copyright: www.xxpay.org
  */
-@Component
-public class Mq4PayNotify extends BaseService {
+public abstract class Mq4PayNotify extends BaseService {
 
-    @Autowired
-    private Queue payNotifyQueue;
-
-    @Autowired
-    private JmsTemplate jmsTemplate;
-    
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final MyLog _log = MyLog.getLog(Mq4PayNotify.class);
+    protected static final MyLog _log = MyLog.getLog(Mq4PayNotify.class);
 
-    public void send(String msg) {
-        _log.info("发送MQ消息:msg={}", msg);
-        this.jmsTemplate.convertAndSend(this.payNotifyQueue, msg);
-    }
+    public abstract void send(String msg);
 
     /**
      * 发送延迟消息
      * @param msg
      * @param delay
      */
-    public void send(String msg, long delay) {
-        _log.info("发送MQ延时消息:msg={},delay={}", msg, delay);
-        jmsTemplate.send(this.payNotifyQueue, new MessageCreator() {
-            public Message createMessage(Session session) throws JMSException {
-                TextMessage tm = session.createTextMessage(msg);
-                tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay);
-                tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_PERIOD, 1*1000);
-                tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_REPEAT, 1);
-                return tm;
-            }
-        });
-    }
+    public abstract void send(String msg, long delay);
 
-    @JmsListener(destination = MqConfig.PAY_NOTIFY_QUEUE_NAME)
     public void receive(String msg) {
         _log.info("do notify task, msg={}", msg);
         JSONObject msgObj = JSON.parseObject(msg);
