@@ -97,12 +97,12 @@ public class PayChannel4WxServiceImpl extends BaseService implements IPayChannel
                         configMap.put("appid", appId);
                         // 此map用于客户端与微信服务器交互
                         payInfo.put("sign", SignUtils.createSign(configMap, wxPayConfig.getMchKey(), null));
-                        payInfo.put("prepayId", wxPayUnifiedOrderResult.getPrepayId());
-                        payInfo.put("partnerId", partnerId);
-                        payInfo.put("appId", appId);
-                        payInfo.put("packageValue", packageValue);
-                        payInfo.put("timeStamp", timestamp);
-                        payInfo.put("nonceStr", nonceStr);
+                        payInfo.put("prepayid", wxPayUnifiedOrderResult.getPrepayId());
+                        payInfo.put("partnerid", partnerId);
+                        payInfo.put("appid", appId);
+                        payInfo.put("package", packageValue);
+                        payInfo.put("timestamp", timestamp);
+                        payInfo.put("noncestr", nonceStr);
                         map.put("payParams", payInfo);
                         break;
                     }
