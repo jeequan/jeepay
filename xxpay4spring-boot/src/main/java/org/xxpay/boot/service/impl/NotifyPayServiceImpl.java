@@ -57,14 +57,15 @@ public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPaySe
             _log.warn("处理支付宝支付回调失败, {}. jsonParam={}", RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
             return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
         }
-        Map<String, Object> payContext = new HashMap();
+        Map<String, Object> payContext = new HashMap<>();
         PayOrder payOrder;
         payContext.put("parameters", params);
         if(!verifyAliPayParams(payContext)) {
             return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_PAY_NOTIFY_VERIFY_FAIL);
         }
         _log.info("{}验证支付通知数据及签名通过", logPrefix);
-        String trade_status = params.get("trade_status").toString();		// 交易状态
+        String trade_status = String.valueOf(params.get("trade_status"));	// 交易状态
+        String trade_no = String.valueOf(params.get("trade_no"));			// 渠道订单号
         // 支付状态成功或者完成
         if (trade_status.equals(PayConstant.AlipayConstant.TRADE_STATUS_SUCCESS) ||
                 trade_status.equals(PayConstant.AlipayConstant.TRADE_STATUS_FINISHED)) {
@@ -72,7 +73,7 @@ public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPaySe
             payOrder = (PayOrder)payContext.get("payOrder");
             byte payStatus = payOrder.getStatus(); // 0：订单生成，1：支付中，-1：支付失败，2：支付成功，3：业务处理完成，-2：订单过期
             if (payStatus != PayConstant.PAY_STATUS_SUCCESS && payStatus != PayConstant.PAY_STATUS_COMPLETE) {
-                updatePayOrderRows = super.baseUpdateStatus4Success(payOrder.getPayOrderId());
+                updatePayOrderRows = super.baseUpdateStatus4Success(payOrder.getPayOrderId(), trade_no);
                 if (updatePayOrderRows != 1) {
                     _log.error("{}更新支付状态失败,将payOrderId={},更新payStatus={}失败", logPrefix, payOrder.getPayOrderId(), PayConstant.PAY_STATUS_SUCCESS);
                     _log.info("{}响应给支付宝结果：{}", logPrefix, PayConstant.RETURN_ALIPAY_VALUE_FAIL);
@@ -80,6 +81,7 @@ public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPaySe
                 }
                 _log.info("{}更新支付状态成功,将payOrderId={},更新payStatus={}成功", logPrefix, payOrder.getPayOrderId(), PayConstant.PAY_STATUS_SUCCESS);
                 payOrder.setStatus(PayConstant.PAY_STATUS_SUCCESS);
+                payOrder.setChannelOrderNo(trade_no);
             }
         }else{
             // 其他状态
@@ -112,7 +114,7 @@ public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPaySe
             }
             WxPayService wxPayService = new WxPayServiceImpl();
             WxPayOrderNotifyResult result = WxPayOrderNotifyResult.fromXML(xmlResult);
-            Map<String, Object> payContext = new HashMap();
+            Map<String, Object> payContext = new HashMap<>();
             payContext.put("parameters", result);
             // 验证业务数据是否正确,验证通过后返回PayOrder和WxPayConfig对象
             if(!verifyWxPayParams(payContext)) {
@@ -126,13 +128,14 @@ public class NotifyPayServiceImpl extends Notify4BasePay implements INotifyPaySe
             // 处理订单
             byte payStatus = payOrder.getStatus(); // 0：订单生成，1：支付中，-1：支付失败，2：支付成功，3：业务处理完成，-2：订单过期
             if (payStatus != PayConstant.PAY_STATUS_SUCCESS && payStatus != PayConstant.PAY_STATUS_COMPLETE) {
-                int updatePayOrderRows = super.baseUpdateStatus4Success(payOrder.getPayOrderId());
+                int updatePayOrderRows = super.baseUpdateStatus4Success(payOrder.getPayOrderId(), result.getTransactionId());
                 if (updatePayOrderRows != 1) {
                     _log.error("{}更新支付状态失败,将payOrderId={},更新payStatus={}失败", logPrefix, payOrder.getPayOrderId(), PayConstant.PAY_STATUS_SUCCESS);
                     return RpcUtil.createBizResult(baseParam, WxPayNotifyResponse.fail("处理订单失败"));
                 }
                 _log.error("{}更新支付状态成功,将payOrderId={},更新payStatus={}成功", logPrefix, payOrder.getPayOrderId(), PayConstant.PAY_STATUS_SUCCESS);
                 payOrder.setStatus(PayConstant.PAY_STATUS_SUCCESS);
+                payOrder.setChannelOrderNo(result.getTransactionId());
             }
             // 业务系统后端通知
             doNotify(payOrder);
