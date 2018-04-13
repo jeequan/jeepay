@@ -2,27 +2,13 @@ package org.xxpay.boot.service.mq;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.activemq.ScheduledMessage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.annotation.JmsListener;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 import org.xxpay.common.util.MyLog;
 import org.xxpay.boot.service.BaseService;
 
-import javax.jms.*;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -33,56 +19,22 @@ import java.util.Date;
  * @version V1.0
  * @Copyright: www.xxpay.org
  */
-@Component
-public class Mq4PayNotify extends BaseService {
+public abstract class Mq4PayNotify extends BaseService {
 
     @Autowired
-    private Queue payNotifyQueue;
+    private RestTemplate restTemplate;
 
-    @Autowired
-    private JmsTemplate jmsTemplate;
+    protected static final MyLog _log = MyLog.getLog(Mq4PayNotify.class);
 
-    private static final MyLog _log = MyLog.getLog(Mq4PayNotify.class);
-
-    public void send(String msg) {
-        _log.info("发送MQ消息:msg={}", msg);
-        this.jmsTemplate.convertAndSend(this.payNotifyQueue, msg);
-    }
+    public abstract void send(String msg);
 
     /**
      * 发送延迟消息
      * @param msg
      * @param delay
      */
-    public void send(String msg, long delay) {
-        _log.info("发送MQ延时消息:msg={},delay={}", msg, delay);
-        jmsTemplate.send(this.payNotifyQueue, new MessageCreator() {
-            public Message createMessage(Session session) throws JMSException {
-                TextMessage tm = session.createTextMessage(msg);
-                tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay);
-                tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_PERIOD, 1*1000);
-                tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_REPEAT, 1);
-                return tm;
-            }
-        });
-    }
+    public abstract void send(String msg, long delay);
 
-    private static class TrustAnyTrustManager implements X509TrustManager {
-
-        public void checkClientTrusted(X509Certificate[] chain, String authType)
-                throws CertificateException {
-        }
-
-        public void checkServerTrusted(X509Certificate[] chain, String authType)
-                throws CertificateException {
-        }
-
-        public X509Certificate[] getAcceptedIssuers() {
-            return new X509Certificate[] {};
-        }
-    }
-
-    @JmsListener(destination = MqConfig.PAY_NOTIFY_QUEUE_NAME)
     public void receive(String msg) {
         _log.info("do notify task, msg={}", msg);
         JSONObject msgObj = JSON.parseObject(msg);
@@ -94,57 +46,18 @@ public class Mq4PayNotify extends BaseService {
             return;
         }
         try {
-            StringBuffer sb = new StringBuffer();
-            URL console = new URL(respUrl);
+        	String notifyResult = "";
             _log.info("==>MQ通知业务系统开始[orderId：{}][count：{}][time：{}]", orderId, count, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-            if("https".equals(console.getProtocol())) {
-                SSLContext sc = SSLContext.getInstance("SSL");
-                sc.init(null, new TrustManager[] { new TrustAnyTrustManager() },
-                        new java.security.SecureRandom());
-                HttpsURLConnection con = (HttpsURLConnection) console.openConnection();
-                con.setSSLSocketFactory(sc.getSocketFactory());
-                con.setRequestMethod("POST");
-                con.setDoInput(true);
-                con.setDoOutput(true);
-                con.setUseCaches(false);
-                con.setConnectTimeout(10 * 1000);
-                con.setReadTimeout(5 * 1000);
-                con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()), 1024*1024);
-                while (true) {
-                    String line = in.readLine();
-                    if (line == null) {
-                        break;
-                    }
-                    sb.append(line);
-                }
-                in.close();
-            }else if("http".equals(console.getProtocol())) {
-                HttpURLConnection con = (HttpURLConnection) console.openConnection();
-                con.setRequestMethod("POST");
-                con.setDoInput(true);
-                con.setDoOutput(true);
-                con.setUseCaches(false);
-                con.setConnectTimeout(10 * 1000);
-                con.setReadTimeout(5 * 1000);
-                con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()), 1024*1024);
-                while (true) {
-                    String line = in.readLine();
-                    if (line == null) {
-                        break;
-                    }
-                    sb.append(line);
-                }
-                in.close();
-            }else {
-                _log.error("not do protocol. protocol=%s", console.getProtocol());
-                return;
-            }
+            try {
+            	URI uri = new URI(respUrl);
+                notifyResult = restTemplate.postForObject(uri, null, String.class);
+            }catch (Exception e) {
+				_log.error(e, "通知商户系统异常");
+			}
             _log.info("<==MQ通知业务系统结束[orderId：{}][count：{}][time：{}]", orderId, count, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
             // 验证结果
             _log.info("notify response , OrderID={}", orderId);
-            if(sb.toString().trim().equalsIgnoreCase("success")){
+            if(notifyResult.trim().equalsIgnoreCase("success")){
                 //_log.info("{} notify success, url:{}", _notifyInfo.getBusiId(), respUrl);
                 //修改订单表
                 try {
@@ -180,7 +93,7 @@ public class Mq4PayNotify extends BaseService {
                 msgObj.put("count", cnt);
                 this.send(msgObj.toJSONString(), cnt * 60 * 1000);
             }
-            _log.warn("notify failed. url:{}, response body:{}", respUrl, sb.toString());
+            _log.warn("notify failed. url:{}, response body:{}", respUrl, notifyResult.toString());
         } catch(Exception e) {
             _log.info("<==MQ通知业务系统结束[orderId：{}][count：{}][time：{}]", orderId, count, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
             _log.error(e, "notify exception. url:%s", respUrl);

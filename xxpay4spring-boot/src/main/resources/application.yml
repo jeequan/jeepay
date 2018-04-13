@@ -24,12 +24,21 @@ spring:
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000  # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
   profiles:
      active: prod
+     include:
+       - activeMQ
+       #- rabbitMQ # 需要安装延迟队列插件：https://www.rabbitmq.com/blog/2015/04/16/scheduling-messages-with-rabbitmq/
 
   activemq:
     broker-url: failover:(tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0)
     in-memory: true
     pool:
       enabled: true # 如果此处设置为true，需要加activemq-pool依赖包，否则会自动配置失败，报JmsMessagingTemplate注入失败
+
+  rabbitmq:
+    addresses: 127.0.0.1:5672
+    username: guest
+    password: guest
+    dynamic: true
 
 config:
   ali:
