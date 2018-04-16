@@ -7,7 +7,7 @@
     <artifactId>xxpay4spring-boot</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>xxpay4spring-boot</name>
+    <name>xxpay-web</name>
     <description>xxpay4spring-boot</description>
 
     <parent>
