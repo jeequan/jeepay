@@ -1,7 +1,18 @@
 server:
   port: 3020
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://58.20.17.84:1111/eureka/
+
+management:
+  security:
+    enabled: false #关掉安全认证
+
 spring:
+  application:
+    name: xxpay-dev
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
