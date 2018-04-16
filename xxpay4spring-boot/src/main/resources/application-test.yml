@@ -1,6 +1,11 @@
 server:
   port: 3020
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://58.20.17.84:1111/eureka/
+
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
