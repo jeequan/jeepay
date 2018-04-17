@@ -136,3 +136,10 @@ xxpay4dubbo-service > xxpay4dubbo-web
 微信扫描下面二维码，关注官方公众号：XxPay，获取更多精彩内容。
 
 ![XxPay聚合支付公众号](http://docs.xxpay.org/uploads/201708/attach_14dc8f1fac0a36a1.jpg "XxPay公众号")
+
+
+##微信测试账号
+mchId:1487990592
+appId:wx6e9638417bff1c13
+key:60EBq9BJX5DNa39MZ48bc65TeFEyt6rD
+
