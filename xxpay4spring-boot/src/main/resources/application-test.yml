@@ -43,4 +43,4 @@ config:
     notifyUrl: http://58.20.17.84:5555/api_cloud/api/xxpay/notify/pay/wxPayNotifyRes.htm
 
 logging:
-  file: ./log/xxpay4spring-boot.log
+  file: datalog/xxpay/xxpay-web.log
