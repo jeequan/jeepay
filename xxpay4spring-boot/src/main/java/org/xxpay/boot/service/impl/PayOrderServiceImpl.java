@@ -268,4 +268,73 @@ public class PayOrderServiceImpl extends BaseService implements IPayOrderService
         int result = super.baseUpdateNotify(payOrderId, count);
         return RpcUtil.createBizResult(baseParam, result);
     }
+    
+    public JSONObject query(String mchId, String payOrderId, String mchOrderNo, String executeNotify) {
+        Map<String,Object> paramMap = new HashMap<>();
+        Map<String, Object> result;
+        if(StringUtils.isNotBlank(payOrderId)) {
+            paramMap.put("mchId", mchId);
+            paramMap.put("payOrderId", payOrderId);
+            String jsonParam = RpcUtil.createBaseParam(paramMap);
+            result = selectByMchIdAndPayOrderId(jsonParam);
+        }else {
+            paramMap.put("mchId", mchId);
+            paramMap.put("mchOrderNo", mchOrderNo);
+            String jsonParam = RpcUtil.createBaseParam(paramMap);
+            result = selectByMchIdAndMchOrderNo(jsonParam);
+        }
+        String s = RpcUtil.mkRet(result);
+        if(s == null) return null;
+        boolean isNotify = Boolean.parseBoolean(executeNotify);
+        JSONObject payOrder = JSONObject.parseObject(s);
+        if(isNotify) {
+            paramMap = new HashMap<>();
+            paramMap.put("payOrderId", payOrderId);
+            String jsonParam = RpcUtil.createBaseParam(paramMap);
+            result = notifyPayService.sendBizPayNotify(jsonParam);
+            s = RpcUtil.mkRet(result);
+            _log.info("业务查单完成,并再次发送业务支付通知.发送结果:{}", s);
+        }
+        return payOrder;
+    }
+    
+    @Override
+    public Map selectByMchIdAndPayOrderId(String jsonParam) {
+        BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
+        Map<String, Object> bizParamMap = baseParam.getBizParamMap();
+        if (ObjectValidUtil.isInvalid(bizParamMap)) {
+            _log.warn("根据商户号和支付订单号查询支付订单失败, {}. jsonParam={}", RetEnum.RET_PARAM_NOT_FOUND.getMessage(), jsonParam);
+            return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_NOT_FOUND);
+        }
+        String mchId = baseParam.isNullValue("mchId") ? null : bizParamMap.get("mchId").toString();
+        String payOrderId = baseParam.isNullValue("payOrderId") ? null : bizParamMap.get("payOrderId").toString();
+        if (ObjectValidUtil.isInvalid(mchId, payOrderId)) {
+            _log.warn("根据商户号和支付订单号查询支付订单失败, {}. jsonParam={}", RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
+            return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
+        }
+        PayOrder payOrder = super.baseSelectByMchIdAndPayOrderId(mchId, payOrderId);
+        if(payOrder == null) return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_DATA_NOT_EXISTS);
+        String jsonResult = JsonUtil.object2Json(payOrder);
+        return RpcUtil.createBizResult(baseParam, jsonResult);
+    }
+
+    @Override
+    public Map selectByMchIdAndMchOrderNo(String jsonParam) {
+        BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
+        Map<String, Object> bizParamMap = baseParam.getBizParamMap();
+        if (ObjectValidUtil.isInvalid(bizParamMap)) {
+            _log.warn("根据商户号和商户订单号查询支付订单失败, {}. jsonParam={}", RetEnum.RET_PARAM_NOT_FOUND.getMessage(), jsonParam);
+            return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_NOT_FOUND);
+        }
+        String mchId = baseParam.isNullValue("mchId") ? null : bizParamMap.get("mchId").toString();
+        String mchOrderNo = baseParam.isNullValue("mchOrderNo") ? null : bizParamMap.get("mchOrderNo").toString();
+        if (ObjectValidUtil.isInvalid(mchId, mchOrderNo)) {
+            _log.warn("根据商户号和商户订单号查询支付订单失败, {}. jsonParam={}", RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
+            return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
+        }
+        PayOrder payOrder = super.baseSelectByMchIdAndMchOrderNo(mchId, mchOrderNo);
+        if(payOrder == null) return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_DATA_NOT_EXISTS);
+        String jsonResult = JsonUtil.object2Json(payOrder);
+        return RpcUtil.createBizResult(baseParam, jsonResult);
+    }
 }

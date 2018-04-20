@@ -3,6 +3,8 @@
 /log/
 target/
 *.project
+*log/
+*logs/
 
 
 ### STS ###

@@ -1,15 +1,10 @@
 package org.xxpay.boot.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
-import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderResult;
-import com.github.binarywang.wxpay.config.WxPayConfig;
-import com.github.binarywang.wxpay.constant.WxPayConstants;
-import com.github.binarywang.wxpay.exception.WxPayException;
-import com.github.binarywang.wxpay.service.WxPayService;
-import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
-import com.github.binarywang.wxpay.util.SignUtils;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
 import org.springframework.stereotype.Service;
 import org.xxpay.boot.service.BaseService;
 import org.xxpay.boot.service.IPayChannel4WxService;
@@ -18,13 +13,27 @@ import org.xxpay.boot.service.channel.wechat.WxPayUtil;
 import org.xxpay.common.constant.PayConstant;
 import org.xxpay.common.domain.BaseParam;
 import org.xxpay.common.enumm.RetEnum;
-import org.xxpay.common.util.*;
+import org.xxpay.common.util.BeanConvertUtils;
+import org.xxpay.common.util.JsonUtil;
+import org.xxpay.common.util.MyLog;
+import org.xxpay.common.util.ObjectValidUtil;
+import org.xxpay.common.util.RpcUtil;
 import org.xxpay.dal.dao.model.PayChannel;
 import org.xxpay.dal.dao.model.PayOrder;
+import org.xxpay.dal.dao.model.RefundOrder;
 
-import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.Map;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
+import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
+import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
+import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderResult;
+import com.github.binarywang.wxpay.config.WxPayConfig;
+import com.github.binarywang.wxpay.constant.WxPayConstants;
+import com.github.binarywang.wxpay.exception.WxPayException;
+import com.github.binarywang.wxpay.service.WxPayService;
+import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
+import com.github.binarywang.wxpay.util.SignUtils;
 
 /**
  * @Description: 支付渠道接口:微信
@@ -193,6 +202,75 @@ public class PayChannel4WxServiceImpl extends BaseService implements IPayChannel
         request.setOpenid(openId);
         request.setSceneInfo(sceneInfo);
 
+        return request;
+    }
+    
+    @Override
+    public Map doWxRefundReq(String jsonParam) {
+        String logPrefix = "【微信退款】";
+        BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
+        Map<String, Object> bizParamMap = baseParam.getBizParamMap();
+        try{
+            if (ObjectValidUtil.isInvalid(bizParamMap)) {
+                _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_NOT_FOUND.getMessage(), jsonParam);
+                return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_NOT_FOUND);
+            }
+            JSONObject refundOrderObj = baseParam.isNullValue("refundOrder") ? null : JSONObject.parseObject(bizParamMap.get("refundOrder").toString());
+            RefundOrder refundOrder = JSON.toJavaObject(refundOrderObj, RefundOrder.class);
+            if (ObjectValidUtil.isInvalid(refundOrder)) {
+                _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
+                return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
+            }
+            String mchId = refundOrder.getMchId();
+            String channelId = refundOrder.getChannelId();
+            PayChannel payChannel = super.baseSelectPayChannel(mchId, channelId);
+            WxPayConfig wxPayConfig = WxPayUtil.getWxPayConfig(payChannel.getParam(), "", wxPayProperties.getCertRootPath(), wxPayProperties.getNotifyUrl());
+            WxPayService wxPayService = new WxPayServiceImpl();
+            wxPayService.setConfig(wxPayConfig);
+            WxPayRefundRequest wxPayRefundRequest = buildWxPayRefundRequest(refundOrder, wxPayConfig);
+            String refundOrderId = refundOrder.getRefundOrderId();
+            Map<String, Object> map = new HashMap<>();
+            WxPayRefundResult result;
+            try {
+                result = wxPayService.refund(wxPayRefundRequest);
+                _log.info("{} >>> 下单成功", logPrefix);
+                map.put("isSuccess", true);
+                map.put("refundOrderId", refundOrderId);
+                map.put("channelOrderNo", result.getRefundId());
+            } catch (WxPayException e) {
+                _log.error(e, "下单失败");
+                //出现业务错误
+                _log.info("{}下单返回失败", logPrefix);
+                _log.info("err_code:{}", e.getErrCode());
+                _log.info("err_code_des:{}", e.getErrCodeDes());
+                map.put("isSuccess", false);
+                map.put("channelErrCode", e.getErrCode());
+                map.put("channelErrMsg", e.getErrCodeDes());
+            }
+            return RpcUtil.createBizResult(baseParam, map);
+        }catch (Exception e) {
+            _log.error(e, "微信退款异常");
+            return RpcUtil.createFailResult(baseParam, RetEnum.RET_BIZ_WX_PAY_CREATE_FAIL);
+        }
+    }
+    
+    /**
+     * 构建微信退款请求数据
+     * @param refundOrder
+     * @param wxPayConfig
+     * @return
+     */
+    WxPayRefundRequest buildWxPayRefundRequest(RefundOrder refundOrder, WxPayConfig wxPayConfig) {
+        // 微信退款请求对象
+        WxPayRefundRequest request = new WxPayRefundRequest();
+        request.setTransactionId(refundOrder.getChannelPayOrderNo());
+        request.setOutTradeNo(refundOrder.getPayOrderId());
+        request.setDeviceInfo(refundOrder.getDevice());
+        request.setOutRefundNo(refundOrder.getRefundOrderId());
+        request.setRefundDesc(refundOrder.getRemarkInfo());
+        request.setRefundFee(refundOrder.getRefundAmount().intValue());
+        request.setRefundFeeType("CNY");
+        request.setTotalFee(refundOrder.getPayAmount().intValue());
         return request;
     }
 }

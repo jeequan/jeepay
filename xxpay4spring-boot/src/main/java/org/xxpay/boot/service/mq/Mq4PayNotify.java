@@ -47,6 +47,7 @@ public abstract class Mq4PayNotify extends BaseService {
         }
         try {
         	String notifyResult = "";
+        	int cnt = count + 1;
             _log.info("==>MQ通知业务系统开始[orderId：{}][count：{}][time：{}]", orderId, count, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
             try {
             	URI uri = new URI(respUrl);
@@ -68,20 +69,26 @@ public abstract class Mq4PayNotify extends BaseService {
                 }
                 // 修改通知次数
                 try {
-                    int result = super.baseUpdateNotify(orderId, (byte) 1);
-                    _log.info("修改payOrderId={},通知业务系统次数->{}", orderId, result == 1 ? "成功" : "失败");
+                    int result = super.baseUpdateNotify(orderId, (byte) cnt);
+                    _log.info("修改【支付订单表】payOrderId={},通知业务系统次数->{}", orderId, result == 1 ? "成功" : "失败");
+                    //添加 修改【商户通知表】
+                    int result2 =  super.baseUpdateMchNotifySuccess(orderId, notifyResult, (byte) cnt);
+                    _log.info("修改【商户通知表】payOrderId={},通知业务系统次数->{}", orderId, result2 == 1 ? "成功" : "失败");
                 }catch (Exception e) {
                     _log.error(e, "修改通知次数异常");
                 }
                 return ; // 通知成功结束
             }else {
                 // 通知失败，延时再通知
-                int cnt = count+1;
+               // int cnt = count+1;
                 _log.info("notify count={}", cnt);
                 // 修改通知次数
                 try {
                     int result = super.baseUpdateNotify(orderId, (byte) cnt);
-                    _log.info("修改payOrderId={},通知业务系统次数->{}", orderId, result == 1 ? "成功" : "失败");
+                    _log.info("修改【支付订单表】payOrderId={},通知业务系统次数->{}", orderId, result == 1 ? "成功" : "失败");
+                    //添加 修改【商户通知表】
+                    int result2 = super.baseUpdateMchNotifyFail(orderId, notifyResult, (byte) cnt);
+                    _log.info("修改【商户通知表】payOrderId={},通知业务系统次数->{}", orderId, result2 == 1 ? "成功" : "失败");
                 }catch (Exception e) {
                     _log.error(e, "修改通知次数异常");
                 }

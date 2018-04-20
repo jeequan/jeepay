@@ -1,6 +1,10 @@
 package org.xxpay.boot.service.mq.impl;
 
-import javax.jms.*;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 
 import org.apache.activemq.ScheduledMessage;
 import org.apache.activemq.command.ActiveMQQueue;
@@ -11,17 +15,16 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Component;
-import org.xxpay.boot.service.mq.Mq4PayNotify;
+import org.xxpay.boot.service.mq.Mq4MchRefundNotify;
 import org.xxpay.boot.service.mq.MqConfig;
-
-import static org.xxpay.boot.service.mq.MqConfig.PAY_NOTIFY_QUEUE_NAME;
 
 @Component
 @Profile(MqConfig.Impl.ACTIVE_MQ)
-public class ActiveMq4PayNotify extends Mq4PayNotify{
+public class ActiveMq4MuchReundNotify extends Mq4MchRefundNotify{
+	
 	
 	@Autowired
-    private Queue payNotifyQueue;
+    private Queue mchRefundNotifyQueue;
 
     @Autowired
     private JmsTemplate jmsTemplate;
@@ -30,13 +33,13 @@ public class ActiveMq4PayNotify extends Mq4PayNotify{
 	@Override
 	public void send(String msg) {
 		_log.info("发送MQ消息:msg={}", msg);
-        jmsTemplate.convertAndSend(payNotifyQueue, msg);
+        jmsTemplate.convertAndSend(mchRefundNotifyQueue, msg);
 	}
 
 	@Override
 	public void send(String msg, long delay) {
 		_log.info("发送MQ延时消息:msg={},delay={}", msg, delay);
-        jmsTemplate.send(this.payNotifyQueue, new MessageCreator() {
+        jmsTemplate.send(this.mchRefundNotifyQueue, new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 TextMessage tm = session.createTextMessage(msg);
                 tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay);
@@ -47,7 +50,7 @@ public class ActiveMq4PayNotify extends Mq4PayNotify{
         });
 	}
 	
-	@JmsListener(destination = PAY_NOTIFY_QUEUE_NAME)
+	@JmsListener(destination = MqConfig.MCH_REFUND_NOTIFY_QUEUE_NAME)
 	public void onMessage(String msg) {
 		receive(msg);
 	}
