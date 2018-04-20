@@ -26,7 +26,7 @@ public class MqConfig {
     
     public static final String REFUND_NOTIFY_QUEUE_NAME = "refund.notify.queue";
     
-    public static final String MCH_REFUND_NOTIFY_QUEUE_NAME ="mch_refund_notify_queue";
+    public static final String MCH_REFUND_NOTIFY_QUEUE_NAME ="mch.refund.notify.queue";
     
 	@Bean
 	@Profile(MqConfig.Impl.ACTIVE_MQ)
