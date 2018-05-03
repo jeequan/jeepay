@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.xxpay.boot.service.BaseService;
 import org.xxpay.boot.service.IPayChannel4AliService;
 import org.xxpay.boot.service.IPayChannel4WxService;
@@ -24,7 +25,11 @@ import com.alibaba.fastjson.JSONObject;
  * @version V1.0
  * @Copyright: www.xxpay.org
  */
-public abstract class Mq4RefundNotify extends BaseService {
+@Component
+public class Mq4RefundNotify extends BaseService {
+	
+	@Autowired
+	private IMqNotify mqNotify;
 
 	@Autowired
 	private IPayChannel4WxService payChannel4WxService;
@@ -37,14 +42,18 @@ public abstract class Mq4RefundNotify extends BaseService {
 
     protected static final MyLog _log = MyLog.getLog(Mq4RefundNotify.class);
 
-    public abstract void send(String msg);
+    public void send(String msg) {
+    	mqNotify.send(MqConfig.REFUND_NOTIFY_QUEUE_NAME, msg);
+    }
 
     /**
      * 发送延迟消息
      * @param msg
      * @param delay
      */
-    public abstract void send(String msg, long delay);
+    public void send(String msg, int delay) {
+    	mqNotify.send(MqConfig.REFUND_NOTIFY_QUEUE_NAME, msg, delay);
+    }
 
     public void receive(String msg) {
         _log.info("处理退款任务.msg={}", msg);

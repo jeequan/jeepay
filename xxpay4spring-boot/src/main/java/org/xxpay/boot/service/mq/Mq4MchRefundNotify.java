@@ -1,20 +1,11 @@
 package org.xxpay.boot.service.mq;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.net.URI;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.springframework.jms.annotation.JmsListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 import org.xxpay.boot.service.BaseService;
 import org.xxpay.common.util.MyLog;
 
@@ -22,27 +13,34 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- * @Description: 商户通知MQ统一处理
- * @author dingzhiwei jmdhappy@126.com
- * @date 2017-10-31
- * @version V1.0
- * @Copyright: www.xxpay.org
+ * 管理后台手动发起退款通知
+ * @author https://github.com/cbwleft
+ * @date 2018年5月3日
  */
 @Component
-public abstract class Mq4MchRefundNotify extends BaseService {
+public class Mq4MchRefundNotify extends BaseService {
+	
+	@Autowired
+	private IMqNotify mqNotify;
 
+	@Autowired
+    private RestTemplate restTemplate;
 
     protected static final MyLog _log = MyLog.getLog(Mq4MchRefundNotify.class);
 
-    public abstract void send(String msg);
+    public void send(String msg) {
+    	mqNotify.send(MqConfig.MCH_REFUND_NOTIFY_QUEUE_NAME, msg);
+    }
     /**
      * 发送延迟消息
      * @param msg
      * @param delay
      */
-    public abstract void send(String msg, long delay);
+    public void send(String msg, int delay) {
+    	mqNotify.send(MqConfig.MCH_REFUND_NOTIFY_QUEUE_NAME, msg, delay);
+    	
+    }
 
-    @JmsListener(destination = MqConfig.MCH_REFUND_NOTIFY_QUEUE_NAME)
     public void receive(String msg) {
         String logPrefix = "【商户退款通知】";
         _log.info("{}接收消息:msg={}", logPrefix, msg);
@@ -54,10 +52,16 @@ public abstract class Mq4MchRefundNotify extends BaseService {
             _log.warn("{}商户通知URL为空,respUrl={}", logPrefix, respUrl);
             return;
         }
-        String httpResult = httpPost(respUrl);
+        String notifyResult = "";
         int cnt = count + 1;
         _log.info("{}notifyCount={}", logPrefix, cnt);
-        if("success".equalsIgnoreCase(httpResult)){
+        try {
+        	 URI uri = new URI(respUrl);
+        	 notifyResult = restTemplate.postForObject(uri, null, String.class);
+        }catch (Exception e) {
+        	_log.error(e, "通知商户系统异常");
+		}
+        if("success".equalsIgnoreCase(notifyResult)){
             // 修改退款订单表
             try {
                 int result = baseUpdateStatus4CompleteByRefund(orderId);
@@ -67,8 +71,8 @@ public abstract class Mq4MchRefundNotify extends BaseService {
             }
             // 修改通知
             try {
-                int result = super.baseUpdateMchNotifySuccess(orderId, httpResult, (byte) cnt);
-                _log.info("{}订单退款修改商户通知,orderId={},result={},notifyCount={},结果:{}", logPrefix, orderId, httpResult, cnt, result == 1 ? "成功" : "失败");
+                int result = super.baseUpdateMchNotifySuccess(orderId, notifyResult, (byte) cnt);
+                _log.info("{}订单退款修改商户通知,orderId={},result={},notifyCount={},结果:{}", logPrefix, orderId, notifyResult, cnt, result == 1 ? "成功" : "失败");
             }catch (Exception e) {
                 _log.error(e, "订单退款修改商户支付通知异常");
             }
@@ -76,8 +80,8 @@ public abstract class Mq4MchRefundNotify extends BaseService {
         }else {
             // 修改通知次数
             try {
-                int result = super.baseUpdateMchNotifyFail(orderId, httpResult, (byte) cnt);
-                _log.info("{}订单退款修改商户通知,orderId={},result={},notifyCount={},结果:{}", logPrefix, orderId, httpResult, cnt, result == 1 ? "成功" : "失败");
+                int result = super.baseUpdateMchNotifyFail(orderId, notifyResult, (byte) cnt);
+                _log.info("{}订单退款修改商户通知,orderId={},result={},notifyCount={},结果:{}", logPrefix, orderId, notifyResult, cnt, result == 1 ? "成功" : "失败");
             }catch (Exception e) {
                 _log.error(e, "订单退款修改商户支付通知异常");
             }
@@ -92,68 +96,4 @@ public abstract class Mq4MchRefundNotify extends BaseService {
         }
     }
     
-    private static class TrustAnyTrustManager implements X509TrustManager {
-        public void checkClientTrusted(X509Certificate[] chain, String authType)
-                throws CertificateException {
-        }
-        public void checkServerTrusted(X509Certificate[] chain, String authType)
-                throws CertificateException {
-        }
-        public X509Certificate[] getAcceptedIssuers() {
-            return new X509Certificate[] {};
-        }
-    }
-
-    public String httpPost(String url) {
-        StringBuffer sb = new StringBuffer();
-        try {
-            URL console = new URL(url);
-            if("https".equals(console.getProtocol())) {
-                SSLContext sc = SSLContext.getInstance("SSL");
-                sc.init(null, new TrustManager[] { new TrustAnyTrustManager() },
-                        new java.security.SecureRandom());
-                HttpsURLConnection con = (HttpsURLConnection) console.openConnection();
-                con.setSSLSocketFactory(sc.getSocketFactory());
-                con.setRequestMethod("POST");
-                con.setDoInput(true);
-                con.setDoOutput(true);
-                con.setUseCaches(false);
-                con.setConnectTimeout(30 * 1000);
-                con.setReadTimeout(60 * 1000);
-                con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()), 1024*1024);
-                while (true) {
-                    String line = in.readLine();
-                    if (line == null) {
-                        break;
-                    }
-                    sb.append(line);
-                }
-                in.close();
-            }else if("http".equals(console.getProtocol())) {
-                HttpURLConnection con = (HttpURLConnection) console.openConnection();
-                con.setRequestMethod("POST");
-                con.setDoInput(true);
-                con.setDoOutput(true);
-                con.setUseCaches(false);
-                con.setConnectTimeout(30 * 1000);
-                con.setReadTimeout(60 * 1000);
-                con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()), 1024*1024);
-                while (true) {
-                    String line = in.readLine();
-                    if (line == null) {
-                        break;
-                    }
-                    sb.append(line);
-                }
-                in.close();
-            }else {
-                _log.error("not do protocol. protocol=%s", console.getProtocol());
-            }
-        } catch(Exception e) {
-            _log.error(e, "httpPost exception. url:%s", url);
-        }
-        return sb.toString();
-    }
 }

@@ -3,6 +3,7 @@ package org.xxpay.boot.service.mq;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.xxpay.common.util.MyLog;
@@ -19,21 +20,29 @@ import java.util.Date;
  * @version V1.0
  * @Copyright: www.xxpay.org
  */
-public abstract class Mq4PayNotify extends BaseService {
+@Component
+public class Mq4PayNotify extends BaseService {
+	
+	@Autowired
+	private IMqNotify mqNotify;
 
     @Autowired
     private RestTemplate restTemplate;
 
     protected static final MyLog _log = MyLog.getLog(Mq4PayNotify.class);
 
-    public abstract void send(String msg);
+    public void send(String msg) {
+    	mqNotify.send(MqConfig.PAY_NOTIFY_QUEUE_NAME, msg);
+    }
 
     /**
      * 发送延迟消息
      * @param msg
      * @param delay
      */
-    public abstract void send(String msg, long delay);
+    public void send(String msg, int delay) {
+    	mqNotify.send(MqConfig.PAY_NOTIFY_QUEUE_NAME, msg, delay);
+    }
 
     public void receive(String msg) {
         _log.info("do notify task, msg={}", msg);

@@ -47,8 +47,6 @@ public class ManualSendNotifyController {
 	 * @param request
 	 * @param orderId
 	 * @return
-	 * @throws ServletException
-	 * @throws IOException
 	 */
 	@RequestMapping("/manual/send/notify")
 	@ResponseBody
