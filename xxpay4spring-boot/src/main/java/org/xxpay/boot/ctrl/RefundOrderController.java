@@ -5,6 +5,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,16 +54,15 @@ public class RefundOrderController {
      * @param params
      * @return
      */
-    @RequestMapping(value = "/api/refund/create_order")
-    public String payOrder(@RequestParam String params) {
+    @RequestMapping(value = "/api/refund/create_order", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String payOrder(@RequestBody JSONObject params) {
         _log.info("###### 开始接收商户统一退款请求 ######");
         String logPrefix = "【商户统一退款】";
         try {
-            JSONObject po = JSONObject.parseObject(params);
             JSONObject refundContext = new JSONObject();
             JSONObject refundOrder = null;
             // 验证参数有效性
-            Object object = validateParams(po, refundContext);
+            Object object = validateParams(params, refundContext);
             if (object instanceof String) {
                 _log.info("{}参数校验不通过:{}", logPrefix, object);
                 return XXPayUtil.makeRetFail(XXPayUtil.makeRetMap(PayConstant.RETURN_VALUE_FAIL, object.toString(), null, null));

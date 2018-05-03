@@ -52,7 +52,7 @@ public class ManualSendNotifyController {
 	 */
 	@RequestMapping("/manual/send/notify")
 	@ResponseBody
-	public String manualSendNotify(HttpServletRequest request, String orderId, Long count) throws ServletException, IOException {
+	public String manualSendNotify(String orderId, Long count){
 		_log.info("====== 开始手动发送通知 ======");
 		MchNotify  mchNotify  = mchInfoServiceImpl.baseSelectMchNotify(orderId);
 		if (mchNotify == null) {
