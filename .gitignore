@@ -3,3 +3,14 @@
 /log/
 target/
 *.project
+*log/
+*logs/
+
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans

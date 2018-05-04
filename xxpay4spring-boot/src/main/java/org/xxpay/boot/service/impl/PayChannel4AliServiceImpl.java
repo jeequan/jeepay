@@ -1,18 +1,8 @@
 package org.xxpay.boot.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alipay.api.AlipayApiException;
-import com.alipay.api.AlipayClient;
-import com.alipay.api.DefaultAlipayClient;
-import com.alipay.api.domain.AlipayTradeAppPayModel;
-import com.alipay.api.domain.AlipayTradePagePayModel;
-import com.alipay.api.domain.AlipayTradePrecreateModel;
-import com.alipay.api.domain.AlipayTradeWapPayModel;
-import com.alipay.api.request.AlipayTradeAppPayRequest;
-import com.alipay.api.request.AlipayTradePagePayRequest;
-import com.alipay.api.request.AlipayTradePrecreateRequest;
-import com.alipay.api.request.AlipayTradeWapPayRequest;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +13,33 @@ import org.xxpay.boot.service.channel.alipay.AlipayConfig;
 import org.xxpay.common.constant.PayConstant;
 import org.xxpay.common.domain.BaseParam;
 import org.xxpay.common.enumm.RetEnum;
-import org.xxpay.common.util.*;
+import org.xxpay.common.util.AmountUtil;
+import org.xxpay.common.util.BeanConvertUtils;
+import org.xxpay.common.util.JsonUtil;
+import org.xxpay.common.util.MyLog;
+import org.xxpay.common.util.ObjectValidUtil;
+import org.xxpay.common.util.RpcUtil;
+import org.xxpay.common.util.XXPayUtil;
 import org.xxpay.dal.dao.model.PayChannel;
 import org.xxpay.dal.dao.model.PayOrder;
+import org.xxpay.dal.dao.model.RefundOrder;
 
-import java.util.Map;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.domain.AlipayTradeAppPayModel;
+import com.alipay.api.domain.AlipayTradePagePayModel;
+import com.alipay.api.domain.AlipayTradePrecreateModel;
+import com.alipay.api.domain.AlipayTradeRefundModel;
+import com.alipay.api.domain.AlipayTradeWapPayModel;
+import com.alipay.api.request.AlipayTradeAppPayRequest;
+import com.alipay.api.request.AlipayTradePagePayRequest;
+import com.alipay.api.request.AlipayTradePrecreateRequest;
+import com.alipay.api.request.AlipayTradeRefundRequest;
+import com.alipay.api.request.AlipayTradeWapPayRequest;
+import com.alipay.api.response.AlipayTradeRefundResponse;
 
 /**
  * @author: dingzhiwei
@@ -281,6 +293,55 @@ public class PayChannel4AliServiceImpl extends BaseService implements IPayChanne
         Map<String, Object> map = XXPayUtil.makeRetMap(PayConstant.RETURN_VALUE_SUCCESS, "", PayConstant.RETURN_VALUE_SUCCESS, null);
         map.put("payOrderId", payOrderId);
         map.put("payUrl", payUrl);
+        return RpcUtil.createBizResult(baseParam, map);
+    }
+    
+    @Override
+    public Map doAliRefundReq(String jsonParam) {
+        String logPrefix = "【支付宝退款】";
+        BaseParam baseParam = JsonUtil.getObjectFromJson(jsonParam, BaseParam.class);
+        Map<String, Object> bizParamMap = baseParam.getBizParamMap();
+        if (ObjectValidUtil.isInvalid(bizParamMap)) {
+            _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_NOT_FOUND.getMessage(), jsonParam);
+            return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_NOT_FOUND);
+        }
+        JSONObject refundOrderObj = baseParam.isNullValue("refundOrder") ? null : JSONObject.parseObject(bizParamMap.get("refundOrder").toString());
+        RefundOrder refundOrder = JSON.toJavaObject(refundOrderObj, RefundOrder.class);
+        if (ObjectValidUtil.isInvalid(refundOrder)) {
+            _log.warn("{}失败, {}. jsonParam={}", logPrefix, RetEnum.RET_PARAM_INVALID.getMessage(), jsonParam);
+            return RpcUtil.createFailResult(baseParam, RetEnum.RET_PARAM_INVALID);
+        }
+        String refundOrderId = refundOrder.getRefundOrderId();
+        String mchId = refundOrder.getMchId();
+        String channelId = refundOrder.getChannelId();
+        PayChannel payChannel = baseSelectPayChannel(mchId, channelId);
+        alipayConfig.init(payChannel.getParam());
+        AlipayClient client = new DefaultAlipayClient(alipayConfig.getUrl(), alipayConfig.getApp_id(), alipayConfig.getRsa_private_key(), AlipayConfig.FORMAT, AlipayConfig.CHARSET, alipayConfig.getAlipay_public_key(), AlipayConfig.SIGNTYPE);
+        AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
+        AlipayTradeRefundModel model = new AlipayTradeRefundModel();
+        model.setOutTradeNo(refundOrder.getPayOrderId());
+        model.setTradeNo(refundOrder.getChannelPayOrderNo());
+        model.setOutRequestNo(refundOrderId);
+        model.setRefundAmount(AmountUtil.convertCent2Dollar(refundOrder.getRefundAmount().toString()));
+        model.setRefundReason("正常退款");
+        request.setBizModel(model);
+        Map<String, Object> map = new HashMap<>();
+        map.put("refundOrderId", refundOrderId);
+        map.put("isSuccess", false);
+        try {
+            AlipayTradeRefundResponse response = client.execute(request);
+            if(response.isSuccess()){
+                map.put("isSuccess", true);
+                map.put("channelOrderNo", response.getTradeNo());
+            }else {
+                _log.info("{}返回失败", logPrefix);
+                _log.info("sub_code:{},sub_msg:{}", response.getSubCode(), response.getSubMsg());
+                map.put("channelErrCode", response.getSubCode());
+                map.put("channelErrMsg", response.getSubMsg());
+            }
+        } catch (AlipayApiException e) {
+            _log.error(e, "");
+        }
         return RpcUtil.createBizResult(baseParam, map);
     }
 

@@ -1,20 +1,22 @@
 package org.xxpay.boot.service;
 
-import com.alibaba.fastjson.JSONObject;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.xxpay.boot.service.mq.Mq4PayNotify;
 import org.xxpay.common.constant.PayConstant;
 import org.xxpay.common.util.MyLog;
 import org.xxpay.common.util.PayDigestUtil;
 import org.xxpay.common.util.XXPayUtil;
 import org.xxpay.dal.dao.model.MchInfo;
+import org.xxpay.dal.dao.model.MchNotify;
 import org.xxpay.dal.dao.model.PayOrder;
-import org.xxpay.boot.service.mq.Mq4PayNotify;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * @Description: 支付通知处理基类
@@ -95,10 +97,10 @@ public class Notify4BasePay extends BaseService {
 	/**
 	 * 处理支付结果后台服务器通知
 	 */
-	public void doNotify(PayOrder payOrder) {
+	public void doNotify(PayOrder payOrder, boolean isFirst) {
 		_log.info(">>>>>> PAY开始回调通知业务系统 <<<<<<");
 		// 发起后台通知业务系统
-		JSONObject object = createNotifyInfo(payOrder);
+		JSONObject object = createNotifyInfo(payOrder, isFirst);
 		try {
 			mq4PayNotify.send(object.toJSONString());
 		} catch (Exception e) {
@@ -107,13 +109,26 @@ public class Notify4BasePay extends BaseService {
 		_log.info(">>>>>> PAY回调通知业务系统完成 <<<<<<");
 	}
 
-	public JSONObject createNotifyInfo(PayOrder payOrder) {
+	public JSONObject createNotifyInfo(PayOrder payOrder,boolean isFirst) {
+		
+		String url = createNotifyUrl(payOrder, "2");
 		JSONObject object = new JSONObject();
 		object.put("method", "GET");
-		object.put("url", createNotifyUrl(payOrder, "2"));
+		object.put("url", url);
 		object.put("orderId", payOrder.getPayOrderId());
-		object.put("count", payOrder.getNotifyCount());
+		object.put("count", 0);
 		object.put("createTime", System.currentTimeMillis());
+		
+		if(isFirst) {
+			int result = baseInsertMchNotify(payOrder.getPayOrderId(), payOrder.getMchId(), payOrder.getMchOrderNo(), PayConstant.MCH_NOTIFY_TYPE_PAY, object.toString());
+			_log.info("增加商户通知记录,orderId={},result:{}", payOrder.getPayOrderId(), result);
+		}
+		/*int count = 0;
+		if(!isFirst) {
+			MchNotify mchNotify = baseSelectMchNotify(payOrder.getPayOrderId());
+			if(mchNotify != null) count = mchNotify.getNotifyCount();
+		}*/
+		
 		return object;
 	}
 
