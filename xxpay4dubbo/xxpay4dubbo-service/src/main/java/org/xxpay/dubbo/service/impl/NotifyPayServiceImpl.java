@@ -246,7 +246,7 @@ public class NotifyPayServiceImpl extends BaseNotify4MchPay implements INotifyPa
 
         //校验结果是否成功
         if (!PayConstant.RETURN_VALUE_SUCCESS.equalsIgnoreCase(params.getResultCode())
-                || !PayConstant.RETURN_VALUE_SUCCESS.equalsIgnoreCase(params.getReturnCode())) {
+                && !PayConstant.RETURN_VALUE_SUCCESS.equalsIgnoreCase(params.getReturnCode())) {
             _log.error("returnCode={},resultCode={},errCode={},errCodeDes={}", params.getReturnCode(), params.getResultCode(), params.getErrCode(), params.getErrCodeDes());
             payContext.put("retMsg", "notify data failed");
             return false;
