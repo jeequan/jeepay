@@ -1,6 +1,11 @@
->XxPay'官方技术交流群①：206119456`已满2000` 群②:885394559`已满1000` 群③:742057837（加群暗号：xxpay技术交流）。
+>XxPay'官方技术交流群①：206119456`已满2000` 群②:885394559`已满1000` 群③:742057837`已满500`。
 
->XxPay'官方资源交流群①：214196580`已满500` 群②:838740906`已满500` 群③:616686832 （加群暗号：xxpay资源交流）。
+>XxPay'官方资源交流群①：214196580`已满500` 群②:838740906`已满500` 群③:616686832`已满500`。
+
+>XxPay'官方支付交流群④：709597332 （加群暗号：xxpay支付交流）
+
+>XxPay'官方支付交流群①:727313291`2000人大群` 官方已发布刷脸支付商业版系统：https://www.xxpay.vip/cates/service/135.html
+
 ***
 
 ### 项目介绍
@@ -10,15 +15,17 @@
 
 - 目前已经接入支付渠道：微信(公众号支付、扫码支付、APP支付、H5支付)、支付宝(电脑网站支付、手机网站支付、APP支付、当面付)；
 
-> [XxPay官网：http://www.xxpay.org](http://www.xxpay.org "xxpay官方网站")
+> [XxPay开源官网：http://www.xxpay.org](http://www.xxpay.org "xxpay官方网站")
 
-> [XxPay开发社区：http://pub.xxpay.org](http://pub.xxpay.org "xxpay开发社区")
+> [XxPay商业官网：https://www.xxpay.vip](https://www.xxpay.vip "xxpay商业系统")
 
 > [XxPay统一扫码支付体验：http://shop.xxpay.org/goods/openQrPay.html](http://shop.xxpay.org/goods/openQrPay.html "xxpay支付体验")
 
 > [XxPay运营平台演示：http://mgr.xxpay.org](http://mgr.xxpay.org "xxpay运营平台")
 
 > [XxPay文档库：http://docs.xxpay.org](http://docs.xxpay.org "xxpay文档库")
+
+> [XxPay刷脸支付系统介绍：https://www.yuque.com/dingzhiwei/xxpayface](https://www.yuque.com/dingzhiwei/xxpayface "XxPay刷脸支付系统介绍")
 
 ### 版本更新
 ***
