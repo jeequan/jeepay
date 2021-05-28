@@ -1,6 +1,10 @@
 >XxPay项目已更为Jeepay，由原XxPay团队开发维护。
 
+![输入图片说明](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/001.png "Xxpay运营平台")
+
 ***
+
+
 
 ### 项目介绍
 ***
