@@ -1,10 +1,12 @@
 ### 郑重声明
 
+![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/001.png "Jeepay演示界面")
+
 > 原`XxPay聚合支付`项目已更名为Jeepay，由原XxPay团队开发维护。目前`Jeepay`开发已经进入收尾阶段，最晚6月初会发布源码到Github和码云上。
 
 > 新版Jeepay支付系统，使用SpringBoot + Ant Vue开发，适合互联网企业搭建内部支付系统。支持普通商户和服务商模式，已对接微信、支付宝、云闪付官方通道。统一的下单接口，实现主扫/被扫（聚合）。
 
-> 请关注官方网站[www.jeequan.com：https://www.jeequan.com](https://www.jeequan.com "计全科技官网")或官方公众号（微信搜索：计全科技），获取Jeepay最新发布消息，如果您喜欢该项目，不妨随手Star下。
+> 请关注官方网站[www.jeequan.com](https://www.jeequan.com "计全科技官网")或官方公众号（微信搜索：计全科技），获取Jeepay最新发布消息，如果您喜欢该项目，不妨随手Star下。
 
 > 待发布源码时，会更公布官方qq或微信技术交流群，同时会发布使用文档及演示地址。
 
