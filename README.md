@@ -1,4 +1,12 @@
->XxPay项目已更为Jeepay，由原XxPay团队开发维护。
+## 郑重声明
+
+> 原`XxPay聚合支付`项目已更为Jeepay，由原XxPay团队开发维护。目前`Jeepay`开发已经进入测试阶段，最晚6月初会发布源码到Github和Gitee上。
+
+> 请关注官方网站www.jeequan.com或官方公众号，获取Jeepay最新发布消息，如果您喜欢该项目，不妨随手Star下。
+
+> 待发布源码时，更公布官方的qq或微信技术群，同时会发布全面的使用文档及演示地址供大家体验。
+
+## 平台截图
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/001.png "Jeepay演示界面")
 
