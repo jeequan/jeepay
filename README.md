@@ -1,6 +1,6 @@
 ### 郑重声明
 
-![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/001.png "Jeepay演示界面")
+![Jeepay系统架构图](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_framework.png "Jeepay系统架构图")
 
 > 原`XxPay聚合支付`项目已更名为Jeepay，由原XxPay团队开发维护。目前`Jeepay`开发已经进入收尾阶段，最晚6月初会发布源码到Github和码云上。
 
@@ -13,6 +13,8 @@
 ### 功能预览
 
 `以下截图是从实际已完成功能界面截取,截图时间为：2021-05-29 02:05`
+
+![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/001.png "Jeepay演示界面")
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/002.png "Jeepay演示界面")
 
