@@ -1,6 +1,6 @@
 ### 郑重声明
 
-![Jeepay系统架构图](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_framework.png "Jeepay系统架构图")
+![Jeepay系统架构图](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_framework.png "Jeepay系统架构图")
 
 > 原`XxPay聚合支付`项目已更名为Jeepay，由原XxPay团队开发维护。目前`Jeepay`开发已经进入收尾阶段，最晚6月初会发布源码到Github和码云上。
 
@@ -9,6 +9,16 @@
 > 请关注官方网站[www.jeequan.com](https://www.jeequan.com "计全科技官网")或官方公众号（微信搜索：计全科技），获取Jeepay最新发布消息，如果您喜欢该项目，不妨随手Star下。
 
 > 待发布源码时，会更公布官方qq或微信技术交流群，同时会发布使用文档及演示地址。
+
+### 功能列表
+
+> Jeepay运营平台功能
+
+![Jeepay运营平台功能](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_mgr.png "Jeepay运营平台功能")
+
+> Jeepay商户系统功能
+
+![Jeepay商户系统功能](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_mch.png "Jeepay商户系统功能")
 
 ### 功能预览
 
