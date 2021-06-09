@@ -1,5 +1,52 @@
-/.idea/
+# [ java 字节码 ]
+*.class
+
+# [ 日志文件 ]
+*.log
+
+# [ 打包压缩文件 ]
+*.jar
+*.war
+*.zip
+*.tar.gz
+*.rar
+
+# [ java 虚拟机异常日志 see http://www.java.com/en/download/help/error_hotspot.xml ]
+hs_err_pid*
+
+# [ 操作系统缓存和备份 ]
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+
+# [ eclipse ]
+.metadata
+bin/
+.settings
+.classpath
+.project
+
+# [ IDEA ]
+.idea/
 *.iml
-/log/
+
+# [ MAVEN ]
 target/
-*.project
+
+# [Jrebel]
+rebel.xml
+
+# ################################################  前端  ###################
+# [npm包管理依赖]
+node_modules/
+
+# [dist目录]
+dist/
+
+# [HBuilderX  编译目录 ]
+unpackage/
+
+# [vscode IDE]
+.vscode/
