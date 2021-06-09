@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeequan.jeepay.service.mapper.RefundOrderMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jeequan.jeepay.core.entity.RefundOrder">
+        <id column="refund_order_id" property="refundOrderId" />
+        <result column="pay_order_id" property="payOrderId" />
+        <result column="channel_pay_order_no" property="channelPayOrderNo" />
+        <result column="mch_no" property="mchNo" />
+        <result column="mch_type" property="mchType" />
+        <result column="mch_refund_no" property="mchRefundNo" />
+        <result column="isv_no" property="isvNo" />
+        <result column="way_code" property="wayCode" />
+        <result column="if_code" property="ifCode" />
+        <result column="pay_amount" property="payAmount" />
+        <result column="refund_amount" property="refundAmount" />
+        <result column="currency" property="currency" />
+        <result column="state" property="state" />
+        <result column="result" property="result" />
+        <result column="client_ip" property="clientIp" />
+        <result column="remark" property="remark" />
+        <result column="channel_order_no" property="channelOrderNo" />
+        <result column="channel_err_code" property="channelErrCode" />
+        <result column="channel_err_msg" property="channelErrMsg" />
+        <result column="channel_extra" property="channelExtra" />
+        <result column="notify_url" property="notifyUrl" />
+        <result column="ext_param" property="extParam" />
+        <result column="success_time" property="successTime" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+</mapper>

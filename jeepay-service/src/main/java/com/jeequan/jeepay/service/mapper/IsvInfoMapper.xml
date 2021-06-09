@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeequan.jeepay.service.mapper.IsvInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jeequan.jeepay.core.entity.IsvInfo">
+        <id column="isv_no" property="isvNo" />
+        <result column="isv_name" property="isvName" />
+        <result column="isv_short_name" property="isvShortName" />
+        <result column="contact_name" property="contactName" />
+        <result column="contact_tel" property="contactTel" />
+        <result column="contact_email" property="contactEmail" />
+        <result column="state" property="state" />
+        <result column="remark" property="remark" />
+        <result column="created_uid" property="createdUid" />
+        <result column="created_by" property="createdBy" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+</mapper>

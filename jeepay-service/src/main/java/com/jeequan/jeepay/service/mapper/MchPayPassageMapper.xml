@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeequan.jeepay.service.mapper.MchPayPassageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jeequan.jeepay.core.entity.MchPayPassage">
+        <id column="id" property="id" />
+        <result column="mch_no" property="mchNo" />
+        <result column="if_code" property="ifCode" />
+        <result column="way_code" property="wayCode" />
+        <result column="rate" property="rate" />
+        <result column="risk_config" property="riskConfig" />
+        <result column="state" property="state" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+    <!-- 根据支付方式查询可用的支付接口列表  -->
+    <select id="selectAvailablePayInterfaceList" resultType="com.alibaba.fastjson.JSONObject" parameterType="java.util.Map">
+        select pid.if_code ifCode, pid.if_name ifName, pid.bg_color bgColor, pid.icon icon, pic.if_params ifParams, pic.if_rate ifRate from t_pay_interface_define pid
+        inner join t_pay_interface_config pic on pid.if_code = pic.if_code
+        where JSON_CONTAINS(pid.way_codes, JSON_OBJECT('wayCode', #{wayCode}))
+        and pid.state = 1
+        and pic.state = 1
+        and pic.info_type = #{infoType}
+        and pic.info_id = #{mchNo}
+        and (pic.if_params is not null and trim(pic.if_params) != '')
+        <if test="mchType == 1">
+            and pid.is_mch_mode = 1
+        </if>
+        <if test="mchType == 2">
+            and pid.is_isv_mode = 1
+        </if>;
+    </select>
+
+
+
+</mapper>

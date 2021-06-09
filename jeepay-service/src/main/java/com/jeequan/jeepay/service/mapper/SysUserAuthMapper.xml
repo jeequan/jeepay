@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeequan.jeepay.service.mapper.SysUserAuthMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jeequan.jeepay.core.entity.SysUserAuth">
+        <id column="auth_id" property="authId" />
+        <result column="user_id" property="userId" />
+        <result column="identity_type" property="identityType" />
+        <result column="identifier" property="identifier" />
+        <result column="credential" property="credential" />
+        <result column="salt" property="salt" />
+        <result column="system" property="system" />
+    </resultMap>
+
+
+    <!-- 根据登录信息查询 -->
+    <select id="selectByLogin" resultMap="BaseResultMap">
+        select a.* from t_sys_user_auth a left join t_sys_user u on a.user_id = u.sys_user_id
+        where a.identity_type = #{identityType} and a.identifier = #{identifier} and a.system = #{system}
+    </select>
+
+
+</mapper>

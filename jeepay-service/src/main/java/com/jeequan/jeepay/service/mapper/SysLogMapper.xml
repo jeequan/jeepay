@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeequan.jeepay.service.mapper.SysLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jeequan.jeepay.core.entity.SysLog">
+        <id column="sys_log_id" property="sysLogId" />
+        <result column="user_id" property="userId" />
+        <result column="user_name" property="userName" />
+        <result column="user_ip" property="userIp" />
+        <result column="system" property="system" />
+        <result column="method_name" property="methodName" />
+        <result column="method_remark" property="methodRemark" />
+        <result column="req_url" property="reqUrl" />
+        <result column="opt_req_param" property="optReqParam" />
+        <result column="opt_res_info" property="optResInfo" />
+        <result column="created_at" property="createdAt" />
+    </resultMap>
+
+</mapper>

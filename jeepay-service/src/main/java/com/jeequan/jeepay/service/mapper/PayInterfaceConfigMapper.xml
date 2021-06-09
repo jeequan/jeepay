@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeequan.jeepay.service.mapper.PayInterfaceConfigMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jeequan.jeepay.core.entity.PayInterfaceConfig">
+        <id column="id" property="id" />
+        <result column="info_type" property="infoType" />
+        <result column="info_id" property="infoId" />
+        <result column="if_code" property="ifCode" />
+        <result column="if_params" property="ifParams" />
+        <result column="if_rate" property="ifRate" />
+        <result column="state" property="state" />
+        <result column="remark" property="remark" />
+        <result column="created_uid" property="createdUid" />
+        <result column="created_by" property="createdBy" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_uid" property="updatedUid" />
+        <result column="updated_by" property="updatedBy" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+</mapper>

@@ -1,29 +1,145 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion> <!-- POM模型版本 -->
 
-  <groupId>org.xxpay</groupId>
-  <artifactId>xxpay-master</artifactId>
-  <version>1.0.0</version>
-  <packaging>pom</packaging>
-  <name>xxpay-master</name>
-  <description>xxpay-master</description>
+  <groupId>com.jeequan</groupId> <!-- 组织名, 类似于包名 -->
+  <artifactId>jeepay</artifactId>  <!-- 项目名称  -->
+  <packaging>pom</packaging> <!-- 项目的最终打包类型/发布形式, 可选[jar, war, pom, maven-plugin]等 -->
 
+  <name>jeepay</name>
+  <version>1.0.0</version> <!-- pom版本号/项目总版本号， 每个子项目引入的版本号必须一致。  -->
+  <description>Jeepay计全支付系统</description> <!-- 项目描述 -->
+  <url>https://www.jeequan.com</url>
+
+  <!-- 继承：Spring Boot Parent -->
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.4.5</version>
+  </parent>
+
+  <!-- 声明子项目 -->
   <modules>
-    <module>xxpay-common</module>
-    <module>xxpay-dal</module>
-    <module>xxpay-mgr</module>
-    <module>xxpay-shop</module>
-    <module>xxpay4spring-cloud</module>
-    <module>xxpay4dubbo</module>
-    <module>xxpay4spring-boot</module>
+    <module>jeepay-z-codegen</module>    <!-- 代码生成器 -->
+
+    <module>jeepay-core</module>  <!-- 基础函数, 包含工具类等 -->
+    <module>jeepay-service</module>  <!-- db service等 -->
+  	<module>jeepay-manager</module>	<!-- 运营平台管理端 -->
+  	<module>jeepay-merchant</module>	<!-- 商户平台管理端 -->
+    <module>jeepay-payment</module>	<!-- 支付统一网关 -->
   </modules>
 
+  <!-- 配置属性声明, 支持自定义参数 -->
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>1.8</java.version>
+    <java.version>1.8</java.version> <!-- 指定java版本号 -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> <!-- 项目构建输出编码 -->
+    <isys.version>1.0.0</isys.version> <!-- 指定当前[项目]版本号 -->
+
+    <!-- 其他工具包 -->
+    <fastjson.version>1.2.76</fastjson.version> <!-- fastjson -->
+    <mybatis.plus.starter.version>3.4.2</mybatis.plus.starter.version>  <!-- mybatis plus -->
+    <hutool.util.version>5.6.6</hutool.util.version>  <!-- hutool -->
+    <spring.security.version>5.4.6</spring.security.version> <!-- 用于core的scope依赖 -->
+    <jjwt.version>0.9.1</jjwt.version>
+    <binarywang.weixin.java.version>4.1.0</binarywang.weixin.java.version>
+
   </properties>
+
+
+  <!-- 依赖包管理， 按需添加 -->
+  <dependencyManagement>
+    <dependencies>
+
+        <!-- alibaba FastJSON -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
+        </dependency>
+
+        <!-- Spring Security -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>${spring.security.version}</version>
+        </dependency>
+
+        <!-- JWT  -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+
+        <!--wx_pay  https://github.com/wechat-group/WxJava  -->
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-pay</artifactId>
+            <version>${binarywang.weixin.java.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-mp</artifactId>
+            <version>${binarywang.weixin.java.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis.plus.starter.version}</version>
+        </dependency>
+
+        <!-- 生成二维码依赖 -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.alipay.sdk/alipay-sdk-java -->
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>4.13.50.ALL</version>
+        </dependency>
+
+    </dependencies>
+
+  </dependencyManagement>
+
+  <!-- 所有项目 项目依赖声明 -->
+  <dependencies>
+
+      <dependency>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok</artifactId>
+          <optional>true</optional>
+          <scope>provided</scope> <!-- 编译阶段生效，不需要打入包中 -->
+      </dependency>
+
+      <!-- https://mvnrepository.com/artifact/cn.hutool/hutool-all -->
+      <dependency>
+          <groupId>cn.hutool</groupId>
+          <artifactId>hutool-all</artifactId>
+          <version>${hutool.util.version}</version>
+      </dependency>
+  </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!--引入插件-->
+            </plugins>
+        </pluginManagement>
+    </build>
+
 
 </project>

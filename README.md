@@ -1,16 +1,120 @@
-### 郑重声明
+<p align="center">
+	<a href="https://www.jeepay.vip"><img src="https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_logo.svg"></a>
+</p>
+<p align="center">
+	<strong>适合互联网企业使用的开源支付系统</strong>
+</p>
+<p align="center">
+	👉 <a href="https://www.jeepay.vip">https://www.jeepay.vip</a> 👈
+</p>
+
+<p align="center">
+	<a target="_blank" href="https://spring.io/projects/spring-boot">
+		<img src="https://img.shields.io/badge/spring%20boot-2.4.5-yellowgreen" />
+	</a>
+    <a target="_blank" href="https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html">
+		<img src="https://img.shields.io/badge/JDK-8+-green.svg" />
+	</a>
+	<a target="_blank" href="http://www.gnu.org/licenses/lgpl.html">
+		<img src="https://img.shields.io/badge/license-LGPL--3.0-blue" />
+	</a>
+	<a href='https://gitee.com/jeequan/jeepay/stargazers' target="_blank">
+        <img src='https://gitee.com/jeequan/jeepay/badge/star.svg?theme=gvp' alt='star'></img>
+    </a>
+	<a target="_blank" href='https://github.com/jeequan/jeepay'>
+		<img src="https://img.shields.io/github/stars/jeequan/jeepay.svg?style=social" alt="github star"/>
+	</a>
+</p>
+
+<br/>
+<p align="center">
+	<a href="https://jq.qq.com/?_wv=1027&k=94WnXmdL">
+        <img src="https://img.shields.io/badge/qq%E7%BE%A4%E2%91%A0-635647058-critical"/>
+    </a>
+</p>
+
+-------------------------------------------------------------------------------
+
+## 📚 项目介绍
+
+Jeepay是一套适合互联网企业使用的开源支付系统，支持多渠道服务商和普通商户模式。已对接`微信支付`，`支付宝`，`云闪付`官方接口，支持聚合码支付。
+
+Jeepay使用`Spring Boot`和`Ant Design Vue`开发，集成`Spring Security`实现权限管理功能，是一套非常实用的web开发框架。
+
+### 🎁 名称的由来
+
+Jeepay = Jee + pay，是由原XxPay支付系统作者带领团队开发，“Jee”是公司计全科技名称的表示，pay表示支付。中文名称为计全支付，释为：计出万全、支付安全，让支付更加方便安全。
+
+
+### 🍟 项目体验
+
+- Jeepay支付流程体验：[https://www.jeequan.com/demo/jeepay_cashier.html](https://www.jeequan.com/demo/jeepay_cashier.html "Jeepay支付体验")
+- Jeepay运营平台和商户系统演体验：[https://www.jeequan.com/doc/detail_84.html](https://www.jeequan.com/doc/detail_84.html "Jeepay支付系统体验")
+- Jeepay项目文档：[https://www.jeepay.vip](https://www.jeepay.vip "Jeepay项目文档")
+
+### 🍎 项目特点
+
+* 支持多渠道对接，支付网关自动路由
+* 已对接`微信`服务商和普通商户接口，支持`V2`和`V3`接口
+* 已对接`支付宝`服务商和普通商户接口，支持RSA和RSA2签名
+* 已对接`云闪付`服务商接口，可选择多家支付机构
+* 提供http形式接口，提供各语言的`sdk`实现，方便对接
+* 接口请求和响应数据采用签名机制，保证交易安全可靠
+* 系统安全，支持`分布式`部署，`高并发`
+* 管理端包括`运营平台`和`商户系统`
+* 管理平台操作界面简洁、易用
+* 支付平台到商户系统的订单通知使用MQ实现，保证了高可用，消息可达
+* 支付渠道的接口参数配置界面自动化生成
+* 使用`spring security`实现权限管理
+* 前后端分离架构，方便二次开发
+* 由原`XxPay`团队开发，有着多年支付系统开发经验
+
+## 🥞 系统架构
+
+> Jeepay计全支付系统架构图
 
 ![Jeepay系统架构图](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_framework.png "Jeepay系统架构图")
 
-> 原`XxPay聚合支付`项目已更名为Jeepay，由原XxPay团队开发维护。目前`Jeepay`开发已经进入收尾阶段，最晚6月初会发布源码到Github和码云上。
+> 核心技术栈
 
-> 新版Jeepay支付系统，使用SpringBoot + Ant Vue开发，适合互联网企业搭建内部支付系统。支持普通商户和服务商模式，已对接微信、支付宝、云闪付官方通道。统一的下单接口，实现主扫/被扫（聚合）。
+| 软件名称  | 描述 | 版本
+|---|---|---
+|Jdk | Java环境 | 1.8
+|Spring Boot | 开发框架 | 2.4.5
+|Redis | 分布式缓存 | 3.2.8 或 高版本
+|MySQL | 数据库 | 5.7.X
+|ActiveMQ | 消息中间件 | 5.15.8 或 高版本
+|[Ant Design Vue](https://www.antdv.com/docs/vue/introduce-cn/) | Ant Design的Vue实现，前端开发使用 | 2.1.2
+|[MyBatis-Plus](https://mp.baomidou.com/) | MyBatis增强工具 | 3.4.2
+|[WxJava](https://gitee.com/binary/weixin-java-tools) | 微新开发Java SDK | 4.0.0
+|[Hutool](https://www.hutool.cn/) | Java工具类库 | 5.6.6
 
-> 请关注官方网站[www.jeequan.com](https://www.jeequan.com "计全科技官网")或官方公众号（微信搜索：计全科技），获取Jeepay最新发布消息，如果您喜欢该项目，不妨随手Star下。
+> 项目结构
 
-> 待发布源码时，会更公布官方qq或微信技术交流群，同时会发布使用文档及演示地址。
+```lua
+jeepay-ui  -- https://gitee.com/jeequan/jeepay-ui
 
-### 功能列表
+jeepay
+├── conf -- 存放系统部署使用的.yml文件
+└── docs -- 存放项目相关文档说明
+     ├── script -- 项目启动shell脚本
+     └── sql -- 初始化sql文件
+├── jeepay-core -- 核心依赖包
+├── jeepay-manager -- 运营平台服务端[9217]
+├── jeepay-merchant -- 商户系统服务端[9218]
+├── jeepay-payment -- 支付网关[9216]
+├── jeepay-service -- 业务层代码
+└── jeepay-z-codegen -- mybatis代码生成
+```
+
+> 开发部署
+
+- 系统开发：[https://www.jeepay.vip/#/develop/dev_serv](https://www.jeepay.vip/#/develop/dev_serv)
+- 通道对接：[https://www.jeepay.vip/#/develop/dev_channel](https://www.jeepay.vip/#/develop/dev_channel)
+- 线上部署：[https://www.jeepay.vip/#/develop/deploy](https://www.jeepay.vip/#/develop/deploy)
+- 接口文档：[https://www.jeepay.vip/#/interface/payment_api](https://www.jeepay.vip/#/interface/payment_api)
+
+## 🍿 功能模块
 
 > Jeepay运营平台功能
 
@@ -20,7 +124,7 @@
 
 ![Jeepay商户系统功能](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_mch.png "Jeepay商户系统功能")
 
-### 功能预览
+## 🍯 系统截图
 
 `以下截图是从实际已完成功能界面截取,截图时间为：2021-05-29 02:05`
 
@@ -28,17 +132,9 @@
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/002.png "Jeepay演示界面")
 
-![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/003.png "Jeepay演示界面")
-
-![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/004.png "Jeepay演示界面")
-
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/005.png "Jeepay演示界面")
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/006.png "Jeepay演示界面")
-
-![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/007.png "Jeepay演示界面")
-
-![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/008.png "Jeepay演示界面")
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/009.png "Jeepay演示界面")
 
@@ -54,21 +150,9 @@
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/015.png "Jeepay演示界面")
 
-![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/016.png "Jeepay演示界面")
-
-![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/017.png "Jeepay演示界面")
-
-![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/018.png "Jeepay演示界面")
-
-![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/019.png "Jeepay演示界面")
-
-![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/020.png "Jeepay演示界面")
-
-![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/021.png "Jeepay演示界面")
-
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/022.png "Jeepay演示界面")
 
-### 关于我们
+## 🥪 关于我们
 ***
 微信扫描下面二维码，关注官方公众号：计全科技，获取更多精彩内容。
 

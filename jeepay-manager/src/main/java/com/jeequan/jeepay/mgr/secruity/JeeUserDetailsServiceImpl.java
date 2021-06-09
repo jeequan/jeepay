@@ -1,0 +1,87 @@
+/*
+ * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
+ * <p>
+ * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.gnu.org/licenses/lgpl.html
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.jeequan.jeepay.mgr.secruity;
+
+import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.core.entity.SysUser;
+import com.jeequan.jeepay.core.entity.SysUserAuth;
+import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.service.impl.SysUserAuthService;
+import com.jeequan.jeepay.service.impl.SysUserService;
+import com.jeequan.jeepay.core.utils.RegKit;
+import com.jeequan.jeepay.core.model.security.JeeUserDetails;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+/*
+* 实现UserDetailsService 接口
+* 
+* @author terrfly
+* @site https://www.jeepay.vip
+* @date 2021/6/8 17:13
+*/
+@Service
+public class JeeUserDetailsServiceImpl implements UserDetailsService {
+
+    @Autowired
+    private SysUserService sysUserService;
+
+    @Autowired
+    private SysUserAuthService sysUserAuthService;
+
+    /**
+     *
+     * 此函数为： authenticationManager.authenticate(upToken) 内部调用 ;
+     * 需返回 用户信息载体 / 用户密码  。
+     * 用户角色+权限的封装集合 (暂时不查询， 在验证通过后再次查询，避免用户名密码输入有误导致查询资源浪费)
+     *
+     * **/
+    @Override
+    public UserDetails loadUserByUsername(String loginUsernameStr) throws UsernameNotFoundException {
+
+        //登录方式， 默认为账号密码登录
+        Byte identityType = CS.AUTH_TYPE.LOGIN_USER_NAME;
+        if(RegKit.isMobile(loginUsernameStr)){
+            identityType = CS.AUTH_TYPE.TELPHONE; //手机号登录
+        }
+
+        //首先根据登录类型 + 用户名得到 信息
+        SysUserAuth auth = sysUserAuthService.selectByLogin(loginUsernameStr, identityType, CS.SYS_TYPE.MGR);
+
+        if(auth == null){ //没有该用户信息
+            throw new BizException("用户名/密码错误！");
+        }
+
+        //用户ID
+        Long userId = auth.getUserId();
+
+        SysUser sysUser = sysUserService.getById(userId);
+
+        if (sysUser == null) {
+            throw new BizException("用户名/密码错误！");
+        }
+
+        if(CS.PUB_USABLE != sysUser.getState()){ //状态不合法
+            throw new BizException("用户状态不可登录，请联系管理员！");
+        }
+
+        return new JeeUserDetails(sysUser, auth.getCredential());
+
+    }
+}

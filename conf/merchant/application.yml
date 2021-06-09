@@ -1,0 +1,45 @@
+#################################
+# spring boot支持外部application.yml  读取优先级为：
+#   1、file:./config/（当前目录下的config文件夹）
+#   2、file:./（当前目录）
+#   3、classpath:/config/（classpath下的config目录）
+#   4、classpath:/（classpath根目录）
+#   建议： 如果是jar则放置到与jar相同的目录下，  如果解压文件放置到classpath: config目录下。 (需要将文件重命名为 application.yml )
+#
+#   该yml文件只配置与环境相关的参数， 其他配置读取项目下的配置项
+#
+#################################
+
+server:
+  port: 9218 # 设置端口为 9218
+spring:
+  datasource:
+    # yml填写url连接串， 无需将&符号进行转义
+    url: jdbc:mysql://127.0.0.1:3306/jeepaydb?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
+    username: jeepay
+    password: 123456
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
+  #activeMQ配置
+  activemq:
+    broker-url: tcp://localhost:61616  #连接地址
+
+  #日志配置参数。
+  # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
+  # 不存在logback-spring.xml 文件时， 使用springboot的配置， 同样可用。
+logging:
+  level:
+    root: info   #主日志级别
+    com.jeequan.jeepay: debug   #该项目日志级别，当需要打印sql时请开启为debug
+  path: ./logs  #日志存放地址
+
+#系统业务参数
+isys:
+  allow-cors: false #是否允许跨域请求 [生产环境建议关闭， 若api与前端项目没有在同一个域名下时，应开启此配置或在nginx统一配置允许跨域]
+  jwt-secret: ARNXp4MzjOOQqxtv #生成jwt的秘钥。 要求每个系统有单独的秘钥管理机制。
+
+  # 文件系统配置项（系统内oss， 并非云oss）
+  oss-file:
+    root-path: /home/jeepay/upload #存储根路径 ( 无需以‘/’结尾 )

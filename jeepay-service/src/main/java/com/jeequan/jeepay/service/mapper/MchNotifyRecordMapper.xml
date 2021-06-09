@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeequan.jeepay.service.mapper.MchNotifyRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jeequan.jeepay.core.entity.MchNotifyRecord">
+        <id column="notify_id" property="notifyId" />
+        <result column="order_id" property="orderId" />
+        <result column="order_type" property="orderType" />
+        <result column="mch_order_no" property="mchOrderNo" />
+        <result column="mch_no" property="mchNo" />
+        <result column="isv_no" property="isvNo" />
+        <result column="notify_url" property="notifyUrl" />
+        <result column="res_result" property="resResult" />
+        <result column="notify_count" property="notifyCount" />
+        <result column="state" property="state" />
+        <result column="last_notify_time" property="lastNotifyTime" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+
+    <!-- 更新商户回调的结果即状态 -->
+    <update id="updateNotifyResult">
+
+        update t_mch_notify_record set res_result = #{resResult},
+                                       notify_count = notify_count + 1,
+                                       state = #{state},
+                                       last_notify_time = now()
+        where notify_id = #{notifyId}
+
+    </update>
+
+</mapper>
