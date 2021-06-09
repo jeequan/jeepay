@@ -16,7 +16,7 @@
         <java.version>1.8</java.version> <!-- 指定java版本号 -->
 
         <!-- 自定义属性 -->
-        <junit.version>4.12</junit.version> <!-- junit版本号 -->
+        <junit.version>4.13.1</junit.version> <!-- junit版本号 -->
 
     </properties>
 
