@@ -76,9 +76,9 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
 
         //女  默认头像
         if(sysUser.getSex() != null && CS.SEX_FEMALE == sysUser.getSex()){
-            sysUser.setAvatarUrl("/imgs/defava_f.png");
+            sysUser.setAvatarUrl("https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/defava_f.png");
         }else{
-            sysUser.setAvatarUrl("/imgs/defava_m.png");
+            sysUser.setAvatarUrl("https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/defava_m.png");
         }
 
         //1. 插入用户主表

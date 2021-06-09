@@ -15,6 +15,10 @@
  */
 package com.jeequan.jeepay.core.utils;
 
+import cn.hutool.core.net.url.UrlBuilder;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Map;
 import java.util.UUID;
 
 /*
@@ -33,4 +37,32 @@ public class StringKit {
 	public static String getUUID(int endAt){
 		return getUUID().substring(0, endAt);
 	}
+
+	/** 拼接url参数 **/
+	public static String appendUrlQuery(String url, Map<String, Object> map){
+
+		if(StringUtils.isEmpty(url) || map == null || map.isEmpty()){
+			return url;
+		}
+		UrlBuilder result = UrlBuilder.create().of(url);
+		map.forEach((k, v) -> {
+			if(k != null && v != null){
+				result.addQuery(k, v.toString());
+			}
+		});
+
+		return result.toURI().toString();
+	}
+
+
+	/** 是否 http 或 https连接 **/
+	public static boolean isAvailableUrl(String url){
+
+		if(StringUtils.isEmpty(url)){
+			return false;
+		}
+
+		return url.startsWith("http://") ||url.startsWith("https://");
+	}
+
 }

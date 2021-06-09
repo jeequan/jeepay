@@ -20,6 +20,7 @@ import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.utils.JeepayKit;
+import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.mq.queue.MqQueue4PayOrderMchNotify;
 import com.jeequan.jeepay.pay.rqrs.QueryPayOrderRS;
 import com.jeequan.jeepay.service.impl.MchInfoService;
@@ -28,9 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 /*
 * 商户通知 service
@@ -101,15 +99,11 @@ public class PayMchNotifyService {
         JSONObject jsonObject = (JSONObject)JSONObject.toJSON(queryPayOrderRS);
         jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
 
-        // 先对原文签名
-        String reqSign = JeepayKit.getSign(jsonObject, mchKey);
+        // 报文签名
+        jsonObject.put("sign", JeepayKit.getSign(jsonObject, mchKey));
 
-        jsonObject.put("sign", reqSign);   // 签名
-        // 生成参数串
-        String param = JeepayKit.genUrlParams(jsonObject);
-
-        //响应结果
-        return payOrder.getNotifyUrl() + "?" + param;
+        // 生成通知
+        return StringKit.appendUrlQuery(payOrder.getNotifyUrl(), jsonObject);
     }
 
 
@@ -126,17 +120,12 @@ public class PayMchNotifyService {
         JSONObject jsonObject = (JSONObject)JSONObject.toJSON(queryPayOrderRS);
         jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
 
-        jsonObject.keySet().stream().forEach(key -> jsonObject.put(key, ( jsonObject.getString(key) == null ? null : URLEncoder.encode(jsonObject.getString(key))) ));
+        // 报文签名
+        jsonObject.put("sign", JeepayKit.getSign(jsonObject, mchKey));   // 签名
 
-        // 先对原文签名
-        String reqSign = JeepayKit.getSign(jsonObject, mchKey);
+        // 生成跳转地址
+        return StringKit.appendUrlQuery(payOrder.getReturnUrl(), jsonObject);
 
-        jsonObject.put("sign", reqSign);   // 签名
-        // 生成参数串
-        String param = JeepayKit.genUrlParams(jsonObject);
-
-        //响应结果
-        return payOrder.getReturnUrl() + "?" + param;
     }
 
 }

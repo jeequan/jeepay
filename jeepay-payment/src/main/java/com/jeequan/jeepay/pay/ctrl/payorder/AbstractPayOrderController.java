@@ -24,6 +24,7 @@ import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
+import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.channel.IPaymentService;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.exception.ChannelException;
@@ -105,6 +106,13 @@ public abstract class AbstractPayOrderController extends ApiController {
             // 只有新订单模式，进行校验
             if(isNewOrder && payOrderService.count(PayOrder.gw().eq(PayOrder::getMchNo, mchNo).eq(PayOrder::getMchOrderNo, bizRQ.getMchOrderNo())) > 0){
                 throw new BizException("商户订单["+bizRQ.getMchOrderNo()+"]已存在");
+            }
+
+            if(StringUtils.isNotEmpty(bizRQ.getNotifyUrl()) && !StringKit.isAvailableUrl(bizRQ.getNotifyUrl())){
+                throw new BizException("异步通知地址协议仅支持http:// 或 https:// !");
+            }
+            if(StringUtils.isNotEmpty(bizRQ.getReturnUrl()) && !StringKit.isAvailableUrl(bizRQ.getReturnUrl())){
+                throw new BizException("同步通知地址协议仅支持http:// 或 https:// !");
             }
 
             //获取支付参数 (缓存数据) 和 商户信息
