@@ -1,0 +1,30 @@
+#################################
+# 开发环境通用配置文件放置目录
+#################################
+spring:
+  datasource:
+    # yml填写url连接串， 无需将&符号进行转义
+    url: jdbc:mysql://127.0.0.1:3306/jeepay?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
+    username: root
+    password: root
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
+  #activeMQ配置
+  activemq:
+    broker-url: tcp://localhost:61616  #连接地址
+
+  #日志配置参数。
+  # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
+  # 不存在logback-spring.xml 文件时， 使用springboot的配置， 同样可用。
+logging:
+  level:
+    root: info   #主日志级别
+    com.jeequan.jeepay: debug   #该项目日志级别，当需要打印sql时请开启为debug
+  path: ./logs  #日志存放地址
+
+#系统业务参数
+isys:
+  oss-file:
+    root-path: /home/jeepay/upload #存储根路径 ( 无需以‘/’结尾 )

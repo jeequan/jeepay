@@ -94,6 +94,19 @@
     <!-- 作为可执行jar -->
     <build>
         <finalName>${project.artifactId}</finalName>
+
+        <!-- resources资源配置项 -->
+        <resources>
+            <!-- 通用资源文件 -->
+            <resource><directory>src/main/resources</directory><includes><include>**/*.*</include></includes></resource>
+
+            <!-- 放置通用配置yml文件， 开发时仅配置一套参数即可。   实际生产环境下应在每个项目下 与jar同级目录下新建application.yml覆写对应参数。  -->
+            <resource>
+                <directory>../conf/devCommons</directory>
+                <includes><include>**/*.yml</include></includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

@@ -20,9 +20,9 @@ spring:
             number_format: '#' #数字格式进行原样显示，不加格式化字符例如  100,00
     datasource:
         # yml填写url连接串， 无需将&符号进行转义
-        url: jdbc:mysql://127.0.0.1:3306/jeepay?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
+        url: jdbc:mysql://127.0.0.1:3306/jeepaydb?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
         username: root
-        password: root
+        password:
         druid:
             # 连接池配置项
             initial-size: 5 #初始化时建立物理连接的个数
@@ -70,7 +70,7 @@ isys:
 
     # 文件系统配置项（系统内oss， 并非云oss）
     oss-file:
-        root-path: E:/home/jeepay/files #存储根路径 ( 无需以‘/’结尾 )
+        root-path: /home/jeepay/upload #存储根路径 ( 无需以‘/’结尾 )
         public-path: ${isys.oss-file.root-path}/public #公共读取块  ( 一般配合root-path参数进行设置，需以‘/’ 开头, 无需以‘/’结尾 )
         private-path: ${isys.oss-file.root-path}/private #私有化本地访问，不允许url方式公共读取 ( 一般配合root-path参数进行设置，需以‘/’ 开头, 无需以‘/’结尾  )
 
