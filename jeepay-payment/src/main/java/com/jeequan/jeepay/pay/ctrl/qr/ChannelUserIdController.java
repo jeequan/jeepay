@@ -20,20 +20,20 @@ import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.utils.JeepayKit;
+import com.jeequan.jeepay.core.utils.JsonKit;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
+import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.channel.IChannelUserService;
 import com.jeequan.jeepay.pay.ctrl.payorder.AbstractPayOrderController;
+import com.jeequan.jeepay.pay.model.MchConfigContext;
 import com.jeequan.jeepay.pay.rqrs.ChannelUserIdRQ;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.net.URLEncoder;
 
 /*
 * 商户获取渠道用户ID接口
@@ -63,6 +63,10 @@ public class ChannelUserIdController extends AbstractPayOrderController {
 
         if(channelUserService == null){
             throw new BizException("不支持的客户端");
+        }
+
+        if(!StringKit.isAvailableUrl(rq.getRedirectUrl())){
+            throw new BizException("跳转地址有误！");
         }
 
         JSONObject jsonObject = new JSONObject();
@@ -101,9 +105,11 @@ public class ChannelUserIdController extends AbstractPayOrderController {
         //获取商户配置信息
         MchConfigContext mchConfigContext = configContextService.getMchConfigContext(mchNo);
 
+        //获取渠道用户ID
         String channelUserId = channelUserService.getChannelUserId(getReqParamJSON(), mchConfigContext);
 
-        response.sendRedirect(redirectUrl + "?channelId=" + URLEncoder.encode(channelUserId));
+        //同步跳转
+        response.sendRedirect(StringKit.appendUrlQuery(redirectUrl, JsonKit.newJson("channelUserId", channelUserId)));
     }
 
 
