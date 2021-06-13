@@ -374,6 +374,7 @@ insert into t_sys_entitlement values('ENT_C_MAIN', '主页', 'home', '/main', 'M
 -- 商户管理
 insert into t_sys_entitlement values('ENT_MCH_INFO', '商户管理', 'shop', '', 'RouteView', 'ML', 0, 1,  'ROOT', '30', 'MGR', now(), now());
     insert into t_sys_entitlement values('ENT_MCH_INFO_LIST', '商户列表', 'profile', '/mch', 'MchListPage', 'ML', 0, 1,  'ENT_MCH_INFO', '10', 'MGR', now(), now());
+        insert into t_sys_entitlement values('ENT_MCH_LIST', '页面：商户列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_INFO_LIST', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_MCH_INFO_ADD', '按钮：新增', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_INFO_LIST', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_MCH_INFO_EDIT', '按钮：编辑', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_INFO_LIST', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_MCH_INFO_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_INFO_LIST', '0', 'MGR', now(), now());
@@ -388,6 +389,7 @@ insert into t_sys_entitlement values('ENT_MCH_INFO', '商户管理', 'shop', '',
 -- 服务商管理
 insert into t_sys_entitlement values('ENT_ISV_INFO', '服务商管理', 'block', '', 'RouteView', 'ML', 0, 1,  'ROOT', '40', 'MGR', now(), now());
     insert into t_sys_entitlement values('ENT_ISV_INFO_LIST', '服务商列表', 'profile', '/isv', 'IsvListPage', 'ML', 0, 1,  'ENT_ISV_INFO', '10', 'MGR', now(), now());
+        insert into t_sys_entitlement values('ENT_ISV_LIST', '页面：服务商列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_ISV_INFO_LIST', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_ISV_INFO_ADD', '按钮：新增', 'no-icon', '', '', 'PB', 0, 1,  'ENT_ISV_INFO_LIST', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_ISV_INFO_EDIT', '按钮：编辑', 'no-icon', '', '', 'PB', 0, 1,  'ENT_ISV_INFO_LIST', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_ISV_INFO_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_ISV_INFO_LIST', '0', 'MGR', now(), now());
@@ -399,10 +401,13 @@ insert into t_sys_entitlement values('ENT_ISV_INFO', '服务商管理', 'block',
 -- 订单管理
 insert into t_sys_entitlement values('ENT_ORDER', '订单管理', 'transaction', '', 'RouteView', 'ML', 0, 1,  'ROOT', '50', 'MGR', now(), now());
     insert into t_sys_entitlement values('ENT_PAY_ORDER_LIST', '支付订单', 'account-book', '/pay', 'PayOrderListPage', 'ML', 0, 1,  'ENT_ORDER', '10', 'MGR', now(), now());
+        insert into t_sys_entitlement values('ENT_ORDER_LIST', '页面：订单列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER_LIST', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_PAY_ORDER_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER_LIST', '0', 'MGR', now(), now());
     insert into t_sys_entitlement values('ENT_REFUND_ORDER_LIST', '退款订单', 'exception', '/refund', 'RefundOrderListPage', 'ML', 0, 1,  'ENT_ORDER', '20', 'MGR', now(), now());
+        insert into t_sys_entitlement values('ENT_REFUND_LIST', '页面：退款订单列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_REFUND_ORDER_LIST', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_REFUND_ORDER_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_REFUND_ORDER_LIST', '0', 'MGR', now(), now());
     insert into t_sys_entitlement values('ENT_MCH_NOTIFY_LIST', '商户通知', 'notification', '/notify', 'MchNotifyListPage', 'ML', 0, 1,  'ENT_ORDER', '30', 'MGR', now(), now());
+        insert into t_sys_entitlement values('ENT_NOTIFY_LIST', '页面：商户通知列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_NOTIFY_LIST', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_MCH_NOTIFY_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_NOTIFY_LIST', '0', 'MGR', now(), now());
 
 -- 支付配置菜单
@@ -449,6 +454,7 @@ insert into t_sys_entitlement values('ENT_SYS_CONFIG', '系统管理', 'setting'
             insert into t_sys_entitlement values('ENT_SYS_CONFIG_EDIT', '按钮： 修改', 'no-icon', '', '', 'PB', 0, 1,  'ENT_SYS_CONFIG_INFO', '0', 'MGR', now(), now());
 
     insert into t_sys_entitlement values('ENT_SYS_LOG_LIST', '系统日志', 'file-text', '/log', 'SysLogPage', 'ML', 0, 1,  'ENT_SYS_CONFIG', '20', 'MGR', now(), now());
+            insert into t_sys_entitlement values('ENT_LOG_LIST', '页面：系统日志列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_SYS_LOG_LIST', '0', 'MGR', now(), now());
             insert into t_sys_entitlement values('ENT_SYS_LOG_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_SYS_LOG_LIST', '0', 'MGR', now(), now());
             insert into t_sys_entitlement values('ENT_SYS_LOG_DEL', '按钮：删除', 'no-icon', '', '', 'PB', 0, 1,  'ENT_SYS_LOG_LIST', '0', 'MGR', now(), now());
 
@@ -472,8 +478,10 @@ insert into t_sys_entitlement values('ENT_MCH_MAIN', '主页', 'home', '/main', 
 -- 【商户系统】 订单管理
 insert into t_sys_entitlement values('ENT_ORDER', '订单中心', 'transaction', '', 'RouteView', 'ML', 0, 1,  'ROOT', '20', 'MCH', now(), now());
     insert into t_sys_entitlement values('ENT_PAY_ORDER_LIST', '订单管理', 'account-book', '/pay', 'PayOrderListPage', 'ML', 0, 1,  'ENT_ORDER', '10', 'MCH', now(), now());
+        insert into t_sys_entitlement values('ENT_ORDER_LIST', '页面：订单列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER_LIST', '0', 'MCH', now(), now());
         insert into t_sys_entitlement values('ENT_PAY_ORDER_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER_LIST', '0', 'MCH', now(), now());
     insert into t_sys_entitlement values('ENT_REFUND_ORDER_LIST', '退款记录', 'exception', '/refund', 'RefundOrderListPage', 'ML', 0, 1,  'ENT_ORDER', '20', 'MCH', now(), now());
+        insert into t_sys_entitlement values('ENT_REFUND_LIST', '页面：退款订单列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_REFUND_ORDER_LIST', '0', 'MCH', now(), now());
         insert into t_sys_entitlement values('ENT_REFUND_ORDER_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_REFUND_ORDER_LIST', '0', 'MCH', now(), now());
 
 -- 【商户系统】 支付配置

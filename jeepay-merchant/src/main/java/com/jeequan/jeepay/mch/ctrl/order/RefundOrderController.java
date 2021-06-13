@@ -49,7 +49,7 @@ public class RefundOrderController extends CommonCtrl {
      * @Description: 退款订单信息列表
      * @Date: 10:44 2021/5/13
     */
-    @PreAuthorize("hasAuthority('ENT_REFUND_ORDER_LIST')")
+    @PreAuthorize("hasAuthority('ENT_REFUND_LIST')")
     @GetMapping
     public ApiRes list() {
 

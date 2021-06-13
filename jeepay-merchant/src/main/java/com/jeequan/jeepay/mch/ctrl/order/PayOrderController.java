@@ -58,7 +58,7 @@ public class PayOrderController extends CommonCtrl {
      * @Description: 订单信息列表
      * @Date: 10:43 2021/5/13
     */
-    @PreAuthorize("hasAuthority('ENT_PAY_ORDER_LIST')")
+    @PreAuthorize("hasAuthority('ENT_ORDER_LIST')")
     @GetMapping
     public ApiRes list() {
 

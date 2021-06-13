@@ -49,7 +49,7 @@ public class MchNotifyController extends CommonCtrl {
      * @date: 2021/6/7 16:14
      * @describe: 商户通知列表
      */
-    @PreAuthorize("hasAuthority('ENT_MCH_NOTIFY_LIST')")
+    @PreAuthorize("hasAuthority('ENT_NOTIFY_LIST')")
     @RequestMapping(value="", method = RequestMethod.GET)
     public ApiRes list() {
 

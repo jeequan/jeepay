@@ -54,7 +54,7 @@ public class SysLogController extends CommonCtrl {
      * @date: 2021/6/7 16:15
      * @describe: 日志记录列表
      */
-    @PreAuthorize("hasAuthority('ENT_SYS_LOG_LIST')")
+    @PreAuthorize("hasAuthority('ENT_LOG_LIST')")
     @RequestMapping(value="", method = RequestMethod.GET)
     public ApiRes list() {
         SysLog sysLog = getObject(SysLog.class);
