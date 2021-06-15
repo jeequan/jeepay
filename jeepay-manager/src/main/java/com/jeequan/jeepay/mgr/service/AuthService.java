@@ -21,6 +21,7 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.SysUser;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.cache.RedisUtil;
+import com.jeequan.jeepay.core.exception.JeepayAuthenticationException;
 import com.jeequan.jeepay.core.jwt.JWTPayload;
 import com.jeequan.jeepay.core.jwt.JWTUtils;
 import com.jeequan.jeepay.core.model.security.JeeUserDetails;
@@ -29,6 +30,7 @@ import com.jeequan.jeepay.service.impl.SysRoleEntRelaService;
 import com.jeequan.jeepay.service.impl.SysRoleService;
 import com.jeequan.jeepay.service.impl.SysUserService;
 import com.jeequan.jeepay.service.mapper.SysEntitlementMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,6 +38,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -48,6 +51,7 @@ import java.util.*;
 * @site https://www.jeepay.vip
 * @date 2021/6/8 17:12
 */
+@Slf4j
 @Service
 public class AuthService {
 
@@ -75,8 +79,11 @@ public class AuthService {
         Authentication authentication = null;
         try {
             authentication = authenticationManager.authenticate(upToken);
+        } catch (JeepayAuthenticationException jex) {
+            throw jex.getBizException() == null ? new BizException(jex.getMessage()) : jex.getBizException();
         } catch (AuthenticationException e) {
-            throw new BizException("用户名或密码有误！");
+            log.error("AuthenticationException:", e);
+            throw new BizException("认证服务出现异常， 请重试或联系系统管理员！");
         }
         JeeUserDetails jeeUserDetails = (JeeUserDetails) authentication.getPrincipal();
 
