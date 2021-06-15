@@ -20,6 +20,7 @@ import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.beans.RequestKitBean;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.SysLog;
+import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.security.JeeUserDetails;
 import com.jeequan.jeepay.service.impl.SysLogService;
 import org.aspectj.lang.JoinPoint;
@@ -82,18 +83,14 @@ public class MethodLogAop{
     public Object around(ProceedingJoinPoint point) throws Throwable {
 
         final SysLog sysLog = new SysLog();
-        // 基础日志信息
-        setBaseLogInfo(point, sysLog);
 
         //处理切面任务 发生异常将向外抛出 不记录日志
         Object result = point.proceed();
 
         try {
-            sysLog.setUserId(JeeUserDetails.getCurrentUserDetails().getSysUser().getSysUserId());
-            sysLog.setUserName(JeeUserDetails.getCurrentUserDetails().getSysUser().getRealname());
-            sysLog.setSystem(JeeUserDetails.getCurrentUserDetails().getSysUser().getSystem());
+            // 基础日志信息
+            setBaseLogInfo(point, sysLog, JeeUserDetails.getCurrentUserDetails());
             sysLog.setOptResInfo(JSONObject.toJSON(result).toString());
-
             scheduledThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -116,8 +113,8 @@ public class MethodLogAop{
     public void doException(JoinPoint joinPoint, Throwable e) throws Exception{
         final SysLog sysLog = new SysLog();
         // 基础日志信息
-        setBaseLogInfo(joinPoint, sysLog);
-        sysLog.setOptResInfo("请求异常");
+        setBaseLogInfo(joinPoint, sysLog, JeeUserDetails.getCurrentUserDetails());
+        sysLog.setOptResInfo(e instanceof BizException ? e.getMessage() : "请求异常");
         scheduledThreadPool.execute(() -> sysLogService.save(sysLog));
     }
 
@@ -144,7 +141,7 @@ public class MethodLogAop{
      * @date: 2021/6/7 14:12
      * @describe: 日志基本信息 公共方法
      */
-    private void setBaseLogInfo(JoinPoint joinPoint, SysLog sysLog) throws Exception {
+    private void setBaseLogInfo(JoinPoint joinPoint, SysLog sysLog, JeeUserDetails userDetails) throws Exception {
         // 使用point.getArgs()可获取request，仅限于spring MVC参数包含request，改为通过contextHolder获取。
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
@@ -164,6 +161,12 @@ public class MethodLogAop{
         sysLog.setUserIp(requestKitBean.getClientIp());
         sysLog.setCreatedAt(new Date());
         sysLog.setSystem(CS.SYS_TYPE.MCH);
+
+        if (userDetails != null) {
+            sysLog.setUserId(JeeUserDetails.getCurrentUserDetails().getSysUser().getSysUserId());
+            sysLog.setUserName(JeeUserDetails.getCurrentUserDetails().getSysUser().getRealname());
+            sysLog.setSystem(JeeUserDetails.getCurrentUserDetails().getSysUser().getSystem());
+        }
     }
 
 }

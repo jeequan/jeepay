@@ -17,6 +17,7 @@ package com.jeequan.jeepay.mch.ctrl.sysuser;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.SysUser;
@@ -94,6 +95,7 @@ public class SysUserController extends CommonCtrl {
 	/** add */
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_ADD' )")
 	@RequestMapping(value="", method = RequestMethod.POST)
+	@MethodLog(remark = "添加管理员")
 	public ApiRes add() {
 		SysUser sysUser = getObject(SysUser.class);
 		sysUser.setBelongInfoId(getCurrentUser().getSysUser().getBelongInfoId());
@@ -130,6 +132,7 @@ public class SysUserController extends CommonCtrl {
 	/** update */
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_EDIT' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.PUT)
+	@MethodLog(remark = "修改操作员信息")
 	public ApiRes update(@PathVariable("recordId") Long recordId) {
 		SysUser sysUser = getObject(SysUser.class);
 		sysUser.setSysUserId(recordId);
