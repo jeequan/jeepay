@@ -53,7 +53,7 @@ public class SysEntController extends CommonCtrl {
 	public ApiRes showTree() {
 
 		//查询全部数据
-		List<SysEntitlement> list = sysEntitlementService.list(SysEntitlement.gw().eq(SysEntitlement::getSystem, CS.SYS_TYPE.MCH));
+		List<SysEntitlement> list = sysEntitlementService.list(SysEntitlement.gw().eq(SysEntitlement::getSysType, CS.SYS_TYPE.MCH));
 
 		//4. 转换为json树状结构
 		JSONArray jsonArray = (JSONArray) JSONArray.toJSON(list);

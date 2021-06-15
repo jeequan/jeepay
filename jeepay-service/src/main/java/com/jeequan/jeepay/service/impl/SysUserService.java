@@ -62,15 +62,15 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
         if(sysUser.getSex() == null ) throw new BizException("性别不能为空！");
 
         //登录用户名不可重复
-        if( count(SysUser.gw().eq(SysUser::getSystem, system).eq(SysUser::getLoginUsername, sysUser.getLoginUsername())) > 0 ){
+        if( count(SysUser.gw().eq(SysUser::getSysType, system).eq(SysUser::getLoginUsername, sysUser.getLoginUsername())) > 0 ){
             throw new BizException("登录用户名已存在！");
         }
         //手机号不可重复
-        if( count(SysUser.gw().eq(SysUser::getSystem, system).eq(SysUser::getTelphone, sysUser.getTelphone())) > 0 ){
+        if( count(SysUser.gw().eq(SysUser::getSysType, system).eq(SysUser::getTelphone, sysUser.getTelphone())) > 0 ){
             throw new BizException("手机号已存在！");
         }
         //员工号不可重复
-        if( count(SysUser.gw().eq(SysUser::getSystem, system).eq(SysUser::getUserNo, sysUser.getUserNo())) > 0 ){
+        if( count(SysUser.gw().eq(SysUser::getSysType, system).eq(SysUser::getUserNo, sysUser.getUserNo())) > 0 ){
             throw new BizException("员工号已存在！");
         }
 
@@ -82,7 +82,7 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
         }
 
         //1. 插入用户主表
-        sysUser.setSystem(system); // 系统类型
+        sysUser.setSysType(system); // 系统类型
         this.save(sysUser);
 
         Long sysUserId = sysUser.getSysUserId();
@@ -109,21 +109,21 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
         //修改了手机号， 需要修改auth表信息
         if(!dbRecord.getTelphone().equals(sysUser.getTelphone())){
 
-            if(count(SysUser.gw().eq(SysUser::getSystem, dbRecord.getSystem()).eq(SysUser::getTelphone, sysUser.getTelphone())) > 0){
+            if(count(SysUser.gw().eq(SysUser::getSysType, dbRecord.getSysType()).eq(SysUser::getTelphone, sysUser.getTelphone())) > 0){
                 throw new BizException("该手机号已关联其他用户！");
             }
 
-            sysUserAuthService.resetAuthInfo(sysUserId, null, sysUser.getTelphone(), null, dbRecord.getSystem());
+            sysUserAuthService.resetAuthInfo(sysUserId, null, sysUser.getTelphone(), null, dbRecord.getSysType());
         }
 
         //修改了手机号， 需要修改auth表信息
         if(!dbRecord.getLoginUsername().equals(sysUser.getLoginUsername())){
 
-            if(count(SysUser.gw().eq(SysUser::getSystem, dbRecord.getSystem()).eq(SysUser::getLoginUsername, sysUser.getLoginUsername())) > 0){
+            if(count(SysUser.gw().eq(SysUser::getSysType, dbRecord.getSysType()).eq(SysUser::getLoginUsername, sysUser.getLoginUsername())) > 0){
                 throw new BizException("该登录用户名已关联其他用户！");
             }
 
-            sysUserAuthService.resetAuthInfo(sysUserId, sysUser.getLoginUsername(), null, null, dbRecord.getSystem());
+            sysUserAuthService.resetAuthInfo(sysUserId, sysUser.getLoginUsername(), null, null, dbRecord.getSysType());
         }
 
         //修改用户主表

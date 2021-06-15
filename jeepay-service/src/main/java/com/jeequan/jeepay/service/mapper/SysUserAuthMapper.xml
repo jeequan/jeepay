@@ -10,14 +10,14 @@
         <result column="identifier" property="identifier" />
         <result column="credential" property="credential" />
         <result column="salt" property="salt" />
-        <result column="system" property="system" />
+        <result column="sys_type" property="sysType" />
     </resultMap>
 
 
     <!-- 根据登录信息查询 -->
     <select id="selectByLogin" resultMap="BaseResultMap">
         select a.* from t_sys_user_auth a left join t_sys_user u on a.user_id = u.sys_user_id
-        where a.identity_type = #{identityType} and a.identifier = #{identifier} and a.system = #{system}
+        where a.identity_type = #{identityType} and a.identifier = #{identifier} and a.sys_type = #{sysType}
     </select>
 
 

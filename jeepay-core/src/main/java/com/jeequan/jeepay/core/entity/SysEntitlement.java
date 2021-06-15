@@ -100,7 +100,7 @@ public class SysEntitlement extends BaseModel {
     /**
      * 所属系统： MGR-运营平台, MCH-商户中心
      */
-    private String system;
+    private String sysType;
 
     /**
      * 创建时间

@@ -30,6 +30,6 @@ import com.jeequan.jeepay.core.entity.SysUserAuth;
 public interface SysUserAuthMapper extends BaseMapper<SysUserAuth> {
 
     SysUserAuth selectByLogin(@Param("identifier")String identifier,
-                              @Param("identityType")Byte identityType, @Param("system")String system);
+                              @Param("identityType")Byte identityType, @Param("sysType")String sysType);
 
 }

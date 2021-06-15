@@ -14,7 +14,7 @@
         <result column="state" property="state" />
         <result column="pid" property="pid" />
         <result column="ent_sort" property="entSort" />
-        <result column="system" property="system" />
+        <result column="sys_type" property="sysType" />
         <result column="created_at" property="createdAt" />
         <result column="updated_at" property="updatedAt" />
     </resultMap>
@@ -25,7 +25,7 @@
         select DISTINCT ent_id from t_sys_role_ent_rela where role_id in (
             select role_id from  t_sys_user_role_rela where user_id = #{userId}
         )
-    ) and state = 1 and ent_type = 'ML' and system  = #{system}
+    ) and state = 1 and ent_type = 'ML' and sys_type  = #{sysType}
 </select>
 
 

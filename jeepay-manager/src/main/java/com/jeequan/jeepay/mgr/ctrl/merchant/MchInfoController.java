@@ -143,7 +143,7 @@ public class MchInfoController extends CommonCtrl {
             List<Long> userIdList = new ArrayList<>();
             List<SysUser> userList = sysUserService.list(SysUser.gw()
                     .eq(SysUser::getBelongInfoId, mchNo)
-                    .eq(SysUser::getSystem, CS.SYS_TYPE.MCH)
+                    .eq(SysUser::getSysType, CS.SYS_TYPE.MCH)
             );
             if (userList.size() > 0) {
                 for (SysUser user:userList) {

@@ -108,7 +108,7 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
 
             List<SysUser> userList = sysUserService.list(SysUser.gw()
                     .eq(SysUser::getBelongInfoId, mchNo)
-                    .eq(SysUser::getSystem, CS.SYS_TYPE.MCH)
+                    .eq(SysUser::getSysType, CS.SYS_TYPE.MCH)
             );
             // 返回的用户id
             List<Long> userIdList = new ArrayList<>();
@@ -123,7 +123,7 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
             // 5.删除当前商户的登录用户
             sysUserService.remove(SysUser.gw()
                     .eq(SysUser::getBelongInfoId, mchNo)
-                    .eq(SysUser::getSystem, CS.SYS_TYPE.MCH)
+                    .eq(SysUser::getSysType, CS.SYS_TYPE.MCH)
             );
 
             // 6.删除当前商户

@@ -6,7 +6,7 @@
     <resultMap id="BaseResultMap" type="com.jeequan.jeepay.core.entity.SysRole">
         <id column="role_id" property="roleId" />
         <result column="role_name" property="roleName" />
-        <result column="system" property="system" />
+        <result column="sys_type" property="sysType" />
         <result column="belong_info_id" property="belongInfoId" />
         <result column="updated_at" property="updatedAt" />
     </resultMap>

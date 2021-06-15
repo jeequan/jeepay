@@ -8,7 +8,7 @@
         <result column="user_id" property="userId" />
         <result column="user_name" property="userName" />
         <result column="user_ip" property="userIp" />
-        <result column="system" property="system" />
+        <result column="sys_type" property="sysType" />
         <result column="method_name" property="methodName" />
         <result column="method_remark" property="methodRemark" />
         <result column="req_url" property="reqUrl" />

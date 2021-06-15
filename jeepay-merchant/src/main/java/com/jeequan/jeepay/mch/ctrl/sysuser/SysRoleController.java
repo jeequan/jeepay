@@ -69,7 +69,7 @@ public class SysRoleController extends CommonCtrl {
 		SysRole queryObject = getObject(SysRole.class);
 
 		LambdaQueryWrapper<SysRole> condition = SysRole.gw();
-		condition.eq(SysRole::getSystem, CS.SYS_TYPE.MCH);
+		condition.eq(SysRole::getSysType, CS.SYS_TYPE.MCH);
 		condition.eq(SysRole::getBelongInfoId, getCurrentMchNo());
 
 		if(StringUtils.isNotEmpty(queryObject.getRoleName())){
@@ -103,7 +103,7 @@ public class SysRoleController extends CommonCtrl {
 		SysRole SysRole = getObject(SysRole.class);
 		String roleId = "ROLE_" + StringKit.getUUID(6);
 		SysRole.setRoleId(roleId);
-		SysRole.setSystem(CS.SYS_TYPE.MCH); //后台系统
+		SysRole.setSysType(CS.SYS_TYPE.MCH); //后台系统
 		SysRole.setBelongInfoId(getCurrentUser().getSysUser().getBelongInfoId());
 		sysRoleService.save(SysRole);
 

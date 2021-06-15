@@ -29,6 +29,6 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface SysEntitlementMapper extends BaseMapper<SysEntitlement> {
 
-    Integer userHasLeftMenu(@Param("userId") Long userId, @Param("system") String system);
+    Integer userHasLeftMenu(@Param("userId") Long userId, @Param("sysType") String sysType);
 
 }

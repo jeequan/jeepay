@@ -13,7 +13,7 @@
         select distinct ent_id from t_sys_entitlement where ent_id in (
             select distinct re.ent_id from t_sys_role_ent_rela re left join t_sys_user_role_rela ur on re.role_id = ur.role_id
             where ur.user_id = #{userId}
-        ) and `system` = #{system} and state = 1
+        ) and `sys_type` = #{sysType} and state = 1
     </select>
 
 </mapper>

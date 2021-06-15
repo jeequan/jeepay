@@ -31,6 +31,6 @@ import java.util.List;
  */
 public interface SysRoleEntRelaMapper extends BaseMapper<SysRoleEntRela> {
 
-    List<String> selectEntIdsByUserId(@Param("userId") Long userId, @Param("system") String system);
+    List<String> selectEntIdsByUserId(@Param("userId") Long userId, @Param("sysType") String sysType);
 
 }

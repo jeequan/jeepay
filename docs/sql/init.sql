@@ -30,10 +30,10 @@ CREATE TABLE `t_sys_entitlement` (
   `state` TINYINT(6) NOT NULL DEFAULT 1 COMMENT '状态 0-停用, 1-启用',
   `pid` VARCHAR(32) NOT NULL COMMENT '父ID',
   `ent_sort` INT(11) NOT NULL DEFAULT 0 COMMENT '排序字段, 规则：正序',
-  `system` VARCHAR(8) NOT NULL COMMENT '所属系统： MGR-运营平台, MCH-商户中心',
+  `sys_type` VARCHAR(8) NOT NULL COMMENT '所属系统： MGR-运营平台, MCH-商户中心',
   `created_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
   `updated_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
-  PRIMARY KEY (`ent_id`, `system`)
+  PRIMARY KEY (`ent_id`, `sys_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统权限表';
 
 -- 角色表
@@ -41,7 +41,7 @@ DROP TABLE IF EXISTS `t_sys_role`;
 CREATE TABLE `t_sys_role` (
   `role_id` VARCHAR(32) NOT NULL COMMENT '角色ID, ROLE_开头',
   `role_name` VARCHAR(32) NOT NULL COMMENT '角色名称',
-  `system` VARCHAR(8) NOT NULL COMMENT '所属系统： MGR-运营平台, MCH-商户中心',
+  `sys_type` VARCHAR(8) NOT NULL COMMENT '所属系统： MGR-运营平台, MCH-商户中心',
   `belong_info_id` VARCHAR(64) NOT NULL DEFAULT '0' COMMENT '所属商户ID / 0(平台)',
   `updated_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
   PRIMARY KEY (`role_id`)
@@ -67,14 +67,14 @@ CREATE TABLE `t_sys_user` (
     `user_no` VARCHAR(32) COMMENT '员工编号',
     `is_admin` TINYINT(6) NOT NULL DEFAULT 0 COMMENT '是否超管（超管拥有全部权限） 0-否 1-是',
     `state` TINYINT(6) NOT NULL DEFAULT 0 COMMENT '状态 0-停用 1-启用',
-    `system` VARCHAR(8) NOT NULL COMMENT '所属系统： MGR-运营平台, MCH-商户中心',
+    `sys_type` VARCHAR(8) NOT NULL COMMENT '所属系统： MGR-运营平台, MCH-商户中心',
     `belong_info_id` VARCHAR(64) NOT NULL DEFAULT '0' COMMENT '所属商户ID / 0(平台)',
 	`created_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
     `updated_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
 	PRIMARY KEY (`sys_user_id`),
-    UNIQUE KEY(`system`,`login_username`),
-    UNIQUE KEY(`system`,`telphone`),
-    UNIQUE KEY(`system`, `user_no`)
+    UNIQUE KEY(`sys_type`,`login_username`),
+    UNIQUE KEY(`sys_type`,`telphone`),
+    UNIQUE KEY(`sys_type`, `user_no`)
 ) ENGINE=InnoDB AUTO_INCREMENT=100001 DEFAULT CHARSET=utf8mb4 COMMENT='系统用户表';
 
 -- 系统用户认证表
@@ -86,7 +86,7 @@ CREATE TABLE `t_sys_user_auth` (
 	`identifier` VARCHAR(128) NOT NULL COMMENT '认证标识 ( 用户名 | open_id )',
 	`credential` VARCHAR(128) NOT NULL COMMENT '密码凭证',
 	`salt` VARCHAR(128) NOT NULL COMMENT 'salt',
-    `system` VARCHAR(8) NOT NULL COMMENT '所属系统： MGR-运营平台, MCH-商户中心',
+    `sys_type` VARCHAR(8) NOT NULL COMMENT '所属系统： MGR-运营平台, MCH-商户中心',
 	PRIMARY KEY (`auth_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1001 DEFAULT CHARSET=utf8mb4 COMMENT='系统用户认证表';
 
@@ -121,7 +121,7 @@ CREATE TABLE `t_sys_log` (
   `user_id` bigint(20) DEFAULT NULL COMMENT '系统用户ID',
   `user_name` varchar(32) DEFAULT NULL COMMENT '用户姓名',
   `user_ip` varchar(128) NOT NULL DEFAULT '' COMMENT '用户IP',
-  `system` varchar(8) NOT NULL COMMENT '所属系统： MGR-运营平台, MCH-商户中心',
+  `sys_type` varchar(8) NOT NULL COMMENT '所属系统： MGR-运营平台, MCH-商户中心',
   `method_name` varchar(128) NOT NULL DEFAULT '' COMMENT '方法名',
   `method_remark` varchar(128) NOT NULL DEFAULT '' COMMENT '方法描述',
   `req_url` varchar(256) NOT NULL DEFAULT '' COMMENT '请求地址',

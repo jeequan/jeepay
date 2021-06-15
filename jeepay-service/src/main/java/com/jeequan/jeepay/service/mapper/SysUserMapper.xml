@@ -12,7 +12,7 @@
         <result column="user_no" property="userNo" />
         <result column="is_admin" property="isAdmin" />
         <result column="state" property="state" />
-        <result column="system" property="system" />
+        <result column="sys_type" property="sysType" />
         <result column="belong_info_id" property="belongInfoId" />
         <result column="created_at" property="createdAt" />
         <result column="updated_at" property="updatedAt" />

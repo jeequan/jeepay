@@ -60,7 +60,7 @@ public class SysUserController extends CommonCtrl {
 		SysUser queryObject = getObject(SysUser.class);
 
 		LambdaQueryWrapper<SysUser> condition = SysUser.gw();
-		condition.eq(SysUser::getSystem, CS.SYS_TYPE.MGR);
+		condition.eq(SysUser::getSysType, CS.SYS_TYPE.MGR);
 
 		if(StringUtils.isNotEmpty(queryObject.getRealname())){
 			condition.like(SysUser::getRealname, queryObject.getRealname());

@@ -160,7 +160,7 @@ public class MethodLogAop{
         sysLog.setReqUrl(request.getRequestURL().toString());
         sysLog.setUserIp(requestKitBean.getClientIp());
         sysLog.setCreatedAt(new Date());
-        sysLog.setSystem(CS.SYS_TYPE.MCH);
+        sysLog.setSysType(CS.SYS_TYPE.MCH);
 
         if (userDetails != null) {
             sysLog.setUserId(JeeUserDetails.getCurrentUserDetails().getSysUser().getSysUserId());

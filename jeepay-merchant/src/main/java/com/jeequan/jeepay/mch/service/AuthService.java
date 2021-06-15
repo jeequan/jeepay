@@ -176,7 +176,7 @@ public class AuthService {
 
         //用户拥有的角色集合  需要以ROLE_ 开头,  用户拥有的权限集合
         List<String> roleList = sysRoleService.findListByUser(sysUser.getSysUserId());
-        List<String> entList = sysRoleEntRelaService.selectEntIdsByUserId(sysUser.getSysUserId(), sysUser.getIsAdmin(), sysUser.getSystem());
+        List<String> entList = sysRoleEntRelaService.selectEntIdsByUserId(sysUser.getSysUserId(), sysUser.getIsAdmin(), sysUser.getSysType());
 
         List<SimpleGrantedAuthority> grantedAuthorities = new LinkedList<>();
         roleList.stream().forEach(role -> grantedAuthorities.add(new SimpleGrantedAuthority(role)));

@@ -52,13 +52,13 @@ public class SysUserAuthService extends ServiceImpl<SysUserAuthMapper, SysUserAu
         String userPwd = new BCryptPasswordEncoder().encode(pwdRaw);
 
         /** 用户名登录方式 */
-        SysUserAuth record = new SysUserAuth(); record.setUserId(userId); record.setCredential(userPwd); record.setSalt(salt);record.setSystem(system);
+        SysUserAuth record = new SysUserAuth(); record.setUserId(userId); record.setCredential(userPwd); record.setSalt(salt);record.setSysType(system);
         record.setIdentityType(CS.AUTH_TYPE.LOGIN_USER_NAME);
         record.setIdentifier(loginUserName);
         save(record);
 
         /** 手机号登录方式 */
-        record = new SysUserAuth(); record.setUserId(userId); record.setCredential(userPwd); record.setSalt(salt);record.setSystem(system);
+        record = new SysUserAuth(); record.setUserId(userId); record.setCredential(userPwd); record.setSalt(salt);record.setSysType(system);
         record.setIdentityType(CS.AUTH_TYPE.TELPHONE);
         record.setIdentifier(telPhone);
         save(record);
@@ -86,7 +86,7 @@ public class SysUserAuthService extends ServiceImpl<SysUserAuthMapper, SysUserAu
         //更改密码
         if(StringUtils.isNotEmpty(newPwd)){
             //根据当前用户ID 查询出用户的所有认证记录
-            List<SysUserAuth> authList = list(SysUserAuth.gw().eq(SysUserAuth::getSystem, system).eq(SysUserAuth::getUserId, resetUserId));
+            List<SysUserAuth> authList = list(SysUserAuth.gw().eq(SysUserAuth::getSysType, system).eq(SysUserAuth::getUserId, resetUserId));
             for (SysUserAuth auth : authList) {
                 if(StringUtils.isEmpty(auth.getSalt())){ //可能为其他登录方式， 不存在salt
                     continue;

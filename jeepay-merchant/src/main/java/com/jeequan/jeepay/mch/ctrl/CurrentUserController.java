@@ -73,7 +73,7 @@ public class CurrentUserController extends CommonCtrl{
 			allMenuList = sysEntitlementService.list(SysEntitlement.gw()
 					.in(SysEntitlement::getEntId, entIdList)
 					.in(SysEntitlement::getEntType, Arrays.asList(CS.ENT_TYPE.MENU_LEFT, CS.ENT_TYPE.MENU_OTHER))
-					.eq(SysEntitlement::getSystem, CS.SYS_TYPE.MCH)
+					.eq(SysEntitlement::getSysType, CS.SYS_TYPE.MCH)
 					.eq(SysEntitlement::getState, CS.PUB_USABLE));
 		}
 
