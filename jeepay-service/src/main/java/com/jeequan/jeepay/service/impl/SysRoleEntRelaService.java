@@ -41,19 +41,19 @@ public class SysRoleEntRelaService extends ServiceImpl<SysRoleEntRelaMapper, Sys
     @Autowired private SysEntitlementService sysEntitlementService;
 
     /** 根据人查询出所有权限ID集合  */
-    public List<String> selectEntIdsByUserId(Long userId, Byte isAdmin, String system){
+    public List<String> selectEntIdsByUserId(Long userId, Byte isAdmin, String sysType){
 
 
         if(isAdmin == CS.YES){
 
             List<String> result = new ArrayList<>();
-            sysEntitlementService.list(SysEntitlement.gw().select(SysEntitlement::getEntId).eq(SysEntitlement::getSysType, system).eq(SysEntitlement::getState, CS.PUB_USABLE)
+            sysEntitlementService.list(SysEntitlement.gw().select(SysEntitlement::getEntId).eq(SysEntitlement::getSysType, sysType).eq(SysEntitlement::getState, CS.PUB_USABLE)
             ).stream().forEach(r -> result.add(r.getEntId()));
 
             return result;
 
         }else{
-            return baseMapper.selectEntIdsByUserId(userId, system);
+            return baseMapper.selectEntIdsByUserId(userId, sysType);
         }
 
     }

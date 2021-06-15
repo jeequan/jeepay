@@ -40,25 +40,25 @@ import java.util.List;
 public class SysUserAuthService extends ServiceImpl<SysUserAuthMapper, SysUserAuth> {
 
     /** 根据登录信息查询用户认证信息  **/
-    public SysUserAuth selectByLogin(String identifier, Byte identityType, String system){
-        return baseMapper.selectByLogin(identifier, identityType, system);
+    public SysUserAuth selectByLogin(String identifier, Byte identityType, String sysType){
+        return baseMapper.selectByLogin(identifier, identityType, sysType);
     }
 
     /** 添加用户认证表 **/
     @Transactional
-    public void addUserAuthDefault(Long userId, String loginUserName, String telPhone, String pwdRaw, String system){
+    public void addUserAuthDefault(Long userId, String loginUserName, String telPhone, String pwdRaw, String sysType){
 
         String salt = StringKit.getUUID(6); //6位随机数
         String userPwd = new BCryptPasswordEncoder().encode(pwdRaw);
 
         /** 用户名登录方式 */
-        SysUserAuth record = new SysUserAuth(); record.setUserId(userId); record.setCredential(userPwd); record.setSalt(salt);record.setSysType(system);
+        SysUserAuth record = new SysUserAuth(); record.setUserId(userId); record.setCredential(userPwd); record.setSalt(salt);record.setSysType(sysType);
         record.setIdentityType(CS.AUTH_TYPE.LOGIN_USER_NAME);
         record.setIdentifier(loginUserName);
         save(record);
 
         /** 手机号登录方式 */
-        record = new SysUserAuth(); record.setUserId(userId); record.setCredential(userPwd); record.setSalt(salt);record.setSysType(system);
+        record = new SysUserAuth(); record.setUserId(userId); record.setCredential(userPwd); record.setSalt(salt);record.setSysType(sysType);
         record.setIdentityType(CS.AUTH_TYPE.TELPHONE);
         record.setIdentifier(telPhone);
         save(record);
@@ -67,7 +67,7 @@ public class SysUserAuthService extends ServiceImpl<SysUserAuthMapper, SysUserAu
 
     /** 重置密码 */
     @Transactional
-    public void resetAuthInfo(Long resetUserId, String authLoginUserName, String telphone, String newPwd, String system){
+    public void resetAuthInfo(Long resetUserId, String authLoginUserName, String telphone, String newPwd, String sysType){
 
         //更改登录用户名
 //        if(StringKit.isNotEmpty(authLoginUserName)){
@@ -86,7 +86,7 @@ public class SysUserAuthService extends ServiceImpl<SysUserAuthMapper, SysUserAu
         //更改密码
         if(StringUtils.isNotEmpty(newPwd)){
             //根据当前用户ID 查询出用户的所有认证记录
-            List<SysUserAuth> authList = list(SysUserAuth.gw().eq(SysUserAuth::getSysType, system).eq(SysUserAuth::getUserId, resetUserId));
+            List<SysUserAuth> authList = list(SysUserAuth.gw().eq(SysUserAuth::getSysType, sysType).eq(SysUserAuth::getUserId, resetUserId));
             for (SysUserAuth auth : authList) {
                 if(StringUtils.isEmpty(auth.getSalt())){ //可能为其他登录方式， 不存在salt
                     continue;
