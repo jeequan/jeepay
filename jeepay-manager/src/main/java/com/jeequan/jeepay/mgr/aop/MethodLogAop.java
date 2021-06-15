@@ -155,12 +155,12 @@ public class MethodLogAop {
         sysLog.setReqUrl(request.getRequestURL().toString());
         sysLog.setUserIp(requestKitBean.getClientIp());
         sysLog.setCreatedAt(new Date());
-        sysLog.setSystem(CS.SYS_TYPE.MGR);
+        sysLog.setSysType(CS.SYS_TYPE.MGR);
 
         if (userDetails != null) {
             sysLog.setUserId(JeeUserDetails.getCurrentUserDetails().getSysUser().getSysUserId());
             sysLog.setUserName(JeeUserDetails.getCurrentUserDetails().getSysUser().getRealname());
-            sysLog.setSystem(JeeUserDetails.getCurrentUserDetails().getSysUser().getSystem());
+            sysLog.setSysType(JeeUserDetails.getCurrentUserDetails().getSysUser().getSysType());
         }
     }
 

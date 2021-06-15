@@ -165,7 +165,7 @@ public class MethodLogAop{
         if (userDetails != null) {
             sysLog.setUserId(JeeUserDetails.getCurrentUserDetails().getSysUser().getSysUserId());
             sysLog.setUserName(JeeUserDetails.getCurrentUserDetails().getSysUser().getRealname());
-            sysLog.setSystem(JeeUserDetails.getCurrentUserDetails().getSysUser().getSystem());
+            sysLog.setSysType(JeeUserDetails.getCurrentUserDetails().getSysUser().getSysType());
         }
     }
 
