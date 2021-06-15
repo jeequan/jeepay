@@ -160,6 +160,7 @@ CREATE TABLE `t_mch_app` (
          `app_name` varchar(64) NOT NULL DEFAULT '' COMMENT '应用名称',
          `mch_no` VARCHAR(64) NOT NULL COMMENT '商户号',
          `state` TINYINT(6) NOT NULL DEFAULT 1 COMMENT '应用状态: 0-停用, 1-正常',
+         `app_secret` VARCHAR(128) NOT NULL COMMENT '应用私钥',
          `remark` varchar(128) DEFAULT NULL COMMENT '备注',
          `created_uid` BIGINT(20) COMMENT '创建者用户ID',
          `created_by` VARCHAR(64) COMMENT '创建者姓名',

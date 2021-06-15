@@ -42,6 +42,10 @@ public class UnifiedOrderRQ extends AbstractRQ {
     @NotBlank(message="商户号不能为空")
     private String mchNo;
 
+    /** 商户应用ID **/
+    @NotBlank(message="商户应用ID不能为空")
+    private String appId;
+
     /** 商户订单号 **/
     @NotBlank(message="商户订单号不能为空")
     private String mchOrderNo;

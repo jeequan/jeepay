@@ -54,6 +54,11 @@ public class MchApp extends BaseModel {
     private Byte state;
 
     /**
+     * 应用私钥
+     */
+    private String appSecret;
+
+    /**
      * 备注
      */
     private String remark;
@@ -77,6 +82,5 @@ public class MchApp extends BaseModel {
      * 更新时间
      */
     private Date updatedAt;
-
 
 }
