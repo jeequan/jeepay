@@ -89,6 +89,11 @@ public class MchNotifyRecord extends BaseModel implements Serializable {
     private String isvNo;
 
     /**
+     * 应用ID
+     */
+    private String appId;
+
+    /**
      * 通知地址
      */
     private String notifyUrl;

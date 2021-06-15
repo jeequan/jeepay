@@ -7,6 +7,7 @@
         <id column="pay_order_id" property="payOrderId" />
         <result column="mch_no" property="mchNo" />
         <result column="isv_no" property="isvNo" />
+        <result column="app_id" property="appId" />
         <result column="mch_name" property="mchName" />
         <result column="mch_type" property="mchType" />
         <result column="mch_order_no" property="mchOrderNo" />

@@ -73,6 +73,11 @@ public class PayOrder extends BaseModel implements Serializable {
     private String isvNo;
 
     /**
+     * 应用ID
+     */
+    private String appId;
+
+    /**
      * 商户名称
      */
     private String mchName;

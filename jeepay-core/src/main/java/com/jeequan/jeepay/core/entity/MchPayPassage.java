@@ -60,6 +60,11 @@ public class MchPayPassage extends BaseModel implements Serializable {
     private String mchNo;
 
     /**
+     * 应用ID
+     */
+    private String appId;
+
+    /**
      * 支付接口
      */
     private String ifCode;
@@ -93,6 +98,5 @@ public class MchPayPassage extends BaseModel implements Serializable {
      * 更新时间
      */
     private Date updatedAt;
-
 
 }

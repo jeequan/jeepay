@@ -10,6 +10,7 @@
         <result column="mch_order_no" property="mchOrderNo" />
         <result column="mch_no" property="mchNo" />
         <result column="isv_no" property="isvNo" />
+        <result column="app_id" property="appId" />
         <result column="notify_url" property="notifyUrl" />
         <result column="res_result" property="resResult" />
         <result column="notify_count" property="notifyCount" />

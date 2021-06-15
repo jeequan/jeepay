@@ -6,6 +6,7 @@
     <resultMap id="BaseResultMap" type="com.jeequan.jeepay.core.entity.MchPayPassage">
         <id column="id" property="id" />
         <result column="mch_no" property="mchNo" />
+        <result column="app_id" property="appId" />
         <result column="if_code" property="ifCode" />
         <result column="way_code" property="wayCode" />
         <result column="rate" property="rate" />

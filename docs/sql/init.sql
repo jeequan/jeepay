@@ -131,7 +131,7 @@ CREATE TABLE `t_sys_log` (
   PRIMARY KEY (`sys_log_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '系统操作日志表';
 
--- 1.商户信息表
+-- 商户信息表
 DROP TABLE IF EXISTS t_mch_info;
 CREATE TABLE `t_mch_info` (
         `mch_no` VARCHAR(64) NOT NULL COMMENT '商户号',
@@ -153,7 +153,22 @@ CREATE TABLE `t_mch_info` (
         PRIMARY KEY (`mch_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商户信息表';
 
--- 2.服务商信息表
+-- 商户应用表
+DROP TABLE IF EXISTS t_mch_app;
+CREATE TABLE `t_mch_app` (
+         `app_id` varchar(64) NOT NULL COMMENT '应用ID',
+         `app_name` varchar(64) NOT NULL DEFAULT '' COMMENT '应用名称',
+         `mch_no` VARCHAR(64) NOT NULL COMMENT '商户号',
+         `state` TINYINT(6) NOT NULL DEFAULT 1 COMMENT '应用状态: 0-停用, 1-正常',
+         `remark` varchar(128) DEFAULT NULL COMMENT '备注',
+         `created_uid` BIGINT(20) COMMENT '创建者用户ID',
+         `created_by` VARCHAR(64) COMMENT '创建者姓名',
+         `created_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
+         `updated_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
+         PRIMARY KEY (`app_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商户应用表';
+
+-- 服务商信息表
 DROP TABLE IF EXISTS t_isv_info;
 CREATE TABLE `t_isv_info` (
         `isv_no` VARCHAR(64) NOT NULL COMMENT '服务商号',
@@ -171,7 +186,7 @@ CREATE TABLE `t_isv_info` (
         PRIMARY KEY (`isv_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='服务商信息表';
 
--- 3.支付方式表  pay_way
+-- 支付方式表  pay_way
 DROP TABLE IF EXISTS t_pay_way;
 CREATE TABLE `t_pay_way` (
         `way_code` VARCHAR(20) NOT NULL COMMENT '支付方式代码  例如： wxpay_jsapi',
@@ -181,7 +196,7 @@ CREATE TABLE `t_pay_way` (
         PRIMARY KEY (`way_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='支付方式表';
 
--- 4.支付接口定义表
+-- 支付接口定义表
 DROP TABLE IF EXISTS t_pay_interface_define;
 CREATE TABLE `t_pay_interface_define` (
           `if_code` VARCHAR(20) NOT NULL COMMENT '接口代码 全小写  wxpay alipay ',
@@ -201,12 +216,12 @@ CREATE TABLE `t_pay_interface_define` (
           PRIMARY KEY (`if_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='支付接口定义表';
 
--- 5.支付接口配置参数表
+-- 支付接口配置参数表
 DROP TABLE IF EXISTS t_pay_interface_config;
 CREATE TABLE `t_pay_interface_config` (
           `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-          `info_type` TINYINT(6) NOT NULL COMMENT '账号类型:1-服务商 2-商户',
-          `info_id` VARCHAR(64) NOT NULL COMMENT '服务商或商户No',
+          `info_type` TINYINT(6) NOT NULL COMMENT '账号类型:1-服务商 2-商户 3-商户应用',
+          `info_id` VARCHAR(64) NOT NULL COMMENT '服务商号/商户号/应用ID',
           `if_code` VARCHAR(20) NOT NULL COMMENT '支付接口代码',
           `if_params` VARCHAR(4096) NOT NULL COMMENT '接口配置参数,json字符串',
           `if_rate` DECIMAL(20,6) DEFAULT NULL COMMENT '支付接口费率',
@@ -223,11 +238,12 @@ CREATE TABLE `t_pay_interface_config` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='支付接口配置参数表';
 
 
--- 6.商户支付通道表 (允许商户  支付方式 对应多个支付接口的配置)
+-- 商户支付通道表 (允许商户  支付方式 对应多个支付接口的配置)
 DROP TABLE IF EXISTS t_mch_pay_passage;
 CREATE TABLE `t_mch_pay_passage` (
          `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
          `mch_no` VARCHAR(64) NOT NULL COMMENT '商户号',
+         `app_id` VARCHAR(64) NOT NULL COMMENT '应用ID',
          `if_code` VARCHAR(20) NOT NULL COMMENT '支付接口',
          `way_code` VARCHAR(20) NOT NULL COMMENT '支付方式',
          `rate` DECIMAL(20,6) NOT NULL COMMENT '支付方式费率',
@@ -244,12 +260,13 @@ CREATE TABLE `t_mch_pay_passage` (
 -- mch_no, way_code, 轮询策略。
 
 
--- 7.支付订单表
+-- 支付订单表
 DROP TABLE IF EXISTS t_pay_order;
 CREATE TABLE `t_pay_order` (
         `pay_order_id` VARCHAR(30) NOT NULL COMMENT '支付订单号',
         `mch_no` VARCHAR(64) NOT NULL COMMENT '商户号',
         `isv_no` VARCHAR(64) DEFAULT NULL COMMENT '服务商号',
+        `app_id` VARCHAR(64) NOT NULL COMMENT '应用ID',
         `mch_name` VARCHAR(30) NOT NULL COMMENT '商户名称',
         `mch_type` TINYINT(6) NOT NULL COMMENT '类型: 1-普通商户, 2-特约商户(服务商模式)',
         `mch_order_no` VARCHAR(64) NOT NULL COMMENT '商户订单号',
@@ -284,7 +301,7 @@ CREATE TABLE `t_pay_order` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='支付订单表';
 
 
--- 8.商户通知记录表
+-- 商户通知记录表
 DROP TABLE IF EXISTS t_mch_notify_record;
 CREATE TABLE `t_mch_notify_record` (
         `notify_id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '商户通知记录ID',
@@ -293,6 +310,7 @@ CREATE TABLE `t_mch_notify_record` (
         `mch_order_no` VARCHAR(64) NOT NULL COMMENT '商户订单号',
         `mch_no` VARCHAR(64) NOT NULL COMMENT '商户号',
         `isv_no` VARCHAR(64) COMMENT '服务商号',
+        `app_id` VARCHAR(64) NOT NULL COMMENT '应用ID',
         `notify_url` TEXT NOT NULL COMMENT '通知地址',
         `res_result` TEXT DEFAULT NULL COMMENT '通知响应结果',
         `notify_count` INT(11) NOT NULL DEFAULT '0' COMMENT '通知次数',
@@ -305,7 +323,7 @@ CREATE TABLE `t_mch_notify_record` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1001 DEFAULT CHARSET=utf8mb4 COMMENT='商户通知记录表';
 
 
--- 9.订单接口数据快照（加密存储）
+-- 订单接口数据快照（加密存储）
 DROP TABLE IF EXISTS `t_order_snapshot`;
 CREATE TABLE `t_order_snapshot` (
         `order_id` VARCHAR(64) NOT NULL COMMENT '订单ID',
@@ -324,7 +342,7 @@ CREATE TABLE `t_order_snapshot` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单接口数据快照';
 
 
--- 10.退款订单表
+-- 退款订单表
 DROP TABLE IF EXISTS t_refund_order;
 CREATE TABLE `t_refund_order` (
           `refund_order_id` VARCHAR(30) NOT NULL COMMENT '退款订单号',
