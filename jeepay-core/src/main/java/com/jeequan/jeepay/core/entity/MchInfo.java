@@ -94,11 +94,6 @@ public class MchInfo extends BaseModel implements Serializable {
     private String contactEmail;
 
     /**
-     * 私钥
-     */
-    private String privateKey;
-
-    /**
      * 商户状态: 0-停用, 1-正常
      */
     private Byte state;
