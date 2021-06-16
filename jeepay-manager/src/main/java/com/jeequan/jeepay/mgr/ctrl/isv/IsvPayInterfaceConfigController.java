@@ -54,7 +54,7 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
     @GetMapping
     public ApiRes list() {
 
-        List<PayInterfaceDefine> list = payInterfaceConfigService.selectAllPayIfConfigListByInfoId(CS.INFO_TYPE_ISV, getValStringRequired("isvNo"));
+        List<PayInterfaceDefine> list = payInterfaceConfigService.selectAllPayIfConfigListByIsvNo(CS.INFO_TYPE_ISV, getValStringRequired("isvNo"));
         return ApiRes.ok(list);
     }
 

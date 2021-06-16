@@ -18,11 +18,14 @@ package com.jeequan.jeepay.mgr.ctrl.merchant;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
+import com.jeequan.jeepay.mgr.mq.topic.MqTopic4ModifyMchApp;
 import com.jeequan.jeepay.mgr.mq.topic.MqTopic4ModifyMchInfo;
+import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,30 +46,31 @@ import java.util.List;
 public class MchPayInterfaceConfigController extends CommonCtrl {
 
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private MqTopic4ModifyMchInfo mqTopic4ModifyMchInfo;
+    @Autowired private MqTopic4ModifyMchApp mqTopic4ModifyMchApp;
+    @Autowired private MchAppService mchAppService;
 
     /**
      * @Author: ZhuXiao
-     * @Description: 查询商户支付接口配置列表
+     * @Description: 查询应用支付接口配置列表
      * @Date: 15:50 2021/4/27
     */
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_LIST')")
     @GetMapping
     public ApiRes list() {
 
-        List<PayInterfaceDefine> list = payInterfaceConfigService.selectAllPayIfConfigListByInfoId(CS.INFO_TYPE_MCH, getValStringRequired("mchNo"));
+        List<PayInterfaceDefine> list = payInterfaceConfigService.selectAllPayIfConfigListByAppId(getValStringRequired("appId"));
         return ApiRes.ok(list);
     }
 
     /**
      * @Author: ZhuXiao
-     * @Description: 根据 商户号、接口类型 获取商户参数配置
+     * @Description: 根据 appId、接口类型 获取应用参数配置
      * @Date: 17:03 2021/4/27
     */
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_VIEW')")
-    @GetMapping("/{mchNo}/{ifCode}")
-    public ApiRes getByMchNo(@PathVariable(value = "mchNo") String mchNo, @PathVariable(value = "ifCode") String ifCode) {
-        PayInterfaceConfig payInterfaceConfig = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_MCH, mchNo, ifCode);
+    @GetMapping("/{appId}/{ifCode}")
+    public ApiRes getByAppId(@PathVariable(value = "appId") String appId, @PathVariable(value = "ifCode") String ifCode) {
+        PayInterfaceConfig payInterfaceConfig = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_MCH_APP, appId, ifCode);
         if (payInterfaceConfig != null && payInterfaceConfig.getIfRate() != null) {
             payInterfaceConfig.setIfRate(payInterfaceConfig.getIfRate().multiply(new BigDecimal("100")));
         }
@@ -75,19 +79,25 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
 
     /**
      * @Author: ZhuXiao
-     * @Description: 商户支付接口配置
+     * @Description: 应用支付接口配置
      * @Date: 16:13 2021/4/27
     */
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_ADD')")
     @PostMapping
-    @MethodLog(remark = "更新商户支付参数")
+    @MethodLog(remark = "更新应用支付参数")
     public ApiRes saveOrUpdate() {
 
         String infoId = getValStringRequired("infoId");
         String ifCode = getValStringRequired("ifCode");
 
+        MchApp mchApp = mchAppService.getById(infoId);
+        if (mchApp == null || mchApp.getState() != CS.YES) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+
         PayInterfaceConfig payInterfaceConfig = getObject(PayInterfaceConfig.class);
-        payInterfaceConfig.setInfoType(CS.INFO_TYPE_MCH);
+        payInterfaceConfig.setInfoType(CS.INFO_TYPE_MCH_APP);
+        payInterfaceConfig.setInfoId(infoId);
 
         // 存入真实费率
         if (payInterfaceConfig.getIfRate() != null) {
@@ -101,7 +111,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
         payInterfaceConfig.setUpdatedBy(realName);
 
         //根据 商户号、接口类型 获取商户参数配置
-        PayInterfaceConfig dbRecoed = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_MCH, infoId, ifCode);
+        PayInterfaceConfig dbRecoed = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_MCH_APP, infoId, ifCode);
         //若配置存在，为saveOrUpdate添加ID，第一次配置添加创建者
         if (dbRecoed != null) {
             payInterfaceConfig.setId(dbRecoed.getId());
@@ -115,7 +125,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
             return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "配置失败");
         }
 
-        mqTopic4ModifyMchInfo.push(infoId); // 推送mq到目前节点进行更新数据
+        mqTopic4ModifyMchApp.push(mchApp.getMchNo(), infoId); // 推送mq到目前节点进行更新数据
 
         return ApiRes.ok();
     }

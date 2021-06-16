@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -53,6 +54,8 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
     @Autowired private SysUserAuthService sysUserAuthService;
 
     @Autowired private IsvInfoService isvInfoService;
+
+    @Autowired private MchAppService mchAppService;
 
     @Transactional(rollbackFor = Exception.class)
     public void addMch(MchInfo mchInfo, String loginUserName) {
@@ -104,9 +107,11 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
             mchPayPassageService.remove(MchPayPassage.gw().eq(MchPayPassage::getMchNo, mchNo));
 
             // 3.删除当前商户支付接口配置参数
+            List<String> appIdList = new LinkedList<>();
+            mchAppService.list(MchApp.gw().eq(MchApp::getMchNo, mchNo)).forEach(item -> appIdList.add(item.getAppId()));
             payInterfaceConfigService.remove(PayInterfaceConfig.gw()
-                    .eq(PayInterfaceConfig::getInfoId, mchNo)
-                    .eq(PayInterfaceConfig::getInfoType, CS.INFO_TYPE_MCH)
+                    .in(PayInterfaceConfig::getInfoId, appIdList)
+                    .eq(PayInterfaceConfig::getInfoType, CS.INFO_TYPE_MCH_APP)
             );
 
             List<SysUser> userList = sysUserService.list(SysUser.gw()

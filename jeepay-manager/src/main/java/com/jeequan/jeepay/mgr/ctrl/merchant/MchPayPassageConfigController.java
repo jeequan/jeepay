@@ -23,16 +23,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.entity.MchInfo;
-import com.jeequan.jeepay.core.entity.MchPayPassage;
-import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
-import com.jeequan.jeepay.core.entity.PayWay;
+import com.jeequan.jeepay.core.entity.*;
+import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.service.impl.MchInfoService;
-import com.jeequan.jeepay.service.impl.MchPayPassageService;
-import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
-import com.jeequan.jeepay.service.impl.PayWayService;
+import com.jeequan.jeepay.service.impl.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.CollectionUtils;
@@ -54,9 +49,9 @@ import java.util.List;
 public class MchPayPassageConfigController extends CommonCtrl {
 
     @Autowired private MchPayPassageService mchPayPassageService;
-    @Autowired private PayInterfaceConfigService payInterfaceConfigService;
     @Autowired private PayWayService payWayService;
     @Autowired private MchInfoService mchInfoService;
+    @Autowired private MchAppService mchAppService;
 
 
     /**
@@ -68,7 +63,7 @@ public class MchPayPassageConfigController extends CommonCtrl {
     @GetMapping
     public ApiRes list() {
 
-        String mchNo = getValStringRequired("mchNo");
+        String appId = getValStringRequired("appId");
         String wayCode = getValString("wayCode");
         String wayName = getValString("wayName");
 
@@ -84,10 +79,10 @@ public class MchPayPassageConfigController extends CommonCtrl {
             List<String> wayCodeList = new LinkedList<>();
             payWayPage.getRecords().stream().forEach(payWay -> wayCodeList.add(payWay.getWayCode()));
 
-            // 商户支付通道集合
+            // 应用支付通道集合
             List<MchPayPassage> mchPayPassageList = mchPayPassageService.list(MchPayPassage.gw()
                     .select(MchPayPassage::getWayCode, MchPayPassage::getState)
-                    .eq(MchPayPassage::getMchNo, mchNo)
+                    .eq(MchPayPassage::getAppId, appId)
                     .in(MchPayPassage::getWayCode, wayCodeList));
 
             for (PayWay payWay : payWayPage.getRecords()) {
@@ -107,41 +102,32 @@ public class MchPayPassageConfigController extends CommonCtrl {
 
     /**
      * @Author: ZhuXiao
-     * @Description: 根据商户号、支付方式查询可用的支付接口列表
+     * @Description: 根据appId、支付方式查询可用的支付接口列表
      * @Date: 17:55 2021/5/8
     */
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_PASSAGE_CONFIG')")
-    @GetMapping("/availablePayInterface/{mchNo}/{wayCode}")
-    public ApiRes availablePayInterface(@PathVariable("mchNo") String mchNo, @PathVariable("wayCode") String wayCode) {
+    @GetMapping("/availablePayInterface/{appId}/{wayCode}")
+    public ApiRes availablePayInterface(@PathVariable("appId") String appId, @PathVariable("wayCode") String wayCode) {
 
-        MchInfo mchInfo = mchInfoService.getById(mchNo);
+        MchApp mchApp = mchAppService.getById(appId);
+        if (mchApp == null || mchApp.getState() != CS.YES) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+
+        MchInfo mchInfo = mchInfoService.getById(mchApp.getMchNo());
         if (mchInfo == null || mchInfo.getState() != CS.YES) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
 
         // 根据支付方式查询可用支付接口列表
-        List<JSONObject> list = mchPayPassageService.selectAvailablePayInterfaceList(wayCode, mchNo, CS.INFO_TYPE_MCH, mchInfo.getType());
+        List<JSONObject> list = mchPayPassageService.selectAvailablePayInterfaceList(wayCode, appId, CS.INFO_TYPE_MCH_APP, mchInfo.getType());
 
         return ApiRes.ok(list);
     }
 
     /**
      * @Author: ZhuXiao
-     * @Description: 根据 商户号、接口类型 获取商户参数配置
-     * @Date: 17:03 2021/4/27
-    */
-    @GetMapping("/{mchNo}/{ifCode}")
-    public ApiRes getByMchNo(@PathVariable(value = "mchNo") String mchNo, @PathVariable(value = "ifCode") String ifCode) {
-        PayInterfaceConfig payInterfaceConfig = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_MCH, mchNo, ifCode);
-        if (payInterfaceConfig != null && payInterfaceConfig.getIfRate() != null) {
-            payInterfaceConfig.setIfRate(payInterfaceConfig.getIfRate().multiply(new BigDecimal("100")));
-        }
-        return ApiRes.ok(payInterfaceConfig);
-    }
-
-    /**
-     * @Author: ZhuXiao
-     * @Description: 商户支付通道配置
+     * @Description: 应用支付通道配置
      * @Date: 17:36 2021/5/8
     */
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_PASSAGE_ADD')")
@@ -153,7 +139,15 @@ public class MchPayPassageConfigController extends CommonCtrl {
 
         try {
             List<MchPayPassage> mchPayPassageList = JSONArray.parseArray(reqParams, MchPayPassage.class);
-            mchPayPassageService.saveOrUpdateBatchSelf(mchPayPassageList);
+            if (CollectionUtils.isEmpty(mchPayPassageList)) {
+                throw new BizException("操作失败");
+            }
+            MchApp mchApp = mchAppService.getById(mchPayPassageList.get(0).getAppId());
+            if (mchApp == null || mchApp.getState() != CS.YES) {
+                return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+            }
+
+            mchPayPassageService.saveOrUpdateBatchSelf(mchPayPassageList, mchApp.getMchNo());
             return ApiRes.ok();
         }catch (Exception e) {
             return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR);

@@ -47,10 +47,10 @@ public class MchPayPassageService extends ServiceImpl<MchPayPassageMapper, MchPa
      * @Description: 根据支付方式查询可用的支付接口列表
      * @Date: 9:56 2021/5/10
     */
-    public List<JSONObject> selectAvailablePayInterfaceList(String wayCode, String mchNo, Byte infoType, Byte mchType) {
+    public List<JSONObject> selectAvailablePayInterfaceList(String wayCode, String appId, Byte infoType, Byte mchType) {
         Map params = new HashMap();
         params.put("wayCode", wayCode);
-        params.put("mchNo", mchNo);
+        params.put("appId", appId);
         params.put("infoType", infoType);
         params.put("mchType", mchType);
         List<JSONObject> list = baseMapper.selectAvailablePayInterfaceList(params);
@@ -59,7 +59,7 @@ public class MchPayPassageService extends ServiceImpl<MchPayPassageMapper, MchPa
         // 添加通道状态
         for (JSONObject object : list) {
             MchPayPassage payPassage = baseMapper.selectOne(MchPayPassage.gw()
-                    .eq(MchPayPassage::getMchNo, mchNo)
+                    .eq(MchPayPassage::getAppId, appId)
                     .eq(MchPayPassage::getWayCode, wayCode)
                     .eq(MchPayPassage::getIfCode, object.getString("ifCode"))
             );
@@ -78,15 +78,7 @@ public class MchPayPassageService extends ServiceImpl<MchPayPassageMapper, MchPa
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void saveOrUpdateBatchSelf(List<MchPayPassage> mchPayPassageList) {
-        saveOrUpdateBatchSelf(mchPayPassageList, null);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
     public void saveOrUpdateBatchSelf(List<MchPayPassage> mchPayPassageList, String mchNo) {
-        if (CollectionUtils.isEmpty(mchPayPassageList)) {
-            throw new BizException("操作失败");
-        }
         for (MchPayPassage payPassage : mchPayPassageList) {
             if (payPassage.getState() == CS.NO && payPassage.getId() == null) {
                 continue;

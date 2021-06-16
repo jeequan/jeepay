@@ -24,7 +24,7 @@
         and pid.state = 1
         and pic.state = 1
         and pic.info_type = #{infoType}
-        and pic.info_id = #{mchNo}
+        and pic.info_id = #{appId}
         and (pic.if_params is not null and trim(pic.if_params) != '')
         <if test="mchType == 1">
             and pid.is_mch_mode = 1
