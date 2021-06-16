@@ -35,6 +35,7 @@ import com.jeequan.jeepay.service.mapper.SysEntitlementMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -83,6 +84,8 @@ public class AuthService {
             authentication = authenticationManager.authenticate(upToken);
         } catch (JeepayAuthenticationException jex) {
             throw jex.getBizException() == null ? new BizException(jex.getMessage()) : jex.getBizException();
+        } catch (BadCredentialsException e) {
+            throw new BizException("用户名/密码错误！");
         } catch (AuthenticationException e) {
             log.error("AuthenticationException:", e);
             throw new BizException("认证服务出现异常， 请重试或联系系统管理员！");
