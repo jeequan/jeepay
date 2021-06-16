@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.mch.ctrl.sysuser;
 
+import cn.hutool.core.codec.Base64;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.aop.MethodLog;
@@ -100,6 +101,7 @@ public class SysUserController extends CommonCtrl {
 	public ApiRes add() {
 		SysUser sysUser = getObject(SysUser.class);
 		sysUser.setBelongInfoId(getCurrentUser().getSysUser().getBelongInfoId());
+		sysUser.setIsAdmin(CS.NO);
 		sysUserService.addSysUser(sysUser, CS.SYS_TYPE.MCH);
 		return ApiRes.ok();
 	}
@@ -137,28 +139,22 @@ public class SysUserController extends CommonCtrl {
 	public ApiRes update(@PathVariable("recordId") Long recordId) {
 		SysUser sysUser = getObject(SysUser.class);
 		sysUser.setSysUserId(recordId);
-
+		// 如果当前用户为非超管则用户状态为普通用户
+		if (getCurrentUser().getSysUser().getIsAdmin() != CS.YES) sysUser.setIsAdmin(CS.NO);
 		SysUser dbRecord = sysUserService.getOne(SysUser.gw().eq(SysUser::getSysUserId, recordId).eq(SysUser::getBelongInfoId, getCurrentMchNo()));
 		if (dbRecord == null) throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
 
-		Boolean resetPass = getReqParamJSON().getBoolean("resetPass");
 		//判断是否自己禁用自己
 		if(recordId.equals(getCurrentUser().getSysUser().getSysUserId()) && sysUser.getState() != null && sysUser.getState() == CS.PUB_DISABLE){
 			throw new BizException("系统不允许禁用当前登陆用户！");
 		}
 
 		//判断是否重置密码
+		Boolean resetPass = getReqParamJSON().getBoolean("resetPass");
 		if (resetPass != null && resetPass) {
-			Boolean defaultPass = getReqParamJSON().getBoolean("defaultPass");
-			String updatePwd = "";
-			if (!defaultPass) {
-				// 获取修改的密码
-				updatePwd = getValStringRequired("confirmPwd");
-			}else {
-				// 重置默认密码
-				updatePwd = CS.DEFAULT_PWD;
-			}
-			sysUserAuthService.resetAuthInfo(recordId, null, null, updatePwd, CS.SYS_TYPE.MCH);
+			//判断是否重置密码
+			String updatePwd = getReqParamJSON().getBoolean("defaultPass") == false? Base64.decodeStr(getValStringRequired("confirmPwd")):CS.DEFAULT_PWD;
+			sysUserAuthService.resetAuthInfo(sysUser.getSysUserId(), null, null, updatePwd, CS.SYS_TYPE.MCH);
 			// 删除用户redis缓存信息
 			authService.delAuthentication(Arrays.asList(recordId));
 		}
@@ -190,13 +186,13 @@ public class SysUserController extends CommonCtrl {
 		}
 
 		//判断是否删除商户默认超管
-		List<SysUser> userList = sysUserService.list(SysUser.gw()
-				.eq(SysUser::getBelongInfoId, sysUser.getBelongInfoId())
+		SysUser mchUserDefault = sysUserService.getOne(SysUser.gw()
+				.eq(SysUser::getBelongInfoId, getCurrentMchNo())
 				.eq(SysUser::getSysType, CS.SYS_TYPE.MCH)
-				.orderByAsc(SysUser::getCreatedAt)
+				.eq(SysUser::getIsAdmin, CS.YES)
 		);
 
-		if (userList.size() > 0 && userList.get(0).getSysUserId().equals(recordId)) {
+		if (mchUserDefault.getSysUserId().equals(recordId)) {
 			throw new BizException("系统不允许删除商户默认用户！");
 		}
 

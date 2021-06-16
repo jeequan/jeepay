@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.mgr.ctrl.merchant;
 
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -130,6 +131,7 @@ public class MchInfoController extends CommonCtrl {
     @RequestMapping(value="/{mchNo}", method = RequestMethod.PUT)
     public ApiRes update(@PathVariable("mchNo") String mchNo) {
         MchInfo mchInfo = getObject(MchInfo.class);
+        List<Long> userIdCacheList = new ArrayList<>();
         mchInfo.setMchNo(mchNo);
         // 校验该商户是否为特邀商户
         MchInfo dbMchInfo = mchInfoService.getById(mchNo);
@@ -143,40 +145,38 @@ public class MchInfoController extends CommonCtrl {
         }
         // 如果商户状态为禁用状态，清除该商户用户登录信息
         if (mchInfo.getState() == CS.NO) {
-            List<Long> userIdList = new ArrayList<>();
             List<SysUser> userList = sysUserService.list(SysUser.gw()
                     .eq(SysUser::getBelongInfoId, mchNo)
                     .eq(SysUser::getSysType, CS.SYS_TYPE.MCH)
             );
             if (userList.size() > 0) {
                 for (SysUser user:userList) {
-                    userIdList.add(user.getSysUserId());
+                    userIdCacheList.add(user.getSysUserId());
                 }
             }
-            // 推送mq删除redis用户缓存
-            mqQueue4ModifyMchUserRemove.push(StringUtils.join(userIdList, ","));
         }
+
         //判断是否重置密码
         Boolean resetPass = getReqParamJSON().getBoolean("resetPass");
         if (resetPass != null && resetPass) {
-            Boolean defaultPass = getReqParamJSON().getBoolean("defaultPass");
-            String updatePwd = "";
-            if (!defaultPass) {
-                // 获取修改的密码
-                updatePwd = getValStringRequired("confirmPwd");
-            }else {
-                // 重置默认密码
-                updatePwd = CS.DEFAULT_PWD;
+            //判断是否重置密码
+            String updatePwd = getReqParamJSON().getBoolean("defaultPass") == false? Base64.decodeStr(getValStringRequired("confirmPwd")):CS.DEFAULT_PWD;
+            if (StringUtils.isNotEmpty(updatePwd)) {
+                // 获取商户最初的用户
+                SysUser sysUser = sysUserService.getOne(SysUser.gw()
+                        .eq(SysUser::getBelongInfoId, mchNo)
+                        .eq(SysUser::getSysType, CS.SYS_TYPE.MCH)
+                        .eq(SysUser::getIsAdmin, CS.YES)
+                );
+                sysUserAuthService.resetAuthInfo(sysUser.getSysUserId(), null, null, updatePwd, CS.SYS_TYPE.MCH);
+                if (mchInfo.getState() == CS.YES) userIdCacheList = Arrays.asList(sysUser.getSysUserId());
             }
-            // 获取商户最初的用户
-            List<SysUser> userList = sysUserService.list(SysUser.gw()
-                    .eq(SysUser::getBelongInfoId, mchNo)
-                    .eq(SysUser::getSysType, CS.SYS_TYPE.MCH)
-                    .orderByAsc(SysUser::getCreatedAt)
-            );
-            sysUserAuthService.resetAuthInfo(userList.get(0).getSysUserId(), null, null, updatePwd, CS.SYS_TYPE.MCH);
+        }
+
+        // 商户被禁用、修改密码删除mq用户缓存
+        if (mchInfo.getState() == CS.NO || resetPass) {
             // 推送mq删除redis用户缓存
-            mqQueue4ModifyMchUserRemove.push(StringUtils.join(Arrays.asList(userList.get(0).getSysUserId()), ","));
+            mqQueue4ModifyMchUserRemove.push(StringUtils.join(Arrays.asList(userIdCacheList), ","));
         }
 
         boolean result = mchInfoService.updateById(mchInfo);

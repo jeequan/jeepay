@@ -15,13 +15,13 @@
  */
 package com.jeequan.jeepay.mgr.ctrl.sysuser;
 
+import cn.hutool.core.codec.Base64;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.SysUser;
 import com.jeequan.jeepay.core.exception.BizException;
-import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.mgr.service.AuthService;
@@ -131,23 +131,14 @@ public class SysUserController extends CommonCtrl {
 	public ApiRes update(@PathVariable("recordId") Long recordId) {
 		SysUser sysUser = getObject(SysUser.class);
 		sysUser.setSysUserId(recordId);
-		Boolean resetPass = getReqParamJSON().getBoolean("resetPass");
 		//判断是否自己禁用自己
 		if(recordId.equals(getCurrentUser().getSysUser().getSysUserId()) && sysUser.getState() != null && sysUser.getState() == CS.PUB_DISABLE){
 			throw new BizException("系统不允许禁用当前登陆用户！");
 		}
-
 		//判断是否重置密码
+		Boolean resetPass = getReqParamJSON().getBoolean("resetPass");
 		if (resetPass != null && resetPass) {
-			Boolean defaultPass = getReqParamJSON().getBoolean("defaultPass");
-			String updatePwd = "";
-			if (!defaultPass) {
-				// 获取修改的密码
-				updatePwd = getValStringRequired("confirmPwd");
-			}else {
-				// 重置默认密码
-				updatePwd = CS.DEFAULT_PWD;
-			}
+			String updatePwd = getReqParamJSON().getBoolean("defaultPass") == false ? Base64.decodeStr(getValStringRequired("confirmPwd")) : CS.DEFAULT_PWD;
 			sysUserAuthService.resetAuthInfo(recordId, null, null, updatePwd, CS.SYS_TYPE.MGR);
 			// 删除用户redis缓存信息
 			authService.delAuthentication(Arrays.asList(recordId));

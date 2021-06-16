@@ -97,7 +97,7 @@ public class AuthService {
         SysUser sysUser = jeeUserDetails.getSysUser();
 
         //非超级管理员 && 不包含左侧菜单 进行错误提示
-        if(sysUser.getIsAdmin() != CS.YES && sysEntitlementMapper.userHasLeftMenu(sysUser.getSysUserId(), CS.SYS_TYPE.MGR) <= 0){
+        if(sysUser.getIsAdmin() != CS.YES && sysEntitlementMapper.userHasLeftMenu(sysUser.getSysUserId(), CS.SYS_TYPE.MCH) <= 0){
             throw new BizException("当前用户未分配任何菜单权限，请联系管理员进行分配后再登录！");
         }
 
