@@ -166,6 +166,22 @@ public class AuthService {
 
     }
 
+    /** 根据用户ID 删除用户缓存信息  **/
+    public void delAuthentication(List<Long> sysUserIdList){
+        if(sysUserIdList == null || sysUserIdList.isEmpty()){
+            return ;
+        }
+        for (Long sysUserId : sysUserIdList) {
+            Collection<String> cacheKeyList = RedisUtil.keys(CS.getCacheKeyToken(sysUserId, "*"));
+            if(cacheKeyList == null || cacheKeyList.isEmpty()){
+                continue;
+            }
+            for (String cacheKey : cacheKeyList) {
+                RedisUtil.del(cacheKey);
+            }
+        }
+    }
+
     public List<SimpleGrantedAuthority> getUserAuthority(SysUser sysUser){
 
         //用户拥有的角色集合  需要以ROLE_ 开头,  用户拥有的权限集合

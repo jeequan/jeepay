@@ -18,6 +18,7 @@ package com.jeequan.jeepay.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.SysUser;
+import com.jeequan.jeepay.core.entity.SysUserAuth;
 import com.jeequan.jeepay.core.entity.SysUserRoleRela;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.utils.StringKit;
@@ -144,5 +145,17 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
         }
     }
 
-
+    /** 删除用户 **/
+    @Transactional
+    public void removeUser(SysUser sysUser, String sysType) {
+        // 1.删除用户登录信息
+        sysUserAuthService.remove(SysUserAuth.gw()
+                .eq(SysUserAuth::getSysType, sysType)
+                .in(SysUserAuth::getUserId, sysUser.getSysUserId())
+        );
+        // 2.删除用户角色信息
+        sysUserRoleRelaService.removeById(sysUser.getSysUserId());
+        // 3.删除用户信息
+        removeById(sysUser.getSysUserId());
+    }
 }

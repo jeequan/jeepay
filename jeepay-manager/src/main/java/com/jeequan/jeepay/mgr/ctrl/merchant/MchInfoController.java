@@ -28,6 +28,7 @@ import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.mgr.mq.queue.MqQueue4ModifyMchUserRemove;
 import com.jeequan.jeepay.mgr.mq.topic.MqTopic4ModifyMchInfo;
 import com.jeequan.jeepay.service.impl.MchInfoService;
+import com.jeequan.jeepay.service.impl.SysUserAuthService;
 import com.jeequan.jeepay.service.impl.SysUserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -55,6 +57,7 @@ public class MchInfoController extends CommonCtrl {
     @Autowired private SysUserService sysUserService;
     @Autowired private MqTopic4ModifyMchInfo mqTopic4ModifyMchInfo;
     @Autowired private MqQueue4ModifyMchUserRemove mqQueue4ModifyMchUserRemove;
+    @Autowired private SysUserAuthService sysUserAuthService;
 
     /**
      * @author: pangxiaoyu
@@ -153,6 +156,29 @@ public class MchInfoController extends CommonCtrl {
             // 推送mq删除redis用户缓存
             mqQueue4ModifyMchUserRemove.push(StringUtils.join(userIdList, ","));
         }
+        //判断是否重置密码
+        Boolean resetPass = getReqParamJSON().getBoolean("resetPass");
+        if (resetPass != null && resetPass) {
+            Boolean defaultPass = getReqParamJSON().getBoolean("defaultPass");
+            String updatePwd = "";
+            if (!defaultPass) {
+                // 获取修改的密码
+                updatePwd = getValStringRequired("confirmPwd");
+            }else {
+                // 重置默认密码
+                updatePwd = CS.DEFAULT_PWD;
+            }
+            // 获取商户最初的用户
+            List<SysUser> userList = sysUserService.list(SysUser.gw()
+                    .eq(SysUser::getBelongInfoId, mchNo)
+                    .eq(SysUser::getSysType, CS.SYS_TYPE.MCH)
+                    .orderByAsc(SysUser::getCreatedAt)
+            );
+            sysUserAuthService.resetAuthInfo(userList.get(0).getSysUserId(), null, null, updatePwd, CS.SYS_TYPE.MCH);
+            // 推送mq删除redis用户缓存
+            mqQueue4ModifyMchUserRemove.push(StringUtils.join(Arrays.asList(userList.get(0).getSysUserId()), ","));
+        }
+
         boolean result = mchInfoService.updateById(mchInfo);
         mqTopic4ModifyMchInfo.push(mchNo); // 推送mq到目前节点进行更新数据
         if (!result)  return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);

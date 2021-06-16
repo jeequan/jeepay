@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -86,6 +88,7 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
 
     }
 
+    /** 删除商户 **/
     @Transactional(rollbackFor = Exception.class)
     public List<Long> removeByMchNo(String mchNo) {
         try {

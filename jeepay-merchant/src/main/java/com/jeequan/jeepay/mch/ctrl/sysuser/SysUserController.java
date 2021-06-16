@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * 用户管理类
@@ -140,9 +141,26 @@ public class SysUserController extends CommonCtrl {
 		SysUser dbRecord = sysUserService.getOne(SysUser.gw().eq(SysUser::getSysUserId, recordId).eq(SysUser::getBelongInfoId, getCurrentMchNo()));
 		if (dbRecord == null) throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
 
+		Boolean resetPass = getReqParamJSON().getBoolean("resetPass");
 		//判断是否自己禁用自己
 		if(recordId.equals(getCurrentUser().getSysUser().getSysUserId()) && sysUser.getState() != null && sysUser.getState() == CS.PUB_DISABLE){
 			throw new BizException("系统不允许禁用当前登陆用户！");
+		}
+
+		//判断是否重置密码
+		if (resetPass != null && resetPass) {
+			Boolean defaultPass = getReqParamJSON().getBoolean("defaultPass");
+			String updatePwd = "";
+			if (!defaultPass) {
+				// 获取修改的密码
+				updatePwd = getValStringRequired("confirmPwd");
+			}else {
+				// 重置默认密码
+				updatePwd = CS.DEFAULT_PWD;
+			}
+			sysUserAuthService.resetAuthInfo(recordId, null, null, updatePwd, CS.SYS_TYPE.MCH);
+			// 删除用户redis缓存信息
+			authService.delAuthentication(Arrays.asList(recordId));
 		}
 
 		sysUserService.updateSysUser(sysUser);
@@ -155,5 +173,39 @@ public class SysUserController extends CommonCtrl {
 		return ApiRes.ok();
 	}
 
+	/** delete */
+	@PreAuthorize("hasAuthority( 'ENT_UR_USER_DELETE' )")
+	@RequestMapping(value="/{recordId}", method = RequestMethod.DELETE)
+	@MethodLog(remark = "删除操作员信息")
+	public ApiRes delete(@PathVariable("recordId") Long recordId) {
+		//查询该操作员信息
+		SysUser sysUser = sysUserService.getById(recordId);
+		if (sysUser == null) {
+			throw new BizException("该操作员不存在！");
+		}
 
+		//判断是否自己删除自己
+		if(recordId.equals(getCurrentUser().getSysUser().getSysUserId())){
+			throw new BizException("系统不允许删除当前登陆用户！");
+		}
+
+		//判断是否删除商户默认超管
+		List<SysUser> userList = sysUserService.list(SysUser.gw()
+				.eq(SysUser::getBelongInfoId, sysUser.getBelongInfoId())
+				.eq(SysUser::getSysType, CS.SYS_TYPE.MCH)
+				.orderByAsc(SysUser::getCreatedAt)
+		);
+
+		if (userList.size() > 0 && userList.get(0).getSysUserId().equals(recordId)) {
+			throw new BizException("系统不允许删除商户默认用户！");
+		}
+
+		// 删除用户
+		sysUserService.removeUser(sysUser, CS.SYS_TYPE.MCH);
+
+		//如果用户被删除，需要更新redis数据
+		authService.refAuthentication(Arrays.asList(recordId));
+
+		return ApiRes.ok();
+	}
 }
