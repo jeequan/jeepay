@@ -110,7 +110,7 @@ public class PayMchNotifyService {
     /**
      * 创建响应URL
      */
-    public String createReturnUrl(PayOrder payOrder, String mchKey) {
+    public String createReturnUrl(PayOrder payOrder, String appSecret) {
 
         if(StringUtils.isEmpty(payOrder.getReturnUrl())){
             return "";
@@ -121,7 +121,7 @@ public class PayMchNotifyService {
         jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
 
         // 报文签名
-        jsonObject.put("sign", JeepayKit.getSign(jsonObject, mchKey));   // 签名
+        jsonObject.put("sign", JeepayKit.getSign(jsonObject, appSecret));   // 签名
 
         // 生成跳转地址
         return StringKit.appendUrlQuery(payOrder.getReturnUrl(), jsonObject);

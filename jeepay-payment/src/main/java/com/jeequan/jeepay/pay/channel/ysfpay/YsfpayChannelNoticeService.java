@@ -24,7 +24,7 @@ import com.jeequan.jeepay.pay.channel.AbstractChannelNoticeService;
 import com.jeequan.jeepay.pay.channel.ysfpay.utils.YsfSignUtils;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.model.IsvConfigContext;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -65,7 +65,7 @@ public class YsfpayChannelNoticeService extends AbstractChannelNoticeService {
     }
 
     @Override
-    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, PayOrder payOrder, MchConfigContext mchConfigContext, NoticeTypeEnum noticeTypeEnum) {
+    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
         try {
 
             ChannelRetMsg result = ChannelRetMsg.confirmSuccess(null);
@@ -77,7 +77,7 @@ public class YsfpayChannelNoticeService extends AbstractChannelNoticeService {
             log.info("{} 回调参数, jsonParams：{}", logPrefix, jsonParams);
 
             // 校验支付回调
-            boolean verifyResult = verifyParams(jsonParams, payOrder, mchConfigContext.getIsvConfigContext());
+            boolean verifyResult = verifyParams(jsonParams, payOrder, mchAppConfigContext.getIsvConfigContext());
             // 验证参数失败
             if(!verifyResult){
                 throw ResponseException.buildText("ERROR");

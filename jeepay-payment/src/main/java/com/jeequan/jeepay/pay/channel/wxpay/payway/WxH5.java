@@ -30,7 +30,7 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxH5OrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxH5OrderRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.springframework.stereotype.Service;
 
 /*
@@ -49,11 +49,11 @@ public class WxH5 extends WxpayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchConfigContext mchConfigContext) {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
 
         WxH5OrderRQ bizRQ = (WxH5OrderRQ) rq;
 
-        WxPayUnifiedOrderRequest req = buildUnifiedOrderRequest(payOrder, mchConfigContext);
+        WxPayUnifiedOrderRequest req = buildUnifiedOrderRequest(payOrder, mchAppConfigContext);
         req.setTradeType(WxPayConstants.TradeType.MWEB);
 
         // 构造函数响应数据
@@ -64,7 +64,7 @@ public class WxH5 extends WxpayPaymentService {
         // 调起上游接口：
         // 1. 如果抛异常，则订单状态为： 生成状态，此时没有查单处理操作。 订单将超时关闭
         // 2. 接口调用成功， 后续异常需进行捕捉， 如果 逻辑代码出现异常则需要走完正常流程，此时订单状态为： 支付中， 需要查单处理。
-        WxPayService wxPayService = mchConfigContext.getWxServiceWrapper().getWxPayService();
+        WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
         try {
             WxPayMwebOrderResult wxPayMwebOrderResult = wxPayService.createOrder(req);
 

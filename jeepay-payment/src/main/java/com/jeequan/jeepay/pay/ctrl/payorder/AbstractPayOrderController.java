@@ -17,6 +17,7 @@ package com.jeequan.jeepay.pay.ctrl.payorder;
 
 import cn.hutool.core.date.DateUtil;
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.MchPayPassage;
 import com.jeequan.jeepay.core.entity.PayOrder;
@@ -29,7 +30,7 @@ import com.jeequan.jeepay.pay.channel.IPaymentService;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.exception.ChannelException;
 import com.jeequan.jeepay.pay.model.IsvConfigContext;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.mq.queue.MqQueue4ChannelOrderQuery;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
@@ -102,6 +103,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             }
 
             String mchNo = bizRQ.getMchNo();
+            String appId = bizRQ.getAppId();
 
             // 只有新订单模式，进行校验
             if(isNewOrder && payOrderService.count(PayOrder.gw().eq(PayOrder::getMchNo, mchNo).eq(PayOrder::getMchOrderNo, bizRQ.getMchOrderNo())) > 0){
@@ -116,18 +118,19 @@ public abstract class AbstractPayOrderController extends ApiController {
             }
 
             //获取支付参数 (缓存数据) 和 商户信息
-            MchConfigContext mchConfigContext = configContextService.getMchConfigContext(mchNo);
-            if(mchConfigContext == null){
-                throw new BizException("获取商户信息失败");
+            MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(mchNo, appId);
+            if(mchAppConfigContext == null){
+                throw new BizException("获取商户应用信息失败");
             }
 
-            MchInfo mchInfo = mchConfigContext.getMchInfo();
+            MchInfo mchInfo = mchAppConfigContext.getMchInfo();
+            MchApp mchApp = mchAppConfigContext.getMchApp();
 
             //收银台支付并且只有新订单需要走这里，  收银台二次下单的wayCode应该为实际支付方式。
             if(isNewOrder && CS.PAY_WAY_CODE.QR_CASHIER.equals(wayCode)){
 
                 //生成订单
-                payOrder = genPayOrder(bizRQ, mchInfo, null);
+                payOrder = genPayOrder(bizRQ, mchInfo, mchApp, null);
                 String payOrderId = payOrder.getPayOrderId();
                 //订单入库 订单状态： 生成状态  此时没有和任何上游渠道产生交互。
                 payOrderService.save(payOrder);
@@ -147,12 +150,12 @@ public abstract class AbstractPayOrderController extends ApiController {
             }
 
             //获取支付接口
-            IPaymentService paymentService = checkMchWayCodeAndGetService(mchConfigContext, wayCode);
+            IPaymentService paymentService = checkMchWayCodeAndGetService(mchAppConfigContext, wayCode);
             String ifCode = paymentService.getIfCode();
 
             //生成订单
             if(isNewOrder){
-                payOrder = genPayOrder(bizRQ, mchInfo, ifCode);
+                payOrder = genPayOrder(bizRQ, mchInfo, mchApp, ifCode);
             }else{
                 payOrder.setIfCode(ifCode);
             }
@@ -169,7 +172,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             }
 
             //调起上游支付接口
-            bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchConfigContext);
+            bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext);
 
             //处理上游返回数据
             this.processChannelMsg(bizRS.getChannelRetMsg(), payOrder);
@@ -197,7 +200,7 @@ public abstract class AbstractPayOrderController extends ApiController {
         }
     }
 
-    private PayOrder genPayOrder(UnifiedOrderRQ rq, MchInfo mchInfo, String ifCode){
+    private PayOrder genPayOrder(UnifiedOrderRQ rq, MchInfo mchInfo, MchApp mchApp, String ifCode){
 
         PayOrder payOrder = new PayOrder();
         payOrder.setPayOrderId(SeqKit.genPayOrderId()); //生成订单ID
@@ -206,6 +209,7 @@ public abstract class AbstractPayOrderController extends ApiController {
         payOrder.setMchName(mchInfo.getMchShortName()); //商户名称（简称）
         payOrder.setMchType(mchInfo.getType()); //商户类型
         payOrder.setMchOrderNo(rq.getMchOrderNo()); //商户订单号
+        payOrder.setAppId(mchApp.getAppId()); //商户应用appId
         payOrder.setIfCode(ifCode); //接口代码
         payOrder.setWayCode(rq.getWayCode()); //支付方式
         payOrder.setAmount(rq.getAmount()); //订单金额
@@ -233,10 +237,10 @@ public abstract class AbstractPayOrderController extends ApiController {
      * 校验： 商户的支付方式是否可用
      * 返回： 支付接口
      * **/
-    private IPaymentService checkMchWayCodeAndGetService(MchConfigContext mchConfigContext, String wayCode){
+    private IPaymentService checkMchWayCodeAndGetService(MchAppConfigContext mchAppConfigContext, String wayCode){
 
         // 根据支付方式， 查询出 该商户 可用的支付接口
-        MchPayPassage mchPayPassage = mchPayPassageService.findMchPayPassage(mchConfigContext.getMchNo(), wayCode);
+        MchPayPassage mchPayPassage = mchPayPassageService.findMchPayPassage(mchAppConfigContext.getMchNo(), wayCode);
         if(mchPayPassage == null){
             throw new BizException("该支付方式商户未开通");
         }
@@ -252,20 +256,20 @@ public abstract class AbstractPayOrderController extends ApiController {
             throw new BizException("接口不支持该支付方式");
         }
 
-        if(mchConfigContext.getMchType() == MchInfo.TYPE_NORMAL){ //普通商户
+        if(mchAppConfigContext.getMchType() == MchInfo.TYPE_NORMAL){ //普通商户
 
-            if(mchConfigContext == null || mchConfigContext.getNormalMchParamsByIfCode(ifCode) == null){
-                throw new BizException("商户参数未配置");
+            if(mchAppConfigContext == null || mchAppConfigContext.getNormalMchParamsByIfCode(ifCode) == null){
+                throw new BizException("商户应用参数未配置");
             }
-        }else if(mchConfigContext.getMchType() == MchInfo.TYPE_ISVSUB){ //特约商户
+        }else if(mchAppConfigContext.getMchType() == MchInfo.TYPE_ISVSUB){ //特约商户
 
-            mchConfigContext = configContextService.getMchConfigContext(mchConfigContext.getMchNo());
+            mchAppConfigContext = configContextService.getMchAppConfigContext(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId());
 
-            if(mchConfigContext == null || mchConfigContext.getIsvsubMchParamsByIfCode(ifCode) == null){
+            if(mchAppConfigContext == null || mchAppConfigContext.getIsvsubMchParamsByIfCode(ifCode) == null){
                 throw new BizException("特约商户参数未配置");
             }
 
-            IsvConfigContext isvConfigContext = configContextService.getIsvConfigContext(mchConfigContext.getMchInfo().getIsvNo());
+            IsvConfigContext isvConfigContext = configContextService.getIsvConfigContext(mchAppConfigContext.getMchInfo().getIsvNo());
 
             if(isvConfigContext == null || isvConfigContext.getIsvParamsByIfCode(ifCode) == null){
                 throw new BizException("服务商参数未配置");
@@ -359,7 +363,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             bizRS.setErrMsg(bizRS.getChannelRetMsg() != null ? bizRS.getChannelRetMsg().getChannelErrMsg() : null);
         }
 
-        return ApiRes.okWithSign(bizRS, configContextService.getMchConfigContext(bizRQ.getMchNo()).getMchInfo().getPrivateKey());
+        return ApiRes.okWithSign(bizRS, configContextService.getMchAppConfigContext(bizRQ.getMchNo(), bizRQ.getAppId()).getMchApp().getAppSecret());
     }
 
 

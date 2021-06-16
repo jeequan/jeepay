@@ -18,11 +18,11 @@ package com.jeequan.jeepay.pay.channel;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 
 /*
 * 调起上游渠道侧支付接口
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/5/8 15:13
@@ -39,6 +39,6 @@ public interface IPaymentService {
     String preCheck(UnifiedOrderRQ bizRQ, PayOrder payOrder);
 
     /** 调起支付接口，并响应数据；  内部处理普通商户和服务商模式  **/
-    AbstractRS pay(UnifiedOrderRQ bizRQ, PayOrder payOrder, MchConfigContext mchConfigContext) throws Exception;
+    AbstractRS pay(UnifiedOrderRQ bizRQ, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
 
 }

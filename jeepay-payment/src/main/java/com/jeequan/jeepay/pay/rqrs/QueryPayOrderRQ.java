@@ -27,11 +27,7 @@ import javax.validation.constraints.NotBlank;
 * @date 2021/6/8 17:40
 */
 @Data
-public class QueryPayOrderRQ extends AbstractRQ{
-
-    /** 商户号 **/
-    @NotBlank(message="商户号不能为空")
-    private String mchNo;
+public class QueryPayOrderRQ extends AbstractMchAppRQ{
 
     /** 商户订单号 **/
     private String mchOrderNo;

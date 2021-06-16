@@ -29,7 +29,7 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliJsapiOrderRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +55,7 @@ public class AliJsapi extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchConfigContext mchConfigContext) throws Exception{
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception{
 
         AliJsapiOrderRQ bizRQ = (AliJsapiOrderRQ) rq;
 
@@ -70,10 +70,10 @@ public class AliJsapi extends AlipayPaymentService {
         req.setBizModel(model);
 
         //统一放置 isv接口必传信息
-        AlipayKit.putApiIsvInfo(mchConfigContext, req, model);
+        AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
 
         //调起支付宝 （如果异常， 将直接跑出   ChannelException ）
-        AlipayTradeCreateResponse alipayResp = mchConfigContext.getAlipayClientWrapper().execute(req);
+        AlipayTradeCreateResponse alipayResp = mchAppConfigContext.getAlipayClientWrapper().execute(req);
 
         // 构造函数响应数据
         AliJsapiOrderRS res = ApiResBuilder.buildSuccess(AliJsapiOrderRS.class);

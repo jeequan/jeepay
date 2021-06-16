@@ -28,7 +28,7 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliAppOrderRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.springframework.stereotype.Service;
 
 /*
@@ -47,7 +47,7 @@ public class AliApp extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchConfigContext mchConfigContext){
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
 
         AlipayTradeAppPayRequest req = new AlipayTradeAppPayRequest();
         AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
@@ -59,14 +59,14 @@ public class AliApp extends AlipayPaymentService {
         req.setBizModel(model);
 
         //统一放置 isv接口必传信息
-        AlipayKit.putApiIsvInfo(mchConfigContext, req, model);
+        AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
 
 
         String payData = null;
 
         // sdk方式需自行拦截接口异常信息
         try {
-            payData = mchConfigContext.getAlipayClientWrapper().getAlipayClient().sdkExecute(req).getBody();
+            payData = mchAppConfigContext.getAlipayClientWrapper().getAlipayClient().sdkExecute(req).getBody();
         } catch (AlipayApiException e) {
             throw ChannelException.sysError(e.getMessage());
         }

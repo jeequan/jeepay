@@ -16,7 +16,7 @@
 package com.jeequan.jeepay.pay.channel;
 
 import com.jeequan.jeepay.core.entity.PayOrder;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.http.ResponseEntity;
@@ -48,7 +48,7 @@ public interface IChannelNoticeService {
 
     /** 返回需要更新的订单状态 和响应数据 **/
     ChannelRetMsg doNotice(HttpServletRequest request,
-                           Object params, PayOrder payOrder, MchConfigContext mchConfigContext, NoticeTypeEnum noticeTypeEnum);
+                           Object params, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum);
 
     /** 数据库订单 状态更新异常 (仅异步通知使用) **/
     ResponseEntity doNotifyOrderStateUpdateFail(HttpServletRequest request);

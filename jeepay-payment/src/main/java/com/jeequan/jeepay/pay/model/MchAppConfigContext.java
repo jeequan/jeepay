@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.pay.model;
 
+import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.model.params.IsvsubMchParams;
 import com.jeequan.jeepay.core.model.params.NormalMchParams;
@@ -24,23 +25,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 /*
-* 商户支付参数信息
-*  用户 放置到内存， 避免多次查询操作
+* 商户应用支付参数信息
+* 放置到内存， 避免多次查询操作
 *
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 17:29
 */
 @Data
-public class MchConfigContext {
+public class MchAppConfigContext {
 
 
     /** 商户信息缓存 */
     private String mchNo;
+    private String appId;
     private Byte mchType;
     private MchInfo mchInfo;
+    private MchApp mchApp;
 
-    /** 商户支付配置信息缓存 */
+    /** 商户支付配置信息缓存,  <接口代码, 支付参数>  */
     private Map<String, NormalMchParams> normalMchParamsMap = new HashMap<>();
     private Map<String, IsvsubMchParams> isvsubMchParamsMap = new HashMap<>();
 

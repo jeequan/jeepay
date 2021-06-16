@@ -21,7 +21,7 @@ import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.exception.ResponseException;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.pay.channel.IChannelNoticeService;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.pay.service.PayMchNotifyService;
@@ -102,14 +102,11 @@ public class ChannelNoticeController extends AbstractCtrl {
                 return this.toReturnPage("支付订单不存在");
             }
 
-            //查询出商户的配置信息
-            String mchNo = payOrder.getMchNo();
-
-            //查询出商户配置参数
-            MchConfigContext mchConfigContext = configContextService.getMchConfigContext(mchNo);
+            //查询出商户应用的配置信息
+            MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(payOrder.getMchNo(), payOrder.getAppId());
 
             //调起接口的回调判断
-            ChannelRetMsg notifyResult = payNotifyService.doNotice(request, mutablePair.getRight(), payOrder, mchConfigContext, IChannelNoticeService.NoticeTypeEnum.DO_RETURN);
+            ChannelRetMsg notifyResult = payNotifyService.doNotice(request, mutablePair.getRight(), payOrder, mchAppConfigContext, IChannelNoticeService.NoticeTypeEnum.DO_RETURN);
 
             // 返回null 表明出现异常， 无需处理通知下游等操作。
             if(notifyResult == null || notifyResult.getChannelState() == null || notifyResult.getResponseEntity() == null){
@@ -130,7 +127,7 @@ public class ChannelNoticeController extends AbstractCtrl {
             //包含通知地址时
             if(hasReturnUrl){
                 // 重定向
-                response.sendRedirect(payMchNotifyService.createReturnUrl(payOrder, mchConfigContext.getMchInfo().getPrivateKey()));
+                response.sendRedirect(payMchNotifyService.createReturnUrl(payOrder, mchAppConfigContext.getMchInfo().getPrivateKey()));
                 return null;
             }else{
 
@@ -202,14 +199,11 @@ public class ChannelNoticeController extends AbstractCtrl {
                 return payNotifyService.doNotifyOrderNotExists(request);
             }
 
-            //查询出商户的配置信息
-            String mchNo = payOrder.getMchNo();
-
-            //查询出商户配置参数
-            MchConfigContext mchConfigContext = configContextService.getMchConfigContext(mchNo);
+            //查询出商户应用的配置信息
+            MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(payOrder.getMchNo(), payOrder.getAppId());
 
             //调起接口的回调判断
-            ChannelRetMsg notifyResult = payNotifyService.doNotice(request, mutablePair.getRight(), payOrder, mchConfigContext, IChannelNoticeService.NoticeTypeEnum.DO_NOTIFY);
+            ChannelRetMsg notifyResult = payNotifyService.doNotice(request, mutablePair.getRight(), payOrder, mchAppConfigContext, IChannelNoticeService.NoticeTypeEnum.DO_NOTIFY);
 
             // 返回null 表明出现异常， 无需处理通知下游等操作。
             if(notifyResult == null || notifyResult.getChannelState() == null || notifyResult.getResponseEntity() == null){

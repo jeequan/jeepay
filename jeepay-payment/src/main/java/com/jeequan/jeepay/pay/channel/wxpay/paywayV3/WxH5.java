@@ -30,7 +30,7 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxH5OrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxH5OrderRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.springframework.stereotype.Service;
 
 /*
@@ -49,14 +49,14 @@ public class WxH5 extends WxpayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchConfigContext mchConfigContext) {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
 
         WxH5OrderRQ bizRQ = (WxH5OrderRQ) rq;
 
-        WxPayService wxPayService = mchConfigContext.getWxServiceWrapper().getWxPayService();
+        WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
 
         // 构造请求数据
-        JSONObject reqJSON = buildV3OrderRequest(payOrder, mchConfigContext);
+        JSONObject reqJSON = buildV3OrderRequest(payOrder, mchAppConfigContext);
 
         JSONObject sceneInfo = reqJSON.getJSONObject("scene_info");
 
@@ -67,7 +67,7 @@ public class WxH5 extends WxpayPaymentService {
         reqJSON.put("scene_info", sceneInfo);
 
         String reqUrl;  // 请求地址
-        if(mchConfigContext.isIsvsubMch()){ // 特约商户
+        if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
             reqUrl = WxpayV3Util.ISV_URL_MAP.get(WxPayConstants.TradeType.MWEB);
         }else {
             reqUrl = WxpayV3Util.NORMALMCH_URL_MAP.get(WxPayConstants.TradeType.MWEB);

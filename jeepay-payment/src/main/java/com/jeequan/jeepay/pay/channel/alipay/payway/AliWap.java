@@ -24,7 +24,7 @@ import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.pay.channel.alipay.AlipayKit;
 import com.jeequan.jeepay.pay.channel.alipay.AlipayPaymentService;
 import com.jeequan.jeepay.pay.exception.ChannelException;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
@@ -49,7 +49,7 @@ public class AliWap extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchConfigContext mchConfigContext){
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
 
         AliWapOrderRQ bizRQ = (AliWapOrderRQ)rq;
 
@@ -65,22 +65,22 @@ public class AliWap extends AlipayPaymentService {
         req.setBizModel(model);
 
         //统一放置 isv接口必传信息
-        AlipayKit.putApiIsvInfo(mchConfigContext, req, model);
+        AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
 
         // 构造函数响应数据
         AliWapOrderRS res = ApiResBuilder.buildSuccess(AliWapOrderRS.class);
 
         try {
             if(CS.PAY_DATA_TYPE.FORM.equals(bizRQ.getPayDataType())){ //表单方式
-                res.setFormContent(mchConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req).getBody());
+                res.setFormContent(mchAppConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req).getBody());
 
             }else if (CS.PAY_DATA_TYPE.CODE_IMG_URL.equals(bizRQ.getPayDataType())){ //二维码图片地址
 
-                String payUrl = mchConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req, "GET").getBody();
+                String payUrl = mchAppConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req, "GET").getBody();
                 res.setCodeImgUrl(sysConfigService.getDBApplicationConfig().genScanImgUrl(payUrl));
             }else{ // 默认都为 payUrl方式
 
-                res.setPayUrl(mchConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req, "GET").getBody());
+                res.setPayUrl(mchAppConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req, "GET").getBody());
             }
         }catch (AlipayApiException e) {
             throw ChannelException.sysError(e.getMessage());

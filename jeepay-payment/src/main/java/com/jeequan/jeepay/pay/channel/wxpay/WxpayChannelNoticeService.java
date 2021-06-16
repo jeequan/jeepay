@@ -33,7 +33,7 @@ import com.jeequan.jeepay.core.exception.ResponseException;
 import com.jeequan.jeepay.pay.channel.AbstractChannelNoticeService;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -82,13 +82,13 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                 }
 
                 //获取支付参数 (缓存数据) 和 商户信息
-                MchConfigContext mchConfigContext = configContextService.getMchConfigContext(payOrder.getMchNo());
-                if(mchConfigContext == null){
+                MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(payOrder.getMchNo(), payOrder.getAppId());
+                if(mchAppConfigContext == null){
                     throw new BizException("获取商户信息失败");
                 }
 
                 // 验签
-                if (!verifyNotifySign(request, mchConfigContext)) {
+                if (!verifyNotifySign(request, mchAppConfigContext)) {
                     throw new BizException("验签失败");
                 }
 
@@ -100,7 +100,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                 String nonce = resource.getString("nonce");
 
                 // 解密
-                String result = AesUtils.decryptToString(associatedData, nonce, cipherText, mchConfigContext.getWxServiceWrapper().getWxPayService().getConfig().getApiV3Key());
+                String result = AesUtils.decryptToString(associatedData, nonce, cipherText, mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig().getApiV3Key());
                 JSONObject decryptJSON = JSONObject.parseObject(result);
                 return MutablePair.of(decryptJSON.getString("out_trade_no"), decryptJSON);
 
@@ -121,16 +121,16 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
     }
 
     @Override
-    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, PayOrder payOrder, MchConfigContext mchConfigContext, NoticeTypeEnum noticeTypeEnum) {
+    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
         try {
             ChannelRetMsg channelResult = new ChannelRetMsg();
             channelResult.setChannelState(ChannelRetMsg.ChannelState.WAITING); // 默认支付中
 
-            if (CS.PAY_IF_VERSION.WX_V2.equals(mchConfigContext.getWxServiceWrapper().getApiVersion())) { // V2
+            if (CS.PAY_IF_VERSION.WX_V2.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) { // V2
                 // 获取回调参数
                 WxPayOrderNotifyResult result = (WxPayOrderNotifyResult) params;
 
-                WxPayService wxPayService = mchConfigContext.getWxServiceWrapper().getWxPayService();
+                WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
 
                 // 验证参数
                 verifyWxPayParams(wxPayService, result, payOrder);
@@ -139,7 +139,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                 channelResult.setChannelUserId(result.getOpenid()); //支付用户ID
                 channelResult.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
 
-            }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchConfigContext.getWxServiceWrapper().getApiVersion())) { // V3
+            }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) { // V3
                 // 获取回调参数
                 JSONObject resultJSON = (JSONObject) params;
 
@@ -200,10 +200,10 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
     /**
      * V3校验通知签名
      * @param request 请求信息
-     * @param mchConfigContext 商户配置
+     * @param mchAppConfigContext 商户配置
      * @return true:校验通过 false:校验不通过
      */
-    private boolean verifyNotifySign(HttpServletRequest request, MchConfigContext mchConfigContext) throws Exception {
+    private boolean verifyNotifySign(HttpServletRequest request, MchAppConfigContext mchAppConfigContext) throws Exception {
         SignatureHeader header = new SignatureHeader();
         header.setTimeStamp(request.getHeader("Wechatpay-Timestamp"));
         header.setNonce(request.getHeader("Wechatpay-Nonce"));
@@ -215,7 +215,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                 header.getNonce(),
                 getReqParamJSON().toJSONString());
 
-        WxPayConfig wxPayConfig = mchConfigContext.getWxServiceWrapper().getWxPayService().getConfig();
+        WxPayConfig wxPayConfig = mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig();
         // 自动获取微信平台证书
         PrivateKey privateKey = PemUtils.loadPrivateKey(new FileInputStream(wxPayConfig.getPrivateKeyPath()));
         AutoUpdateCertificatesVerifier verifier = new AutoUpdateCertificatesVerifier(

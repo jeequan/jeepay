@@ -29,7 +29,7 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliBarOrderRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +55,7 @@ public class AliBar extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchConfigContext mchConfigContext){
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
 
         AliBarOrderRQ bizRQ = (AliBarOrderRQ) rq;
 
@@ -71,10 +71,10 @@ public class AliBar extends AlipayPaymentService {
         req.setBizModel(model);
 
         //统一放置 isv接口必传信息
-        AlipayKit.putApiIsvInfo(mchConfigContext, req, model);
+        AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
 
         //调起支付宝 （如果异常， 将直接跑出   ChannelException ）
-        AlipayTradePayResponse alipayResp = mchConfigContext.getAlipayClientWrapper().execute(req);
+        AlipayTradePayResponse alipayResp = mchAppConfigContext.getAlipayClientWrapper().execute(req);
 
         // 构造函数响应数据
         AliBarOrderRS res = ApiResBuilder.buildSuccess(AliBarOrderRS.class);

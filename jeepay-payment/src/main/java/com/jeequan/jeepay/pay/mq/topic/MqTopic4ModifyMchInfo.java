@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.pay.mq.topic;
 
+import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import lombok.extern.slf4j.Slf4j;
@@ -40,14 +41,30 @@ public class MqTopic4ModifyMchInfo extends ActiveMQTopic{
         super(CS.MQ.TOPIC_MODIFY_MCH_INFO);
     }
 
-    /** 接收 更新系统配置项的消息 **/
+    /** 接收 [商户配置信息] 的消息
+     * 已知推送节点：
+     * 1. 更新商户基本资料和状态
+     * 2. 删除商户时
+     * **/
     @JmsListener(destination = CS.MQ.TOPIC_MODIFY_MCH_INFO, containerFactory = "jmsListenerContainer")
     public void receive(String mchNo) {
 
-        log.info("重置商户信息, msg={}", mchNo);
-        configContextService.initMchConfigContext(mchNo);
+        log.info("接收 [商户配置信息] 的消息, msg={}", mchNo);
+        configContextService.initMchInfoConfigContext(mchNo);
     }
 
+    /** 接收 [商户应用支付参数配置信息] 的消息
+     * 已知推送节点：
+     * 1. 更新商户应用配置
+     * 2. 删除商户应用配置
+     * **/
+    @JmsListener(destination = CS.MQ.TOPIC_MODIFY_MCH_APP, containerFactory = "jmsListenerContainer")
+    public void receiveMchApp(String mchNoAndAppId) {
+
+        log.info("接收 [商户应用支付参数配置信息] 的消息, msg={}", mchNoAndAppId);
+        JSONObject jsonObject = (JSONObject) JSONObject.parse(mchNoAndAppId);
+        configContextService.initMchAppConfigContext(jsonObject.getString("mchNo"), jsonObject.getString("appId"));
+    }
 
 
 }

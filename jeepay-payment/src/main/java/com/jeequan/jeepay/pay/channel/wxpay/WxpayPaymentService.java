@@ -26,7 +26,7 @@ import com.jeequan.jeepay.pay.channel.AbstractPaymentService;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.util.PaywayUtil;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.springframework.stereotype.Service;
 
 /*
@@ -56,14 +56,14 @@ public class WxpayPaymentService extends AbstractPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchConfigContext mchConfigContext) throws Exception {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
 
         // 微信API版本
-        String apiVersion = mchConfigContext.getWxServiceWrapper().getApiVersion();
+        String apiVersion = mchAppConfigContext.getWxServiceWrapper().getApiVersion();
         if (CS.PAY_IF_VERSION.WX_V2.equals(apiVersion)) {
-            return PaywayUtil.getRealPaywayService(this, payOrder.getWayCode()).pay(rq, payOrder, mchConfigContext);
+            return PaywayUtil.getRealPaywayService(this, payOrder.getWayCode()).pay(rq, payOrder, mchAppConfigContext);
         } else if (CS.PAY_IF_VERSION.WX_V3.equals(apiVersion)) {
-            return PaywayUtil.getRealPaywayV3Service(this, payOrder.getWayCode()).pay(rq, payOrder, mchConfigContext);
+            return PaywayUtil.getRealPaywayV3Service(this, payOrder.getWayCode()).pay(rq, payOrder, mchAppConfigContext);
         } else {
             throw new BizException("不支持的微信支付API版本");
         }
@@ -75,7 +75,7 @@ public class WxpayPaymentService extends AbstractPaymentService {
      * @param payOrder
      * @return
      */
-    public WxPayUnifiedOrderRequest buildUnifiedOrderRequest(PayOrder payOrder, MchConfigContext mchConfigContext) {
+    public WxPayUnifiedOrderRequest buildUnifiedOrderRequest(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
         String payOrderId = payOrder.getPayOrderId();
 
         // 微信统一下单请求对象
@@ -90,8 +90,8 @@ public class WxpayPaymentService extends AbstractPaymentService {
         request.setProductId(System.currentTimeMillis()+"");
 
         // 特约商户
-        if(mchConfigContext.isIsvsubMch()){
-            WxpayIsvsubMchParams isvsubMchParams = mchConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
+        if(mchAppConfigContext.isIsvsubMch()){
+            WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
             request.setSubMchId(isvsubMchParams.getSubMchId());
             request.setSubAppId(isvsubMchParams.getSubMchAppId());
         }
@@ -104,7 +104,7 @@ public class WxpayPaymentService extends AbstractPaymentService {
      * @param payOrder
      * @return
      */
-    public JSONObject buildV3OrderRequest(PayOrder payOrder, MchConfigContext mchConfigContext) {
+    public JSONObject buildV3OrderRequest(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
         String payOrderId = payOrder.getPayOrderId();
 
         // 微信统一下单请求对象
@@ -122,9 +122,9 @@ public class WxpayPaymentService extends AbstractPaymentService {
         sceneInfo.put("payer_client_ip", payOrder.getClientIp());
         reqJSON.put("scene_info", sceneInfo);
 
-        WxPayService wxPayService = mchConfigContext.getWxServiceWrapper().getWxPayService();
-        if(mchConfigContext.isIsvsubMch()){ // 特约商户
-            WxpayIsvsubMchParams isvsubMchParams = mchConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
+        WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+        if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
+            WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
             reqJSON.put("sp_appid", wxPayService.getConfig().getAppId());
             reqJSON.put("sp_mchid", wxPayService.getConfig().getMchId());
             reqJSON.put("sub_mchid", isvsubMchParams.getSubMchId());

@@ -53,10 +53,11 @@ public class CS {
     }
 
     /**
-     * 账号类型:1-服务商 2-商户
+     * 账号类型:1-服务商 2-商户 3-商户应用
      */
     public static final byte INFO_TYPE_ISV = 1;
     public static final byte INFO_TYPE_MCH = 2;
+    public static final byte INFO_TYPE_MCH_APP = 3;
 
 
     /**
@@ -131,6 +132,9 @@ public class CS {
 
         /** 更新商户配置信息 **/
         String TOPIC_MODIFY_MCH_INFO = "topic.modify.mch.info";
+
+        /** 更新商户应用配置信息 **/
+        String TOPIC_MODIFY_MCH_APP = "topic.modify.mch.app";
 
         /** 更新服务商配置信息 **/
         String TOPIC_MODIFY_ISV_INFO = "topic.modify.isv.info";

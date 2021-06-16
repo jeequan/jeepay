@@ -22,7 +22,7 @@ import com.alipay.api.request.*;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvsubMchParams;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.apache.commons.lang3.StringUtils;
 
 /*
@@ -36,16 +36,16 @@ public class AlipayKit {
 
 
     /** 放置 isv特殊信息 **/
-    public static void putApiIsvInfo(MchConfigContext mchConfigContext, AlipayRequest req, AlipayObject model){
+    public static void putApiIsvInfo(MchAppConfigContext mchAppConfigContext, AlipayRequest req, AlipayObject model){
 
         //不是特约商户， 无需放置此值
-        if(!mchConfigContext.isIsvsubMch()){
+        if(!mchAppConfigContext.isIsvsubMch()){
             return ;
         }
 
         // 获取支付参数
-        AlipayIsvParams isvParams = mchConfigContext.getIsvConfigContext().getIsvParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayIsvParams.class);
-        AlipayIsvsubMchParams isvsubMchParams = mchConfigContext.getIsvsubMchParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayIsvsubMchParams.class);
+        AlipayIsvParams isvParams = mchAppConfigContext.getIsvConfigContext().getIsvParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayIsvParams.class);
+        AlipayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayIsvsubMchParams.class);
 
         // 子商户信息
         if(req instanceof AlipayTradePayRequest) ((AlipayTradePayRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());

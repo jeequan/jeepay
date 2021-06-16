@@ -29,7 +29,7 @@ import com.jeequan.jeepay.pay.channel.ysfpay.utils.YsfHttpUtil;
 import com.jeequan.jeepay.pay.channel.ysfpay.utils.YsfSignUtils;
 import com.jeequan.jeepay.pay.config.SystemYmlConfig;
 import com.jeequan.jeepay.pay.model.IsvConfigContext;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.util.PaywayUtil;
@@ -38,7 +38,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.Date;
 
 /**
@@ -70,13 +69,13 @@ public class YsfpayPaymentService extends AbstractPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchConfigContext mchConfigContext) throws Exception {
-        return PaywayUtil.getRealPaywayService(this, payOrder.getWayCode()).pay(rq, payOrder, mchConfigContext);
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
+        return PaywayUtil.getRealPaywayService(this, payOrder.getWayCode()).pay(rq, payOrder, mchAppConfigContext);
     }
 
 
     /** 封装参数 & 统一请求 **/
-    public JSONObject packageParamAndReq(String apiUri, JSONObject reqParams, String logPrefix, IsvConfigContext isvConfigContext, MchConfigContext mchConfigContext) throws Exception {
+    public JSONObject packageParamAndReq(String apiUri, JSONObject reqParams, String logPrefix, IsvConfigContext isvConfigContext, MchAppConfigContext mchAppConfigContext) throws Exception {
 
         YsfpayIsvParams isvParams = isvConfigContext.getIsvParamsByIfCode(getIfCode(), YsfpayIsvParams.class);
 
@@ -86,7 +85,7 @@ public class YsfpayPaymentService extends AbstractPaymentService {
         }
 
         reqParams.put("serProvId", isvParams.getSerProvId()); //云闪付服务商标识
-        YsfpayIsvsubMchParams isvsubMchParams = mchConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), YsfpayIsvsubMchParams.class);
+        YsfpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), YsfpayIsvsubMchParams.class);
         reqParams.put("merId", isvsubMchParams.getMerId()); // 商户号
 
         //签名

@@ -20,7 +20,7 @@ import com.github.binarywang.wxpay.exception.WxPayException;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvsubMchParams;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.apache.commons.lang3.StringUtils;
 
 /*
@@ -33,14 +33,14 @@ import org.apache.commons.lang3.StringUtils;
 public class WxpayKit {
 
     /** 放置 isv特殊信息 **/
-    public static void putApiIsvInfo(MchConfigContext mchConfigContext, BaseWxPayRequest req){
+    public static void putApiIsvInfo(MchAppConfigContext mchAppConfigContext, BaseWxPayRequest req){
 
         //不是特约商户， 无需放置此值
-        if(!mchConfigContext.isIsvsubMch()){
+        if(!mchAppConfigContext.isIsvsubMch()){
             return ;
         }
 
-        WxpayIsvsubMchParams isvsubMchParams = mchConfigContext.getIsvsubMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvsubMchParams.class);
+        WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvsubMchParams.class);
         req.setSubMchId(isvsubMchParams.getSubMchId());
         req.setSubAppId(isvsubMchParams.getSubMchAppId());
     }

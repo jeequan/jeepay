@@ -24,7 +24,7 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.channel.wxpay.WxpayPaymentService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayV3Util;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
@@ -49,17 +49,17 @@ public class WxNative extends WxpayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchConfigContext mchConfigContext) {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
 
         WxNativeOrderRQ bizRQ = (WxNativeOrderRQ) rq;
 
-        WxPayService wxPayService = mchConfigContext.getWxServiceWrapper().getWxPayService();
+        WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
 
         // 构造请求数据
-        JSONObject reqJSON = buildV3OrderRequest(payOrder, mchConfigContext);
+        JSONObject reqJSON = buildV3OrderRequest(payOrder, mchAppConfigContext);
 
         String reqUrl;  // 请求地址
-        if(mchConfigContext.isIsvsubMch()){ // 特约商户
+        if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
             reqUrl = WxpayV3Util.ISV_URL_MAP.get(WxPayConstants.TradeType.NATIVE);
         }else {
             reqUrl = WxpayV3Util.NORMALMCH_URL_MAP.get(WxPayConstants.TradeType.NATIVE);

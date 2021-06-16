@@ -21,7 +21,7 @@ import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.channel.IPayOrderQueryService;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +41,7 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
     }
 
     @Override
-    public ChannelRetMsg query(PayOrder payOrder, MchConfigContext mchConfigContext){
+    public ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
 
         AlipayTradeQueryRequest req = new AlipayTradeQueryRequest();
 
@@ -51,9 +51,9 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
         req.setBizModel(model);
 
         //通用字段
-        AlipayKit.putApiIsvInfo(mchConfigContext, req, model);
+        AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
 
-        AlipayTradeQueryResponse resp = mchConfigContext.getAlipayClientWrapper().execute(req);
+        AlipayTradeQueryResponse resp = mchAppConfigContext.getAlipayClientWrapper().execute(req);
         String result = resp.getTradeStatus();
 
         if("TRADE_SUCCESS".equals(result)) {

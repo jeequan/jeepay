@@ -13,25 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.channel;
+package com.jeequan.jeepay.pay.rqrs;
 
-import com.alibaba.fastjson.JSONObject;
-import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import lombok.Data;
+
+import javax.validation.constraints.NotBlank;
 
 /*
-* @Description: 301方式获取渠道侧用户ID， 如微信openId 支付宝的userId等
+*
+* 通用RQ, 包含mchNo和appId 必填项
+*
 * @author terrfly
-* @date 2021/5/2 15:10
+* @site https://www.jeepay.vip
+* @date 2021/6/16 10:30
 */
-public interface IChannelUserService {
+@Data
+public class AbstractMchAppRQ extends AbstractRQ {
 
-    /* 获取到接口code **/
-    String getIfCode();
+    /** 商户号 **/
+    @NotBlank(message="商户号不能为空")
+    private String mchNo;
 
-    /** 获取重定向地址 **/
-    String buildUserRedirectUrl(String callbackUrlEncode, MchAppConfigContext mchAppConfigContext);
+    /** 商户应用ID **/
+    @NotBlank(message="商户应用ID不能为空")
+    private String appId;
 
-    /** 获取渠道用户ID **/
-    String getChannelUserId(JSONObject reqParams, MchAppConfigContext mchAppConfigContext);
 
 }

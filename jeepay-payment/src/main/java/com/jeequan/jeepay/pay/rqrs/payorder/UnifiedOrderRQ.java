@@ -17,7 +17,7 @@ package com.jeequan.jeepay.pay.rqrs.payorder;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.pay.rqrs.AbstractRQ;
+import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.*;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
@@ -36,15 +36,7 @@ import javax.validation.constraints.NotNull;
 * @date 2021/6/8 17:33
 */
 @Data
-public class UnifiedOrderRQ extends AbstractRQ {
-
-    /** 商户号 **/
-    @NotBlank(message="商户号不能为空")
-    private String mchNo;
-
-    /** 商户应用ID **/
-    @NotBlank(message="商户应用ID不能为空")
-    private String appId;
+public class UnifiedOrderRQ extends AbstractMchAppRQ {
 
     /** 商户订单号 **/
     @NotBlank(message="商户订单号不能为空")

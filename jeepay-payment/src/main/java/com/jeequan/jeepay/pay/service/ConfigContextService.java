@@ -25,6 +25,7 @@ import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.IsvInfo;
+import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.model.params.IsvParams;
@@ -35,13 +36,10 @@ import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
-import com.jeequan.jeepay.pay.config.SystemYmlConfig;
-import com.jeequan.jeepay.pay.model.AlipayClientWrapper;
-import com.jeequan.jeepay.pay.model.IsvConfigContext;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
-import com.jeequan.jeepay.pay.model.WxServiceWrapper;
+import com.jeequan.jeepay.pay.model.*;
 import com.jeequan.jeepay.pay.util.ChannelCertConfigKitBean;
 import com.jeequan.jeepay.service.impl.IsvInfoService;
+import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import me.chanjar.weixin.mp.api.WxMpService;
@@ -50,14 +48,13 @@ import me.chanjar.weixin.mp.config.impl.WxMpDefaultConfigImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /*
 * 商户/服务商 配置信息上下文服务
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 17:41
@@ -65,29 +62,49 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class ConfigContextService {
 
-    private static final Map<String, MchConfigContext> mchConfigContextMap = new ConcurrentHashMap<>();
+    /** <商户ID, 商户配置项>  **/
+    private static final Map<String, MchInfoConfigContext> mchInfoConfigContextMap = new ConcurrentHashMap<>();
+
+    /** <应用ID, 商户配置上下文>  **/
+    private static final Map<String, MchAppConfigContext> mchAppConfigContextMap = new ConcurrentHashMap<>();
+
+    /** <服务商号, 服务商配置上下文>  **/
     private static final Map<String, IsvConfigContext> isvConfigContextMap = new ConcurrentHashMap<>();
 
     @Autowired private MchInfoService mchInfoService;
+    @Autowired private MchAppService mchAppService;
     @Autowired private IsvInfoService isvInfoService;
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private SystemYmlConfig mainConfig;
     @Autowired private ChannelCertConfigKitBean channelCertConfigKitBean;
 
-    /** 获取支付参数 **/
-    public synchronized MchConfigContext getMchConfigContext(String mchNo){
 
-        MchConfigContext mchConfigContext = mchConfigContextMap.get(mchNo);
+    /** 获取 [商户配置信息] **/
+    public synchronized MchInfoConfigContext getMchInfoConfigContext(String mchNo){
+
+        MchInfoConfigContext mchInfoConfigContext = mchInfoConfigContextMap.get(mchNo);
 
         //无此数据， 需要初始化
-        if(mchConfigContext == null){
-            initMchConfigContext(mchNo);
+        if(mchInfoConfigContext == null){
+            initMchInfoConfigContext(mchNo);
         }
 
-        return mchConfigContextMap.get(mchNo);
+        return mchInfoConfigContextMap.get(mchNo);
     }
 
-    /** 获取支付参数 **/
+    /** 获取 [商户应用支付参数配置信息] **/
+    public synchronized MchAppConfigContext getMchAppConfigContext(String mchNo, String appId){
+
+        MchAppConfigContext mchAppConfigContext = mchAppConfigContextMap.get(appId);
+
+        //无此数据， 需要初始化
+        if(mchAppConfigContext == null){
+            initMchAppConfigContext(mchNo, appId);
+        }
+
+        return mchAppConfigContextMap.get(appId);
+    }
+
+    /** 获取 [ISV支付参数配置信息] **/
     public synchronized IsvConfigContext getIsvConfigContext(String isvNo){
 
         IsvConfigContext isvConfigContext = isvConfigContextMap.get(isvNo);
@@ -101,34 +118,80 @@ public class ConfigContextService {
     }
 
 
-    /** 获取支付参数 **/
-    public synchronized void initMchConfigContext(String mchNo){
+    /** 初始化 [商户配置信息] **/
+    public synchronized void initMchInfoConfigContext(String mchNo){
 
-        MchConfigContext mchConfigContext = new MchConfigContext();
+        //商户主体信息
         MchInfo mchInfo = mchInfoService.getById(mchNo);
-        if(mchInfo == null){
-            mchConfigContextMap.remove(mchNo);
+        if(mchInfo == null){ // 查询不到商户主体， 可能已经删除
+
+            MchInfoConfigContext mchInfoConfigContext = mchInfoConfigContextMap.get(mchNo);
+
+            // 删除所有的商户应用
+            if(mchInfoConfigContext != null){
+                mchInfoConfigContext.getAppMap().forEach((k, v) -> mchAppConfigContextMap.remove(k));
+            }
+
+            mchInfoConfigContextMap.remove(mchNo);
             return ;
         }
 
+        MchInfoConfigContext mchInfoConfigContext = new MchInfoConfigContext();
+
         // 设置商户信息
-        mchConfigContext.setMchNo(mchInfo.getMchNo());
-        mchConfigContext.setMchType(mchInfo.getType());
-        mchConfigContext.setMchInfo(mchInfo);
+        mchInfoConfigContext.setMchNo(mchInfo.getMchNo());
+        mchInfoConfigContext.setMchType(mchInfo.getType());
+        mchInfoConfigContext.setMchInfo(mchInfo);
+        mchAppService.list(MchApp.gw().eq(MchApp::getMchNo, mchNo)).stream().forEach( mchApp -> mchInfoConfigContext.putMchApp(mchApp));
+    }
+
+    /** 初始化 [商户应用支付参数配置信息] **/
+    public synchronized void initMchAppConfigContext(String mchNo, String appId){
+
+        // 获取商户的配置信息
+        MchInfoConfigContext mchInfoConfigContext = getMchInfoConfigContext(mchNo);
+        if(mchInfoConfigContext == null){ // 商户信息不存在
+            return;
+        }
+
+        //商户应用信息
+        MchApp mchApp = mchInfoConfigContext.getMchApp(appId);
+
+        if(mchApp == null){ //说明商户主体信息不存在缓存
+
+            mchApp = mchAppService.getById(appId);
+            if(mchApp == null){ // DB查询为空
+                mchAppConfigContextMap.remove(appId);  //清除缓存信息
+                return ;
+            }
+
+            //更新商户信息主体中的商户应用
+            mchInfoConfigContext.putMchApp(mchApp);
+        }
+
+        //商户主体信息
+        MchInfo mchInfo = mchInfoConfigContext.getMchInfo();
+        MchAppConfigContext mchAppConfigContext = new MchAppConfigContext();
+
+        // 设置商户信息
+        mchAppConfigContext.setMchNo(mchInfo.getMchNo());
+        mchAppConfigContext.setMchType(mchInfo.getType());
+        mchAppConfigContext.setMchInfo(mchInfo);
+        mchAppConfigContext.setMchApp(mchApp);
 
         // 查询商户的所有支持的参数配置
         List<PayInterfaceConfig> allConfigList = payInterfaceConfigService.list(PayInterfaceConfig.gw()
                 .select(PayInterfaceConfig::getIfCode, PayInterfaceConfig::getIfParams)
                 .eq(PayInterfaceConfig::getState, CS.YES)
-                .eq(PayInterfaceConfig::getInfoType, CS.INFO_TYPE_MCH)
-                .eq(PayInterfaceConfig::getInfoId, mchNo)
+                .eq(PayInterfaceConfig::getInfoType, CS.INFO_TYPE_MCH_APP)
+                .eq(PayInterfaceConfig::getInfoId, appId)
         );
 
         // 普通商户
         if(mchInfo.getType() == CS.MCH_TYPE_NORMAL){
 
             for (PayInterfaceConfig payInterfaceConfig : allConfigList) {
-                mchConfigContext.getNormalMchParamsMap().put(
+                mchAppConfigContext.getNormalMchParamsMap().put(
                         payInterfaceConfig.getIfCode(),
                         NormalMchParams.factory(payInterfaceConfig.getIfCode(), payInterfaceConfig.getIfParams())
                 );
@@ -136,10 +199,10 @@ public class ConfigContextService {
 
             //放置alipay client
 
-            AlipayNormalMchParams alipayParams = mchConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayNormalMchParams.class);
+            AlipayNormalMchParams alipayParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayNormalMchParams.class);
             if(alipayParams != null){
 
-                mchConfigContext.setAlipayClientWrapper(buildAlipayClientWrapper(
+                mchAppConfigContext.setAlipayClientWrapper(buildAlipayClientWrapper(
                         alipayParams.getUseCert(), alipayParams.getSandbox(), alipayParams.getAppId(), alipayParams.getPrivateKey(),
                         alipayParams.getAlipayPublicKey(), alipayParams.getSignType(), alipayParams.getAppPublicCert(),
                         alipayParams.getAlipayPublicCert(), alipayParams.getAlipayRootCert()
@@ -149,9 +212,9 @@ public class ConfigContextService {
             }
 
             //放置 wxJavaService
-            WxpayNormalMchParams wxpayParams = mchConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayNormalMchParams.class);
+            WxpayNormalMchParams wxpayParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayNormalMchParams.class);
             if(wxpayParams != null){
-                mchConfigContext.setWxServiceWrapper(buildWxServiceWrapper(wxpayParams.getMchId(), wxpayParams.getAppId(),
+                mchAppConfigContext.setWxServiceWrapper(buildWxServiceWrapper(wxpayParams.getMchId(), wxpayParams.getAppId(),
                         wxpayParams.getAppSecret(), wxpayParams.getKey(), wxpayParams.getApiVersion(), wxpayParams.getApiV3Key(),
                         wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientKey()));
             }
@@ -159,22 +222,22 @@ public class ConfigContextService {
 
         }else{ //服务商模式商户
             for (PayInterfaceConfig payInterfaceConfig : allConfigList) {
-                mchConfigContext.getIsvsubMchParamsMap().put(
+                mchAppConfigContext.getIsvsubMchParamsMap().put(
                         payInterfaceConfig.getIfCode(),
                         IsvsubMchParams.factory(payInterfaceConfig.getIfCode(), payInterfaceConfig.getIfParams())
                 );
             }
 
             //放置 当前商户的 服务商信息
-            mchConfigContext.setIsvConfigContext(getIsvConfigContext(mchInfo.getIsvNo()));
+            mchAppConfigContext.setIsvConfigContext(getIsvConfigContext(mchInfo.getIsvNo()));
 
         }
 
-        mchConfigContextMap.put(mchNo, mchConfigContext);
+        mchAppConfigContextMap.put(appId, mchAppConfigContext);
     }
 
 
-    /** 初始化  **/
+    /** 初始化 [ISV支付参数配置信息]  **/
     public synchronized void initIsvConfigContext(String isvNo){
 
         IsvConfigContext isvConfigContext = new IsvConfigContext();
@@ -185,9 +248,9 @@ public class ConfigContextService {
             mchInfoService.list(MchInfo.gw().select(MchInfo::getMchNo).eq(MchInfo::getIsvNo, isvNo)).forEach(mchInfoItem -> {
 
                 //将更新已存在缓存的商户配置信息 （每个商户下存储的为同一个 服务商配置的对象指针）
-                MchConfigContext mchConfigContext = mchConfigContextMap.get(mchInfoItem.getMchNo());
-                if(mchConfigContext != null){
-                    mchConfigContext.setIsvConfigContext(null);
+                MchAppConfigContext mchAppConfigContext = mchAppConfigContextMap.get(mchInfoItem.getMchNo());
+                if(mchAppConfigContext != null){
+                    mchAppConfigContext.setIsvConfigContext(null);
                 }
             });
             isvConfigContextMap.remove(isvNo); // 服务商有商户不可删除， 此处不再更新商户下的配置信息
@@ -238,9 +301,9 @@ public class ConfigContextService {
         mchInfoService.list(MchInfo.gw().select(MchInfo::getMchNo).eq(MchInfo::getIsvNo, isvNo)).forEach(mchInfoItem -> {
 
             //将更新已存在缓存的商户配置信息 （每个商户下存储的为同一个 服务商配置的对象指针）
-            MchConfigContext mchConfigContext = mchConfigContextMap.get(mchInfoItem.getMchNo());
-            if(mchConfigContext != null){
-                mchConfigContext.setIsvConfigContext(isvConfigContext);
+            MchAppConfigContext mchAppConfigContext = mchAppConfigContextMap.get(mchInfoItem.getMchNo());
+            if(mchAppConfigContext != null){
+                mchAppConfigContext.setIsvConfigContext(isvConfigContext);
             }
 
         });
@@ -250,7 +313,7 @@ public class ConfigContextService {
 
     /*
     * 构建支付宝client 包装类
-    * 
+    *
     * @author terrfly
     * @site https://www.jeepay.vip
     * @date 2021/6/8 17:46

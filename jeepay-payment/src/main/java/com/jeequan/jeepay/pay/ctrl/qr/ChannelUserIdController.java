@@ -25,7 +25,7 @@ import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.channel.IChannelUserService;
 import com.jeequan.jeepay.pay.ctrl.payorder.AbstractPayOrderController;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.ChannelUserIdRQ;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
@@ -71,6 +71,7 @@ public class ChannelUserIdController extends AbstractPayOrderController {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("mchNo", rq.getMchNo());
+        jsonObject.put("appId", rq.getAppId());
         jsonObject.put("ifCode", ifCode);
         jsonObject.put("redirectUrl", rq.getRedirectUrl());
 
@@ -78,8 +79,8 @@ public class ChannelUserIdController extends AbstractPayOrderController {
         String callbackUrl = sysConfigService.getDBApplicationConfig().genMchChannelUserIdApiOauth2RedirectUrlEncode(jsonObject);
 
         //获取商户配置信息
-        MchConfigContext mchConfigContext = configContextService.getMchConfigContext(rq.getMchNo());
-        String redirectUrl = channelUserService.buildUserRedirectUrl(callbackUrl, mchConfigContext);
+        MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(rq.getMchNo(), rq.getAppId());
+        String redirectUrl = channelUserService.buildUserRedirectUrl(callbackUrl, mchAppConfigContext);
         response.sendRedirect(redirectUrl);
 
     }
@@ -92,6 +93,7 @@ public class ChannelUserIdController extends AbstractPayOrderController {
         JSONObject callbackData = JSON.parseObject(JeepayKit.aesDecode(aesData));
 
         String mchNo = callbackData.getString("mchNo");
+        String appId = callbackData.getString("appId");
         String ifCode = callbackData.getString("ifCode");
         String redirectUrl = callbackData.getString("redirectUrl");
 
@@ -103,10 +105,10 @@ public class ChannelUserIdController extends AbstractPayOrderController {
         }
 
         //获取商户配置信息
-        MchConfigContext mchConfigContext = configContextService.getMchConfigContext(mchNo);
+        MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(mchNo, appId);
 
         //获取渠道用户ID
-        String channelUserId = channelUserService.getChannelUserId(getReqParamJSON(), mchConfigContext);
+        String channelUserId = channelUserService.getChannelUserId(getReqParamJSON(), mchAppConfigContext);
 
         //同步跳转
         response.sendRedirect(StringKit.appendUrlQuery(redirectUrl, JsonKit.newJson("channelUserId", channelUserId)));

@@ -25,7 +25,7 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.YsfJsapiOrderRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import com.jeequan.jeepay.pay.model.IsvConfigContext;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +44,7 @@ public class YsfJsapi extends YsfpayPaymentService {
         return null;
     }
 
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, IsvConfigContext isvConfigContext, MchConfigContext mchConfigContext) throws Exception {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, IsvConfigContext isvConfigContext, MchAppConfigContext mchAppConfigContext) throws Exception {
         String logPrefix = "【云闪付(unionpay)jsapi支付】";
         JSONObject reqParams = new JSONObject();
         YsfJsapiOrderRS res = ApiResBuilder.buildSuccess(YsfJsapiOrderRS.class);
@@ -61,7 +61,7 @@ public class YsfJsapi extends YsfpayPaymentService {
         //客户端IP
         reqParams.put("customerIp", StringUtils.defaultIfEmpty(payOrder.getClientIp(), "127.0.0.1"));
         // 发送请求并返回订单状态
-        JSONObject resJSON = packageParamAndReq("/gateway/api/pay/unifiedorder", reqParams, logPrefix, isvConfigContext, mchConfigContext);
+        JSONObject resJSON = packageParamAndReq("/gateway/api/pay/unifiedorder", reqParams, logPrefix, isvConfigContext, mchAppConfigContext);
         //请求 & 响应成功， 判断业务逻辑
         String respCode = resJSON.getString("respCode"); //应答码
         String respMsg = resJSON.getString("respMsg"); //应答信息

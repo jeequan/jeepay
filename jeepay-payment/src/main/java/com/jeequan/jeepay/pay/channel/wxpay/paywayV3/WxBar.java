@@ -18,7 +18,7 @@ package com.jeequan.jeepay.pay.channel.wxpay.paywayV3;
 
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.channel.wxpay.WxpayPaymentService;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ public class WxBar extends WxpayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchConfigContext mchConfigContext) throws Exception {
-        return wxBar.pay(rq, payOrder, mchConfigContext);
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
+        return wxBar.pay(rq, payOrder, mchAppConfigContext);
     }
 }

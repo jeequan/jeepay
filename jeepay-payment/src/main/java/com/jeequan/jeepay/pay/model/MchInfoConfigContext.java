@@ -13,32 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.rqrs;
+package com.jeequan.jeepay.pay.model;
 
+import com.jeequan.jeepay.core.entity.MchApp;
+import com.jeequan.jeepay.core.entity.MchInfo;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /*
-* 商户获取渠道用户ID 请求参数对象
+* 商户配置信息
+* 放置到内存， 避免多次查询操作
 *
 * @author terrfly
 * @site https://www.jeepay.vip
-* @date 2021/6/8 17:40
+* @date 2021/6/8 17:29
 */
 @Data
-public class ChannelUserIdRQ extends AbstractMchAppRQ{
+public class MchInfoConfigContext {
 
-    /** 商户号 **/
-    @NotBlank(message="商户号不能为空")
+
+    /** 商户信息缓存 */
     private String mchNo;
+    private Byte mchType;
+    private MchInfo mchInfo;
+    private Map<String, MchApp> appMap = new ConcurrentHashMap<>();
 
-    /** 接口代码,  AUTO表示：自动获取 **/
-    @NotBlank(message="接口代码不能为空")
-    private String ifCode;
+    /** 重置商户APP **/
+    public void putMchApp(MchApp mchApp){
+        appMap.put(mchApp.getAppId(), mchApp);
+    }
 
-    /** 回调地址 **/
-    @NotBlank(message="回调地址不能为空")
-    private String redirectUrl;
+    /** get商户APP **/
+    public MchApp getMchApp(String appId){
+        return appMap.get(appId);
+    }
 
 }

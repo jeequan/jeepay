@@ -18,10 +18,12 @@ package com.jeequan.jeepay.pay.ctrl;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
+import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.utils.JeepayKit;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import com.jeequan.jeepay.pay.rqrs.AbstractRQ;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.pay.service.ValidateService;
@@ -30,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /*
 * api 抽象接口， 公共函数
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 17:28
@@ -59,29 +61,40 @@ public abstract class ApiController extends AbstractCtrl {
         //获取请求RQ, and 通用验证
         T bizRQ = getRQ(cls);
 
-        // 转换为 JSON
-        JSONObject bizReqJSON = (JSONObject)JSONObject.toJSON(bizRQ);
+        AbstractMchAppRQ abstractMchAppRQ = (AbstractMchAppRQ)bizRQ;
 
-        // [2]. 业务校验， 包括： 验签， 商户状态是否可用， 是否支持该支付方式下单等。
-        String mchNo = bizReqJSON.getString("mchNo");
+        //业务校验， 包括： 验签， 商户状态是否可用， 是否支持该支付方式下单等。
+        String mchNo = abstractMchAppRQ.getMchNo();
+        String appId = abstractMchAppRQ.getAppId();
         String sign = bizRQ.getSign();
 
-        if(StringUtils.isAnyEmpty(mchNo, sign)){
+        if(StringUtils.isAnyBlank(mchNo, appId, sign)){
             throw new BizException("参数有误！");
         }
 
-        MchConfigContext mchConfigContext = configContextService.getMchConfigContext(mchNo);
+        MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(mchNo, appId);
 
-        MchInfo mchInfo = mchConfigContext == null ? null : mchConfigContext.getMchInfo();
+        MchInfo mchInfo = mchAppConfigContext == null ? null : mchAppConfigContext.getMchInfo();
         if(mchInfo == null || mchInfo.getState() != CS.YES){
             throw new BizException("商户不存在或商户状态不可用");
         }
 
-        // 验签
-        String privateKey = mchInfo.getPrivateKey();
+        MchApp mchApp = mchAppConfigContext == null ? null : mchAppConfigContext.getMchApp();
+        if(mchInfo == null || mchInfo.getState() != CS.YES){
+            throw new BizException("商户应用不存在或商户状态不可用");
+        }
 
+        if(!mchApp.getMchNo().equals(mchNo)){
+            throw new BizException("商户应用与商户号不匹配");
+        }
+
+        // 验签
+        String appSecret = mchApp.getAppSecret();
+
+        // 转换为 JSON
+        JSONObject bizReqJSON = (JSONObject)JSONObject.toJSON(bizRQ);
         bizReqJSON.remove("sign");
-        if(!sign.equalsIgnoreCase(JeepayKit.getSign(bizReqJSON, privateKey))){
+        if(!sign.equalsIgnoreCase(JeepayKit.getSign(bizReqJSON, appSecret))){
              throw new BizException("验签失败");
         }
 

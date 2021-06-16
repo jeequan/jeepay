@@ -24,7 +24,7 @@ import com.jeequan.jeepay.core.model.params.alipay.AlipayConfig;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
 import com.jeequan.jeepay.pay.channel.AbstractChannelNoticeService;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -69,16 +69,16 @@ public class AlipayChannelNoticeService extends AbstractChannelNoticeService {
 
 
     @Override
-    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, PayOrder payOrder, MchConfigContext mchConfigContext, NoticeTypeEnum noticeTypeEnum) {
+    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
         try {
 
             //配置参数获取
             Byte useCert = null;
             String alipaySignType, alipayPublicCert, alipayPublicKey = null;
-            if(mchConfigContext.isIsvsubMch()){
+            if(mchAppConfigContext.isIsvsubMch()){
 
                 // 获取支付参数
-                AlipayIsvParams alipayParams = mchConfigContext.getIsvConfigContext().getIsvParamsByIfCode(getIfCode(), AlipayIsvParams.class);
+                AlipayIsvParams alipayParams = mchAppConfigContext.getIsvConfigContext().getIsvParamsByIfCode(getIfCode(), AlipayIsvParams.class);
                 useCert = alipayParams.getUseCert();
                 alipaySignType = alipayParams.getSignType();
                 alipayPublicCert = alipayParams.getAlipayPublicCert();
@@ -87,7 +87,7 @@ public class AlipayChannelNoticeService extends AbstractChannelNoticeService {
             }else{
 
                 // 获取支付参数
-                AlipayNormalMchParams alipayParams = mchConfigContext.getNormalMchParamsByIfCode(getIfCode(), AlipayNormalMchParams.class);
+                AlipayNormalMchParams alipayParams = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), AlipayNormalMchParams.class);
                 useCert = alipayParams.getUseCert();
                 alipaySignType = alipayParams.getSignType();
                 alipayPublicCert = alipayParams.getAlipayPublicCert();

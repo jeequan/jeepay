@@ -20,7 +20,7 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
 import com.jeequan.jeepay.pay.channel.IChannelUserService;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.apache.commons.lang3.StringUtils;
@@ -46,17 +46,17 @@ public class WxpayChannelUserService implements IChannelUserService {
     }
 
     @Override
-    public String buildUserRedirectUrl(String callbackUrlEncode, MchConfigContext mchConfigContext) {
+    public String buildUserRedirectUrl(String callbackUrlEncode, MchAppConfigContext mchAppConfigContext) {
 
         String appId = null;
         String oauth2Url = "";
-        if(mchConfigContext.isIsvsubMch()){
-            WxpayIsvParams wxpayIsvParams = mchConfigContext.getIsvConfigContext().getIsvParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvParams.class);
+        if(mchAppConfigContext.isIsvsubMch()){
+            WxpayIsvParams wxpayIsvParams = mchAppConfigContext.getIsvConfigContext().getIsvParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvParams.class);
             appId = wxpayIsvParams.getAppId();
             oauth2Url = wxpayIsvParams.getOauth2Url();
         }else{
             //获取商户配置信息
-            WxpayNormalMchParams normalMchParams = mchConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayNormalMchParams.class);
+            WxpayNormalMchParams normalMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayNormalMchParams.class);
             appId = normalMchParams.getAppId();
             oauth2Url = normalMchParams.getOauth2Url();
         }
@@ -69,10 +69,10 @@ public class WxpayChannelUserService implements IChannelUserService {
     }
 
     @Override
-    public String getChannelUserId(JSONObject reqParams, MchConfigContext mchConfigContext) {
+    public String getChannelUserId(JSONObject reqParams, MchAppConfigContext mchAppConfigContext) {
         String code = reqParams.getString("code");
         try {
-            return mchConfigContext.getWxServiceWrapper().getWxMpService().getOAuth2Service().getAccessToken(code).getOpenId();
+            return mchAppConfigContext.getWxServiceWrapper().getWxMpService().getOAuth2Service().getAccessToken(code).getOpenId();
         } catch (WxErrorException e) {
             e.printStackTrace();
             return null;

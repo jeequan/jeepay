@@ -25,7 +25,7 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.channel.IPayOrderQueryService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayV3Util;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import org.springframework.stereotype.Service;
 
@@ -45,20 +45,20 @@ public class WxpayPayOrderQueryService implements IPayOrderQueryService {
     }
 
     @Override
-    public ChannelRetMsg query(PayOrder payOrder, MchConfigContext mchConfigContext) {
+    public ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
 
         try {
 
-            if (CS.PAY_IF_VERSION.WX_V2.equals(mchConfigContext.getWxServiceWrapper().getApiVersion())) {  //V2
+            if (CS.PAY_IF_VERSION.WX_V2.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) {  //V2
 
                 WxPayOrderQueryRequest req = new WxPayOrderQueryRequest();
 
                 //放置isv信息
-                WxpayKit.putApiIsvInfo(mchConfigContext, req);
+                WxpayKit.putApiIsvInfo(mchAppConfigContext, req);
 
                 req.setOutTradeNo(payOrder.getPayOrderId());
 
-                WxPayService wxPayService = mchConfigContext.getWxServiceWrapper().getWxPayService();
+                WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
 
                 WxPayOrderQueryResult result = wxPayService.queryOrder(req);
 
@@ -74,9 +74,9 @@ public class WxpayPayOrderQueryService implements IPayOrderQueryService {
                     return ChannelRetMsg.unknown();
                 }
 
-            }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchConfigContext.getWxServiceWrapper().getApiVersion())) {   //V3
+            }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) {   //V3
 
-                JSONObject resultJSON = WxpayV3Util.queryOrderV3(payOrder.getPayOrderId(), mchConfigContext.getWxServiceWrapper().getWxPayService().getConfig());
+                JSONObject resultJSON = WxpayV3Util.queryOrderV3(payOrder.getPayOrderId(), mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig());
 
                 String channelState = resultJSON.getString("trade_state");
                 if ("SUCCESS".equals(channelState)) {

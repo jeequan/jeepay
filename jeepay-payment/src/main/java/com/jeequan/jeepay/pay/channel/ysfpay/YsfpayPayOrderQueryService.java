@@ -21,7 +21,7 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.channel.IPayOrderQueryService;
 import com.jeequan.jeepay.pay.channel.ysfpay.utils.YsfHttpUtil;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,7 +46,7 @@ public class YsfpayPayOrderQueryService implements IPayOrderQueryService {
     private YsfpayPaymentService ysfpayPaymentService;
 
     @Override
-    public ChannelRetMsg query(PayOrder payOrder, MchConfigContext mchConfigContext) throws Exception {
+    public ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
         JSONObject reqParams = new JSONObject();
         String orderType = YsfHttpUtil.getOrderTypeByCommon(payOrder.getWayCode());
         String logPrefix = "【云闪付("+orderType+")查单】";
@@ -56,7 +56,7 @@ public class YsfpayPayOrderQueryService implements IPayOrderQueryService {
             reqParams.put("orderType", orderType); //订单类型
 
             //封装公共参数 & 签名 & 调起http请求 & 返回响应数据并包装为json格式。
-            JSONObject resJSON = ysfpayPaymentService.packageParamAndReq("/gateway/api/pay/queryOrder", reqParams, logPrefix, mchConfigContext.getIsvConfigContext(), mchConfigContext);
+            JSONObject resJSON = ysfpayPaymentService.packageParamAndReq("/gateway/api/pay/queryOrder", reqParams, logPrefix, mchAppConfigContext.getIsvConfigContext(), mchAppConfigContext);
             log.info("查询订单 payorderId:{}, 返回结果:{}", payOrder.getPayOrderId(), resJSON);
             if(resJSON == null){
                 return ChannelRetMsg.waiting(); //支付中

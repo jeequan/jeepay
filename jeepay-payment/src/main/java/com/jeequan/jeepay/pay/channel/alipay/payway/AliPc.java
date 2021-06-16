@@ -24,7 +24,7 @@ import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.pay.channel.alipay.AlipayKit;
 import com.jeequan.jeepay.pay.channel.alipay.AlipayPaymentService;
 import com.jeequan.jeepay.pay.exception.ChannelException;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
@@ -49,7 +49,7 @@ public class AliPc extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchConfigContext mchConfigContext){
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
 
         AliPcOrderRQ bizRQ = (AliPcOrderRQ) rq;
 
@@ -66,16 +66,16 @@ public class AliPc extends AlipayPaymentService {
         req.setBizModel(model);
 
         //统一放置 isv接口必传信息
-        AlipayKit.putApiIsvInfo(mchConfigContext, req, model);
+        AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
 
         // 构造函数响应数据
         AliPcOrderRS res = ApiResBuilder.buildSuccess(AliPcOrderRS.class);
 
         try {
             if(CS.PAY_DATA_TYPE.FORM.equals(bizRQ.getPayDataType())){
-                res.setFormContent(mchConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req).getBody());
+                res.setFormContent(mchAppConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req).getBody());
             }else{
-                res.setPayUrl(mchConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req, "GET").getBody());
+                res.setPayUrl(mchAppConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req, "GET").getBody());
             }
         }catch (AlipayApiException e) {
             throw ChannelException.sysError(e.getMessage());

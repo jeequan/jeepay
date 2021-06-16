@@ -23,13 +23,13 @@ import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
 import com.jeequan.jeepay.pay.channel.IChannelUserService;
 import com.jeequan.jeepay.pay.exception.ChannelException;
-import com.jeequan.jeepay.pay.model.MchConfigContext;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /*
 * 支付宝： 获取用户ID实现类
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 17:21
@@ -45,17 +45,17 @@ public class AlipayChannelUserService implements IChannelUserService {
     }
 
     @Override
-    public String buildUserRedirectUrl(String callbackUrlEncode, MchConfigContext mchConfigContext) {
+    public String buildUserRedirectUrl(String callbackUrlEncode, MchAppConfigContext mchAppConfigContext) {
 
         String oauthUrl = AlipayConfig.PROD_OAUTH_URL;
         String appId = null;
 
-        if(mchConfigContext.isIsvsubMch()){
-            AlipayIsvParams isvParams = mchConfigContext.getIsvConfigContext().getIsvParamsByIfCode(getIfCode(), AlipayIsvParams.class);
+        if(mchAppConfigContext.isIsvsubMch()){
+            AlipayIsvParams isvParams = mchAppConfigContext.getIsvConfigContext().getIsvParamsByIfCode(getIfCode(), AlipayIsvParams.class);
             appId = isvParams.getAppId();
         }else{
             //获取商户配置信息
-            AlipayNormalMchParams normalMchParams = mchConfigContext.getNormalMchParamsByIfCode(getIfCode(), AlipayNormalMchParams.class);
+            AlipayNormalMchParams normalMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), AlipayNormalMchParams.class);
             appId = normalMchParams.getAppId();
             if(normalMchParams.getSandbox() != null && normalMchParams.getSandbox() == CS.YES){
                 oauthUrl = AlipayConfig.SANDBOX_OAUTH_URL;
@@ -66,7 +66,7 @@ public class AlipayChannelUserService implements IChannelUserService {
     }
 
     @Override
-    public String getChannelUserId(JSONObject reqParams, MchConfigContext mchConfigContext) {
+    public String getChannelUserId(JSONObject reqParams, MchAppConfigContext mchAppConfigContext) {
 
         String authCode = reqParams.getString("auth_code");
 
@@ -74,7 +74,7 @@ public class AlipayChannelUserService implements IChannelUserService {
         AlipaySystemOauthTokenRequest request = new AlipaySystemOauthTokenRequest();
         request.setCode(authCode); request.setGrantType("authorization_code");
         try {
-            return mchConfigContext.getAlipayClientWrapper().execute(request).getUserId();
+            return mchAppConfigContext.getAlipayClientWrapper().execute(request).getUserId();
         } catch (ChannelException e) {
             e.printStackTrace();
             return null;
