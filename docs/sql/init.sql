@@ -142,7 +142,6 @@ CREATE TABLE `t_mch_info` (
         `contact_name` VARCHAR(32) COMMENT '联系人姓名',
         `contact_tel` VARCHAR(32) COMMENT '联系人手机号',
         `contact_email` VARCHAR(32) COMMENT '联系人邮箱',
-        `private_key` VARCHAR(128) COMMENT '私钥',
         `state` TINYINT(6) NOT NULL DEFAULT 1 COMMENT '商户状态: 0-停用, 1-正常',
         `remark` VARCHAR(128) COMMENT '商户备注',
         `init_user_id` BIGINT(20) DEFAULT NULL COMMENT '初始用户ID（创建商户时，允许商户登录的用户）',

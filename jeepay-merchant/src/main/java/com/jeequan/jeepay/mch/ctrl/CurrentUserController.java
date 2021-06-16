@@ -138,7 +138,7 @@ public class CurrentUserController extends CommonCtrl{
 			throw new BizException("新密码与原密码不能相同！");
 		}
 
-		sysUserAuthService.resetAuthInfo(opSysUserId, null, null, opUserPwd, CS.SYS_TYPE.MGR);
+		sysUserAuthService.resetAuthInfo(opSysUserId, null, null, opUserPwd, CS.SYS_TYPE.MCH);
 		//调用登出接口
 		return logout();
 	}

@@ -12,7 +12,6 @@
         <result column="contact_name" property="contactName" />
         <result column="contact_tel" property="contactTel" />
         <result column="contact_email" property="contactEmail" />
-        <result column="private_key" property="privateKey" />
         <result column="state" property="state" />
         <result column="remark" property="remark" />
         <result column="init_user_id" property="initUserId" />
