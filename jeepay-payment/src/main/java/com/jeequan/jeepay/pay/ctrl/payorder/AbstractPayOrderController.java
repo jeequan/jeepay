@@ -89,6 +89,7 @@ public abstract class AbstractPayOrderController extends ApiController {
 
                 payOrder.setWayCode(wayCode); // 需要将订单更新 支付方式
                 bizRQ.setMchNo(payOrder.getMchNo());
+                bizRQ.setAppId(payOrder.getAppId());
                 bizRQ.setMchOrderNo(payOrder.getMchOrderNo());
                 bizRQ.setWayCode(wayCode);
                 bizRQ.setAmount(payOrder.getAmount());
