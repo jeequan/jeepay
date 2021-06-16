@@ -63,7 +63,7 @@ public class AliBar extends AlipayPaymentService {
         AlipayTradePayModel model = new AlipayTradePayModel();
         model.setOutTradeNo(payOrder.getPayOrderId());
         model.setScene("bar_code"); //条码支付 bar_code ; 声波支付 wave_code
-        model.setAuthCode(bizRQ.getAuthCode()); //支付授权码
+        model.setAuthCode(bizRQ.getAuthCode().trim()); //支付授权码
         model.setSubject(payOrder.getSubject()); //订单标题
         model.setBody(payOrder.getBody()); //订单描述信息
         model.setTotalAmount(AmountUtil.convertCent2Dollar(payOrder.getAmount().toString()));  //支付金额

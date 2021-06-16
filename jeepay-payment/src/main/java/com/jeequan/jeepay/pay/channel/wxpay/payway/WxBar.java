@@ -68,7 +68,7 @@ public class WxBar extends WxpayPaymentService {
         request.setFeeType("CNY");
         request.setTotalFee(payOrder.getAmount().intValue());
         request.setSpbillCreateIp(payOrder.getClientIp());
-        request.setAuthCode(bizRQ.getAuthCode());
+        request.setAuthCode(bizRQ.getAuthCode().trim());
 
         //放置isv信息
         WxpayKit.putApiIsvInfo(mchAppConfigContext, request);

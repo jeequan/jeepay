@@ -75,6 +75,7 @@ public class PayMchNotifyService {
             mchNotifyRecord.setMchNo(dbPayOrder.getMchNo());
             mchNotifyRecord.setMchOrderNo(dbPayOrder.getMchOrderNo()); //商户订单号
             mchNotifyRecord.setIsvNo(dbPayOrder.getIsvNo());
+            mchNotifyRecord.setAppId(dbPayOrder.getAppId());
             mchNotifyRecord.setNotifyUrl(notifyUrl);
             mchNotifyRecord.setResResult("");
             mchNotifyRecord.setNotifyCount(0);
