@@ -8,18 +8,19 @@
         <result column="pay_order_id" property="payOrderId" />
         <result column="channel_pay_order_no" property="channelPayOrderNo" />
         <result column="mch_no" property="mchNo" />
+        <result column="isv_no" property="isvNo" />
+        <result column="app_id" property="appId" />
+        <result column="mch_name" property="mchName" />
         <result column="mch_type" property="mchType" />
         <result column="mch_refund_no" property="mchRefundNo" />
-        <result column="isv_no" property="isvNo" />
         <result column="way_code" property="wayCode" />
         <result column="if_code" property="ifCode" />
         <result column="pay_amount" property="payAmount" />
         <result column="refund_amount" property="refundAmount" />
         <result column="currency" property="currency" />
         <result column="state" property="state" />
-        <result column="result" property="result" />
         <result column="client_ip" property="clientIp" />
-        <result column="remark" property="remark" />
+        <result column="refund_reason" property="refundReason" />
         <result column="channel_order_no" property="channelOrderNo" />
         <result column="channel_err_code" property="channelErrCode" />
         <result column="channel_err_msg" property="channelErrMsg" />

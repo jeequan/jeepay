@@ -15,8 +15,6 @@
  */
 package com.jeequan.jeepay.pay.ctrl.refund;
 
-import cn.hutool.core.date.DateUtil;
-import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.*;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
@@ -25,18 +23,8 @@ import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.channel.IPaymentService;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
-import com.jeequan.jeepay.pay.ctrl.payorder.AbstractPayOrderController;
-import com.jeequan.jeepay.pay.exception.ChannelException;
-import com.jeequan.jeepay.pay.model.IsvConfigContext;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
-import com.jeequan.jeepay.pay.mq.queue.MqQueue4ChannelOrderQuery;
-import com.jeequan.jeepay.pay.rqrs.QueryPayOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.QueryPayOrderRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
-import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRS;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.QrCashierOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.QrCashierOrderRS;
 import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRS;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
@@ -46,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
@@ -114,7 +101,7 @@ public class RefundOrderController extends ApiController {
             }
 
 
-            RefundOrder refundOrder = genPayOrder(rq, payOrder, mchInfo, mchApp);
+            RefundOrder refundOrder = genRefundOrder(rq, payOrder, mchInfo, mchApp);
 
             //订单入库 订单状态： 生成状态  此时没有和任何上游渠道产生交互。
             refundOrderService.save(refundOrder);
@@ -140,31 +127,32 @@ public class RefundOrderController extends ApiController {
 
     }
 
-    private RefundOrder genPayOrder(RefundOrderRQ rq, PayOrder payOrder, MchInfo mchInfo, MchApp mchApp){
+    private RefundOrder genRefundOrder(RefundOrderRQ rq, PayOrder payOrder, MchInfo mchInfo, MchApp mchApp){
 
         RefundOrder refundOrder = new RefundOrder();
         refundOrder.setRefundOrderId(SeqKit.genPayOrderId()); //退款订单号
         refundOrder.setPayOrderId(payOrder.getPayOrderId()); //支付订单号
         refundOrder.setChannelPayOrderNo(payOrder.getChannelOrderNo()); //渠道支付单号
         refundOrder.setMchNo(mchInfo.getMchNo()); //商户号
+        refundOrder.setIsvNo(mchInfo.getIsvNo()); //服务商号
+        refundOrder.setAppId(mchApp.getAppId()); //商户应用ID
+        refundOrder.setMchName(mchInfo.getMchShortName()); //商户名称
         refundOrder.setMchType(mchInfo.getType()); //商户类型
         refundOrder.setMchRefundNo(rq.getMchRefundNo()); //商户退款单号
-        refundOrder.setIsvNo(mchInfo.getIsvNo()); //服务商号
         refundOrder.setWayCode(payOrder.getWayCode()); //支付方式代码
         refundOrder.setIfCode(payOrder.getIfCode()); //支付接口代码
         refundOrder.setPayAmount(payOrder.getAmount()); //支付金额,单位分
-        refundOrder.setRefundAmount(rq.getAmount()); //退款金额,单位分
+        refundOrder.setRefundAmount(rq.getRefundAmount()); //退款金额,单位分
         refundOrder.setCurrency(rq.getCurrency()); //三位货币代码,人民币:cny
-        refundOrder.setState(null); //退款状态:0-订单生成,1-退款中,2-退款成功,3-退款失败
-        refundOrder.setResult(null); //退款结果:0-不确认结果,1-等待手动处理,2-确认成功,3-确认失败
-        refundOrder.setClientIp(null); //客户端IP
-        refundOrder.setRemark(null); //备注
+        refundOrder.setState(RefundOrder.STATE_INIT); //退款状态:0-订单生成,1-退款中,2-退款成功,3-退款失败
+        refundOrder.setClientIp(StringUtils.defaultIfEmpty(rq.getClientIp(), getClientIp())); //客户端IP
+        refundOrder.setRefundReason(rq.getRefundReason()); //退款原因
         refundOrder.setChannelOrderNo(null); //渠道订单号
         refundOrder.setChannelErrCode(null); //渠道错误码
         refundOrder.setChannelErrMsg(null); //渠道错误描述
-        refundOrder.setChannelExtra(null); //特定渠道发起时额外参数
-        refundOrder.setNotifyUrl(null); //通知地址
-        refundOrder.setExtParam(null); //扩展参数
+        refundOrder.setChannelExtra(rq.getChannelExtra()); //特定渠道发起时额外参数
+        refundOrder.setNotifyUrl(rq.getNotifyUrl()); //通知地址
+        refundOrder.setExtParam(rq.getExtParam()); //扩展参数
         refundOrder.setSuccessTime(null); //订单退款成功时间
         refundOrder.setCreatedAt(new Date()); //创建时间
 

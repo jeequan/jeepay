@@ -45,7 +45,7 @@ public class RefundOrderRQ extends AbstractMchAppRQ {
     /** 退款金额， 单位：分 **/
     @NotNull(message="退款金额不能为空")
     @Min(value = 1, message = "退款金额请大于1分")
-    private Long amount;
+    private Long refundAmount;
 
     /** 货币代码 **/
     @NotBlank(message="货币代码不能为空")
