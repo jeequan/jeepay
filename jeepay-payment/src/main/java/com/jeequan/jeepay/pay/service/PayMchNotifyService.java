@@ -42,8 +42,8 @@ import org.springframework.stereotype.Service;
 public class PayMchNotifyService {
 
     @Autowired private MchNotifyRecordService mchNotifyRecordService;
-    @Autowired private MchInfoService mchInfoService;
     @Autowired private MqQueue4PayOrderMchNotify mqPayOrderMchNotifyQueue;
+    @Autowired private ConfigContextService configContextService;
 
 
     /** 商户通知信息， 只有订单是终态，才会发送通知， 如明确成功和明确失败 **/
@@ -64,10 +64,11 @@ public class PayMchNotifyService {
                 return ;
             }
 
-            //构建数据
-            MchInfo mchInfo = mchInfoService.getById(dbPayOrder.getMchNo());
+            //商户app私钥
+            String appSecret = configContextService.getMchAppConfigContext(dbPayOrder.getMchNo(), dbPayOrder.getAppId()).getMchApp().getAppSecret();
+
             // 封装通知url
-            String notifyUrl = createNotifyUrl(dbPayOrder, mchInfo.getPrivateKey());
+            String notifyUrl = createNotifyUrl(dbPayOrder, appSecret);
             mchNotifyRecord = new MchNotifyRecord();
             mchNotifyRecord.setOrderId(dbPayOrder.getPayOrderId());
             mchNotifyRecord.setOrderType(MchNotifyRecord.TYPE_PAY_ORDER);
@@ -93,14 +94,14 @@ public class PayMchNotifyService {
     /**
      * 创建响应URL
      */
-    public String createNotifyUrl(PayOrder payOrder, String mchKey) {
+    public String createNotifyUrl(PayOrder payOrder, String appSecret) {
 
         QueryPayOrderRS queryPayOrderRS = QueryPayOrderRS.buildByPayOrder(payOrder);
         JSONObject jsonObject = (JSONObject)JSONObject.toJSON(queryPayOrderRS);
         jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
 
         // 报文签名
-        jsonObject.put("sign", JeepayKit.getSign(jsonObject, mchKey));
+        jsonObject.put("sign", JeepayKit.getSign(jsonObject, appSecret));
 
         // 生成通知
         return StringKit.appendUrlQuery(payOrder.getNotifyUrl(), jsonObject);
