@@ -240,9 +240,9 @@ public abstract class AbstractPayOrderController extends ApiController {
     private IPaymentService checkMchWayCodeAndGetService(MchAppConfigContext mchAppConfigContext, String wayCode){
 
         // 根据支付方式， 查询出 该商户 可用的支付接口
-        MchPayPassage mchPayPassage = mchPayPassageService.findMchPayPassage(mchAppConfigContext.getMchNo(), wayCode);
+        MchPayPassage mchPayPassage = mchPayPassageService.findMchPayPassage(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), wayCode);
         if(mchPayPassage == null){
-            throw new BizException("该支付方式商户未开通");
+            throw new BizException("商户应用不支持该支付方式");
         }
 
         // 接口代码

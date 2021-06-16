@@ -74,18 +74,21 @@ public abstract class ApiController extends AbstractCtrl {
 
         MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(mchNo, appId);
 
-        MchInfo mchInfo = mchAppConfigContext == null ? null : mchAppConfigContext.getMchInfo();
-        if(mchInfo == null || mchInfo.getState() != CS.YES){
-            throw new BizException("商户不存在或商户状态不可用");
+        if(mchAppConfigContext == null){
+            throw new BizException("商户或商户应用不存在");
         }
 
-        MchApp mchApp = mchAppConfigContext == null ? null : mchAppConfigContext.getMchApp();
-        if(mchInfo == null || mchInfo.getState() != CS.YES){
-            throw new BizException("商户应用不存在或商户状态不可用");
+        if(mchAppConfigContext.getMchInfo() == null || mchAppConfigContext.getMchInfo().getState() != CS.YES){
+            throw new BizException("商户信息不存在或商户状态不可用");
+        }
+
+        MchApp mchApp = mchAppConfigContext.getMchApp();
+        if(mchApp == null || mchApp.getState() != CS.YES){
+            throw new BizException("商户应用不存在或应用状态不可用");
         }
 
         if(!mchApp.getMchNo().equals(mchNo)){
-            throw new BizException("商户应用与商户号不匹配");
+            throw new BizException("参数appId与商户号不匹配");
         }
 
         // 验签

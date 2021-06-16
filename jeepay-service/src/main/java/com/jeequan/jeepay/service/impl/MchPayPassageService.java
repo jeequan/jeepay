@@ -104,11 +104,12 @@ public class MchPayPassageService extends ServiceImpl<MchPayPassageMapper, MchPa
     }
 
 
-    /** 根据商户号 和 支付方式， 查询出商户可用的支付接口 **/
-    public MchPayPassage findMchPayPassage(String mchNo, String wayCode){
+    /** 根据应用ID 和 支付方式， 查询出商户可用的支付接口 **/
+    public MchPayPassage findMchPayPassage(String mchNo, String appId, String wayCode){
 
         List<MchPayPassage> list = list(MchPayPassage.gw()
                                     .eq(MchPayPassage::getMchNo, mchNo)
+                                    .eq(MchPayPassage::getAppId, appId)
                                     .eq(MchPayPassage::getState, CS.YES)
                                     .eq(MchPayPassage::getWayCode, wayCode)
         );

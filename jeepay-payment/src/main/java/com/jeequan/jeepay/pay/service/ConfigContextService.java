@@ -143,6 +143,8 @@ public class ConfigContextService {
         mchInfoConfigContext.setMchType(mchInfo.getType());
         mchInfoConfigContext.setMchInfo(mchInfo);
         mchAppService.list(MchApp.gw().eq(MchApp::getMchNo, mchNo)).stream().forEach( mchApp -> mchInfoConfigContext.putMchApp(mchApp));
+
+        mchInfoConfigContextMap.put(mchNo, mchInfoConfigContext);
     }
 
     /** 初始化 [商户应用支付参数配置信息] **/
@@ -162,6 +164,7 @@ public class ConfigContextService {
             mchApp = mchAppService.getById(appId);
             if(mchApp == null){ // DB查询为空
                 mchAppConfigContextMap.remove(appId);  //清除缓存信息
+                mchInfoConfigContext.getAppMap().remove(appId); //清除主体信息中的appId
                 return ;
             }
 
@@ -174,6 +177,7 @@ public class ConfigContextService {
         MchAppConfigContext mchAppConfigContext = new MchAppConfigContext();
 
         // 设置商户信息
+        mchAppConfigContext.setAppId(appId);
         mchAppConfigContext.setMchNo(mchInfo.getMchNo());
         mchAppConfigContext.setMchType(mchInfo.getType());
         mchAppConfigContext.setMchInfo(mchInfo);
