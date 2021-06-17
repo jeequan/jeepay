@@ -13,56 +13,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.ctrl.payorder;
+package com.jeequan.jeepay.pay.ctrl.refund;
 
-import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
-import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRS;
+import com.jeequan.jeepay.pay.rqrs.refund.QueryRefundOrderRQ;
+import com.jeequan.jeepay.pay.rqrs.refund.QueryRefundOrderRS;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
-import com.jeequan.jeepay.service.impl.PayOrderService;
+import com.jeequan.jeepay.service.impl.RefundOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/*
-* 商户查单controller
+/**
+* 商户退款单查询controller
 *
 * @author terrfly
 * @site https://www.jeepay.vip
-* @date 2021/6/8 17:26
+* @date 2021/6/17 15:20
 */
 @Slf4j
 @RestController
-public class QueryOrderController extends ApiController {
+public class QueryRefundOrderController extends ApiController {
 
-    @Autowired private PayOrderService payOrderService;
+    @Autowired private RefundOrderService refundOrderService;
     @Autowired private ConfigContextService configContextService;
 
     /**
      * 查单接口
      * **/
-    @RequestMapping("/api/pay/query")
-    public ApiRes queryOrder(){
+    @RequestMapping("/api/refund/query")
+    public ApiRes queryRefundOrder(){
 
         //获取参数 & 验签
-        QueryPayOrderRQ rq = getRQByWithMchSign(QueryPayOrderRQ.class);
+        QueryRefundOrderRQ rq = getRQByWithMchSign(QueryRefundOrderRQ.class);
 
-        if(StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())){
-            throw new BizException("mchOrderNo 和 payOrderId不能同时为空");
+        if(StringUtils.isAllEmpty(rq.getMchRefundNo(), rq.getRefundOrderId())){
+            throw new BizException("mchRefundNo 和 refundOrderId不能同时为空");
         }
 
-        PayOrder payOrder = payOrderService.queryMchOrder(rq.getMchNo(), rq.getPayOrderId(), rq.getMchOrderNo());
-        if(payOrder == null){
+        RefundOrder refundOrder = refundOrderService.queryMchOrder(rq.getMchNo(), rq.getMchRefundNo(), rq.getRefundOrderId());
+        if(refundOrder == null){
             throw new BizException("订单不存在");
         }
 
-        QueryPayOrderRS bizRes = QueryPayOrderRS.buildByPayOrder(payOrder);
+        QueryRefundOrderRS bizRes = QueryRefundOrderRS.buildByRefundOrder(refundOrder);
         return ApiRes.okWithSign(bizRes, configContextService.getMchAppConfigContext(rq.getMchNo(), rq.getAppId()).getMchApp().getAppSecret());
     }
-
 }

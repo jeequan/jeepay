@@ -43,6 +43,7 @@ public class RefundOrder extends BaseModel {
     public static final byte STATE_ING = 1; //退款中
     public static final byte STATE_SUCCESS = 2; //退款成功
     public static final byte STATE_FAIL = 3; //退款失败
+    public static final byte STATE_CLOSED = 4; //退款任务关闭
 
     public static final LambdaQueryWrapper<RefundOrder> gw(){
         return new LambdaQueryWrapper<>();
@@ -122,7 +123,7 @@ public class RefundOrder extends BaseModel {
     private String currency;
 
     /**
-     * 退款状态:0-订单生成,1-退款中,2-退款成功,3-退款失败
+     * 退款状态:0-订单生成,1-退款中,2-退款成功,3-退款失败,4-退款任务关闭
      */
     private Byte state;
 
@@ -170,6 +171,11 @@ public class RefundOrder extends BaseModel {
      * 订单退款成功时间
      */
     private Date successTime;
+
+    /**
+     * 退款失效时间（失效后系统更改为退款任务关闭状态）
+     */
+    private Date expiredTime;
 
     /**
      * 创建时间

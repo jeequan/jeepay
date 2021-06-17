@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.rqrs;
+package com.jeequan.jeepay.pay.rqrs.payorder;
 
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
@@ -27,7 +28,7 @@ import org.springframework.beans.BeanUtils;
 * @date 2021/6/8 17:40
 */
 @Data
-public class QueryPayOrderRS extends AbstractRS{
+public class QueryPayOrderRS extends AbstractRS {
 
     /**
      * 支付订单号

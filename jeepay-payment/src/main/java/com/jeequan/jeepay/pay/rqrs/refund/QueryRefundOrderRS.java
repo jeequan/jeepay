@@ -21,63 +21,106 @@ import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
 /*
-* 退款订单 响应参数
+* 查询退款单 响应参数
 *
 * @author terrfly
 * @site https://www.jeepay.vip
-* @date 2021/6/16 15:41
+* @date 2021/6/17 14:08
 */
 @Data
-public class RefundOrderRS extends AbstractRS {
+public class QueryRefundOrderRS extends AbstractRS {
 
-    /** 支付系统退款订单号 **/
+    /**
+     * 退款订单号（支付系统生成订单号）
+     */
     private String refundOrderId;
 
-    /** 商户号 **/
+    /**
+     * 支付订单号（与t_pay_order对应）
+     */
+    private String payOrderId;
+
+    /**
+     * 商户号
+     */
     private String mchNo;
 
-    /** 商户应用ID **/
+    /**
+     * 应用ID
+     */
     private String appId;
 
-    /** 商户发起的退款订单号 **/
+    /**
+     * 商户退款单号（商户系统的订单号）
+     */
     private String mchRefundNo;
 
-    /** 订单支付金额 **/
+    /**
+     * 支付金额,单位分
+     */
     private Long payAmount;
 
-    /** 申请退款金额 **/
+    /**
+     * 退款金额,单位分
+     */
     private Long refundAmount;
 
-    /** 退款状态 **/
+    /**
+     * 三位货币代码,人民币:cny
+     */
+    private String currency;
+
+    /**
+     * 退款状态:0-订单生成,1-退款中,2-退款成功,3-退款失败
+     */
     private Byte state;
 
-    /** 渠道退款单号   **/
+    /**
+     * 渠道订单号
+     */
     private String channelOrderNo;
 
-    /** 渠道返回错误代码 **/
+    /**
+     * 渠道错误码
+     */
     private String channelErrCode;
 
-    /** 渠道返回错误信息 **/
+    /**
+     * 渠道错误描述
+     */
     private String channelErrMsg;
 
-    /** 退款成功时间 **/
+    /**
+     * 特定渠道发起时额外参数
+     */
+    private String channelExtra;
+
+    /**
+     * 扩展参数
+     */
+    private String extParam;
+
+    /**
+     * 订单退款成功时间
+     */
     private Long successTime;
 
-    /** 创建时间 **/
+    /**
+     * 创建时间
+     */
     private Long createdAt;
 
 
-    public static RefundOrderRS buildByRefundOrder(RefundOrder refundOrder){
+    public static QueryRefundOrderRS buildByRefundOrder(RefundOrder refundOrder){
 
         if(refundOrder == null){
             return null;
         }
 
-        RefundOrderRS result = new RefundOrderRS();
+        QueryRefundOrderRS result = new QueryRefundOrderRS();
         BeanUtils.copyProperties(refundOrder, result);
         result.setSuccessTime(refundOrder.getSuccessTime() == null ? null : refundOrder.getSuccessTime().getTime());
         result.setCreatedAt(refundOrder.getCreatedAt() == null ? null : refundOrder.getCreatedAt().getTime());
-
         return result;
     }
 

@@ -39,4 +39,7 @@ public interface IRefundService {
     /** 调起退款接口，并响应数据；  内部处理普通商户和服务商模式  **/
     ChannelRetMsg refund(RefundOrderRQ bizRQ, RefundOrder refundOrder, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
 
+    /** 退款查单接口  **/
+    ChannelRetMsg query(RefundOrder refundOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
+
 }

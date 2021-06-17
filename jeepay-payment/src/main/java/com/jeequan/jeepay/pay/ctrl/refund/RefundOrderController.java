@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.pay.ctrl.refund;
 
+import cn.hutool.core.date.DateUtil;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.PayOrder;
@@ -32,6 +33,7 @@ import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRS;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
+import com.jeequan.jeepay.pay.service.PayMchNotifyService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.RefundOrderService;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +58,7 @@ public class RefundOrderController extends ApiController {
     @Autowired private PayOrderService payOrderService;
     @Autowired private RefundOrderService refundOrderService;
     @Autowired private ConfigContextService configContextService;
+    @Autowired private PayMchNotifyService payMchNotifyService;
 
     /** 申请退款 **/
     @PostMapping("/api/refund/refundOrder")
@@ -68,7 +71,6 @@ public class RefundOrderController extends ApiController {
         RefundOrderRQ rq = getRQByWithMchSign(RefundOrderRQ.class);
 
         try {
-
 
             if(StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())){
                 throw new BizException("mchOrderNo 和 payOrderId不能同时为空");
@@ -174,6 +176,7 @@ public class RefundOrderController extends ApiController {
 
     private RefundOrder genRefundOrder(RefundOrderRQ rq, PayOrder payOrder, MchInfo mchInfo, MchApp mchApp){
 
+        Date nowTime = new Date();
         RefundOrder refundOrder = new RefundOrder();
         refundOrder.setRefundOrderId(SeqKit.genPayOrderId()); //退款订单号
         refundOrder.setPayOrderId(payOrder.getPayOrderId()); //支付订单号
@@ -198,8 +201,9 @@ public class RefundOrderController extends ApiController {
         refundOrder.setChannelExtra(rq.getChannelExtra()); //特定渠道发起时额外参数
         refundOrder.setNotifyUrl(rq.getNotifyUrl()); //通知地址
         refundOrder.setExtParam(rq.getExtParam()); //扩展参数
+        refundOrder.setExpiredTime(DateUtil.offsetHour(nowTime, 2)); //订单超时关闭时间 默认两个小时
         refundOrder.setSuccessTime(null); //订单退款成功时间
-        refundOrder.setCreatedAt(new Date()); //创建时间
+        refundOrder.setCreatedAt(nowTime); //创建时间
 
         return refundOrder;
     }
@@ -219,7 +223,7 @@ public class RefundOrderController extends ApiController {
         if(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == channelRetMsg.getChannelState()) {
 
             this.updateInitOrderStateThrowException(RefundOrder.STATE_SUCCESS, refundOrder, channelRetMsg);
-//            payMchNotifyService.payOrderNotify(payOrder);
+            payMchNotifyService.refundOrderNotify(refundOrder);
 
             //明确失败
         }else if(ChannelRetMsg.ChannelState.CONFIRM_FAIL == channelRetMsg.getChannelState()) {
@@ -235,7 +239,7 @@ public class RefundOrderController extends ApiController {
             this.updateInitOrderStateThrowException(RefundOrder.STATE_ING, refundOrder, channelRetMsg);
 
             // 系统异常：  退款单不再处理。  为： 生成状态
-        }else if( ChannelRetMsg.ChannelState.SYS_ERROR == channelRetMsg.getChannelState()){
+        }else if( ChannelRetMsg.ChannelState.SYS_ERROR == channelRetMsg.getChannelState() ){
 
         }else{
 

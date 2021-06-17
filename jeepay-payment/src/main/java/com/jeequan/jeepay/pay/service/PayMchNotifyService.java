@@ -16,14 +16,14 @@
 package com.jeequan.jeepay.pay.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.mq.queue.MqQueue4PayOrderMchNotify;
-import com.jeequan.jeepay.pay.rqrs.QueryPayOrderRS;
-import com.jeequan.jeepay.service.impl.MchInfoService;
+import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRS;
+import com.jeequan.jeepay.pay.rqrs.refund.QueryRefundOrderRS;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -91,6 +91,51 @@ public class PayMchNotifyService {
         }
     }
 
+    /** 商户通知信息，退款成功的发送通知 **/
+    public void refundOrderNotify(RefundOrder dbRefundOrder){
+
+        try {
+            // 通知地址为空
+            if(StringUtils.isEmpty(dbRefundOrder.getNotifyUrl())){
+                return ;
+            }
+
+            //获取到通知对象
+            MchNotifyRecord mchNotifyRecord = mchNotifyRecordService.findByRefundOrder(dbRefundOrder.getRefundOrderId());
+
+            if(mchNotifyRecord != null){
+
+                log.info("当前已存在通知消息， 不再发送。");
+                return ;
+            }
+
+            //商户app私钥
+            String appSecret = configContextService.getMchAppConfigContext(dbRefundOrder.getMchNo(), dbRefundOrder.getAppId()).getMchApp().getAppSecret();
+
+            // 封装通知url
+            String notifyUrl = createNotifyUrl(dbRefundOrder, appSecret);
+            mchNotifyRecord = new MchNotifyRecord();
+            mchNotifyRecord.setOrderId(dbRefundOrder.getRefundOrderId());
+            mchNotifyRecord.setOrderType(MchNotifyRecord.TYPE_REFUND_ORDER);
+            mchNotifyRecord.setMchNo(dbRefundOrder.getMchNo());
+            mchNotifyRecord.setMchOrderNo(dbRefundOrder.getMchRefundNo()); //商户订单号
+            mchNotifyRecord.setIsvNo(dbRefundOrder.getIsvNo());
+            mchNotifyRecord.setAppId(dbRefundOrder.getAppId());
+            mchNotifyRecord.setNotifyUrl(notifyUrl);
+            mchNotifyRecord.setResResult("");
+            mchNotifyRecord.setNotifyCount(0);
+            mchNotifyRecord.setState(MchNotifyRecord.STATE_ING); // 通知中
+            mchNotifyRecordService.save(mchNotifyRecord);
+
+            //推送到MQ
+            Long notifyId = mchNotifyRecord.getNotifyId();
+            mqPayOrderMchNotifyQueue.send(notifyId + "");
+
+        } catch (Exception e) {
+            log.error("推送失败！", e);
+        }
+    }
+
 
     /**
      * 创建响应URL
@@ -106,6 +151,23 @@ public class PayMchNotifyService {
 
         // 生成通知
         return StringKit.appendUrlQuery(payOrder.getNotifyUrl(), jsonObject);
+    }
+
+
+    /**
+     * 创建响应URL
+     */
+    public String createNotifyUrl(RefundOrder refundOrder, String appSecret) {
+
+        QueryRefundOrderRS queryPayOrderRS = QueryRefundOrderRS.buildByRefundOrder(refundOrder);
+        JSONObject jsonObject = (JSONObject)JSONObject.toJSON(queryPayOrderRS);
+        jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
+
+        // 报文签名
+        jsonObject.put("sign", JeepayKit.getSign(jsonObject, appSecret));
+
+        // 生成通知
+        return StringKit.appendUrlQuery(refundOrder.getNotifyUrl(), jsonObject);
     }
 
 

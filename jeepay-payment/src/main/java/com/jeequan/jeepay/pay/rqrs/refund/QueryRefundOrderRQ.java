@@ -13,26 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.rqrs;
+package com.jeequan.jeepay.pay.rqrs.refund;
 
+import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-
 /*
-* 查询订单请求参数对象
+* 查询退款单请求参数对象
 *
 * @author terrfly
 * @site https://www.jeepay.vip
-* @date 2021/6/8 17:40
+* @date 2021/6/17 14:07
 */
 @Data
-public class QueryPayOrderRQ extends AbstractMchAppRQ{
+public class QueryRefundOrderRQ extends AbstractMchAppRQ {
 
-    /** 商户订单号 **/
-    private String mchOrderNo;
+    /** 商户退款单号 **/
+    private String mchRefundNo;
 
-    /** 支付系统订单号 **/
-    private String payOrderId;
+    /** 支付系统退款订单号 **/
+    private String refundOrderId;
 
 }

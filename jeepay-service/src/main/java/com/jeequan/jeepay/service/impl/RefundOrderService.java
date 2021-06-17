@@ -21,10 +21,12 @@ import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.service.mapper.PayOrderMapper;
 import com.jeequan.jeepay.service.mapper.RefundOrderMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -39,6 +41,18 @@ import java.util.Date;
 public class RefundOrderService extends ServiceImpl<RefundOrderMapper, RefundOrder> {
 
     @Autowired private PayOrderMapper payOrderMapper;
+
+    /** 查询商户订单 **/
+    public RefundOrder queryMchOrder(String mchNo, String mchRefundNo, String refundOrderId){
+
+        if(StringUtils.isNotEmpty(refundOrderId)){
+            return getOne(RefundOrder.gw().eq(RefundOrder::getMchNo, mchNo).eq(RefundOrder::getRefundOrderId, refundOrderId));
+        }else if(StringUtils.isNotEmpty(mchRefundNo)){
+            return getOne(RefundOrder.gw().eq(RefundOrder::getMchNo, mchNo).eq(RefundOrder::getMchRefundNo, mchRefundNo));
+        }else{
+            return null;
+        }
+    }
 
 
     /** 更新退款单状态  【退款单生成】 --》 【退款中】 **/
@@ -105,6 +119,20 @@ public class RefundOrderService extends ServiceImpl<RefundOrderMapper, RefundOrd
             return updateIng2Fail(refundOrderId, channelOrderNo, channelErrCode, channelErrMsg);
         }
         return false;
+    }
+
+
+    /** 更新退款单为 关闭状态 **/
+    public Integer updateOrderExpired(){
+
+        RefundOrder refundOrder = new RefundOrder();
+        refundOrder.setState(RefundOrder.STATE_CLOSED);
+
+        return baseMapper.update(refundOrder,
+                RefundOrder.gw()
+                        .in(RefundOrder::getState, Arrays.asList(RefundOrder.STATE_INIT, RefundOrder.STATE_ING))
+                        .le(RefundOrder::getExpiredTime, new Date())
+        );
     }
 
 

@@ -16,11 +16,14 @@
 package com.jeequan.jeepay.pay.service;
 
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.pay.channel.IPayOrderQueryService;
+import com.jeequan.jeepay.pay.channel.IRefundService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.service.impl.PayOrderService;
+import com.jeequan.jeepay.service.impl.RefundOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +36,14 @@ import org.springframework.stereotype.Service;
 * @site https://www.jeepay.vip
 * @date 2021/6/8 17:40
 */
+
 @Service
 @Slf4j
 public class ChannelOrderReissueService {
 
     @Autowired private ConfigContextService configContextService;
     @Autowired private PayOrderService payOrderService;
+    @Autowired private RefundOrderService refundOrderService;
     @Autowired private PayMchNotifyService payMchNotifyService;
 
 
@@ -90,6 +95,59 @@ public class ChannelOrderReissueService {
 
         } catch (Exception e) {  //继续下一次迭代查询
             log.error("error payOrderId = {}", payOrder.getPayOrderId(), e);
+            return null;
+        }
+
+    }
+
+    /** 处理退款订单 **/
+    public ChannelRetMsg processRefundOrder(RefundOrder refundOrder){
+
+        try {
+
+            String refundOrderId = refundOrder.getRefundOrderId();
+
+            //查询支付接口是否存在
+            IRefundService queryService = SpringBeansUtil.getBean(refundOrder.getIfCode() + "RefundService", IRefundService.class);
+
+            // 支付通道接口实现不存在
+            if(queryService == null){
+                log.error("退款补单：{} interface not exists!", refundOrder.getIfCode());
+                return null;
+            }
+
+            //查询出商户应用的配置信息
+            MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(refundOrder.getMchNo(), refundOrder.getAppId());
+
+            ChannelRetMsg channelRetMsg = queryService.query(refundOrder, mchAppConfigContext);
+            if(channelRetMsg == null){
+                log.error("退款补单：channelRetMsg is null");
+                return null;
+            }
+
+            log.info("退款补单：[{}]查询结果为：{}", refundOrderId, channelRetMsg);
+
+            // 查询成功
+            if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
+                if (refundOrderService.updateIng2Success(refundOrderId, channelRetMsg.getChannelOrderId())) {
+
+                    // 通知商户系统
+                    if(StringUtils.isNotEmpty(refundOrder.getNotifyUrl())){
+                        payMchNotifyService.refundOrderNotify(refundOrderService.getById(refundOrderId));
+                    }
+
+                }
+            }else if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_FAIL){  //确认失败
+
+                //1. 更新支付订单表为失败状态
+                refundOrderService.updateIng2Fail(refundOrderId, channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrCode(), channelRetMsg.getChannelErrMsg());
+
+            }
+
+            return channelRetMsg;
+
+        } catch (Exception e) {  //继续下一次迭代查询
+            log.error("退款补单：error refundOrderId = {}", refundOrder.getRefundOrderId(), e);
             return null;
         }
 

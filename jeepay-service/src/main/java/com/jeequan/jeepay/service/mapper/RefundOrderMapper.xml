@@ -28,6 +28,7 @@
         <result column="notify_url" property="notifyUrl" />
         <result column="ext_param" property="extParam" />
         <result column="success_time" property="successTime" />
+        <result column="expired_time" property="expiredTime" />
         <result column="created_at" property="createdAt" />
         <result column="updated_at" property="updatedAt" />
     </resultMap>
