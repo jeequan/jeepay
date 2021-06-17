@@ -55,7 +55,7 @@ public class AlipayKit {
         else if(req instanceof AlipayTradePrecreateRequest) ((AlipayTradePrecreateRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
         else if(req instanceof AlipayTradeWapPayRequest) ((AlipayTradeWapPayRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
         else if(req instanceof AlipayTradeQueryRequest) ((AlipayTradeQueryRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
-
+        else if(req instanceof AlipayTradeRefundRequest) ((AlipayTradeRefundRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
 
         // 服务商信息
         ExtendParams extendParams = new ExtendParams();

@@ -55,6 +55,9 @@ public class PayOrder extends BaseModel implements Serializable {
     public static final byte STATE_REFUND = 5; //已退款
     public static final byte STATE_CLOSED = 6; //订单关闭
 
+    public static final byte REFUND_STATE_NONE = 0; //未发生实际退款
+    public static final byte REFUND_STATE_SUB = 1; //部分退款
+    public static final byte REFUND_STATE_ALL = 2; //全额退款
 
     /**
      * 支付订单号
@@ -151,6 +154,11 @@ public class PayOrder extends BaseModel implements Serializable {
      * 渠道订单号
      */
     private String channelOrderNo;
+
+    /**
+     * 退款状态: 0-未发生实际退款, 1-部分退款, 2-全额退款
+     */
+    private Byte refundState;
 
     /**
      * 退款次数

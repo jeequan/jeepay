@@ -32,4 +32,9 @@
         <result column="updated_at" property="updatedAt" />
     </resultMap>
 
+    <select id="sumSuccessRefundAmount" resultType="Long">
+        select ifnull(sum(refund_amount), 0) from t_refund_order
+        where pay_order_id = #{payOrderId} and state = 2
+    </select>
+
 </mapper>

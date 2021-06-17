@@ -113,6 +113,11 @@ public class ChannelRetMsg implements Serializable {
         return new ChannelRetMsg(ChannelState.UNKNOWN, null, null, null);
     }
 
+    /** 状态未知的情况 **/
+    public static ChannelRetMsg unknown(String channelErrMsg){
+        return new ChannelRetMsg(ChannelState.UNKNOWN, null, null, channelErrMsg);
+    }
+
 }
 
 

@@ -282,6 +282,7 @@ CREATE TABLE `t_pay_order` (
         `channel_extra` VARCHAR(512) DEFAULT NULL COMMENT '特定渠道发起额外参数',
         `channel_user` VARCHAR(64) DEFAULT NULL COMMENT '渠道用户标识,如微信openId,支付宝账号',
         `channel_order_no` VARCHAR(64) DEFAULT NULL COMMENT '渠道订单号',
+        `refund_state` TINYINT(6) NOT NULL DEFAULT '0' COMMENT '退款状态: 0-未发生实际退款, 1-部分退款, 2-全额退款',
         `refund_times` INT NOT NULL DEFAULT 0 COMMENT '退款次数',
         `refund_amount` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '退款总金额,单位分',
         `division_flag` TINYINT(6) DEFAULT 0 COMMENT '订单分账标志：0-否  1-是',
