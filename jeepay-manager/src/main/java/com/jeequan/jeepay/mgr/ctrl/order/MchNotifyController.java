@@ -62,6 +62,7 @@ public class MchNotifyController extends CommonCtrl {
         if (StringUtils.isNotEmpty(mchNotify.getMchOrderNo())) wrapper.eq(MchNotifyRecord::getMchOrderNo, mchNotify.getMchOrderNo());
         if (mchNotify.getOrderType() != null) wrapper.eq(MchNotifyRecord::getOrderType, mchNotify.getOrderType());
         if (mchNotify.getState() != null) wrapper.eq(MchNotifyRecord::getState, mchNotify.getState());
+        if (StringUtils.isNotEmpty(mchNotify.getAppId())) wrapper.eq(MchNotifyRecord::getAppId, mchNotify.getAppId());
 
         if (paramJSON != null) {
             if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) wrapper.ge(MchNotifyRecord::getCreatedAt, paramJSON.getString("createdStart"));
