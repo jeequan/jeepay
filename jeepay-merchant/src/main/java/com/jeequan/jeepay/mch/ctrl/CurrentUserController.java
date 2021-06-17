@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.mch.ctrl;
 
+import cn.hutool.core.codec.Base64;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.aop.MethodLog;
@@ -124,14 +125,14 @@ public class CurrentUserController extends CommonCtrl{
 
 		Long opSysUserId = getValLongRequired("recordId");   //操作员ID
 
-		//更改密码， 验证当前用户信息
-		String currentUserPwd = getValStringRequired("originalPwd"); //当前用户登录密码
+		//更改密码，验证当前用户信息
+		String currentUserPwd = Base64.decodeStr(getValStringRequired("originalPwd")); //当前用户登录密码
 		//验证当前密码是否正确
 		if(!sysUserAuthService.validateCurrentUserPwd(currentUserPwd)){
 			throw new BizException("原密码验证失败！");
 		}
 
-		String opUserPwd = getValStringRequired("confirmPwd");
+		String opUserPwd = Base64.decodeStr(getValStringRequired("confirmPwd"));
 
 		// 验证原密码与新密码是否相同
 		if (opUserPwd.equals(currentUserPwd)) {
