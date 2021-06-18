@@ -36,7 +36,7 @@ public class MchApp extends BaseModel {
     /**
      * 应用ID
      */
-    @TableId(value = "app_id", type = IdType.ASSIGN_UUID)
+    @TableId(value = "app_id", type = IdType.INPUT)
     private String appId;
 
     /**

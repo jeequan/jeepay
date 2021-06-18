@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.mch.ctrl.merchant;
 
+import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.aop.MethodLog;
@@ -77,6 +78,7 @@ public class MchAppController extends CommonCtrl {
     public ApiRes add() {
         MchApp mchApp = getObject(MchApp.class);
         mchApp.setMchNo(getCurrentMchNo());
+        mchApp.setAppId(IdUtil.objectId());
 
         boolean result = mchAppService.save(mchApp);
         if (!result) {
