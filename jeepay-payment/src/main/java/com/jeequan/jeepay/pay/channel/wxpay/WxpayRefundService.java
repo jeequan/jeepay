@@ -95,19 +95,13 @@ public class WxpayRefundService extends AbstractRefundService {
                 amountJson.put("refund", refundOrder.getRefundAmount());// 退款金额
                 amountJson.put("total", payOrder.getAmount());// 订单总金额
                 amountJson.put("currency", "CNY");// 币种
-                reqJSON.put("amount", amountJson.toJSONString());
+                reqJSON.put("amount", amountJson);
                 WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
                 setCretPath(mchAppConfigContext, wxPayService); // 证书路径
 
                 if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
                     WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
-                    reqJSON.put("sp_appid", wxPayService.getConfig().getAppId());
-                    reqJSON.put("sp_mchid", wxPayService.getConfig().getMchId());
                     reqJSON.put("sub_mchid", isvsubMchParams.getSubMchId());
-                    reqJSON.put("sub_appid", isvsubMchParams.getSubMchAppId());
-                }else { // 普通商户
-                    reqJSON.put("appid", wxPayService.getConfig().getAppId());
-                    reqJSON.put("mchid", wxPayService.getConfig().getMchId());
                 }
 
                 JSONObject resultJSON = WxpayV3Util.refundV3(reqJSON, mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig());
@@ -115,6 +109,10 @@ public class WxpayRefundService extends AbstractRefundService {
                 if("SUCCESS".equals(status)){ // 退款成功
                     String refundId = resultJSON.getString("refund_id");
                     channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+                    channelRetMsg.setChannelOrderId(refundId);
+                }else if ("PROCESSING".equals(status)){ // 退款处理中
+                    String refundId = resultJSON.getString("refund_id");
+                    channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
                     channelRetMsg.setChannelOrderId(refundId);
                 }else{
                     channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
@@ -157,7 +155,14 @@ public class WxpayRefundService extends AbstractRefundService {
             }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) {   //V3
                 WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
                 setCretPath(mchAppConfigContext, wxPayService); // 证书路径
-                JSONObject resultJSON = WxpayV3Util.refundQueryV3(refundOrder.getRefundOrderId(), wxPayService.getConfig());
+                JSONObject resultJSON = null;
+                if (mchAppConfigContext.isIsvsubMch()) {
+                    WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
+                    wxPayService.getConfig().setSubMchId(isvsubMchParams.getSubMchId());
+                    resultJSON = WxpayV3Util.refundQueryV3Isv(refundOrder.getRefundOrderId(), wxPayService.getConfig());
+                }else {
+                    resultJSON = WxpayV3Util.refundQueryV3(refundOrder.getRefundOrderId(), wxPayService.getConfig());
+                }
                 String status = resultJSON.getString("status");
                 if("SUCCESS".equals(status)){ // 退款成功
                     channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
