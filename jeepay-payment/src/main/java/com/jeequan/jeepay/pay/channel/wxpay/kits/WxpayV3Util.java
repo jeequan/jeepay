@@ -82,6 +82,18 @@ public class WxpayV3Util {
         return JSON.parseObject(response);
     }
 
+    public static JSONObject refundV3(JSONObject reqJSON, WxPayConfig wxPayConfig) throws WxPayException {
+        String url = String.format("%s/v3/refund/domestic/refunds", PAY_BASE_URL);
+        String response = postV3(url, reqJSON.toJSONString(), wxPayConfig);
+        return JSON.parseObject(response);
+    }
+
+    public static JSONObject refundQueryV3(String refundOrderId, WxPayConfig wxPayConfig) throws WxPayException {
+        String url = String.format("%s/v3/refund/domestic/refunds/%s", PAY_BASE_URL, refundOrderId);
+        String response = getV3(url, wxPayConfig);
+        return JSON.parseObject(response);
+    }
+
     public static String postV3(String url, String requestStr, WxPayConfig wxPayConfig) throws WxPayException {
         CloseableHttpClient httpClient = createApiV3HttpClient(wxPayConfig);
         HttpPost httpPost = createHttpPost(url, requestStr);

@@ -27,7 +27,6 @@ import com.jeequan.jeepay.core.model.params.ysf.YsfpayIsvsubMchParams;
 import com.jeequan.jeepay.pay.channel.AbstractPaymentService;
 import com.jeequan.jeepay.pay.channel.ysfpay.utils.YsfHttpUtil;
 import com.jeequan.jeepay.pay.channel.ysfpay.utils.YsfSignUtils;
-import com.jeequan.jeepay.pay.config.SystemYmlConfig;
 import com.jeequan.jeepay.pay.model.IsvConfigContext;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
@@ -35,7 +34,6 @@ import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.util.PaywayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -50,8 +48,6 @@ import java.util.Date;
 @Service
 @Slf4j
 public class YsfpayPaymentService extends AbstractPaymentService {
-
-    @Autowired private SystemYmlConfig mainConfig;
 
     @Override
     public String getIfCode() {
