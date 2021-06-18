@@ -18,27 +18,22 @@ package com.jeequan.jeepay.pay.mq.topic;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.command.ActiveMQTopic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 /*
 * 更改系统配置参数
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 17:35
 */
 @Slf4j
 @Component
-public class MqTopic4ModifySysConfig extends ActiveMQTopic{
+public class MqTopic4ModifySysConfig{
 
     @Autowired private SysConfigService sysConfigService;
-
-    public MqTopic4ModifySysConfig(){
-        super(CS.MQ.TOPIC_MODIFY_SYS_CONFIG);
-    }
 
     /** 接收 更新系统配置项的消息 **/
     @JmsListener(destination = CS.MQ.TOPIC_MODIFY_SYS_CONFIG, containerFactory = "jmsListenerContainer")
