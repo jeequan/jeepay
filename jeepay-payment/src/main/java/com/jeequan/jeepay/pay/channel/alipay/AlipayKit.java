@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.pay.channel.alipay;
 
+import cn.hutool.core.util.StrUtil;
 import com.alipay.api.AlipayObject;
 import com.alipay.api.AlipayRequest;
 import com.alipay.api.domain.*;
@@ -77,10 +78,13 @@ public class AlipayKit {
 
     public static String appendErrMsg(String msg, String subMsg){
 
+        String result = null;
         if(StringUtils.isNotEmpty(msg) && StringUtils.isNotEmpty(subMsg) ){
-            return msg + "【" + subMsg + "】";
+            result = msg + "【" + subMsg + "】";
+        }else{
+            result = StringUtils.defaultIfEmpty(subMsg, msg);
         }
-        return StringUtils.defaultIfEmpty(subMsg, msg);
+        return StrUtil.maxLength(result, 253);
     }
 
 }
