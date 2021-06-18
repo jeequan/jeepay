@@ -71,7 +71,7 @@ public class WxpayRefundService extends AbstractRefundService {
                 WxpayKit.putApiIsvInfo(mchAppConfigContext, req);
 
                 req.setOutTradeNo(payOrder.getPayOrderId());    // 商户订单号
-                req.setOutRefundNo(refundOrder.getRefundOrderId()); // 退款单号
+                req.setOutRefundNo(refundOrder.getMchRefundNo()); // 退款单号
                 req.setTotalFee(payOrder.getAmount().intValue());   // 订单总金额
                 req.setRefundFee(refundOrder.getRefundAmount().intValue()); // 退款金额
                 WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
@@ -89,7 +89,7 @@ public class WxpayRefundService extends AbstractRefundService {
                 // 微信统一下单请求对象
                 JSONObject reqJSON = new JSONObject();
                 reqJSON.put("out_trade_no", refundOrder.getPayOrderId());   // 订单号
-                reqJSON.put("out_refund_no", refundOrder.getRefundOrderId()); // 退款订单号
+                reqJSON.put("out_refund_no", refundOrder.getMchRefundNo()); // 退款订单号
 
                 JSONObject amountJson = new JSONObject();
                 amountJson.put("refund", refundOrder.getRefundAmount());// 退款金额
@@ -140,7 +140,7 @@ public class WxpayRefundService extends AbstractRefundService {
                 //放置isv信息
                 WxpayKit.putApiIsvInfo(mchAppConfigContext, req);
 
-                req.setOutRefundNo(refundOrder.getRefundOrderId()); // 退款单号
+                req.setOutRefundNo(refundOrder.getMchRefundNo()); // 退款单号
                 WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
                 setCretPath(mchAppConfigContext, wxPayService); // 证书路径
 
@@ -159,9 +159,9 @@ public class WxpayRefundService extends AbstractRefundService {
                 if (mchAppConfigContext.isIsvsubMch()) {
                     WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
                     wxPayService.getConfig().setSubMchId(isvsubMchParams.getSubMchId());
-                    resultJSON = WxpayV3Util.refundQueryV3Isv(refundOrder.getRefundOrderId(), wxPayService.getConfig());
+                    resultJSON = WxpayV3Util.refundQueryV3Isv(refundOrder.getMchRefundNo(), wxPayService.getConfig());
                 }else {
-                    resultJSON = WxpayV3Util.refundQueryV3(refundOrder.getRefundOrderId(), wxPayService.getConfig());
+                    resultJSON = WxpayV3Util.refundQueryV3(refundOrder.getMchRefundNo(), wxPayService.getConfig());
                 }
                 String status = resultJSON.getString("status");
                 if("SUCCESS".equals(status)){ // 退款成功
