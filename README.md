@@ -86,7 +86,7 @@ Jeepay = Jee + pay，是由原XxPay支付系统作者带领团队开发，“Jee
 |ActiveMQ | 消息中间件 | 5.15.8 或 高版本
 |[Ant Design Vue](https://www.antdv.com/docs/vue/introduce-cn/) | Ant Design的Vue实现，前端开发使用 | 2.1.2
 |[MyBatis-Plus](https://mp.baomidou.com/) | MyBatis增强工具 | 3.4.2
-|[WxJava](https://gitee.com/binary/weixin-java-tools) | 微新开发Java SDK | 4.0.0
+|[WxJava](https://gitee.com/binary/weixin-java-tools) | 微信开发Java SDK | 4.0.0
 |[Hutool](https://www.hutool.cn/) | Java工具类库 | 5.6.6
 
 > 项目结构
@@ -157,3 +157,7 @@ jeepay
 微信扫描下面二维码，关注官方公众号：计全科技，获取更多精彩内容。
 
 ![计全科技公众号](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jee-qrcode.jpg "计全科技公众号")
+
+微信扫码加入交流群，或添加微信号：`jiquanltd` 邀请进群
+
+![Jeepay微信交流群](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/wx_qun.jpeg "Jeepay微信交流群")
