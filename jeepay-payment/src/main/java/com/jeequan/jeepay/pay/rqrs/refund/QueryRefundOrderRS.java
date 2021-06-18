@@ -83,17 +83,12 @@ public class QueryRefundOrderRS extends AbstractRS {
     /**
      * 渠道错误码
      */
-    private String channelErrCode;
+    private String errCode;
 
     /**
      * 渠道错误描述
      */
-    private String channelErrMsg;
-
-    /**
-     * 特定渠道发起时额外参数
-     */
-    private String channelExtra;
+    private String errMsg;
 
     /**
      * 扩展参数
