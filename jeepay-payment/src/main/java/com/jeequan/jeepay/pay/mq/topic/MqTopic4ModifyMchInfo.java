@@ -19,7 +19,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.command.ActiveMQTopic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
@@ -33,13 +32,9 @@ import org.springframework.stereotype.Component;
 */
 @Slf4j
 @Component
-public class MqTopic4ModifyMchInfo extends ActiveMQTopic{
+public class MqTopic4ModifyMchInfo{
 
     @Autowired private ConfigContextService configContextService;
-
-    public MqTopic4ModifyMchInfo(){
-        super(CS.MQ.TOPIC_MODIFY_MCH_INFO);
-    }
 
     /** 接收 [商户配置信息] 的消息
      * 已知推送节点：

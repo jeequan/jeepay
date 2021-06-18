@@ -142,6 +142,11 @@ public class ChannelOrderReissueService {
                 //1. 更新支付订单表为失败状态
                 refundOrderService.updateIng2Fail(refundOrderId, channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrCode(), channelRetMsg.getChannelErrMsg());
 
+                // 通知商户系统
+                if(StringUtils.isNotEmpty(refundOrder.getNotifyUrl())){
+                    payMchNotifyService.refundOrderNotify(refundOrderService.getById(refundOrderId));
+                }
+
             }
 
             return channelRetMsg;

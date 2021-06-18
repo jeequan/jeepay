@@ -156,7 +156,14 @@ public class ConfigContextService {
             return;
         }
 
-        //商户应用信息
+        //DB已经删除
+        if(mchAppService.count(MchApp.gw().eq(MchApp::getAppId, appId)) <= 0){
+            mchAppConfigContextMap.remove(appId);  //清除缓存信息
+            mchInfoConfigContext.getAppMap().remove(appId); //清除主体信息中的appId
+            return ;
+        }
+
+        //商户应用信息(缓存中存在)
         MchApp mchApp = mchInfoConfigContext.getMchApp(appId);
 
         if(mchApp == null){ //说明商户主体信息不存在缓存

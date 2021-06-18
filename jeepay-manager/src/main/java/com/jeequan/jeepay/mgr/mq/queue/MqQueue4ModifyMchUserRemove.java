@@ -15,12 +15,15 @@
  */
 package com.jeequan.jeepay.mgr.mq.queue;
 
+import com.alibaba.fastjson.JSONArray;
 import com.jeequan.jeepay.core.constants.CS;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
 
 /**
  * 商户用户信息清除
@@ -44,8 +47,11 @@ public class MqQueue4ModifyMchUserRemove extends ActiveMQQueue{
      * @date: 2021/6/7 16:16
      * @describe: 推送消息到各个节点
      */
-    public void push(String userIdStr) {
-        this.jmsTemplate.convertAndSend(this, userIdStr);
+    public void push(Collection<Long> userIdList) {
+        if(userIdList == null || userIdList.isEmpty()){
+            return ;
+        }
+        this.jmsTemplate.convertAndSend(this,JSONArray.toJSONString(userIdList));
     }
 
 }

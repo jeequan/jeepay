@@ -71,7 +71,6 @@ public class AlipayRefundService extends AbstractRefundService {
 
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
         channelRetMsg.setChannelAttach(response.getBody());
-        channelRetMsg.setChannelOrderId(response.getTradeNo());
 
         // 调用成功
         if(response.isSuccess()){
@@ -102,7 +101,6 @@ public class AlipayRefundService extends AbstractRefundService {
 
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
         channelRetMsg.setChannelAttach(response.getBody());
-        channelRetMsg.setChannelOrderId(response.getTradeNo());
 
         // 调用成功 & 金额相等  （传入不存在的outRequestNo支付宝仍然返回响应成功只是数据不存在， 调用isSuccess() 仍是成功, 此处需判断金额是否相等）
         Long channelRefundAmount = response.getRefundAmount() == null ? null : Long.parseLong(AmountUtil.convertDollar2Cent(response.getRefundAmount()));

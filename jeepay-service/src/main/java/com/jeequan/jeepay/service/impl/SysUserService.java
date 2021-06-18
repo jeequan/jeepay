@@ -158,4 +158,16 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
         // 3.删除用户信息
         removeById(sysUser.getSysUserId());
     }
+
+
+    /** 获取到商户的超管用户ID  **/
+    public Long findMchAdminUserId(String mchNo){
+
+        return getOne(SysUser.gw().select(SysUser::getSysUserId)
+                .eq(SysUser::getBelongInfoId, mchNo)
+                .eq(SysUser::getSysType, CS.SYS_TYPE.MCH)
+                .eq(SysUser::getIsAdmin, CS.YES)).getSysUserId();
+
+    }
+
 }

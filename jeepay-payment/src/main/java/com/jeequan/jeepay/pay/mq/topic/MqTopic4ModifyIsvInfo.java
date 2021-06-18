@@ -18,7 +18,6 @@ package com.jeequan.jeepay.pay.mq.topic;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.command.ActiveMQTopic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
@@ -32,13 +31,9 @@ import org.springframework.stereotype.Component;
 */
 @Slf4j
 @Component
-public class MqTopic4ModifyIsvInfo extends ActiveMQTopic{
+public class MqTopic4ModifyIsvInfo{
 
     @Autowired private ConfigContextService configContextService;
-
-    public MqTopic4ModifyIsvInfo(){
-        super(CS.MQ.TOPIC_MODIFY_ISV_INFO);
-    }
 
     /** 接收 更新系统配置项的消息 **/
     @JmsListener(destination = CS.MQ.TOPIC_MODIFY_ISV_INFO, containerFactory = "jmsListenerContainer")
