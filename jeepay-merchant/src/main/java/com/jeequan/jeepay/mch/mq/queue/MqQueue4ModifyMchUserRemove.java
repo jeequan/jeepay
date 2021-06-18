@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.mch.mq.queue;
 
+import com.alibaba.fastjson.JSONArray;
 import com.jeequan.jeepay.core.cache.RedisUtil;
 import com.jeequan.jeepay.core.constants.CS;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,7 @@ public class MqQueue4ModifyMchUserRemove extends ActiveMQQueue {
 
         log.info("成功接收删除商户用户登录的订阅通知, msg={}", userIdStr);
         // 字符串转List<Long>
-        List<Long> userIdList = Arrays.stream(userIdStr.split(",")).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
+        List<Long> userIdList = JSONArray.parseArray(userIdStr, Long.class);
         // 删除redis用户缓存
         if(userIdList == null || userIdList.isEmpty()){
             log.info("用户ID为空");

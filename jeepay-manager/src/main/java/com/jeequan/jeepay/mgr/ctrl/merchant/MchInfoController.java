@@ -39,9 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * 商户管理类
@@ -115,7 +113,7 @@ public class MchInfoController extends CommonCtrl {
     public ApiRes delete(@PathVariable("mchNo") String mchNo) {
         List<Long> userIdList = mchInfoService.removeByMchNo(mchNo);
         // 推送mq删除redis用户缓存
-        mqQueue4ModifyMchUserRemove.push(StringUtils.join(userIdList, ","));
+        mqQueue4ModifyMchUserRemove.push(userIdList);
         // 推送mq到目前节点进行更新数据
         mqTopic4ModifyMchInfo.push(mchNo);
         return ApiRes.ok();
@@ -130,58 +128,50 @@ public class MchInfoController extends CommonCtrl {
     @MethodLog(remark = "更新商户信息")
     @RequestMapping(value="/{mchNo}", method = RequestMethod.PUT)
     public ApiRes update(@PathVariable("mchNo") String mchNo) {
+
+        //获取查询条件
         MchInfo mchInfo = getObject(MchInfo.class);
-        List<Long> userIdCacheList = new ArrayList<>();
-        mchInfo.setMchNo(mchNo);
-        // 校验该商户是否为特邀商户
-        MchInfo dbMchInfo = mchInfoService.getById(mchNo);
-        if (dbMchInfo == null) {
-            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
-        }
-        // 如果为特邀商户则不允许修改服务商及商户类型
-        if (dbMchInfo.getType() == CS.MCH_TYPE_ISVSUB) {
-            mchInfo.setType(dbMchInfo.getType());
-            mchInfo.setIsvNo(dbMchInfo.getIsvNo());
-        }
+        mchInfo.setMchNo(mchNo); //设置商户号主键
+
+        mchInfo.setType(null); //防止变更商户类型
+        mchInfo.setIsvNo(null);
+
+        // 待删除用户登录信息的ID list
+        Set<Long> removeCacheUserIdList = new HashSet<>();
+
         // 如果商户状态为禁用状态，清除该商户用户登录信息
         if (mchInfo.getState() == CS.NO) {
-            List<SysUser> userList = sysUserService.list(SysUser.gw()
-                    .eq(SysUser::getBelongInfoId, mchNo)
-                    .eq(SysUser::getSysType, CS.SYS_TYPE.MCH)
-            );
-            if (userList.size() > 0) {
-                for (SysUser user:userList) {
-                    userIdCacheList.add(user.getSysUserId());
-                }
-            }
+            sysUserService.list( SysUser.gw().select(SysUser::getSysUserId).eq(SysUser::getBelongInfoId, mchNo).eq(SysUser::getSysType, CS.SYS_TYPE.MCH) )
+            .stream().forEach(u -> removeCacheUserIdList.add(u.getSysUserId()));
         }
 
         //判断是否重置密码
-        Boolean resetPass = getReqParamJSON().getBoolean("resetPass");
-        if (resetPass != null && resetPass) {
-            //判断是否重置密码
-            String updatePwd = getReqParamJSON().getBoolean("defaultPass") == false? Base64.decodeStr(getValStringRequired("confirmPwd")):CS.DEFAULT_PWD;
-            if (StringUtils.isNotEmpty(updatePwd)) {
-                // 获取商户最初的用户
-                SysUser sysUser = sysUserService.getOne(SysUser.gw()
-                        .eq(SysUser::getBelongInfoId, mchNo)
-                        .eq(SysUser::getSysType, CS.SYS_TYPE.MCH)
-                        .eq(SysUser::getIsAdmin, CS.YES)
-                );
-                sysUserAuthService.resetAuthInfo(sysUser.getSysUserId(), null, null, updatePwd, CS.SYS_TYPE.MCH);
-                if (mchInfo.getState() == CS.YES) userIdCacheList = Arrays.asList(sysUser.getSysUserId());
-            }
+        if (getReqParamJSON().getBooleanValue("resetPass")) {
+            // 待更新的密码
+            String updatePwd = getReqParamJSON().getBoolean("defaultPass") ? CS.DEFAULT_PWD : Base64.decodeStr(getValStringRequired("confirmPwd")) ;
+            // 获取商户超管
+            Long mchAdminUserId = sysUserService.findMchAdminUserId(mchNo);
+
+            //重置超管密码
+            sysUserAuthService.resetAuthInfo(mchAdminUserId, null, null, updatePwd, CS.SYS_TYPE.MCH);
+
+            //删除超管登录信息
+            removeCacheUserIdList.add(mchAdminUserId);
         }
 
-        // 商户被禁用、修改密码删除mq用户缓存
-        if (mchInfo.getState() == CS.NO || resetPass) {
-            // 推送mq删除redis用户缓存
-            mqQueue4ModifyMchUserRemove.push(StringUtils.join(Arrays.asList(userIdCacheList), ","));
+        // 推送mq删除redis用户认证信息
+        if (!removeCacheUserIdList.isEmpty()) {
+            mqQueue4ModifyMchUserRemove.push(removeCacheUserIdList);
         }
 
-        boolean result = mchInfoService.updateById(mchInfo);
-        mqTopic4ModifyMchInfo.push(mchNo); // 推送mq到目前节点进行更新数据
-        if (!result)  return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
+        //更新商户信息
+        if (!mchInfoService.updateById(mchInfo)) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
+        }
+
+        // 推送mq到目前节点进行更新数据
+        mqTopic4ModifyMchInfo.push(mchNo);
+
         return ApiRes.ok();
     }
 
