@@ -229,6 +229,7 @@ public class RefundOrderController extends ApiController {
         }else if(ChannelRetMsg.ChannelState.CONFIRM_FAIL == channelRetMsg.getChannelState()) {
 
             this.updateInitOrderStateThrowException(RefundOrder.STATE_FAIL, refundOrder, channelRetMsg);
+            payMchNotifyService.refundOrderNotify(refundOrder);
 
             // 上游处理中 || 未知 || 上游接口返回异常  退款单为退款中状态
         }else if( ChannelRetMsg.ChannelState.WAITING == channelRetMsg.getChannelState() ||
