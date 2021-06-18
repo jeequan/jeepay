@@ -25,20 +25,29 @@ import java.util.concurrent.atomic.AtomicLong;
 * 序列号生成 工具类
 *
 * @author terrfly
+* @author jmdhappy
 * @site https://www.jeepay.vip
 * @date 2021/6/8 16:56
 */
 public class SeqKit {
 
-	private static final AtomicLong BUY_ORDER_SEQ = new AtomicLong(0L);
-	private static final String BUY_ORDER_SEQ_PREFIX = "P";
+	private static final AtomicLong PAY_ORDER_SEQ = new AtomicLong(0L);
+	private static final AtomicLong REFUND_ORDER_SEQ = new AtomicLong(0L);
+	private static final String PAY_ORDER_SEQ_PREFIX = "P";
+	private static final String REFUND_ORDER_SEQ_PREFIX = "R";
 
-	/** 生成购买订单ID **/
+	/** 生成支付订单号 **/
 	public static String genPayOrderId() {
-
-		return String.format("%s%s%04d",BUY_ORDER_SEQ_PREFIX,
+		return String.format("%s%s%04d",PAY_ORDER_SEQ_PREFIX,
 				DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
-				(int) BUY_ORDER_SEQ.getAndIncrement() % 10000);
+				(int) PAY_ORDER_SEQ.getAndIncrement() % 10000);
+	}
+
+	/** 生成退款订单号 **/
+	public static String genRefundOrderId() {
+		return String.format("%s%s%04d",REFUND_ORDER_SEQ_PREFIX,
+				DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
+				(int) REFUND_ORDER_SEQ.getAndIncrement() % 10000);
 	}
 
 }

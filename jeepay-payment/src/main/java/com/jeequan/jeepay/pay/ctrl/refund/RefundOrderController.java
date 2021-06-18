@@ -178,7 +178,7 @@ public class RefundOrderController extends ApiController {
 
         Date nowTime = new Date();
         RefundOrder refundOrder = new RefundOrder();
-        refundOrder.setRefundOrderId(SeqKit.genPayOrderId()); //退款订单号
+        refundOrder.setRefundOrderId(SeqKit.genRefundOrderId()); //退款订单号
         refundOrder.setPayOrderId(payOrder.getPayOrderId()); //支付订单号
         refundOrder.setChannelPayOrderNo(payOrder.getChannelOrderNo()); //渠道支付单号
         refundOrder.setMchNo(mchInfo.getMchNo()); //商户号
