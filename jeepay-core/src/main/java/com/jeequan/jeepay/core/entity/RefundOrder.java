@@ -145,12 +145,12 @@ public class RefundOrder extends BaseModel {
     /**
      * 渠道错误码
      */
-    private String channelErrCode;
+    private String errCode;
 
     /**
      * 渠道错误描述
      */
-    private String channelErrMsg;
+    private String errMsg;
 
     /**
      * 特定渠道发起时额外参数

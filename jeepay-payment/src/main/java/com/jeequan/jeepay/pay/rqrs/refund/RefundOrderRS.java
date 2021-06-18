@@ -33,12 +33,6 @@ public class RefundOrderRS extends AbstractRS {
     /** 支付系统退款订单号 **/
     private String refundOrderId;
 
-    /** 商户号 **/
-    private String mchNo;
-
-    /** 商户应用ID **/
-    private String appId;
-
     /** 商户发起的退款订单号 **/
     private String mchRefundNo;
 
@@ -55,16 +49,10 @@ public class RefundOrderRS extends AbstractRS {
     private String channelOrderNo;
 
     /** 渠道返回错误代码 **/
-    private String channelErrCode;
+    private String errCode;
 
     /** 渠道返回错误信息 **/
-    private String channelErrMsg;
-
-    /** 退款成功时间 **/
-    private Long successTime;
-
-    /** 创建时间 **/
-    private Long createdAt;
+    private String errMsg;
 
 
     public static RefundOrderRS buildByRefundOrder(RefundOrder refundOrder){
@@ -75,8 +63,6 @@ public class RefundOrderRS extends AbstractRS {
 
         RefundOrderRS result = new RefundOrderRS();
         BeanUtils.copyProperties(refundOrder, result);
-        result.setSuccessTime(refundOrder.getSuccessTime() == null ? null : refundOrder.getSuccessTime().getTime());
-        result.setCreatedAt(refundOrder.getCreatedAt() == null ? null : refundOrder.getCreatedAt().getTime());
 
         return result;
     }

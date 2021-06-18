@@ -22,8 +22,8 @@
         <result column="client_ip" property="clientIp" />
         <result column="refund_reason" property="refundReason" />
         <result column="channel_order_no" property="channelOrderNo" />
-        <result column="channel_err_code" property="channelErrCode" />
-        <result column="channel_err_msg" property="channelErrMsg" />
+        <result column="err_code" property="errCode" />
+        <result column="err_msg" property="errMsg" />
         <result column="channel_extra" property="channelExtra" />
         <result column="notify_url" property="notifyUrl" />
         <result column="ext_param" property="extParam" />

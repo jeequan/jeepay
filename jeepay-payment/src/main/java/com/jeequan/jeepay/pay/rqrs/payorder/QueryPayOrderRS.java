@@ -41,6 +41,11 @@ public class QueryPayOrderRS extends AbstractRS {
     private String mchNo;
 
     /**
+     * 商户应用ID
+     */
+    private String appId;
+
+    /**
      * 商户订单号
      */
     private String mchOrderNo;

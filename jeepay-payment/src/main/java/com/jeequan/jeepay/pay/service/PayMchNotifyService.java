@@ -159,8 +159,8 @@ public class PayMchNotifyService {
      */
     public String createNotifyUrl(RefundOrder refundOrder, String appSecret) {
 
-        QueryRefundOrderRS queryPayOrderRS = QueryRefundOrderRS.buildByRefundOrder(refundOrder);
-        JSONObject jsonObject = (JSONObject)JSONObject.toJSON(queryPayOrderRS);
+        QueryRefundOrderRS queryRefundOrderRS = QueryRefundOrderRS.buildByRefundOrder(refundOrder);
+        JSONObject jsonObject = (JSONObject)JSONObject.toJSON(queryRefundOrderRS);
         jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
 
         // 报文签名

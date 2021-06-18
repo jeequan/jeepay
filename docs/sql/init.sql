@@ -287,8 +287,8 @@ CREATE TABLE `t_pay_order` (
         `refund_amount` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '退款总金额,单位分',
         `division_flag` TINYINT(6) DEFAULT 0 COMMENT '订单分账标志：0-否  1-是',
         `division_time` DATETIME COMMENT '预计分账发起时间',
-        `err_code` VARCHAR(64) DEFAULT NULL COMMENT '渠道支付错误码',
-        `err_msg` VARCHAR(128) DEFAULT NULL COMMENT '渠道支付错误描述',
+        `err_code` VARCHAR(128) DEFAULT NULL COMMENT '渠道支付错误码',
+        `err_msg` VARCHAR(256) DEFAULT NULL COMMENT '渠道支付错误描述',
         `ext_param` VARCHAR(128) DEFAULT NULL COMMENT '商户扩展参数',
         `notify_url` VARCHAR(128) NOT NULL default '' COMMENT '异步通知地址',
         `return_url` VARCHAR(128) DEFAULT '' COMMENT '页面跳转地址',
@@ -364,8 +364,8 @@ CREATE TABLE `t_refund_order` (
           `client_ip` VARCHAR(32) DEFAULT NULL COMMENT '客户端IP',
           `refund_reason` VARCHAR(256) NOT NULL COMMENT '退款原因',
           `channel_order_no` VARCHAR(32) DEFAULT NULL COMMENT '渠道订单号',
-          `channel_err_code` VARCHAR(128) DEFAULT NULL COMMENT '渠道错误码',
-          `channel_err_msg` VARCHAR(128) DEFAULT NULL COMMENT '渠道错误描述',
+          `err_code` VARCHAR(128) DEFAULT NULL COMMENT '渠道错误码',
+          `err_msg` VARCHAR(256) DEFAULT NULL COMMENT '渠道错误描述',
           `channel_extra` VARCHAR(512) DEFAULT NULL COMMENT '特定渠道发起时额外参数',
           `notify_url` VARCHAR(128) DEFAULT NULL COMMENT '通知地址',
           `ext_param` VARCHAR(64) DEFAULT NULL COMMENT '扩展参数',
@@ -433,6 +433,7 @@ insert into t_sys_entitlement values('ENT_ORDER', '订单管理', 'transaction',
     insert into t_sys_entitlement values('ENT_PAY_ORDER', '支付订单', 'account-book', '/pay', 'PayOrderListPage', 'ML', 0, 1,  'ENT_ORDER', '10', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_ORDER_LIST', '页面：订单列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_PAY_ORDER_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER', '0', 'MGR', now(), now());
+        insert into t_sys_entitlement values('ENT_PAY_ORDER_REFUND', '按钮：订单退款', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER', '0', 'MGR', now(), now());
     insert into t_sys_entitlement values('ENT_REFUND_ORDER', '退款订单', 'exception', '/refund', 'RefundOrderListPage', 'ML', 0, 1,  'ENT_ORDER', '20', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_REFUND_LIST', '页面：退款订单列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_REFUND_ORDER', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_REFUND_ORDER_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_REFUND_ORDER', '0', 'MGR', now(), now());

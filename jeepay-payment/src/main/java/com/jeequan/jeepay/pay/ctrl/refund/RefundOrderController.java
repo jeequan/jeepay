@@ -196,8 +196,8 @@ public class RefundOrderController extends ApiController {
         refundOrder.setClientIp(StringUtils.defaultIfEmpty(rq.getClientIp(), getClientIp())); //客户端IP
         refundOrder.setRefundReason(rq.getRefundReason()); //退款原因
         refundOrder.setChannelOrderNo(null); //渠道订单号
-        refundOrder.setChannelErrCode(null); //渠道错误码
-        refundOrder.setChannelErrMsg(null); //渠道错误描述
+        refundOrder.setErrCode(null); //渠道错误码
+        refundOrder.setErrMsg(null); //渠道错误描述
         refundOrder.setChannelExtra(rq.getChannelExtra()); //特定渠道发起时额外参数
         refundOrder.setNotifyUrl(rq.getNotifyUrl()); //通知地址
         refundOrder.setExtParam(rq.getExtParam()); //扩展参数
@@ -254,8 +254,8 @@ public class RefundOrderController extends ApiController {
 
         refundOrder.setState(orderState);
         refundOrder.setChannelOrderNo(channelRetMsg.getChannelOrderId());
-        refundOrder.setChannelErrCode(channelRetMsg.getChannelErrCode());
-        refundOrder.setChannelErrMsg(channelRetMsg.getChannelErrMsg());
+        refundOrder.setErrCode(channelRetMsg.getChannelErrCode());
+        refundOrder.setErrMsg(channelRetMsg.getChannelErrMsg());
 
 
         boolean isSuccess = refundOrderService.updateInit2Ing(refundOrder.getRefundOrderId());

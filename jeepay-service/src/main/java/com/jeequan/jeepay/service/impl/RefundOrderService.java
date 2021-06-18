@@ -98,8 +98,8 @@ public class RefundOrderService extends ServiceImpl<RefundOrderMapper, RefundOrd
 
         RefundOrder updateRecord = new RefundOrder();
         updateRecord.setState(RefundOrder.STATE_FAIL);
-        updateRecord.setChannelErrCode(channelErrCode);
-        updateRecord.setChannelErrMsg(channelErrMsg);
+        updateRecord.setErrCode(channelErrCode);
+        updateRecord.setErrMsg(channelErrMsg);
         updateRecord.setChannelOrderNo(channelOrderNo);
 
         return update(updateRecord, new LambdaUpdateWrapper<RefundOrder>()

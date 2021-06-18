@@ -18,9 +18,11 @@ package com.jeequan.jeepay.mgr.ctrl.order;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayWay;
+import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.PayOrderService;
@@ -28,10 +30,7 @@ import com.jeequan.jeepay.service.impl.PayWayService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -106,6 +105,35 @@ public class PayOrderController extends CommonCtrl {
         PayOrder payOrder = payOrderService.getById(payOrderId);
         if (payOrder == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         return ApiRes.ok(payOrder);
+    }
+
+
+    /**
+     * 发起订单退款
+     * @author terrfly
+     * @site https://www.jeepay.vip
+     * @date 2021/6/17 16:38
+     */
+    @MethodLog(remark = "发起订单退款")
+    @PreAuthorize("hasAuthority('ENT_PAY_ORDER_REFUND')")
+    @PostMapping("/refunds/{payOrderId}")
+    public ApiRes refund(@PathVariable("payOrderId") String payOrderId) {
+
+        Long refundAmount = getRequiredAmountL("refundAmount");
+        String refundReason = getValStringRequired("refundReason");
+
+        PayOrder payOrder = payOrderService.getById(payOrderId);
+        if (payOrder == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+
+        if(payOrder.getState() != PayOrder.STATE_SUCCESS){
+            throw new BizException("订单状态不正确");
+        }
+
+        if(payOrder.getRefundAmount() + refundAmount >= payOrder.getAmount()){
+            throw new BizException("退款金额超过订单可退款金额！");
+        }
+
+        throw new BizException("功能开发中， 暂时不支持后台退款，请调起API接口发起退款。");
     }
 
 }

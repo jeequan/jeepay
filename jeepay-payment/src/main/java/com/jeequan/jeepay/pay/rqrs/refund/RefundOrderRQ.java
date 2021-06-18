@@ -58,9 +58,6 @@ public class RefundOrderRQ extends AbstractMchAppRQ {
     /** 客户端IP地址 **/
     private String clientIp;
 
-    /** 客户端设备信息 **/
-    private String device;
-
     /** 异步通知地址 **/
     private String notifyUrl;
 
