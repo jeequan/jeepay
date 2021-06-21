@@ -89,6 +89,12 @@
             <artifactId>spring-boot-starter-activemq</artifactId>
         </dependency>
 
+        <!-- 引入 jeepay-sdk-java -->
+        <dependency>
+            <groupId>com.jeequan</groupId>
+            <artifactId>jeepay-sdk-java</artifactId>
+        </dependency>
+
     </dependencies>
 
 

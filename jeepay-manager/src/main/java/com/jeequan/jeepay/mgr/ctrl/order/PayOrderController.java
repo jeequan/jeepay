@@ -15,18 +15,29 @@
  */
 package com.jeequan.jeepay.mgr.ctrl.order;
 
+import cn.hutool.core.lang.UUID;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.api.R;
+import com.jeequan.jeepay.JeepayClient;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
+import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayWay;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.exception.JeepayException;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
+import com.jeequan.jeepay.model.RefundOrderCreateReqModel;
+import com.jeequan.jeepay.model.RefundOrderCreateResModel;
+import com.jeequan.jeepay.request.RefundOrderCreateRequest;
+import com.jeequan.jeepay.response.RefundOrderCreateResponse;
+import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.PayWayService;
+import com.jeequan.jeepay.service.impl.SysConfigService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,6 +60,8 @@ public class PayOrderController extends CommonCtrl {
 
     @Autowired private PayOrderService payOrderService;
     @Autowired private PayWayService payWayService;
+    @Autowired private SysConfigService sysConfigService;
+    @Autowired private MchAppService mchAppService;
 
     /**
      * @author: pangxiaoyu
@@ -129,11 +142,36 @@ public class PayOrderController extends CommonCtrl {
             throw new BizException("订单状态不正确");
         }
 
-        if(payOrder.getRefundAmount() + refundAmount >= payOrder.getAmount()){
+        if(payOrder.getRefundAmount() + refundAmount > payOrder.getAmount()){
             throw new BizException("退款金额超过订单可退款金额！");
         }
 
-        throw new BizException("功能开发中， 暂时不支持后台退款，请调起API接口发起退款。");
+
+        RefundOrderCreateRequest request = new RefundOrderCreateRequest();
+        RefundOrderCreateReqModel model = new RefundOrderCreateReqModel();
+        request.setBizModel(model);
+
+        model.setMchNo(payOrder.getMchNo());     // 商户号
+        model.setAppId(payOrder.getAppId());
+        model.setPayOrderId(payOrderId);
+        model.setMchRefundNo(UUID.fastUUID().toString());
+        model.setRefundAmount(refundAmount);
+        model.setRefundReason(refundReason);
+        model.setCurrency("CNY");
+
+        MchApp mchApp = mchAppService.getById(payOrder.getAppId());
+
+        JeepayClient jeepayClient = new JeepayClient(sysConfigService.getDBApplicationConfig().getPaySiteUrl(), mchApp.getAppSecret());
+
+        try {
+            RefundOrderCreateResponse response = jeepayClient.execute(request);
+            if(response.getCode() != 0){
+                throw new BizException(response.getMsg());
+            }
+            return ApiRes.ok(response.get());
+        } catch (JeepayException e) {
+            throw new BizException(e.getMessage());
+        }
     }
 
 }
