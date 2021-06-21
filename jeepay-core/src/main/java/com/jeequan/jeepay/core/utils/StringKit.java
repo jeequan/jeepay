@@ -23,7 +23,7 @@ import java.util.UUID;
 
 /*
 * String 工具类
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 16:58
@@ -51,7 +51,7 @@ public class StringKit {
 			}
 		});
 
-		return result.toURI().toString();
+		return result.build();
 	}
 
 
