@@ -20,8 +20,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
+import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
+import com.jeequan.jeepay.mgr.mq.queue.MqQueue4PayOrderMchNotify;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MchNotifyController extends CommonCtrl {
 
     @Autowired private MchNotifyRecordService mchNotifyService;
+    @Autowired private MqQueue4PayOrderMchNotify mqQueue4PayOrderMchNotify;
 
     /**
      * @author: pangxiaoyu
@@ -86,4 +89,26 @@ public class MchNotifyController extends CommonCtrl {
         if (mchNotify == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         return ApiRes.ok(mchNotify);
     }
+
+   /*
+    * 功能描述: 商户通知重发操作
+    * @Author: terrfly
+    * @Date: 2021/6/21 17:41
+    */
+    @PreAuthorize("hasAuthority('ENT_MCH_NOTIFY_RESEND')")
+    @RequestMapping(value="resend/{notifyId}", method = RequestMethod.POST)
+    public ApiRes resend(@PathVariable("notifyId") Long notifyId) {
+        MchNotifyRecord mchNotify = mchNotifyService.getById(notifyId);
+        if (mchNotify == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        if (mchNotify.getState() != MchNotifyRecord.STATE_FAIL) throw new BizException("请选择失败的通知记录");
+
+        //更新通知中
+        mchNotifyService.getBaseMapper().updateIngAndAddNotifyCountLimit(notifyId);
+
+        //调起MQ重发
+        mqQueue4PayOrderMchNotify.send(notifyId);
+
+        return ApiRes.ok(mchNotify);
+    }
+
 }

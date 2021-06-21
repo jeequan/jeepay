@@ -14,6 +14,7 @@
         <result column="notify_url" property="notifyUrl" />
         <result column="res_result" property="resResult" />
         <result column="notify_count" property="notifyCount" />
+        <result column="notify_count_limit" property="notifyCountLimit" />
         <result column="state" property="state" />
         <result column="last_notify_time" property="lastNotifyTime" />
         <result column="created_at" property="createdAt" />
@@ -30,6 +31,15 @@
                                        last_notify_time = now()
         where notify_id = #{notifyId}
 
+    </update>
+
+
+
+    <!-- 更改为通知中 & 增加允许重发通知次数  -->
+    <update id="updateIngAndAddNotifyCountLimit">
+        update t_mch_notify_record
+        set notify_count_limit = notify_count_limit + 1, state = 1
+        where notify_id = #{notifyId}
     </update>
 
 </mapper>

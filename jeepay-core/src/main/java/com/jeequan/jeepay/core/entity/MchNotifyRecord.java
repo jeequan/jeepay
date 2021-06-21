@@ -109,6 +109,11 @@ public class MchNotifyRecord extends BaseModel implements Serializable {
     private Integer notifyCount;
 
     /**
+     * 最大通知次数, 默认6次
+     */
+    private Integer notifyCountLimit;
+
+    /**
      * 通知状态,1-通知中,2-通知成功,3-通知失败
      */
     private Byte state;

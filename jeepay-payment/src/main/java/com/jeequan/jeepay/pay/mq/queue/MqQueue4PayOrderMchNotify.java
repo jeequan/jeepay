@@ -39,7 +39,7 @@ import javax.jms.TextMessage;
 
 /*
 * 商户订单回调MQ通知
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 17:34
@@ -96,7 +96,7 @@ public class MqQueue4PayOrderMchNotify {
             log.info("查询通知记录不存在或状态不是通知中");
             return ;
         }
-        if( record.getNotifyCount() >= 6 ){
+        if( record.getNotifyCount() >= record.getNotifyCountLimit() ){
             log.info("已达到最大发送次数");
             return ;
         }
@@ -122,8 +122,8 @@ public class MqQueue4PayOrderMchNotify {
             return ;
         }
 
-        //响应结果为异常
-        if( currentCount >= 6 ){
+        //通知次数 >= 最大通知次数时， 更新响应结果为异常， 不在继续延迟发送消息
+        if( currentCount >= record.getNotifyCountLimit() ){
             mchNotifyRecordService.updateNotifyResult(notifyId, MchNotifyRecord.STATE_FAIL, res);
             return ;
         }

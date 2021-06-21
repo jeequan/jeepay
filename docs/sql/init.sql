@@ -315,6 +315,7 @@ CREATE TABLE `t_mch_notify_record` (
         `notify_url` TEXT NOT NULL COMMENT '通知地址',
         `res_result` TEXT DEFAULT NULL COMMENT '通知响应结果',
         `notify_count` INT(11) NOT NULL DEFAULT '0' COMMENT '通知次数',
+        `notify_count_limit` INT(11) NOT NULL DEFAULT '6' COMMENT '最大通知次数, 默认6次',
         `state` TINYINT(6) NOT NULL DEFAULT '1' COMMENT '通知状态,1-通知中,2-通知成功,3-通知失败',
         `last_notify_time` DATETIME DEFAULT NULL COMMENT '最后一次通知时间',
         `created_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
@@ -440,6 +441,7 @@ insert into t_sys_entitlement values('ENT_ORDER', '订单管理', 'transaction',
     insert into t_sys_entitlement values('ENT_MCH_NOTIFY', '商户通知', 'notification', '/notify', 'MchNotifyListPage', 'ML', 0, 1,  'ENT_ORDER', '30', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_NOTIFY_LIST', '页面：商户通知列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_NOTIFY', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_MCH_NOTIFY_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_NOTIFY', '0', 'MGR', now(), now());
+        insert into t_sys_entitlement values('ENT_MCH_NOTIFY_RESEND', '按钮：重发通知', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_NOTIFY', '0', 'MGR', now(), now());
 
 -- 支付配置菜单
 insert into t_sys_entitlement values('ENT_PC', '支付配置', 'file-done', '', 'RouteView', 'ML', 0, 1,  'ROOT', '60', 'MGR', now(), now());
