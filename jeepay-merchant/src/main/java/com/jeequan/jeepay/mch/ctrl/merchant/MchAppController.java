@@ -63,7 +63,7 @@ public class MchAppController extends CommonCtrl {
         if (mchApp.getState() != null) wrapper.eq(MchApp::getState, mchApp.getState());
         wrapper.orderByDesc(MchApp::getCreatedAt);
 
-        IPage<MchApp> pages = mchAppService.page(getIPage(), wrapper);
+        IPage<MchApp> pages = mchAppService.page(getIPage(true), wrapper);
         return ApiRes.ok(pages);
     }
 

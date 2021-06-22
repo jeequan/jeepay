@@ -15,11 +15,9 @@
  */
 package com.jeequan.jeepay.mgr.ctrl.order;
 
-import cn.hutool.core.lang.UUID;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.jeequan.jeepay.JeepayClient;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
@@ -28,10 +26,10 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayWay;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.exception.JeepayException;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.model.RefundOrderCreateReqModel;
-import com.jeequan.jeepay.model.RefundOrderCreateResModel;
 import com.jeequan.jeepay.request.RefundOrderCreateRequest;
 import com.jeequan.jeepay.response.RefundOrderCreateResponse;
 import com.jeequan.jeepay.service.impl.MchAppService;
@@ -154,7 +152,7 @@ public class PayOrderController extends CommonCtrl {
         model.setMchNo(payOrder.getMchNo());     // 商户号
         model.setAppId(payOrder.getAppId());
         model.setPayOrderId(payOrderId);
-        model.setMchRefundNo(UUID.fastUUID().toString());
+        model.setMchRefundNo(SeqKit.genMhoOrderId());
         model.setRefundAmount(refundAmount);
         model.setRefundReason(refundReason);
         model.setCurrency("CNY");
