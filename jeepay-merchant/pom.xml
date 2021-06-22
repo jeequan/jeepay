@@ -95,6 +95,12 @@
             <artifactId>jeepay-sdk-java</artifactId>
         </dependency>
 
+        <!-- webSocket -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+        </dependency>
+
     </dependencies>
 
     <!-- 作为可执行jar -->
