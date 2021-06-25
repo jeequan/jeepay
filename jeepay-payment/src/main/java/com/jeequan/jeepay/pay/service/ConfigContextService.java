@@ -79,7 +79,7 @@ public class ConfigContextService {
 
 
     /** 获取 [商户配置信息] **/
-    public synchronized MchInfoConfigContext getMchInfoConfigContext(String mchNo){
+    public MchInfoConfigContext getMchInfoConfigContext(String mchNo){
 
         MchInfoConfigContext mchInfoConfigContext = mchInfoConfigContextMap.get(mchNo);
 
@@ -92,7 +92,7 @@ public class ConfigContextService {
     }
 
     /** 获取 [商户应用支付参数配置信息] **/
-    public synchronized MchAppConfigContext getMchAppConfigContext(String mchNo, String appId){
+    public MchAppConfigContext getMchAppConfigContext(String mchNo, String appId){
 
         MchAppConfigContext mchAppConfigContext = mchAppConfigContextMap.get(appId);
 
@@ -105,7 +105,7 @@ public class ConfigContextService {
     }
 
     /** 获取 [ISV支付参数配置信息] **/
-    public synchronized IsvConfigContext getIsvConfigContext(String isvNo){
+    public IsvConfigContext getIsvConfigContext(String isvNo){
 
         IsvConfigContext isvConfigContext = isvConfigContextMap.get(isvNo);
 
@@ -142,7 +142,19 @@ public class ConfigContextService {
         mchInfoConfigContext.setMchNo(mchInfo.getMchNo());
         mchInfoConfigContext.setMchType(mchInfo.getType());
         mchInfoConfigContext.setMchInfo(mchInfo);
-        mchAppService.list(MchApp.gw().eq(MchApp::getMchNo, mchNo)).stream().forEach( mchApp -> mchInfoConfigContext.putMchApp(mchApp));
+        mchAppService.list(MchApp.gw().eq(MchApp::getMchNo, mchNo)).stream().forEach( mchApp -> {
+
+            //1. 更新商户内appId集合
+            mchInfoConfigContext.putMchApp(mchApp);
+
+            MchAppConfigContext mchAppConfigContext = mchAppConfigContextMap.get(mchApp.getAppId());
+            if(mchAppConfigContext != null){
+                mchAppConfigContext.setMchApp(mchApp);
+                mchAppConfigContext.setMchNo(mchInfo.getMchNo());
+                mchAppConfigContext.setMchType(mchInfo.getType());
+                mchAppConfigContext.setMchInfo(mchInfo);
+            }
+        });
 
         mchInfoConfigContextMap.put(mchNo, mchInfoConfigContext);
     }
@@ -156,28 +168,18 @@ public class ConfigContextService {
             return;
         }
 
+        // 查询商户应用信息主体
+        MchApp dbMchApp = mchAppService.getById(appId);
+
         //DB已经删除
-        if(mchAppService.count(MchApp.gw().eq(MchApp::getAppId, appId)) <= 0){
+        if(dbMchApp == null){
             mchAppConfigContextMap.remove(appId);  //清除缓存信息
             mchInfoConfigContext.getAppMap().remove(appId); //清除主体信息中的appId
             return ;
         }
 
-        //商户应用信息(缓存中存在)
-        MchApp mchApp = mchInfoConfigContext.getMchApp(appId);
-
-        if(mchApp == null){ //说明商户主体信息不存在缓存
-
-            mchApp = mchAppService.getById(appId);
-            if(mchApp == null){ // DB查询为空
-                mchAppConfigContextMap.remove(appId);  //清除缓存信息
-                mchInfoConfigContext.getAppMap().remove(appId); //清除主体信息中的appId
-                return ;
-            }
-
-            //更新商户信息主体中的商户应用
-            mchInfoConfigContext.putMchApp(mchApp);
-        }
+        //更新商户信息主体中的商户应用
+        mchInfoConfigContext.putMchApp(dbMchApp);
 
         //商户主体信息
         MchInfo mchInfo = mchInfoConfigContext.getMchInfo();
@@ -188,7 +190,7 @@ public class ConfigContextService {
         mchAppConfigContext.setMchNo(mchInfo.getMchNo());
         mchAppConfigContext.setMchType(mchInfo.getType());
         mchAppConfigContext.setMchInfo(mchInfo);
-        mchAppConfigContext.setMchApp(mchApp);
+        mchAppConfigContext.setMchApp(dbMchApp);
 
         // 查询商户的所有支持的参数配置
         List<PayInterfaceConfig> allConfigList = payInterfaceConfigService.list(PayInterfaceConfig.gw()
