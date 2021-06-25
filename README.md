@@ -160,4 +160,4 @@ jeepay
 
 微信扫码加入交流群，或添加微信号：`jiquanltd` 邀请进群
 
-![Jeepay微信交流群](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/wx_qun.jpeg "Jeepay微信交流群")
+![Jeepay微信交流群](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/wx_qun_702.png "Jeepay微信交流群")
