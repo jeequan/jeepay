@@ -13,7 +13,7 @@
     <parent>
         <groupId>com.jeequan</groupId>
         <artifactId>jeepay</artifactId>
-        <version>1.1.0</version>
+        <version>Final</version>
     </parent>
     <!-- 项目依赖声明 -->
     <dependencies>

@@ -8,7 +8,7 @@
   <packaging>pom</packaging> <!-- 项目的最终打包类型/发布形式, 可选[jar, war, pom, maven-plugin]等 -->
 
   <name>jeepay</name>
-  <version>1.1.0</version> <!-- pom版本号/项目总版本号， 每个子项目引入的版本号必须一致。  -->
+  <version>Final</version> <!-- pom版本号/项目总版本号， 每个子项目引入的版本号必须一致。  最外层的pom.xml版本号保持不变，始终为Final版本。 更新版本请更改isys.version属性  -->
   <description>Jeepay计全支付系统</description> <!-- 项目描述 -->
   <url>https://www.jeequan.com</url>
 
@@ -34,7 +34,7 @@
   <properties>
     <java.version>1.8</java.version> <!-- 指定java版本号 -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> <!-- 项目构建输出编码 -->
-    <isys.version>1.1.0</isys.version> <!-- 指定当前[项目]版本号 -->
+    <isys.version>1.1.1</isys.version> <!-- 指定当前[项目]版本号 -->
 
     <!-- 其他工具包 -->
     <jeepay.sdk.java.version>1.1.0</jeepay.sdk.java.version>
