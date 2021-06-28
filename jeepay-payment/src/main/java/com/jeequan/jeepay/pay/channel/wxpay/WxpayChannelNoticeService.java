@@ -198,7 +198,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
         header.setSignature(request.getHeader("Wechatpay-Signature"));
 
         // 获取加密信息
-        JSONObject params = getReqParamJSON();
+        JSONObject params = reqParam2JSON();
 
         log.info("\n【请求头信息】：{}\n【加密数据】：{}", header.toString(), params.toJSONString());
 
