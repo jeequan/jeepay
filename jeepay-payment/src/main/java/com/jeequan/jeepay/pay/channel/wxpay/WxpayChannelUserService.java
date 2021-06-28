@@ -65,7 +65,7 @@ public class WxpayChannelUserService implements IChannelUserService {
             oauth2Url = DEFAULT_OAUTH_URL;
         }
 
-        return String.format(oauth2Url + "?appid=%s&scope=snsapi_base&state=&redirect_uri=%s", appId, callbackUrlEncode);
+        return String.format(oauth2Url + "?appid=%s&scope=snsapi_base&state=&redirect_uri=%s&response_type=code#wechat_redirect", appId, callbackUrlEncode);
     }
 
     @Override
