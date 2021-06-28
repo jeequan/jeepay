@@ -77,7 +77,7 @@ public class WxpayV3Util {
     }
 
     public static JSONObject queryOrderV3(String url, WxPayConfig wxPayConfig) throws WxPayException {
-        String response = getV3(url, wxPayConfig);
+        String response = getV3(PAY_BASE_URL + url, wxPayConfig);
         return JSON.parseObject(response);
     }
 
@@ -169,7 +169,7 @@ public class WxpayV3Util {
                 throw wxPayException;
             }
         } catch (Exception e) {
-            log.error("\n【异常信息】：{}", url, e.getMessage());
+            log.error("\n【异常信息】：{}，e={}", url, e.getMessage());
             throw (e instanceof WxPayException) ? (WxPayException) e : new WxPayException(e.getMessage(), e);
         } finally {
             httpGet.releaseConnection();
