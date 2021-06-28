@@ -198,9 +198,9 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
         header.setSignature(request.getHeader("Wechatpay-Signature"));
 
         // 获取加密信息
-        JSONObject params = reqParam2JSON();
+        String params = getReqParamFromBody();
 
-        log.info("\n【请求头信息】：{}\n【加密数据】：{}", header.toString(), params.toJSONString());
+        log.info("\n【请求头信息】：{}\n【加密数据】：{}", header.toString(), params);
 
         WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
         WxPayConfig wxPayConfig = wxPayService.getConfig();
@@ -212,7 +212,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
         wxPayConfig.setVerifier(verifier);
         wxPayService.setConfig(wxPayConfig);
 
-        WxPayOrderNotifyV3Result result = wxPayService.parseOrderNotifyV3Result(params.toJSONString(), header);
+        WxPayOrderNotifyV3Result result = wxPayService.parseOrderNotifyV3Result(params, header);
 
         return result.getResult();
     }
