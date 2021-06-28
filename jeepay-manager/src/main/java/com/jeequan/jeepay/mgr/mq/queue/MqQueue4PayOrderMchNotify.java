@@ -16,11 +16,18 @@
 package com.jeequan.jeepay.mgr.mq.queue;
 
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.mgr.mq.service.MqPayOrderNotifyService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
+
+import javax.jms.Queue;
 
 /**
 * 商户订单回调MQ通知
@@ -31,17 +38,26 @@ import org.springframework.stereotype.Component;
 */
 @Slf4j
 @Component
-public class MqQueue4PayOrderMchNotify extends ActiveMQQueue{
+@Profile(CS.MQTYPE.ACTIVE_MQ)
+public class MqQueue4PayOrderMchNotify extends MqPayOrderNotifyService {
 
     @Autowired private JmsTemplate jmsTemplate;
 
-    public MqQueue4PayOrderMchNotify(){
-        super(CS.MQ.QUEUE_PAYORDER_MCH_NOTIFY);
+    @Bean("payOrderMchNotify")
+    public Queue mqQueue4PayOrderMchNotify(){
+        return new ActiveMQQueue(CS.MQ.QUEUE_PAYORDER_MCH_NOTIFY);
     }
 
+    @Lazy
+    @Autowired
+    @Qualifier("payOrderMchNotify")
+    private Queue mqQueue4PayOrderMchNotify;
+
+
     /** 发送MQ消息 **/
-    public void send(Long notifyId) {
-        this.jmsTemplate.convertAndSend(this, notifyId + "");
+    @Override
+    public void send(String msg) {
+        this.jmsTemplate.convertAndSend(mqQueue4PayOrderMchNotify, msg);
     }
 
 }

@@ -20,16 +20,15 @@ import com.jeequan.jeepay.core.cache.RedisUtil;
 import com.jeequan.jeepay.core.constants.CS;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.command.ActiveMQQueue;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * 更新商户配置mq
+ * 商户用户登录信息清除
  *
  * @author pangxiaoyu
  * @site https://www.jeepay.vip
@@ -37,6 +36,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
+@Profile(CS.MQTYPE.ACTIVE_MQ)
 public class MqQueue4ModifyMchUserRemove extends ActiveMQQueue {
 
     public MqQueue4ModifyMchUserRemove(){
@@ -46,7 +46,7 @@ public class MqQueue4ModifyMchUserRemove extends ActiveMQQueue {
     /**
      * @author: pangxiaoyu
      * @date: 2021/6/7 16:17
-     * @describe: 接收 更新系统配置项的消息
+     * @describe: 接收 商户用户登录信息清除消息
      */
     @JmsListener(destination = CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE)
     public void receive(String userIdStr) {

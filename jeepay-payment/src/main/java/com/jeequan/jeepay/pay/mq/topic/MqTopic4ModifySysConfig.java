@@ -19,6 +19,7 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Component;
 */
 @Slf4j
 @Component
+@Profile(CS.MQTYPE.ACTIVE_MQ)
 public class MqTopic4ModifySysConfig{
 
     @Autowired private SysConfigService sysConfigService;

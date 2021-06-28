@@ -21,7 +21,7 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.core.utils.StringKit;
-import com.jeequan.jeepay.pay.mq.queue.MqQueue4PayOrderMchNotify;
+import com.jeequan.jeepay.pay.mq.queue.service.MqServiceImpl;
 import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRS;
 import com.jeequan.jeepay.pay.rqrs.refund.QueryRefundOrderRS;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
@@ -42,7 +42,7 @@ import org.springframework.stereotype.Service;
 public class PayMchNotifyService {
 
     @Autowired private MchNotifyRecordService mchNotifyRecordService;
-    @Autowired private MqQueue4PayOrderMchNotify mqPayOrderMchNotifyQueue;
+    @Autowired private MqServiceImpl mqService;
     @Autowired private ConfigContextService configContextService;
 
 
@@ -84,7 +84,7 @@ public class PayMchNotifyService {
 
             //推送到MQ
             Long notifyId = mchNotifyRecord.getNotifyId();
-            mqPayOrderMchNotifyQueue.send(notifyId + "");
+            mqService.PayOrderMchNotify(notifyId + "");
 
         } catch (Exception e) {
             log.error("推送失败！", e);
@@ -129,7 +129,7 @@ public class PayMchNotifyService {
 
             //推送到MQ
             Long notifyId = mchNotifyRecord.getNotifyId();
-            mqPayOrderMchNotifyQueue.send(notifyId + "");
+            mqService.PayOrderMchNotify(notifyId + "");
 
         } catch (Exception e) {
             log.error("推送失败！", e);

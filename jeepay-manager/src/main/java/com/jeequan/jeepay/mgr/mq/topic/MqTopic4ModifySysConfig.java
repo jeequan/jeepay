@@ -16,10 +16,15 @@
 package com.jeequan.jeepay.mgr.mq.topic;
 
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.mgr.mq.service.MqModifySysConfigService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.command.ActiveMQTopic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -33,14 +38,21 @@ import org.springframework.stereotype.Component;
 */
 @Slf4j
 @Component
-public class MqTopic4ModifySysConfig extends ActiveMQTopic{
+@Profile(CS.MQTYPE.ACTIVE_MQ)
+public class MqTopic4ModifySysConfig extends MqModifySysConfigService {
 
     @Autowired private JmsTemplate jmsTemplate;
     @Autowired private SysConfigService sysConfigService;
 
-    public MqTopic4ModifySysConfig(){
-        super(CS.MQ.TOPIC_MODIFY_SYS_CONFIG);
+    @Bean("modifySysConfig")
+    public ActiveMQTopic mqTopic4ModifySysConfig(){
+        return new ActiveMQTopic(CS.MQ.TOPIC_MODIFY_SYS_CONFIG);
     }
+
+    @Lazy
+    @Autowired
+    @Qualifier("modifySysConfig")
+    private ActiveMQTopic mqTopic4ModifySysConfig;
 
     /** 接收 更新系统配置项的消息 **/
     @JmsListener(destination = CS.MQ.TOPIC_MODIFY_SYS_CONFIG, containerFactory = "jmsListenerContainer")
@@ -52,8 +64,9 @@ public class MqTopic4ModifySysConfig extends ActiveMQTopic{
     }
 
     /** 推送消息到各个节点 **/
-    public void push(String msg) {
-        this.jmsTemplate.convertAndSend(this, msg);
+    @Override
+    public void send(String msg) {
+        this.jmsTemplate.convertAndSend(mqTopic4ModifySysConfig, msg);
     }
 
 

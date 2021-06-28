@@ -26,8 +26,7 @@ import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.SysUser;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.queue.MqQueue4ModifyMchUserRemove;
-import com.jeequan.jeepay.mgr.mq.topic.MqTopic4ModifyMchInfo;
+import com.jeequan.jeepay.mgr.mq.service.MqServiceImpl;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.SysUserAuthService;
 import com.jeequan.jeepay.service.impl.SysUserService;
@@ -39,7 +38,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 商户管理类
@@ -54,9 +55,8 @@ public class MchInfoController extends CommonCtrl {
 
     @Autowired private MchInfoService mchInfoService;
     @Autowired private SysUserService sysUserService;
-    @Autowired private MqTopic4ModifyMchInfo mqTopic4ModifyMchInfo;
-    @Autowired private MqQueue4ModifyMchUserRemove mqQueue4ModifyMchUserRemove;
     @Autowired private SysUserAuthService sysUserAuthService;
+    @Autowired private MqServiceImpl mqServiceImpl;
 
     /**
      * @author: pangxiaoyu
@@ -113,9 +113,9 @@ public class MchInfoController extends CommonCtrl {
     public ApiRes delete(@PathVariable("mchNo") String mchNo) {
         List<Long> userIdList = mchInfoService.removeByMchNo(mchNo);
         // 推送mq删除redis用户缓存
-        mqQueue4ModifyMchUserRemove.push(userIdList);
+        mqServiceImpl.sendUserRemove(userIdList);
         // 推送mq到目前节点进行更新数据
-        mqTopic4ModifyMchInfo.push(mchNo);
+        mqServiceImpl.sendModifyMchInfo(mchNo);
         return ApiRes.ok();
     }
 
@@ -161,7 +161,7 @@ public class MchInfoController extends CommonCtrl {
 
         // 推送mq删除redis用户认证信息
         if (!removeCacheUserIdList.isEmpty()) {
-            mqQueue4ModifyMchUserRemove.push(removeCacheUserIdList);
+            mqServiceImpl.sendUserRemove(removeCacheUserIdList);
         }
 
         //更新商户信息
@@ -170,7 +170,7 @@ public class MchInfoController extends CommonCtrl {
         }
 
         // 推送mq到目前节点进行更新数据
-        mqTopic4ModifyMchInfo.push(mchNo);
+        mqServiceImpl.sendModifyMchInfo(mchNo);
 
         return ApiRes.ok();
     }

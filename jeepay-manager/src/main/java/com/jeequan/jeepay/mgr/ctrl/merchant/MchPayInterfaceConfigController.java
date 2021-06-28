@@ -23,8 +23,7 @@ import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.topic.MqTopic4ModifyMchApp;
-import com.jeequan.jeepay.mgr.mq.topic.MqTopic4ModifyMchInfo;
+import com.jeequan.jeepay.mgr.mq.service.MqServiceImpl;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +45,7 @@ import java.util.List;
 public class MchPayInterfaceConfigController extends CommonCtrl {
 
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private MqTopic4ModifyMchApp mqTopic4ModifyMchApp;
+    @Autowired private MqServiceImpl mqServiceImpl;
     @Autowired private MchAppService mchAppService;
 
     /**
@@ -125,7 +124,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
             return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "配置失败");
         }
 
-        mqTopic4ModifyMchApp.push(mchApp.getMchNo(), infoId); // 推送mq到目前节点进行更新数据
+        mqServiceImpl.sendModifyMchApp(mchApp.getMchNo(), infoId); // 推送mq到目前节点进行更新数据
 
         return ApiRes.ok();
     }

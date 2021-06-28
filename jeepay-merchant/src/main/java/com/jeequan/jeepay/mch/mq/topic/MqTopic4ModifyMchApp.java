@@ -18,9 +18,11 @@ package com.jeequan.jeepay.mch.mq.topic;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.utils.JsonKit;
+import com.jeequan.jeepay.mch.mq.service.MqModifyMchAppService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.command.ActiveMQTopic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
@@ -33,20 +35,17 @@ import org.springframework.stereotype.Component;
 */
 @Slf4j
 @Component
-public class MqTopic4ModifyMchApp extends ActiveMQTopic{
+@Profile(CS.MQTYPE.ACTIVE_MQ)
+public class MqTopic4ModifyMchApp extends MqModifyMchAppService {
 
     @Autowired private JmsTemplate jmsTemplate;
 
-    public MqTopic4ModifyMchApp(){
-        super(CS.MQ.TOPIC_MODIFY_MCH_APP);
-    }
-
     /** 推送消息到各个节点 **/
-    public void push(String mchNo, String appId) {
+    @Override
+    public void send(String mchNo, String appId) {
         JSONObject jsonObject = JsonKit.newJson("mchNo", mchNo);
         jsonObject.put("appId", appId);
-
-        this.jmsTemplate.convertAndSend(this, jsonObject.toString());
+        this.jmsTemplate.convertAndSend(new ActiveMQTopic(CS.MQ.TOPIC_MODIFY_MCH_APP), jsonObject.toString());
     }
 
 }

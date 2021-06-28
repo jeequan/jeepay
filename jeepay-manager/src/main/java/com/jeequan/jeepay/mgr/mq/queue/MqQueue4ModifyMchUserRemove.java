@@ -17,12 +17,18 @@ package com.jeequan.jeepay.mgr.mq.queue;
 
 import com.alibaba.fastjson.JSONArray;
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.mgr.mq.service.MqMchUserRemoveService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.jms.Queue;
 import java.util.Collection;
 
 /**
@@ -34,24 +40,27 @@ import java.util.Collection;
  */
 @Slf4j
 @Component
-public class MqQueue4ModifyMchUserRemove extends ActiveMQQueue{
+@Profile(CS.MQTYPE.ACTIVE_MQ)
+public class MqQueue4ModifyMchUserRemove extends MqMchUserRemoveService {
 
     @Autowired private JmsTemplate jmsTemplate;
 
-    public MqQueue4ModifyMchUserRemove(){
-        super(CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE);
+    @Bean("modifyMchUserRemove")
+    public Queue mqQueue4ModifyMchUserRemove(){
+        return new ActiveMQQueue(CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE);
     }
 
-    /**
-     * @author: pangxiaoyu
-     * @date: 2021/6/7 16:16
-     * @describe: 推送消息到各个节点
-     */
-    public void push(Collection<Long> userIdList) {
+    @Lazy
+    @Autowired
+    @Qualifier("modifyMchUserRemove")
+    private Queue mqQueue4ModifyMchUserRemove;
+
+    @Override
+    public void send(Collection<Long> userIdList) {
         if(userIdList == null || userIdList.isEmpty()){
             return ;
         }
-        this.jmsTemplate.convertAndSend(this,JSONArray.toJSONString(userIdList));
+        this.jmsTemplate.convertAndSend(mqQueue4ModifyMchUserRemove, JSONArray.toJSONString(userIdList));
     }
 
 }

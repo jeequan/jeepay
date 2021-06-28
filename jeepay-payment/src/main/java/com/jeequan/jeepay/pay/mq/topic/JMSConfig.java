@@ -15,7 +15,9 @@
  */
 package com.jeequan.jeepay.pay.mq.topic;
 
+import com.jeequan.jeepay.core.constants.CS;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.stereotype.Component;
@@ -30,6 +32,7 @@ import javax.jms.ConnectionFactory;
 * @date 2021/6/8 17:31
 */
 @Component
+@Profile(CS.MQTYPE.ACTIVE_MQ)
 public class JMSConfig {
 
     /** 新增jmsListenerContainer, 用于接收topic类型的消息 **/

@@ -20,6 +20,7 @@ import cn.hutool.http.HttpUtil;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.pay.mq.config.MqThreadExecutor;
+import com.jeequan.jeepay.pay.mq.queue.service.MqPayOrderMchNotifyService;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -46,16 +48,17 @@ import javax.jms.TextMessage;
 */
 @Slf4j
 @Component
-public class MqQueue4PayOrderMchNotify {
+@Profile(CS.MQTYPE.ACTIVE_MQ)
+public class MqQueue4PayOrderMchNotify extends MqPayOrderMchNotifyService {
 
-    @Bean("mqQueue4PayOrderMchNotifyInner")
+    @Bean("payOrderMchNotifyInner")
     public Queue mqQueue4PayOrderMchNotifyInner(){
         return new ActiveMQQueue(CS.MQ.QUEUE_PAYORDER_MCH_NOTIFY);
     }
 
     @Lazy
     @Autowired
-    @Qualifier("mqQueue4PayOrderMchNotifyInner")
+    @Qualifier("payOrderMchNotifyInner")
     private Queue mqQueue4PayOrderMchNotifyInner;
     @Autowired private JmsTemplate jmsTemplate;
     @Autowired private MchNotifyRecordService mchNotifyRecordService;
@@ -66,11 +69,13 @@ public class MqQueue4PayOrderMchNotify {
     }
 
     /** 发送MQ消息 **/
+    @Override
     public void send(String msg) {
         this.jmsTemplate.convertAndSend(mqQueue4PayOrderMchNotifyInner, msg);
     }
 
     /** 发送MQ消息 **/
+    @Override
     public void send(String msg, long delay) {
         jmsTemplate.send(mqQueue4PayOrderMchNotifyInner, session -> {
             TextMessage tm = session.createTextMessage(msg);

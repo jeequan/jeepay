@@ -20,10 +20,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.SysConfig;
-import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.topic.MqTopic4ModifySysConfig;
+import com.jeequan.jeepay.mgr.mq.service.MqServiceImpl;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +49,7 @@ import java.util.Map;
 public class SysConfigController extends CommonCtrl {
 
 	@Autowired private SysConfigService sysConfigService;
-	@Autowired private MqTopic4ModifySysConfig mqTopic4ModifySysConfig;
+	@Autowired private MqServiceImpl mqService;
 
 
 	/**
@@ -86,7 +84,7 @@ public class SysConfigController extends CommonCtrl {
 		int update = sysConfigService.updateByConfigKey(updateMap);
 		if(update <= 0) return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "更新失败");
 
-		mqTopic4ModifySysConfig.push(groupKey);
+		mqService.sendModifySysConfig(groupKey);
 		return ApiRes.ok();
 	}
 

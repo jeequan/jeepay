@@ -17,6 +17,8 @@ package com.jeequan.jeepay.pay.mq.queue;
 
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.pay.mq.queue.service.MqChannelOrderQueryService;
+import com.jeequan.jeepay.pay.mq.queue.service.MqServiceImpl;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.service.ChannelOrderReissueService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
@@ -24,10 +26,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ScheduledMessage;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.jms.Queue;
 import javax.jms.TextMessage;
 
 /*
@@ -41,29 +48,33 @@ import javax.jms.TextMessage;
 */
 @Slf4j
 @Component
-public class MqQueue4ChannelOrderQuery extends ActiveMQQueue{
+@Profile(CS.MQTYPE.ACTIVE_MQ)
+public class MqQueue4ChannelOrderQuery extends MqChannelOrderQueryService {
 
     @Autowired private JmsTemplate jmsTemplate;
     @Autowired private PayOrderService payOrderService;
     @Autowired private ChannelOrderReissueService channelOrderReissueService;
 
-    public static final String buildMsg(String payOrderId, int count){
-        return payOrderId + "," + count;
+    @Bean("channelOrderQuery")
+    public Queue mqQueue4ChannelOrderQuery(){
+        return new ActiveMQQueue(CS.MQ.QUEUE_CHANNEL_ORDER_QUERY);
     }
 
-    /** 构造函数 */
-    public MqQueue4ChannelOrderQuery(){
-        super(CS.MQ.QUEUE_CHANNEL_ORDER_QUERY);
-    }
+    @Lazy
+    @Autowired
+    @Qualifier("channelOrderQuery")
+    private Queue mqQueue4ChannelOrderQuery;
 
     /** 发送MQ消息 **/
+    @Override
     public void send(String msg) {
-        this.jmsTemplate.convertAndSend(this, msg);
+        this.jmsTemplate.convertAndSend(mqQueue4ChannelOrderQuery, msg);
     }
 
     /** 发送MQ消息 **/
+    @Override
     public void send(String msg, long delay) {
-        jmsTemplate.send(this, session -> {
+        jmsTemplate.send(mqQueue4ChannelOrderQuery, session -> {
             TextMessage tm = session.createTextMessage(msg);
             tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay);
             tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_PERIOD, 1*1000);
@@ -101,7 +112,7 @@ public class MqQueue4ChannelOrderQuery extends ActiveMQQueue{
 
             //最多查询6次
             if(currentCount <= 6){
-                send(buildMsg(payOrderId, currentCount), 5 * 1000); //延迟5s再次查询
+                send(MqServiceImpl.buildMsg(payOrderId, currentCount), 5 * 1000); //延迟5s再次查询
             }else{
 
                 //TODO 调用【撤销订单】接口

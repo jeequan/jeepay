@@ -150,6 +150,15 @@ public class CS {
 
     }
 
+    /** RabbitMQ交换机类型 **/
+    public static final String TOPIC_EXCHANGE = "topicExchange";
+    public static final String DIRECT_EXCHANGE = "directExchange";
+    public static final String DELAYED_EXCHANGE = "delayedExchange"; // 延迟交换机
+    /** 切换MQ的类型 **/
+    public static class MQTYPE{
+        public static final String ACTIVE_MQ = "activeMQ";
+        public static final String RABBIT_MQ = "rabbitMQ";
+    }
 
     //菜单类型
     public interface ENT_TYPE{

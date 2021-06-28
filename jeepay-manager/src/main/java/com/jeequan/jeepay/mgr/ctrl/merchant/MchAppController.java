@@ -21,16 +21,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.MchApp;
-import com.jeequan.jeepay.core.entity.MchInfo;
-import com.jeequan.jeepay.core.entity.PayOrder;
-import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.queue.MqQueue4ModifyMchUserRemove;
-import com.jeequan.jeepay.mgr.mq.topic.MqTopic4ModifyMchApp;
+import com.jeequan.jeepay.mgr.mq.service.MqServiceImpl;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
-import com.jeequan.jeepay.service.impl.PayOrderService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,7 +44,7 @@ public class MchAppController extends CommonCtrl {
 
     @Autowired private MchInfoService mchInfoService;
     @Autowired private MchAppService mchAppService;
-    @Autowired private MqTopic4ModifyMchApp mqTopic4ModifyMchApp;
+    @Autowired private MqServiceImpl mqServiceImpl;
 
     /**
      * @Author: ZhuXiao
@@ -127,7 +122,7 @@ public class MchAppController extends CommonCtrl {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
         }
         // 推送修改应用消息
-        mqTopic4ModifyMchApp.push(mchApp.getMchNo(), mchApp.getAppId());
+        mqServiceImpl.sendModifyMchApp(mchApp.getMchNo(), mchApp.getAppId());
         return ApiRes.ok();
     }
 
@@ -145,7 +140,7 @@ public class MchAppController extends CommonCtrl {
         mchAppService.removeByAppId(appId);
 
         // 推送mq到目前节点进行更新数据
-        mqTopic4ModifyMchApp.push(mchApp.getMchNo(), appId);
+        mqServiceImpl.sendModifyMchApp(mchApp.getMchNo(), appId);
         return ApiRes.ok();
     }
 

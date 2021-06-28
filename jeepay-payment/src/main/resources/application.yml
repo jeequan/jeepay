@@ -51,8 +51,8 @@ spring:
         database: 3    #1库：运营平台  #2库：商户系统 #3库：支付网关
         password:
     #activeMQ配置
-    activemq:
-        broker-url: tcp://localhost:61616  #连接地址
+#    activemq:
+#        broker-url: tcp://localhost:61616  #连接地址
 
 #日志配置参数。
     # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
