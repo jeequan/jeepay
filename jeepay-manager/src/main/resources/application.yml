@@ -64,8 +64,8 @@ spring:
         #rabbitmq配置
         #  rabbitmq:
         #    addresses: 127.0.0.1:5672
-        #    username: jeepay
-        #    password: 123123
+        #    username: guest
+        #    password: guest
         #    dynamic: true
         #    virtual-host: /
 

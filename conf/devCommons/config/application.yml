@@ -4,7 +4,7 @@
 spring:
   datasource:
     # yml填写url连接串， 无需将&符号进行转义
-    url: jdbc:mysql://127.0.0.1:3306/jeepay?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
+    url: jdbc:mysql://127.0.0.1:3306/jeepaydb?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
     username: root
     password:
   redis:
@@ -25,8 +25,8 @@ spring:
   #rabbitmq配置
   #  rabbitmq:
   #    addresses: 127.0.0.1:5672
-  #    username: jeepay
-  #    password: 123123
+  #    username: guest
+  #    password: guest
   #    dynamic: true
   #    virtual-host: /
 
