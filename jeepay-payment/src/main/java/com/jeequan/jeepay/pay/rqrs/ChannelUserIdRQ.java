@@ -29,10 +29,6 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class ChannelUserIdRQ extends AbstractMchAppRQ{
 
-    /** 商户号 **/
-    @NotBlank(message="商户号不能为空")
-    private String mchNo;
-
     /** 接口代码,  AUTO表示：自动获取 **/
     @NotBlank(message="接口代码不能为空")
     private String ifCode;
