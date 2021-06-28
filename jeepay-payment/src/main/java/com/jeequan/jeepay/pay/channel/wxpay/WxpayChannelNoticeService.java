@@ -16,24 +16,19 @@
 package com.jeequan.jeepay.pay.channel.wxpay;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.binarywang.wxpay.bean.ecommerce.SignatureHeader;
+import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
-import com.github.binarywang.wxpay.config.WxPayConfig;
+import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyV3Result;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.service.WxPayService;
-import com.github.binarywang.wxpay.v3.auth.AutoUpdateCertificatesVerifier;
-import com.github.binarywang.wxpay.v3.auth.PrivateKeySigner;
-import com.github.binarywang.wxpay.v3.auth.WxPayCredentials;
-import com.github.binarywang.wxpay.v3.util.AesUtils;
-import com.github.binarywang.wxpay.v3.util.PemUtils;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.exception.ResponseException;
 import com.jeequan.jeepay.pay.channel.AbstractChannelNoticeService;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
-import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -44,10 +39,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.FileInputStream;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.security.PrivateKey;
 
 /*
 * 微信回调
@@ -87,22 +79,10 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                     throw new BizException("获取商户信息失败");
                 }
 
-                // 验签
-                if (!verifyNotifySign(request, mchAppConfigContext)) {
-                    throw new BizException("验签失败");
-                }
+                // 验签 && 获取订单回调数据
+                WxPayOrderNotifyV3Result.DecryptNotifyResult result = parseOrderNotifyV3Result(request, mchAppConfigContext);
 
-                // 获取加密信息
-                JSONObject params = getReqParamJSON();
-                JSONObject resource = params.getJSONObject("resource");
-                String cipherText = resource.getString("cipherText");
-                String associatedData = resource.getString("associatedData");
-                String nonce = resource.getString("nonce");
-
-                // 解密
-                String result = AesUtils.decryptToString(associatedData, nonce, cipherText, mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig().getApiV3Key());
-                JSONObject decryptJSON = JSONObject.parseObject(result);
-                return MutablePair.of(decryptJSON.getString("out_trade_no"), decryptJSON);
+                return MutablePair.of(result.getOutTradeNo(), result);
 
             } else {     // V2接口回调
                 String xmlResult = IOUtils.toString(request.getInputStream(), request.getCharacterEncoding());
@@ -141,12 +121,12 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
 
             }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) { // V3
                 // 获取回调参数
-                JSONObject resultJSON = (JSONObject) params;
+                WxPayOrderNotifyV3Result.DecryptNotifyResult result = (WxPayOrderNotifyV3Result.DecryptNotifyResult) params;
 
                 // 验证参数
-                verifyWxPayParams(resultJSON, payOrder);
+                verifyWxPayParams(result, payOrder);
 
-                String channelState = resultJSON.getString("trade_state");
+                String channelState = result.getTradeState();
                 if ("SUCCESS".equals(channelState)) {
                     channelResult.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
                 }else if("CLOSED".equals(channelState)
@@ -155,10 +135,10 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                     channelResult.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL); //支付失败
                 }
 
-                channelResult.setChannelOrderId(resultJSON.getString("transaction_id")); //渠道订单号
-                JSONObject payer = resultJSON.getJSONObject("payer");
+                channelResult.setChannelOrderId(result.getTransactionId()); //渠道订单号
+                WxPayOrderNotifyV3Result.Payer payer = result.getPayer();
                 if (payer != null) {
-                    channelResult.setChannelUserId(StringUtils.isNotBlank(payer.getString("openid")) ? payer.getString("openid") : payer.getString("sp_openid")); //支付用户ID
+                    channelResult.setChannelUserId(payer.getOpenid()); //支付用户ID
                 }
 
             }else {
@@ -203,38 +183,30 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
      * @param mchAppConfigContext 商户配置
      * @return true:校验通过 false:校验不通过
      */
-    private boolean verifyNotifySign(HttpServletRequest request, MchAppConfigContext mchAppConfigContext) throws Exception {
+    private WxPayOrderNotifyV3Result.DecryptNotifyResult parseOrderNotifyV3Result(HttpServletRequest request, MchAppConfigContext mchAppConfigContext) throws Exception {
         SignatureHeader header = new SignatureHeader();
         header.setTimeStamp(request.getHeader("Wechatpay-Timestamp"));
         header.setNonce(request.getHeader("Wechatpay-Nonce"));
-        header.setSerialNo(request.getHeader("Wechatpay-Serial"));
-        header.setSigned(request.getHeader("Wechatpay-Signature"));
+        header.setSerial(request.getHeader("Wechatpay-Serial"));
+        header.setSignature(request.getHeader("Wechatpay-Signature"));
 
-        String beforeSign = String.format("%s\n%s\n%s\n",
-                header.getTimeStamp(),
-                header.getNonce(),
-                getReqParamJSON().toJSONString());
+        // 获取加密信息
+        JSONObject params = getReqParamJSON();
 
-        WxPayConfig wxPayConfig = mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig();
-        // 自动获取微信平台证书
-        PrivateKey privateKey = PemUtils.loadPrivateKey(new FileInputStream(wxPayConfig.getPrivateKeyPath()));
-        AutoUpdateCertificatesVerifier verifier = new AutoUpdateCertificatesVerifier(
-                new WxPayCredentials(wxPayConfig.getMchId(), new PrivateKeySigner(wxPayConfig.getCertSerialNo(), privateKey)),
-                wxPayConfig.getApiV3Key().getBytes("utf-8"));
+        WxPayOrderNotifyV3Result result = mchAppConfigContext.getWxServiceWrapper().getWxPayService().parseOrderNotifyV3Result(params.toJSONString(), header);
 
-        return verifier.verify(header.getSerialNo(),
-                beforeSign.getBytes(StandardCharsets.UTF_8), header.getSigned());
+        return result.getResult();
     }
 
     /**
      * V3接口验证微信支付通知参数
      * @return
      */
-    public void verifyWxPayParams(JSONObject result, PayOrder payOrder) {
+    public void verifyWxPayParams(WxPayOrderNotifyV3Result.DecryptNotifyResult result, PayOrder payOrder) {
 
         try {
             // 核对金额
-            Integer total_fee = result.getInteger("total");   			// 总金额
+            Integer total_fee = result.getAmount().getTotal();   			// 总金额
             long wxPayAmt = new BigDecimal(total_fee).longValue();
             long dbPayAmt = payOrder.getAmount().longValue();
             if (dbPayAmt != wxPayAmt) {
