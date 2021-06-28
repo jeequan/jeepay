@@ -19,8 +19,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyV3Result;
+import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.service.WxPayService;
+import com.github.binarywang.wxpay.v3.auth.AutoUpdateCertificatesVerifier;
+import com.github.binarywang.wxpay.v3.auth.PrivateKeySigner;
+import com.github.binarywang.wxpay.v3.auth.WxPayCredentials;
+import com.github.binarywang.wxpay.v3.util.PemUtils;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
@@ -39,7 +44,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.FileInputStream;
 import java.math.BigDecimal;
+import java.security.PrivateKey;
 
 /*
 * 微信回调
@@ -193,7 +200,19 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
         // 获取加密信息
         JSONObject params = getReqParamJSON();
 
-        WxPayOrderNotifyV3Result result = mchAppConfigContext.getWxServiceWrapper().getWxPayService().parseOrderNotifyV3Result(params.toJSONString(), header);
+        log.info("\n【请求头信息】：{}\n【加密数据】：{}", header.toString(), params.toJSONString());
+
+        WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+        WxPayConfig wxPayConfig = wxPayService.getConfig();
+        // 自动获取微信平台证书
+        PrivateKey privateKey = PemUtils.loadPrivateKey(new FileInputStream(wxPayConfig.getPrivateKeyPath()));
+        AutoUpdateCertificatesVerifier verifier = new AutoUpdateCertificatesVerifier(
+                new WxPayCredentials(wxPayConfig.getMchId(), new PrivateKeySigner(wxPayConfig.getCertSerialNo(), privateKey)),
+                wxPayConfig.getApiV3Key().getBytes("utf-8"));
+        wxPayConfig.setVerifier(verifier);
+        wxPayService.setConfig(wxPayConfig);
+
+        WxPayOrderNotifyV3Result result = wxPayService.parseOrderNotifyV3Result(params.toJSONString(), header);
 
         return result.getResult();
     }
