@@ -76,8 +76,7 @@ public class WxpayV3Util {
         return JSON.parseObject(response);
     }
 
-    public static JSONObject queryOrderV3(String payOrderId, WxPayConfig wxPayConfig) throws WxPayException {
-        String url = String.format("%s/v3/pay/transactions/out-trade-no/%s", PAY_BASE_URL, payOrderId);
+    public static JSONObject queryOrderV3(String url, WxPayConfig wxPayConfig) throws WxPayException {
         String response = getV3(url, wxPayConfig);
         return JSON.parseObject(response);
     }
