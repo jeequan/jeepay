@@ -125,33 +125,25 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
     }
 
 
-    public Map payCount(String mchNo, Byte state, String dayStart, String dayEnd) {
+    public Map payCount(String mchNo, Byte state, Byte refundState, String dayStart, String dayEnd) {
         Map param = new HashMap<>();
         if (state != null) param.put("state", state);
+        if (refundState != null) param.put("refundState", refundState);
         if (StrUtil.isNotBlank(mchNo)) param.put("mchNo", mchNo);
         if (StrUtil.isNotBlank(dayStart)) param.put("createTimeStart", dayStart);
         if (StrUtil.isNotBlank(dayEnd)) param.put("createTimeEnd", dayEnd);
         return payOrderMapper.payCount(param);
     }
 
-    public List<Map> payTypeCount(String mchNo, Byte state, String dayStart, String dayEnd) {
+    public List<Map> payTypeCount(String mchNo, Byte state, Byte refundState, String dayStart, String dayEnd) {
         Map param = new HashMap<>();
         if (state != null) param.put("state", state);
+        if (refundState != null) param.put("refundState", refundState);
         if (StrUtil.isNotBlank(mchNo)) param.put("mchNo", mchNo);
         if (StrUtil.isNotBlank(dayStart)) param.put("createTimeStart", dayStart);
         if (StrUtil.isNotBlank(dayEnd)) param.put("createTimeEnd", dayEnd);
         return payOrderMapper.payTypeCount(param);
     }
-
-    public Map selectTotalCount(String mchNo, Byte state, String dayStart, String dayEnd) {
-        Map param = new HashMap<>();
-        if (state != null) param.put("state", state);
-        if (StrUtil.isNotBlank(mchNo)) param.put("mchNo", mchNo);
-        if (StrUtil.isNotBlank(dayStart)) param.put("createTimeStart", dayStart);
-        if (StrUtil.isNotBlank(dayEnd)) param.put("createTimeEnd", dayEnd);
-        return payOrderMapper.selectTotalCount(param);
-    }
-
 
     /** 更新订单为 超时状态 **/
     public Integer updateOrderExpired(){
@@ -190,7 +182,7 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
             String dayStart = DateUtil.beginOfDay(date).toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN);
             String dayEnd = DateUtil.endOfDay(date).toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN);
             // 每日交易金额查询
-            dayAmount = payCount(mchNo, PayOrder.STATE_SUCCESS, dayStart, dayEnd);
+            dayAmount = payCount(mchNo, PayOrder.STATE_SUCCESS, null, dayStart, dayEnd);
             if (dayAmount != null) payAmount = new BigDecimal(dayAmount.get("payAmount").toString());
             if (i == 0) {
                 todayAmount = dayAmount.get("payAmount").toString();
@@ -219,7 +211,7 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         // 服务商总数
         int isvCount = isvInfoMapper.selectCount(IsvInfo.gw());
         // 总交易金额
-        Map<String, String> payCountMap = payCount(mchNo, PayOrder.STATE_SUCCESS, null, null);
+        Map<String, String> payCountMap = payCount(mchNo, PayOrder.STATE_SUCCESS, null, null, null);
         json.put("totalMch", mchCount);
         json.put("totalIsv", isvCount);
         json.put("totalAmount", payCountMap.get("payAmount"));
@@ -247,9 +239,10 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         param.put("createTimeEnd", createdEnd);
         // 查询收款的记录
         param.put("state", PayOrder.STATE_SUCCESS);
+        param.put("refundState", null);
         List<Map> payOrderList = payOrderMapper.selectOrderCount(param);
         // 查询退款的记录
-        param.put("state", PayOrder.STATE_REFUND);
+        param.put("refundState", PayOrder.STATE_REFUND);
         List<Map> refundOrderList = payOrderMapper.selectOrderCount(param);
         // 生成前端返回参数类型
         List<Map> returnList = getReturnList(daySpace, createdEnd, payOrderList, refundOrderList);
@@ -272,7 +265,7 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
             createdEnd = end + " 23:59:59";
         }
         // 统计列表
-        List<Map> payCountMap = payTypeCount(mchNo, PayOrder.STATE_SUCCESS, createdStart, createdEnd);
+        List<Map> payCountMap = payTypeCount(mchNo, PayOrder.STATE_SUCCESS, null, createdStart, createdEnd);
 
         // 得到所有支付方式
         Map<String, String> payWayNameMap = new HashMap<>();
@@ -326,7 +319,7 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
             payListMap.add(payMap);
             for (Map refundOrderMap:refundOrderList) {
                 if (dayMap.get("date").equals(refundOrderMap.get("groupDate"))) {
-                    refundMap.put("payAmount", refundOrderMap.get("payAmount"));
+                    refundMap.put("payAmount", refundOrderMap.get("refundAmount"));
                 }
             }
             refundListMap.add(refundMap);
