@@ -152,7 +152,11 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                 throw ResponseException.buildText("API_VERSION ERROR");
             }
 
-            ResponseEntity okResponse = textResp("SUCCESS");
+            JSONObject resJSON = new JSONObject();
+            resJSON.put("code", "SUCCESS");
+            resJSON.put("message", "成功");
+
+            ResponseEntity okResponse = jsonResp(resJSON);
             channelResult.setResponseEntity(okResponse); //响应数据
 
             return channelResult;
