@@ -45,14 +45,14 @@ public class MqQueue4ModifyMchUserRemove extends MqMchUserRemoveService {
 
     @Autowired private JmsTemplate jmsTemplate;
 
-    @Bean("modifyMchUserRemove")
+    @Bean("activeModifyMchUserRemove")
     public Queue mqQueue4ModifyMchUserRemove(){
         return new ActiveMQQueue(CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE);
     }
 
     @Lazy
     @Autowired
-    @Qualifier("modifyMchUserRemove")
+    @Qualifier("activeModifyMchUserRemove")
     private Queue mqQueue4ModifyMchUserRemove;
 
     @Override

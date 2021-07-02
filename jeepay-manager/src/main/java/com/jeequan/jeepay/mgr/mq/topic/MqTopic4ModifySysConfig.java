@@ -44,14 +44,14 @@ public class MqTopic4ModifySysConfig extends MqModifySysConfigService {
     @Autowired private JmsTemplate jmsTemplate;
     @Autowired private SysConfigService sysConfigService;
 
-    @Bean("modifySysConfig")
+    @Bean("activeModifySysConfig")
     public ActiveMQTopic mqTopic4ModifySysConfig(){
         return new ActiveMQTopic(CS.MQ.TOPIC_MODIFY_SYS_CONFIG);
     }
 
     @Lazy
     @Autowired
-    @Qualifier("modifySysConfig")
+    @Qualifier("activeModifySysConfig")
     private ActiveMQTopic mqTopic4ModifySysConfig;
 
     /** 接收 更新系统配置项的消息 **/

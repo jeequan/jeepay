@@ -52,14 +52,14 @@ spring:
         password:
 
     # 注意：以下MQ配置需注意【如需使用activeMQ则需将rabbitMQ配置注释即可】
-    profiles:
-        include:
-            - activeMQ
+#    profiles:
+#        include:
+#            - activeMQ
     #      - rabbitMQ # 需要安装延迟队列插件：https://www.rabbitmq.com/blog/2015/04/16/scheduling-messages-with-rabbitmq/
 
     #activeMQ配置
-    activemq:
-        broker-url: tcp://localhost:61616  #连接地址
+#    activemq:
+#        broker-url: tcp://localhost:61616  #连接地址
 
         #rabbitmq配置
         #  rabbitmq:

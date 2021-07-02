@@ -51,14 +51,14 @@ import javax.jms.TextMessage;
 @Profile(CS.MQTYPE.ACTIVE_MQ)
 public class MqQueue4PayOrderMchNotify extends MqPayOrderMchNotifyService {
 
-    @Bean("payOrderMchNotifyInner")
+    @Bean("activePayOrderMchNotifyInner")
     public Queue mqQueue4PayOrderMchNotifyInner(){
         return new ActiveMQQueue(CS.MQ.QUEUE_PAYORDER_MCH_NOTIFY);
     }
 
     @Lazy
     @Autowired
-    @Qualifier("payOrderMchNotifyInner")
+    @Qualifier("activePayOrderMchNotifyInner")
     private Queue mqQueue4PayOrderMchNotifyInner;
     @Autowired private JmsTemplate jmsTemplate;
     @Autowired private MchNotifyRecordService mchNotifyRecordService;

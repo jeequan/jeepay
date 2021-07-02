@@ -43,14 +43,14 @@ public class MqTopic4ModifyMchApp extends MqModifyMchAppService {
 
     @Autowired private JmsTemplate jmsTemplate;
 
-    @Bean("modifyMchApp")
+    @Bean("activeModifyMchApp")
     public ActiveMQTopic mqTopic4ModifyMchApp(){
         return new ActiveMQTopic(CS.MQ.TOPIC_MODIFY_MCH_APP);
     }
 
     @Lazy
     @Autowired
-    @Qualifier("modifyMchApp")
+    @Qualifier("activeModifyMchApp")
     private ActiveMQTopic mqTopic4ModifyMchApp;
 
     /** 推送消息到各个节点 **/

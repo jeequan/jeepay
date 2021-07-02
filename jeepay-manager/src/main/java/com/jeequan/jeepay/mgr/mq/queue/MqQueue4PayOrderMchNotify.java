@@ -43,14 +43,14 @@ public class MqQueue4PayOrderMchNotify extends MqPayOrderNotifyService {
 
     @Autowired private JmsTemplate jmsTemplate;
 
-    @Bean("payOrderMchNotify")
+    @Bean("activePayOrderMchNotify")
     public Queue mqQueue4PayOrderMchNotify(){
         return new ActiveMQQueue(CS.MQ.QUEUE_PAYORDER_MCH_NOTIFY);
     }
 
     @Lazy
     @Autowired
-    @Qualifier("payOrderMchNotify")
+    @Qualifier("activePayOrderMchNotify")
     private Queue mqQueue4PayOrderMchNotify;
 
 

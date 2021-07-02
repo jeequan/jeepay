@@ -55,14 +55,14 @@ public class MqQueue4ChannelOrderQuery extends MqChannelOrderQueryService {
     @Autowired private PayOrderService payOrderService;
     @Autowired private ChannelOrderReissueService channelOrderReissueService;
 
-    @Bean("channelOrderQuery")
+    @Bean("activeChannelOrderQuery")
     public Queue mqQueue4ChannelOrderQuery(){
         return new ActiveMQQueue(CS.MQ.QUEUE_CHANNEL_ORDER_QUERY);
     }
 
     @Lazy
     @Autowired
-    @Qualifier("channelOrderQuery")
+    @Qualifier("activeChannelOrderQuery")
     private Queue mqQueue4ChannelOrderQuery;
 
     /** 发送MQ消息 **/

@@ -41,14 +41,14 @@ public class MqTopic4ModifyIsvInfo extends MqModifyIsvInfoService {
 
     @Autowired private JmsTemplate jmsTemplate;
 
-    @Bean("modifyIsvInfo")
+    @Bean("activeModifyIsvInfo")
     public ActiveMQTopic mqTopic4ModifyIsvInfo(){
         return new ActiveMQTopic(CS.MQ.TOPIC_MODIFY_ISV_INFO);
     }
 
     @Lazy
     @Autowired
-    @Qualifier("modifyIsvInfo")
+    @Qualifier("activeModifyIsvInfo")
     private ActiveMQTopic mqTopic4ModifyIsvInfo;
 
     @Override

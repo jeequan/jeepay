@@ -41,14 +41,14 @@ public class MqTopic4ModifyMchInfo extends MqModifyMchInfoService {
 
     @Autowired private JmsTemplate jmsTemplate;
 
-    @Bean("modifyMchInfo")
+    @Bean("activeModifyMchInfo")
     public ActiveMQTopic mqTopic4ModifyMchInfo(){
         return new ActiveMQTopic(CS.MQ.TOPIC_MODIFY_MCH_INFO);
     }
 
     @Lazy
     @Autowired
-    @Qualifier("modifyMchInfo")
+    @Qualifier("activeModifyMchInfo")
     private ActiveMQTopic mqTopic4ModifyMchInfo;
 
     @Override
