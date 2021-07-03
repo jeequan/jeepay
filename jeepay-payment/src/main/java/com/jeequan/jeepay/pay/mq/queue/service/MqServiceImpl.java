@@ -51,7 +51,4 @@ public class MqServiceImpl {
         mqPayOrderMchNotifyService.send(msg, delay);
     }
 
-    public static final String buildMsg(String payOrderId, int count){
-        return payOrderId + "," + count;
-    }
 }

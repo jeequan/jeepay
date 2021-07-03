@@ -148,12 +148,15 @@ public class CS {
         /** 清除商户登录用户信息 **/
         String QUEUE_MODIFY_MCH_USER_REMOVE = "queue.modify.mch.user.remove";
 
+        /** 用于activemq 发布订阅模式交换机**/
+        String FANOUT_MODIFY_SYS_CONFIG = "fanout.modify.sys.config";
+
     }
 
     /** RabbitMQ交换机类型 **/
-    public static final String TOPIC_EXCHANGE = "topicExchange";
     public static final String DIRECT_EXCHANGE = "directExchange";
     public static final String DELAYED_EXCHANGE = "delayedExchange"; // 延迟交换机
+    public static final String FANOUT_EXCHANGE_SYS_CONFIG = "fanoutExchangeSysConfig";
     /** 切换MQ的类型 **/
     public static class MQTYPE{
         public static final String ACTIVE_MQ = "activeMQ";

@@ -22,7 +22,7 @@ import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.service.MqServiceImpl;
+import com.jeequan.jeepay.mgr.mq.service.MqSendServiceImpl;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,7 +43,7 @@ import java.util.List;
 public class IsvPayInterfaceConfigController extends CommonCtrl {
 
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private MqServiceImpl mqServiceImpl;
+    @Autowired private MqSendServiceImpl mqSendServiceImpl;
 
    /**
     * @Author: ZhuXiao
@@ -114,7 +114,7 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
         if (!result) {
             return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "配置失败");
         }
-        mqServiceImpl.sendModifyIsvInfo(infoId); // 推送mq到目前节点进行更新数据
+        mqSendServiceImpl.sendModifyIsvInfo(infoId); // 推送mq到目前节点进行更新数据
         return ApiRes.ok();
     }
 

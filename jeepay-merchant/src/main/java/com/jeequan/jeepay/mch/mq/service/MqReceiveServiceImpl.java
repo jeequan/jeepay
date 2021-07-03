@@ -13,39 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mch.mq.queue;
+package com.jeequan.jeepay.mch.mq.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.jeequan.jeepay.core.cache.RedisUtil;
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
 
 /**
- * 商户用户登录信息清除
+ * 处理公共接收消息方法
  *
- * @author pangxiaoyu
+ * @author xiaoyu
  * @site https://www.jeepay.vip
- * @date 2021-04-27 15:50
+ * @date 2021/6/25 17:10
  */
 @Slf4j
-@Component
-@Profile(CS.MQTYPE.RABBIT_MQ)
-public class RabbitMqQueue4ModifyMchUserRemove {
+@Service
+public class MqReceiveServiceImpl {
 
-    /**
-     * @author: pangxiaoyu
-     * @date: 2021/6/7 16:17
-     * @describe: 接收 商户用户登录信息清除消息
-     */
-    @RabbitListener(queues = CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE)
-    public void receive(String userIdStr) {
+    @Autowired private SysConfigService sysConfigService;
+
+    public void mchUserRemove(String userIdStr) {
         log.info("成功接收删除商户用户登录的订阅通知, msg={}", userIdStr);
         // 字符串转List<Long>
         List<Long> userIdList = JSONArray.parseArray(userIdStr, Long.class);
@@ -68,4 +62,9 @@ public class RabbitMqQueue4ModifyMchUserRemove {
         log.info("无权限登录用户信息已清除");
     }
 
+    public void initDbConfig(String msg) {
+        log.info("成功接收更新系统配置的订阅通知, msg={}", msg);
+        sysConfigService.initDBConfig(msg);
+        log.info("系统配置静态属性已重置");
+    }
 }

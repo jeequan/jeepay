@@ -13,38 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.mq.topic;
+package com.jeequan.jeepay.mgr.mq.topic;
 
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.mgr.mq.service.MqModifySysConfigService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 /**
-* 更改系统配置参数
-*
-* @author xiaoyu
-* @site https://www.jeepay.vip
-* @date 2021/6/25 17:10
-*/
+ * RabbitMq
+ * 系统信息修改推送
+ * @author xiaoyu
+ * @site https://www.jeepay.vip
+ * @date 2021/6/25 17:10
+ */
 @Slf4j
 @Component
 @Profile(CS.MQTYPE.RABBIT_MQ)
-public class RabbitMqTopic4ModifySysConfig {
+public class RabbitMqDirect4ModifySysConfig extends MqModifySysConfigService {
 
+    @Autowired private AmqpTemplate rabbitTemplate;
     @Autowired private SysConfigService sysConfigService;
 
     /** 接收 更新系统配置项的消息 **/
-    @RabbitListener(queues = CS.MQ.TOPIC_MODIFY_SYS_CONFIG)
+    @RabbitListener(bindings = {@QueueBinding(value = @Queue(),exchange = @Exchange(name = CS.FANOUT_EXCHANGE_SYS_CONFIG,type = "fanout"))})
     public void receive(String msg) {
-
         log.info("成功接收更新系统配置的订阅通知, msg={}", msg);
         sysConfigService.initDBConfig(msg);
         log.info("系统配置静态属性已重置");
+    }
+
+    /** 推送消息到各个节点 **/
+    @Override
+    public void send(String msg) {
+        this.rabbitTemplate.convertAndSend(CS.FANOUT_EXCHANGE_SYS_CONFIG, CS.MQ.FANOUT_MODIFY_SYS_CONFIG, msg);
     }
 
 }

@@ -16,7 +16,7 @@
 package com.jeequan.jeepay.mch.mq.topic;
 
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.service.impl.SysConfigService;
+import com.jeequan.jeepay.mch.mq.service.MqReceiveServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.command.ActiveMQTopic;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 @Profile(CS.MQTYPE.ACTIVE_MQ)
 public class MqTopic4ModifySysConfig extends ActiveMQTopic{
 
-    @Autowired private SysConfigService sysConfigService;
+    @Autowired private MqReceiveServiceImpl mqReceiveServiceImpl;
 
     public MqTopic4ModifySysConfig(){
         super(CS.MQ.TOPIC_MODIFY_SYS_CONFIG);
@@ -46,10 +46,7 @@ public class MqTopic4ModifySysConfig extends ActiveMQTopic{
     /** 接收 更新系统配置项的消息 **/
     @JmsListener(destination = CS.MQ.TOPIC_MODIFY_SYS_CONFIG, containerFactory = "jmsListenerContainer")
     public void receive(String msg) {
-
-        log.info("成功接收更新系统配置的订阅通知, msg={}", msg);
-        sysConfigService.initDBConfig(msg);
-        log.info("系统配置静态属性已重置");
+        mqReceiveServiceImpl.initDbConfig(msg);
     }
 
 

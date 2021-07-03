@@ -23,7 +23,7 @@ import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.service.MqServiceImpl;
+import com.jeequan.jeepay.mgr.mq.service.MqSendServiceImpl;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +44,7 @@ public class MchAppController extends CommonCtrl {
 
     @Autowired private MchInfoService mchInfoService;
     @Autowired private MchAppService mchAppService;
-    @Autowired private MqServiceImpl mqServiceImpl;
+    @Autowired private MqSendServiceImpl mqSendServiceImpl;
 
     /**
      * @Author: ZhuXiao
@@ -122,7 +122,7 @@ public class MchAppController extends CommonCtrl {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
         }
         // 推送修改应用消息
-        mqServiceImpl.sendModifyMchApp(mchApp.getMchNo(), mchApp.getAppId());
+        mqSendServiceImpl.sendModifyMchApp(mchApp.getMchNo(), mchApp.getAppId());
         return ApiRes.ok();
     }
 
@@ -140,7 +140,7 @@ public class MchAppController extends CommonCtrl {
         mchAppService.removeByAppId(appId);
 
         // 推送mq到目前节点进行更新数据
-        mqServiceImpl.sendModifyMchApp(mchApp.getMchNo(), appId);
+        mqSendServiceImpl.sendModifyMchApp(mchApp.getMchNo(), appId);
         return ApiRes.ok();
     }
 

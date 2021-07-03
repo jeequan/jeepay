@@ -15,14 +15,10 @@
  */
 package com.jeequan.jeepay.pay.mq.queue;
 
-import cn.hutool.http.HttpException;
-import cn.hutool.http.HttpUtil;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.entity.MchNotifyRecord;
+import com.jeequan.jeepay.pay.mq.MqReceiveServiceImpl;
 import com.jeequan.jeepay.pay.mq.config.MqThreadExecutor;
 import com.jeequan.jeepay.pay.mq.queue.service.MqPayOrderMchNotifyService;
-import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
-import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ScheduledMessage;
 import org.apache.activemq.command.ActiveMQQueue;
@@ -61,8 +57,7 @@ public class MqQueue4PayOrderMchNotify extends MqPayOrderMchNotifyService {
     @Qualifier("activePayOrderMchNotifyInner")
     private Queue mqQueue4PayOrderMchNotifyInner;
     @Autowired private JmsTemplate jmsTemplate;
-    @Autowired private MchNotifyRecordService mchNotifyRecordService;
-    @Autowired private PayOrderService payOrderService;
+    @Autowired private MqReceiveServiceImpl mqReceiveServiceImpl;
 
     public MqQueue4PayOrderMchNotify(){
         super();
@@ -86,56 +81,12 @@ public class MqQueue4PayOrderMchNotify extends MqPayOrderMchNotifyService {
         });
     }
 
-    /** 接收 更新系统配置项的消息 **/
+    /** 接收 支付订单商户回调消息 **/
     @Async(MqThreadExecutor.EXECUTOR_PAYORDER_MCH_NOTIFY)
     @JmsListener(destination = CS.MQ.QUEUE_PAYORDER_MCH_NOTIFY)
     public void receive(String msg) {
-
-        log.info("接收商户通知MQ, msg={}", msg);
-
-        Long notifyId = Long.parseLong(msg);
-
-        MchNotifyRecord record = mchNotifyRecordService.getById(notifyId);
-
-        if(record == null || record.getState() != MchNotifyRecord.STATE_ING){
-            log.info("查询通知记录不存在或状态不是通知中");
-            return ;
-        }
-        if( record.getNotifyCount() >= record.getNotifyCountLimit() ){
-            log.info("已达到最大发送次数");
-            return ;
-        }
-
-        //1. (发送结果最多6次)
-        Integer currentCount = record.getNotifyCount() + 1;
-
-        String notifyUrl = record.getNotifyUrl();
-        String res = "";
-        try {
-            res = HttpUtil.createPost(notifyUrl).timeout(20000).execute().body();
-        } catch (HttpException e) {
-            log.error("http error", e);
-        }
-
-        if(currentCount == 1){ //第一次通知: 更新为已通知
-            payOrderService.updateNotifySent(record.getOrderId());
-        }
-
-        //通知成功
-        if("SUCCESS".equalsIgnoreCase(res)){
-            mchNotifyRecordService.updateNotifyResult(notifyId, MchNotifyRecord.STATE_SUCCESS, res);
-            return ;
-        }
-
-        //通知次数 >= 最大通知次数时， 更新响应结果为异常， 不在继续延迟发送消息
-        if( currentCount >= record.getNotifyCountLimit() ){
-            mchNotifyRecordService.updateNotifyResult(notifyId, MchNotifyRecord.STATE_FAIL, res);
-            return ;
-        }
-
-        // 继续发送MQ 延迟发送
-        mchNotifyRecordService.updateNotifyResult(notifyId, MchNotifyRecord.STATE_ING, res);
-
+        Integer currentCount = mqReceiveServiceImpl.payOrderMchNotify(msg);
+        if (currentCount == null) return;
         // 通知延时次数
 //        1   2  3  4   5   6
 //        0  30 60 90 120 150

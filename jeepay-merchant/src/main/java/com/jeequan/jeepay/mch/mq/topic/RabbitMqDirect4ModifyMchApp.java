@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Profile(CS.MQTYPE.RABBIT_MQ)
-public class RabbitMqTopic4ModifyMchApp extends MqModifyMchAppService {
+public class RabbitMqDirect4ModifyMchApp extends MqModifyMchAppService {
 
     @Autowired private RabbitTemplate rabbitTemplate;
 
@@ -47,7 +47,7 @@ public class RabbitMqTopic4ModifyMchApp extends MqModifyMchAppService {
         JSONObject jsonObject = JsonKit.newJson("mchNo", mchNo);
         jsonObject.put("appId", appId);
 
-        rabbitTemplate.convertAndSend(CS.TOPIC_EXCHANGE, CS.MQ.TOPIC_MODIFY_ISV_INFO, jsonObject.toString());
+        rabbitTemplate.convertAndSend(CS.DIRECT_EXCHANGE, CS.MQ.TOPIC_MODIFY_MCH_APP, jsonObject.toString());
     }
 
 }

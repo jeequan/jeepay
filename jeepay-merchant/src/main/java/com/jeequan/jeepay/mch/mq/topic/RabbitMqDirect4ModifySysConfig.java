@@ -13,32 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mgr.mq.topic;
+package com.jeequan.jeepay.mch.mq.topic;
 
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.mgr.mq.service.MqModifyMchInfoService;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import com.jeequan.jeepay.mch.mq.service.MqReceiveServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
  * RabbitMq
- * 商户信息修改推送
+ * 系统信息修改推送
  * @author xiaoyu
  * @site https://www.jeepay.vip
  * @date 2021/6/25 17:10
  */
+@Slf4j
 @Component
 @Profile(CS.MQTYPE.RABBIT_MQ)
-public class RabbitMqTopic4ModifyMchInfo extends MqModifyMchInfoService {
+public class RabbitMqDirect4ModifySysConfig {
 
-    @Autowired private RabbitTemplate rabbitTemplate;
+    @Autowired private MqReceiveServiceImpl mqReceiveServiceImpl;
 
-    /** 推送消息到各个节点 **/
-    @Override
-    public void send(String mchNo) {
-        rabbitTemplate.convertAndSend(CS.TOPIC_EXCHANGE, CS.MQ.TOPIC_MODIFY_MCH_INFO, mchNo);
+    /** 接收 更新系统配置项的消息 **/
+    @RabbitListener(bindings = {@QueueBinding(value = @Queue(),exchange = @Exchange(name = CS.FANOUT_EXCHANGE_SYS_CONFIG,type = "fanout"))})
+    public void receive(String msg) {
+        mqReceiveServiceImpl.initDbConfig(msg);
     }
+
+
 
 }

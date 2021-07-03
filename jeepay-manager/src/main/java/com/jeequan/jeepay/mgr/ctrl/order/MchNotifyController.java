@@ -23,7 +23,7 @@ import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.service.MqServiceImpl;
+import com.jeequan.jeepay.mgr.mq.service.MqSendServiceImpl;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MchNotifyController extends CommonCtrl {
 
     @Autowired private MchNotifyRecordService mchNotifyService;
-    @Autowired private MqServiceImpl mqServiceImpl;
+    @Autowired private MqSendServiceImpl mqSendServiceImpl;
 
     /**
      * @author: pangxiaoyu
@@ -106,7 +106,7 @@ public class MchNotifyController extends CommonCtrl {
         mchNotifyService.getBaseMapper().updateIngAndAddNotifyCountLimit(notifyId);
 
         //调起MQ重发
-        mqServiceImpl.sendPayOrderNotify(notifyId+"");
+        mqSendServiceImpl.sendPayOrderNotify(notifyId+"");
 
         return ApiRes.ok(mchNotify);
     }

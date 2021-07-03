@@ -13,39 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mch.mq.topic;
+package com.jeequan.jeepay.mch.mq.service;
 
-import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
- * RabbitMq
- * 系统信息修改推送
+ * mq消息中转
+ *
  * @author xiaoyu
  * @site https://www.jeepay.vip
  * @date 2021/6/25 17:10
  */
 @Slf4j
-@Component
-@Profile(CS.MQTYPE.RABBIT_MQ)
-public class RabbitMqTopic4ModifySysConfig{
+@Service
+public class MqSendServiceImpl {
 
-    @Autowired private SysConfigService sysConfigService;
+    @Autowired private MqModifyMchAppService mqModifyMchAppService;
 
-    /** 接收 更新系统配置项的消息 **/
-    @RabbitListener(queues = CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE)
-    public void receive(String msg) {
-
-        log.info("成功接收更新系统配置的订阅通知, msg={}", msg);
-        sysConfigService.initDBConfig(msg);
-        log.info("系统配置静态属性已重置");
+    public void sendModifyMchApp(String mchNo, String appId){
+        mqModifyMchAppService.send(mchNo, appId);
     }
-
-
 
 }

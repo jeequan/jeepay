@@ -23,7 +23,7 @@ import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.IsvInfo;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.service.MqServiceImpl;
+import com.jeequan.jeepay.mgr.mq.service.MqSendServiceImpl;
 import com.jeequan.jeepay.service.impl.IsvInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class IsvInfoController extends CommonCtrl {
 
     @Autowired private IsvInfoService isvInfoService;
-    @Autowired private MqServiceImpl mqServiceImpl;
+    @Autowired private MqSendServiceImpl mqSendServiceImpl;
 
     /**
      * @author: pangxiaoyu
@@ -95,7 +95,7 @@ public class IsvInfoController extends CommonCtrl {
     @RequestMapping(value="/{isvNo}", method = RequestMethod.DELETE)
     public ApiRes delete(@PathVariable("isvNo") String isvNo) {
         isvInfoService.removeByIsvNo(isvNo);
-        mqServiceImpl.sendModifyIsvInfo(isvNo); // 推送mq到目前节点进行更新数据
+        mqSendServiceImpl.sendModifyIsvInfo(isvNo); // 推送mq到目前节点进行更新数据
         return ApiRes.ok();
     }
 
@@ -111,7 +111,7 @@ public class IsvInfoController extends CommonCtrl {
         IsvInfo isvInfo = getObject(IsvInfo.class);
         isvInfo.setIsvNo(isvNo);
         boolean result = isvInfoService.updateById(isvInfo);
-        mqServiceImpl.sendModifyIsvInfo(isvNo); // 推送mq到目前节点进行更新数据
+        mqSendServiceImpl.sendModifyIsvInfo(isvNo); // 推送mq到目前节点进行更新数据
         if (!result)  return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
         return ApiRes.ok();
     }

@@ -18,27 +18,27 @@ package com.jeequan.jeepay.pay.mq.topic;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.pay.mq.MqReceiveServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
-/*
+/**
 * 更改ISV信息
 *
-* @author terrfly
+* @author xiaoyu
 * @site https://www.jeepay.vip
-* @date 2021/6/8 17:31
+* @date 2021/6/25 17:10
 */
 @Slf4j
 @Component
-@Profile(CS.MQTYPE.ACTIVE_MQ)
-public class MqTopic4ModifyIsvInfo{
+@Profile(CS.MQTYPE.RABBIT_MQ)
+public class RabbitMqDirect4ModifyIsvInfo {
 
     @Autowired private MqReceiveServiceImpl mqReceiveServiceImpl;
 
-    /** 接收 更新系统配置项的消息 **/
-    @JmsListener(destination = CS.MQ.TOPIC_MODIFY_ISV_INFO, containerFactory = "jmsListenerContainer")
+    /** 接收 更新服务商信息的消息 **/
+    @RabbitListener(queues = CS.MQ.TOPIC_MODIFY_ISV_INFO)
     public void receive(String isvNo) {
         mqReceiveServiceImpl.modifyIsvInfo(isvNo);
     }

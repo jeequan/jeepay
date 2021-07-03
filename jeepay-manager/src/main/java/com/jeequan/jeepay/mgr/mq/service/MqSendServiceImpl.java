@@ -30,7 +30,7 @@ import java.util.Collection;
  */
 @Slf4j
 @Service
-public class MqServiceImpl {
+public class MqSendServiceImpl {
 
     @Autowired private MqMchUserRemoveService mqMchUserRemoveService;
     @Autowired private MqPayOrderNotifyService mqPayOrderNotifyService;

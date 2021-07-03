@@ -17,6 +17,7 @@ package com.jeequan.jeepay.mgr.mq.topic;
 
 import com.jeequan.jeepay.core.constants.CS;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,7 @@ import org.springframework.context.annotation.Profile;
  */
 @Profile(CS.MQTYPE.RABBIT_MQ)
 @Configuration
+@EnableRabbit
 public class RabbitMqConfig {
 
     @Bean("modifyIsvInfo")
@@ -48,9 +50,8 @@ public class RabbitMqConfig {
 
     @Bean("modifySysConfig")
     public Queue modifySysConfig() {
-        return new Queue(CS.MQ.TOPIC_MODIFY_SYS_CONFIG,true);
+        return new Queue(CS.MQ.FANOUT_MODIFY_SYS_CONFIG,true);
     }
-
 
     @Bean("payOrderMchNotify")
     public Queue payOrderMchNotify() {
@@ -62,10 +63,10 @@ public class RabbitMqConfig {
         return new Queue(CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE,true);
     }
 
-    //Topic交换机 起名：topicExchange
-    @Bean("topicExchange")
-    TopicExchange topicExchange() {
-        return new TopicExchange(CS.TOPIC_EXCHANGE,true,false);
+    //Fanout交换机 起名：fanoutExchange
+    @Bean("fanoutExchange")
+    FanoutExchange fanoutExchange() {
+        return new FanoutExchange(CS.FANOUT_EXCHANGE_SYS_CONFIG,true,false);
     }
 
     //交换机 起名：directExchange
@@ -74,29 +75,28 @@ public class RabbitMqConfig {
         return new DirectExchange(CS.DIRECT_EXCHANGE,true,false);
     }
 
-
     //绑定  将队列和交换机绑定, 并设置用于匹配键：TOPIC_MODIFY_ISV_INFO
     @Bean
-    Binding bindingIsvInfo(@Qualifier("modifyIsvInfo") Queue modifyIsvInfo, @Qualifier("topicExchange") TopicExchange topicExchange) {
-        return BindingBuilder.bind(modifyIsvInfo).to(topicExchange).with(CS.MQ.TOPIC_MODIFY_ISV_INFO);
+    Binding bindingIsvInfo(@Qualifier("modifyIsvInfo") Queue modifyIsvInfo, @Qualifier("directExchange") DirectExchange directExchange) {
+        return BindingBuilder.bind(modifyIsvInfo).to(directExchange).with(CS.MQ.TOPIC_MODIFY_ISV_INFO);
     }
 
     //绑定  将队列和交换机绑定, 并设置用于匹配键：TOPIC_MODIFY_MCH_APP
     @Bean
-    Binding bindingMchApp(@Qualifier("modifyMchApp") Queue modifyMchApp, @Qualifier("topicExchange") TopicExchange topicExchange) {
-        return BindingBuilder.bind(modifyMchApp).to(topicExchange).with(CS.MQ.TOPIC_MODIFY_MCH_APP);
+    Binding bindingMchApp(@Qualifier("modifyMchApp") Queue modifyMchApp, @Qualifier("directExchange") DirectExchange directExchange) {
+        return BindingBuilder.bind(modifyMchApp).to(directExchange).with(CS.MQ.TOPIC_MODIFY_MCH_APP);
     }
 
     //绑定  将队列和交换机绑定, 并设置用于匹配键：TOPIC_MODIFY_MCH_INFO
     @Bean
-    Binding bindingMchInfo(@Qualifier("modifyMchInfo") Queue modifyMchInfo, @Qualifier("topicExchange") TopicExchange topicExchange) {
-        return BindingBuilder.bind(modifyMchInfo).to(topicExchange).with(CS.MQ.TOPIC_MODIFY_MCH_INFO);
+    Binding bindingMchInfo(@Qualifier("modifyMchInfo") Queue modifyMchInfo, @Qualifier("directExchange") DirectExchange directExchange) {
+        return BindingBuilder.bind(modifyMchInfo).to(directExchange).with(CS.MQ.TOPIC_MODIFY_MCH_INFO);
     }
 
-    //绑定  将队列和交换机绑定, 并设置用于匹配键：TOPIC_MODIFY_SYS_CONFIG
+    //绑定  将队列和交换机绑定
     @Bean
-    Binding bindingSysConfig(@Qualifier("modifySysConfig") Queue modifySysConfig, @Qualifier("topicExchange") TopicExchange topicExchange) {
-        return BindingBuilder.bind(modifySysConfig).to(topicExchange).with(CS.MQ.TOPIC_MODIFY_SYS_CONFIG);
+    Binding bindingSysConfig(Queue modifySysConfig, FanoutExchange fanoutExchange) {
+        return BindingBuilder.bind(modifySysConfig).to(fanoutExchange);
     }
 
     //绑定  将队列和交换机绑定, 并设置用于匹配键：QUEUE_PAYORDER_MCH_NOTIFY

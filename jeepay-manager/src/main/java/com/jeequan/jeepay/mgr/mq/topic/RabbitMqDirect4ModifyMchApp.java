@@ -13,40 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.mq.topic;
+package com.jeequan.jeepay.mgr.mq.topic;
 
+import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.pay.service.ConfigContextService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import com.jeequan.jeepay.core.utils.JsonKit;
+import com.jeequan.jeepay.mgr.mq.service.MqModifyMchAppService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 /**
-* 更改ISV信息
-*
-* @author xiaoyu
-* @site https://www.jeepay.vip
-* @date 2021/6/25 17:10
-*/
-@Slf4j
+ * RabbitMq
+ * 商户应用修改推送
+ * @author xiaoyu
+ * @site https://www.jeepay.vip
+ * @date 2021/6/25 17:10
+ */
 @Component
 @Profile(CS.MQTYPE.RABBIT_MQ)
-public class RabbitMqTopic4ModifyIsvInfo {
+public class RabbitMqDirect4ModifyMchApp extends MqModifyMchAppService {
 
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private RabbitTemplate rabbitTemplate;
 
-    /** 接收 更新系统配置项的消息 **/
-    @RabbitListener(queues = CS.MQ.TOPIC_MODIFY_ISV_INFO)
-    public void receive(String isvNo) {
-
-        log.info("重置ISV信息, msg={}", isvNo);
-        configContextService.initIsvConfigContext(isvNo);
+    /** 推送消息到各个节点 **/
+    @Override
+    public void send(String mchNo, String appId) {
+        JSONObject jsonObject = JsonKit.newJson("mchNo", mchNo);
+        jsonObject.put("appId", appId);
+        rabbitTemplate.convertAndSend(CS.DIRECT_EXCHANGE, CS.MQ.TOPIC_MODIFY_MCH_APP, jsonObject.toString());
     }
-
-
 
 }

@@ -15,9 +15,8 @@
  */
 package com.jeequan.jeepay.pay.mq.topic;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.pay.service.ConfigContextService;
+import com.jeequan.jeepay.pay.mq.MqReceiveServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -36,7 +35,7 @@ import org.springframework.stereotype.Component;
 @Profile(CS.MQTYPE.ACTIVE_MQ)
 public class MqTopic4ModifyMchInfo{
 
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private MqReceiveServiceImpl mqReceiveServiceImpl;
 
     /** 接收 [商户配置信息] 的消息
      * 已知推送节点：
@@ -45,9 +44,7 @@ public class MqTopic4ModifyMchInfo{
      * **/
     @JmsListener(destination = CS.MQ.TOPIC_MODIFY_MCH_INFO, containerFactory = "jmsListenerContainer")
     public void receive(String mchNo) {
-
-        log.info("接收 [商户配置信息] 的消息, msg={}", mchNo);
-        configContextService.initMchInfoConfigContext(mchNo);
+        mqReceiveServiceImpl.modifyMchInfo(mchNo);
     }
 
     /** 接收 [商户应用支付参数配置信息] 的消息
@@ -57,10 +54,7 @@ public class MqTopic4ModifyMchInfo{
      * **/
     @JmsListener(destination = CS.MQ.TOPIC_MODIFY_MCH_APP, containerFactory = "jmsListenerContainer")
     public void receiveMchApp(String mchNoAndAppId) {
-
-        log.info("接收 [商户应用支付参数配置信息] 的消息, msg={}", mchNoAndAppId);
-        JSONObject jsonObject = (JSONObject) JSONObject.parse(mchNoAndAppId);
-        configContextService.initMchAppConfigContext(jsonObject.getString("mchNo"), jsonObject.getString("appId"));
+        mqReceiveServiceImpl.modifyMchApp(mchNoAndAppId);
     }
 
 

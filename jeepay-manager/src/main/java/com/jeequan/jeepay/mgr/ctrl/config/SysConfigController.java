@@ -22,7 +22,7 @@ import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.SysConfig;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.service.MqServiceImpl;
+import com.jeequan.jeepay.mgr.mq.service.MqSendServiceImpl;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +49,7 @@ import java.util.Map;
 public class SysConfigController extends CommonCtrl {
 
 	@Autowired private SysConfigService sysConfigService;
-	@Autowired private MqServiceImpl mqService;
+	@Autowired private MqSendServiceImpl mqSendServiceImpl;
 
 
 	/**
@@ -84,7 +84,7 @@ public class SysConfigController extends CommonCtrl {
 		int update = sysConfigService.updateByConfigKey(updateMap);
 		if(update <= 0) return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "更新失败");
 
-		mqService.sendModifySysConfig(groupKey);
+		mqSendServiceImpl.sendModifySysConfig(groupKey);
 		return ApiRes.ok();
 	}
 

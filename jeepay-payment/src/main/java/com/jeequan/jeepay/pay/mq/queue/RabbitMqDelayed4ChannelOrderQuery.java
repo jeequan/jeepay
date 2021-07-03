@@ -16,11 +16,8 @@
 package com.jeequan.jeepay.pay.mq.queue;
 
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.pay.mq.MqReceiveServiceImpl;
 import com.jeequan.jeepay.pay.mq.queue.service.MqChannelOrderQueryService;
-import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
-import com.jeequan.jeepay.pay.service.ChannelOrderReissueService;
-import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -41,11 +38,11 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Profile(CS.MQTYPE.RABBIT_MQ)
-public class RabbitMqQueue4ChannelOrderQuery extends MqChannelOrderQueryService {
+public class RabbitMqDelayed4ChannelOrderQuery extends MqChannelOrderQueryService {
 
     @Autowired private RabbitTemplate rabbitTemplate;
-    @Autowired private PayOrderService payOrderService;
-    @Autowired private ChannelOrderReissueService channelOrderReissueService;
+
+    @Autowired private MqReceiveServiceImpl mqReceiveServiceImpl;
 
     public static final String buildMsg(String payOrderId, int count){
         return payOrderId + "," + count;
@@ -67,45 +64,10 @@ public class RabbitMqQueue4ChannelOrderQuery extends MqChannelOrderQueryService 
     }
 
 
-    /** 接收 更新系统配置项的消息 **/
+    /** 接收 查单消息 **/
     @RabbitListener(queues = CS.MQ.QUEUE_CHANNEL_ORDER_QUERY)
     public void receive(String msg) {
-
-        String [] arr = msg.split(",");
-        String payOrderId = arr[0];
-        int currentCount = Integer.parseInt(arr[1]);
-        log.info("接收轮询查单通知MQ, payOrderId={}, count={}", payOrderId, currentCount);
-        currentCount++ ;
-
-        PayOrder payOrder = payOrderService.getById(payOrderId);
-        if(payOrder == null) {
-            log.warn("查询支付订单为空,payOrderId={}", payOrderId);
-            return;
-        }
-
-        if(payOrder.getState() != PayOrder.STATE_ING) {
-            log.warn("订单状态不是支付中,不需查询渠道.payOrderId={}", payOrderId);
-            return;
-        }
-
-        ChannelRetMsg channelRetMsg = channelOrderReissueService.processPayOrder(payOrder);
-
-        //返回null 可能为接口报错等， 需要再次轮询
-        if(channelRetMsg == null || channelRetMsg.getChannelState() == null || channelRetMsg.getChannelState().equals(ChannelRetMsg.ChannelState.WAITING)){
-
-            //最多查询6次
-            if(currentCount <= 6){
-                send(buildMsg(payOrderId, currentCount), 5 * 1000); //延迟5s再次查询
-            }else{
-
-                //TODO 调用【撤销订单】接口
-
-            }
-
-        }else{ //其他状态， 不需要再次轮询。
-        }
-
-        return;
+        mqReceiveServiceImpl.channelOrderQuery(msg);
     }
 
 

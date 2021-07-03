@@ -16,45 +16,28 @@
 package com.jeequan.jeepay.mgr.mq.topic;
 
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.mgr.mq.service.MqModifyMchInfoService;
-import com.jeequan.jeepay.mgr.mq.service.MqModifySysConfigService;
-import com.jeequan.jeepay.service.impl.SysConfigService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import com.jeequan.jeepay.mgr.mq.service.MqModifyIsvInfoService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 /**
  * RabbitMq
- * 系统信息修改推送
+ * 服务商信息修改推送
  * @author xiaoyu
  * @site https://www.jeepay.vip
  * @date 2021/6/25 17:10
  */
-@Slf4j
 @Component
 @Profile(CS.MQTYPE.RABBIT_MQ)
-public class RabbitMqTopic4ModifySysConfig extends MqModifySysConfigService {
+public class RabbitMqDirect4ModifyIsvInfo extends MqModifyIsvInfoService {
 
     @Autowired private RabbitTemplate rabbitTemplate;
-    @Autowired private SysConfigService sysConfigService;
 
-    /** 接收 更新系统配置项的消息 **/
-    @RabbitListener(queues = CS.MQ.TOPIC_MODIFY_SYS_CONFIG)
-    public void receive(String msg) {
-
-        log.info("成功接收更新系统配置的订阅通知, msg={}", msg);
-        sysConfigService.initDBConfig(msg);
-        log.info("系统配置静态属性已重置");
-    }
-
-    /** 推送消息到各个节点 **/
     @Override
     public void send(String msg) {
-        rabbitTemplate.convertAndSend(CS.TOPIC_EXCHANGE, CS.MQ.TOPIC_MODIFY_SYS_CONFIG, msg);
+        rabbitTemplate.convertAndSend(CS.DIRECT_EXCHANGE, CS.MQ.TOPIC_MODIFY_ISV_INFO, msg);
     }
 
 }

@@ -31,6 +31,7 @@ import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.exception.ChannelException;
 import com.jeequan.jeepay.pay.model.IsvConfigContext;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.mq.MqReceiveServiceImpl;
 import com.jeequan.jeepay.pay.mq.queue.service.MqServiceImpl;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
@@ -63,7 +64,9 @@ public abstract class AbstractPayOrderController extends ApiController {
     @Autowired private ConfigContextService configContextService;
     @Autowired private PayMchNotifyService payMchNotifyService;
     @Autowired private SysConfigService sysConfigService;
-    @Autowired private MqServiceImpl mqService;
+    @Autowired private MqServiceImpl mqServiceImpl;
+    @Autowired private MqReceiveServiceImpl mqReceiveServiceImpl;
+
 
     /** 统一下单 (新建订单模式) **/
     protected ApiRes unifiedOrder(String wayCode, UnifiedOrderRQ bizRQ){
@@ -323,7 +326,7 @@ public abstract class AbstractPayOrderController extends ApiController {
 
         //判断是否需要轮询查单
         if(channelRetMsg.isNeedQuery()){
-            mqService.sendChannelOrderQuery(MqServiceImpl.buildMsg(payOrderId, 1), 5 * 1000);
+            mqServiceImpl.sendChannelOrderQuery(mqReceiveServiceImpl.buildMsg(payOrderId, 1), 5 * 1000);
         }
 
     }

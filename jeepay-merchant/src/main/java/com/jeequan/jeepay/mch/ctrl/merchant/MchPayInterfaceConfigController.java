@@ -23,7 +23,7 @@ import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mch.mq.service.MqServiceImpl;
+import com.jeequan.jeepay.mch.mq.service.MqSendServiceImpl;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ import java.util.List;
 public class MchPayInterfaceConfigController extends CommonCtrl {
 
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private MqServiceImpl mqService;
+    @Autowired private MqSendServiceImpl mqSendServiceImpl;
     @Autowired private MchInfoService mchInfoService;
 
     /**
@@ -125,7 +125,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
             throw new BizException("配置失败");
         }
 
-        mqService.sendModifyMchApp(getCurrentMchNo(), infoId); // 推送mq到目前节点进行更新数据
+        mqSendServiceImpl.sendModifyMchApp(getCurrentMchNo(), infoId); // 推送mq到目前节点进行更新数据
 
         return ApiRes.ok();
     }

@@ -15,17 +15,14 @@
  */
 package com.jeequan.jeepay.mch.mq.queue;
 
-import com.alibaba.fastjson.JSONArray;
-import com.jeequan.jeepay.core.cache.RedisUtil;
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.mch.mq.service.MqReceiveServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.command.ActiveMQQueue;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
-
-import java.util.Collection;
-import java.util.List;
 
 /**
  * 商户用户登录信息清除
@@ -39,6 +36,9 @@ import java.util.List;
 @Profile(CS.MQTYPE.ACTIVE_MQ)
 public class MqQueue4ModifyMchUserRemove extends ActiveMQQueue {
 
+    @Autowired
+    private MqReceiveServiceImpl mqReceiveServiceImpl;
+
     public MqQueue4ModifyMchUserRemove(){
         super(CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE);
     }
@@ -50,27 +50,7 @@ public class MqQueue4ModifyMchUserRemove extends ActiveMQQueue {
      */
     @JmsListener(destination = CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE)
     public void receive(String userIdStr) {
-
-        log.info("成功接收删除商户用户登录的订阅通知, msg={}", userIdStr);
-        // 字符串转List<Long>
-        List<Long> userIdList = JSONArray.parseArray(userIdStr, Long.class);
-        // 删除redis用户缓存
-        if(userIdList == null || userIdList.isEmpty()){
-            log.info("用户ID为空");
-            return ;
-        }
-        for (Long sysUserId : userIdList) {
-            Collection<String> cacheKeyList = RedisUtil.keys(CS.getCacheKeyToken(sysUserId, "*"));
-            if(cacheKeyList == null || cacheKeyList.isEmpty()){
-                continue;
-            }
-            for (String cacheKey : cacheKeyList) {
-                // 删除用户Redis信息
-                RedisUtil.del(cacheKey);
-                continue;
-            }
-        }
-        log.info("无权限登录用户信息已清除");
+        mqReceiveServiceImpl.mchUserRemove(userIdStr);
     }
 
 

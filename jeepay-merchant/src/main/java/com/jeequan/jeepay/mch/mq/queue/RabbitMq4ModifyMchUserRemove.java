@@ -13,39 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mgr.mq.topic;
+package com.jeequan.jeepay.mch.mq.queue;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.utils.JsonKit;
-import com.jeequan.jeepay.mgr.mq.service.MqModifyMchAppService;
+import com.jeequan.jeepay.mch.mq.service.MqReceiveServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.command.ActiveMQTopic;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * RabbitMq
- * 商户应用修改推送
- * @author xiaoyu
+ * 商户用户登录信息清除
+ *
+ * @author pangxiaoyu
  * @site https://www.jeepay.vip
- * @date 2021/6/25 17:10
+ * @date 2021-04-27 15:50
  */
+@Slf4j
 @Component
 @Profile(CS.MQTYPE.RABBIT_MQ)
-public class RabbitMqTopic4ModifyMchApp extends MqModifyMchAppService {
+public class RabbitMq4ModifyMchUserRemove {
 
-    @Autowired private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private MqReceiveServiceImpl mqReceiveServiceImpl;
 
-    /** 推送消息到各个节点 **/
-    @Override
-    public void send(String mchNo, String appId) {
-        JSONObject jsonObject = JsonKit.newJson("mchNo", mchNo);
-        jsonObject.put("appId", appId);
-        rabbitTemplate.convertAndSend(CS.TOPIC_EXCHANGE, CS.MQ.TOPIC_MODIFY_ISV_INFO, jsonObject.toString());
+    /**
+     * @author: pangxiaoyu
+     * @date: 2021/6/7 16:17
+     * @describe: 接收 商户用户登录信息清除消息
+     */
+    @RabbitListener(queues = CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE)
+    public void receive(String userIdStr) {
+        mqReceiveServiceImpl.mchUserRemove(userIdStr);
     }
 
 }

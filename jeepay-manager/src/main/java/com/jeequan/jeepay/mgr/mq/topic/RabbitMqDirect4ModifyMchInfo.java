@@ -13,27 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mch.mq.service;
+package com.jeequan.jeepay.mgr.mq.topic;
 
-import lombok.extern.slf4j.Slf4j;
+import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.mgr.mq.service.MqModifyMchInfoService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 /**
- * mq消息中转
- *
+ * RabbitMq
+ * 商户信息修改推送
  * @author xiaoyu
  * @site https://www.jeepay.vip
  * @date 2021/6/25 17:10
  */
-@Slf4j
-@Service
-public class MqServiceImpl {
+@Component
+@Profile(CS.MQTYPE.RABBIT_MQ)
+public class RabbitMqDirect4ModifyMchInfo extends MqModifyMchInfoService {
 
-    @Autowired private MqModifyMchAppService mqModifyMchAppService;
+    @Autowired private RabbitTemplate rabbitTemplate;
 
-    public void sendModifyMchApp(String mchNo, String appId){
-        mqModifyMchAppService.send(mchNo, appId);
+    /** 推送消息到各个节点 **/
+    @Override
+    public void send(String mchNo) {
+        rabbitTemplate.convertAndSend(CS.DIRECT_EXCHANGE, CS.MQ.TOPIC_MODIFY_MCH_INFO, mchNo);
     }
 
 }
