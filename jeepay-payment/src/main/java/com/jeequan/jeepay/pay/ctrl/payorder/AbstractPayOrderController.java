@@ -23,6 +23,7 @@ import com.jeequan.jeepay.core.entity.MchPayPassage;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.core.utils.StringKit;
@@ -31,8 +32,7 @@ import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.exception.ChannelException;
 import com.jeequan.jeepay.pay.model.IsvConfigContext;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
-import com.jeequan.jeepay.pay.mq.MqReceiveServiceImpl;
-import com.jeequan.jeepay.pay.mq.queue.service.MqServiceImpl;
+import com.jeequan.jeepay.pay.mq.receive.MqReceiveCommon;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRS;
@@ -64,8 +64,8 @@ public abstract class AbstractPayOrderController extends ApiController {
     @Autowired private ConfigContextService configContextService;
     @Autowired private PayMchNotifyService payMchNotifyService;
     @Autowired private SysConfigService sysConfigService;
-    @Autowired private MqServiceImpl mqServiceImpl;
-    @Autowired private MqReceiveServiceImpl mqReceiveServiceImpl;
+    @Autowired private MqCommonService mqCommonService;
+    @Autowired private MqReceiveCommon receiveCommon;
 
 
     /** 统一下单 (新建订单模式) **/
@@ -326,7 +326,7 @@ public abstract class AbstractPayOrderController extends ApiController {
 
         //判断是否需要轮询查单
         if(channelRetMsg.isNeedQuery()){
-            mqServiceImpl.sendChannelOrderQuery(mqReceiveServiceImpl.buildMsg(payOrderId, 1), 5 * 1000);
+            mqCommonService.send(receiveCommon.buildMsg(payOrderId, 1), 5 * 1000, CS.MQ.MQ_TYPE_CHANNEL_ORDER_QUERY);
         }
 
     }

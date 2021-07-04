@@ -19,10 +19,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
+import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.SysConfig;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.service.MqSendServiceImpl;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +50,7 @@ import java.util.Map;
 public class SysConfigController extends CommonCtrl {
 
 	@Autowired private SysConfigService sysConfigService;
-	@Autowired private MqSendServiceImpl mqSendServiceImpl;
+	@Autowired private MqCommonService mqCommonService;
 
 
 	/**
@@ -84,7 +85,7 @@ public class SysConfigController extends CommonCtrl {
 		int update = sysConfigService.updateByConfigKey(updateMap);
 		if(update <= 0) return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "更新失败");
 
-		mqSendServiceImpl.sendModifySysConfig(groupKey);
+		mqCommonService.send(groupKey, CS.MQ.MQ_TYPE_MODIFY_SYS_CONFIG);
 		return ApiRes.ok();
 	}
 

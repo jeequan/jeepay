@@ -151,6 +151,15 @@ public class CS {
         /** 用于activemq 发布订阅模式交换机**/
         String FANOUT_MODIFY_SYS_CONFIG = "fanout.modify.sys.config";
 
+        /** MQ消息类型 **/
+        String MQ_TYPE_MODIFY_MCH_APP = "modify.mch.app";
+        String MQ_TYPE_MODIFY_ISV_INFO = "modify.isv.info";
+        String MQ_TYPE_MODIFY_MCH_INFO = "modify.mch.info";
+        String MQ_TYPE_MODIFY_SYS_CONFIG = "modify.sys.config";
+        String MQ_TYPE_CHANNEL_ORDER_QUERY = "channel.order.query";
+        String MQ_TYPE_PAY_ORDER_MCH_NOTIFY = "pay.order.mch.notify";
+        String MQ_TYPE_MCH_LOGIN_USER_REMOVE = "mch.login.user.remove";
+
     }
 
     /** RabbitMQ交换机类型 **/

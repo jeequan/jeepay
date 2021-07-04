@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.mgr.ctrl.merchant;
 
+import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
@@ -22,8 +23,9 @@ import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.mq.MqCommonService;
+import com.jeequan.jeepay.core.utils.JsonKit;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.service.MqSendServiceImpl;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +47,8 @@ import java.util.List;
 public class MchPayInterfaceConfigController extends CommonCtrl {
 
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private MqSendServiceImpl mqSendServiceImpl;
     @Autowired private MchAppService mchAppService;
+    @Autowired private MqCommonService mqCommonService;
 
     /**
      * @Author: ZhuXiao
@@ -123,8 +125,9 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
         if (!result) {
             return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "配置失败");
         }
-
-        mqSendServiceImpl.sendModifyMchApp(mchApp.getMchNo(), infoId); // 推送mq到目前节点进行更新数据
+        JSONObject jsonObject = JsonKit.newJson("mchNo", mchApp.getMchNo());
+        jsonObject.put("appId", infoId);
+        mqCommonService.send(jsonObject.toJSONString(), CS.MQ.MQ_TYPE_MODIFY_MCH_APP); // 推送mq到目前节点进行更新数据
 
         return ApiRes.ok();
     }

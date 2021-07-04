@@ -17,6 +17,7 @@ package com.jeequan.jeepay.mgr.ctrl.merchant;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.DateUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.aop.MethodLog;
@@ -25,8 +26,8 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.SysUser;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.service.MqSendServiceImpl;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.SysUserAuthService;
 import com.jeequan.jeepay.service.impl.SysUserService;
@@ -56,7 +57,7 @@ public class MchInfoController extends CommonCtrl {
     @Autowired private MchInfoService mchInfoService;
     @Autowired private SysUserService sysUserService;
     @Autowired private SysUserAuthService sysUserAuthService;
-    @Autowired private MqSendServiceImpl mqSendServiceImpl;
+    @Autowired private MqCommonService mqCommonService;
 
     /**
      * @author: pangxiaoyu
@@ -113,9 +114,9 @@ public class MchInfoController extends CommonCtrl {
     public ApiRes delete(@PathVariable("mchNo") String mchNo) {
         List<Long> userIdList = mchInfoService.removeByMchNo(mchNo);
         // 推送mq删除redis用户缓存
-        mqSendServiceImpl.sendUserRemove(userIdList);
+        mqCommonService.send(JSONArray.toJSONString(userIdList), CS.MQ.MQ_TYPE_MCH_LOGIN_USER_REMOVE);
         // 推送mq到目前节点进行更新数据
-        mqSendServiceImpl.sendModifyMchInfo(mchNo);
+        mqCommonService.send(mchNo, CS.MQ.MQ_TYPE_MODIFY_MCH_INFO);
         return ApiRes.ok();
     }
 
@@ -161,7 +162,7 @@ public class MchInfoController extends CommonCtrl {
 
         // 推送mq删除redis用户认证信息
         if (!removeCacheUserIdList.isEmpty()) {
-            mqSendServiceImpl.sendUserRemove(removeCacheUserIdList);
+            mqCommonService.send(JSONArray.toJSONString(removeCacheUserIdList), CS.MQ.MQ_TYPE_MCH_LOGIN_USER_REMOVE);
         }
 
         //更新商户信息
@@ -170,7 +171,7 @@ public class MchInfoController extends CommonCtrl {
         }
 
         // 推送mq到目前节点进行更新数据
-        mqSendServiceImpl.sendModifyMchInfo(mchNo);
+        mqCommonService.send(mchNo, CS.MQ.MQ_TYPE_MODIFY_MCH_INFO);
 
         return ApiRes.ok();
     }
