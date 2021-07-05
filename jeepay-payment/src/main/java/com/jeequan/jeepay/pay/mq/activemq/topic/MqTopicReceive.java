@@ -24,23 +24,50 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 /*
-* 更改系统配置参数
+* 接收mq消息
 *
 * @author terrfly
 * @site https://www.jeepay.vip
-* @date 2021/6/8 17:35
+* @date 2021/6/8 17:31
 */
 @Slf4j
 @Component
 @Profile(CS.MQTYPE.ACTIVE_MQ)
-public class MqTopic4ModifySysConfig{
+public class MqTopicReceive {
 
     @Autowired private MqReceiveCommon mqReceiveCommon;
 
+    /** 接收 更新服务商信息的消息 **/
+    @JmsListener(destination = CS.MQ.TOPIC_MODIFY_ISV_INFO, containerFactory = "jmsListenerContainer")
+    public void receiveModifyIsvInfo(String isvNo) {
+        mqReceiveCommon.modifyIsvInfo(isvNo);
+    }
+
+    /** 接收 [商户配置信息] 的消息
+     * 已知推送节点：
+     * 1. 更新商户基本资料和状态
+     * 2. 删除商户时
+     * **/
+    @JmsListener(destination = CS.MQ.TOPIC_MODIFY_MCH_INFO, containerFactory = "jmsListenerContainer")
+    public void receiveModifyMchInfo(String mchNo) {
+        mqReceiveCommon.modifyMchInfo(mchNo);
+    }
+
+    /** 接收 [商户应用支付参数配置信息] 的消息
+     * 已知推送节点：
+     * 1. 更新商户应用配置
+     * 2. 删除商户应用配置
+     * **/
+    @JmsListener(destination = CS.MQ.TOPIC_MODIFY_MCH_APP, containerFactory = "jmsListenerContainer")
+    public void receiveModifyMchApp(String mchNoAndAppId) {
+        mqReceiveCommon.modifyMchApp(mchNoAndAppId);
+    }
+
     /** 接收 更新系统配置项的消息 **/
     @JmsListener(destination = CS.MQ.TOPIC_MODIFY_SYS_CONFIG, containerFactory = "jmsListenerContainer")
-    public void receive(String msg) {
+    public void receiveModifySysConfig(String msg) {
         mqReceiveCommon.initDbConfig(msg);
     }
+
 
 }

@@ -138,14 +138,12 @@ public class ActiveMqMessage extends MqCommonService {
 
 
     /** 接收 查单消息 **/
-    @Lazy
     @JmsListener(destination = CS.MQ.QUEUE_CHANNEL_ORDER_QUERY)
     public void receiveChannelOrderQuery(String msg) {
         mqReceiveCommon.channelOrderQuery(msg);
     }
 
     /** 接收 支付订单商户回调消息 **/
-    @Lazy
     @Async(MqThreadExecutor.EXECUTOR_PAYORDER_MCH_NOTIFY)
     @JmsListener(destination = CS.MQ.QUEUE_PAYORDER_MCH_NOTIFY)
     public void receivePayOrderMchNotify(String msg) {

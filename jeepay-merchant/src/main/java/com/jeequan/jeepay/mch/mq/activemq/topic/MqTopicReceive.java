@@ -13,43 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mch.mq.activemq.queue;
+package com.jeequan.jeepay.mch.mq.activemq.topic;
 
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.mch.mq.receive.MqReceiveServiceImpl;
+import com.jeequan.jeepay.mch.mq.receive.MqReceiveCommon;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.command.ActiveMQQueue;
+import org.apache.activemq.command.ActiveMQTopic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 /**
- * 商户用户登录信息清除
+ * 更新系统配置mq
  *
- * @author pangxiaoyu
+ * @author terrfly
+ * @modify zhuxiao
  * @site https://www.jeepay.vip
  * @date 2021-04-27 15:50
  */
 @Slf4j
 @Component
 @Profile(CS.MQTYPE.ACTIVE_MQ)
-public class MqQueue4ModifyMchUserRemove extends ActiveMQQueue {
+public class MqTopicReceive extends ActiveMQTopic{
 
-    @Autowired private MqReceiveServiceImpl mqReceiveServiceImpl;
+    @Autowired private MqReceiveCommon mqReceiveCommon;
 
-    public MqQueue4ModifyMchUserRemove(){
-        super(CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE);
+    public MqTopicReceive(){
+        super(CS.MQ.TOPIC_MODIFY_SYS_CONFIG);
     }
 
-    /**
-     * @author: pangxiaoyu
-     * @date: 2021/6/7 16:17
-     * @describe: 接收 商户用户登录信息清除消息
-     */
-    @JmsListener(destination = CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE)
-    public void receive(String userIdStr) {
-        mqReceiveServiceImpl.mchUserRemove(userIdStr);
+    /** 接收 更新系统配置项的消息 **/
+    @JmsListener(destination = CS.MQ.TOPIC_MODIFY_SYS_CONFIG, containerFactory = "jmsListenerContainer")
+    public void receive(String msg) {
+        mqReceiveCommon.initDbConfig(msg);
     }
 
 }

@@ -13,37 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.mq.rabbitmq;
+package com.jeequan.jeepay.mch.mq.activemq.queue;
 
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.pay.mq.receive.MqReceiveCommon;
+import com.jeequan.jeepay.mch.mq.receive.MqReceiveCommon;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 /**
-* 更改系统配置参数
-*
-* @author xiaoyu
-* @site https://www.jeepay.vip
-* @date 2021/6/25 17:10
-*/
+ * 商户用户登录信息清除
+ *
+ * @author pangxiaoyu
+ * @site https://www.jeepay.vip
+ * @date 2021-04-27 15:50
+ */
 @Slf4j
 @Component
-@Profile(CS.MQTYPE.RABBIT_MQ)
-public class RabbitMqDirect4ModifySysConfig {
+@Profile(CS.MQTYPE.ACTIVE_MQ)
+public class MqQueueReceive extends ActiveMQQueue {
 
     @Autowired private MqReceiveCommon mqReceiveCommon;
 
-    /** 接收 更新系统配置项的消息 **/
-    @RabbitListener(bindings = {@QueueBinding(value = @Queue(),exchange = @Exchange(name = CS.FANOUT_EXCHANGE_SYS_CONFIG,type = "fanout"))})
-    public void receive(String msg) {
-        mqReceiveCommon.initDbConfig(msg);
+    public MqQueueReceive(){
+        super(CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE);
+    }
+
+    /**
+     * @author: pangxiaoyu
+     * @date: 2021/6/7 16:17
+     * @describe: 接收 商户用户登录信息清除消息
+     */
+    @JmsListener(destination = CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE)
+    public void receive(String userIdStr) {
+        mqReceiveCommon.removeMchUser(userIdStr);
     }
 
 }

@@ -13,40 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mch.mq.activemq.topic;
+package com.jeequan.jeepay.mch.mq.rabbitmq;
 
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.mch.mq.receive.MqReceiveServiceImpl;
+import com.jeequan.jeepay.mch.mq.receive.MqReceiveCommon;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.command.ActiveMQTopic;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 /**
- * 更新系统配置mq
- *
- * @author terrfly
- * @modify zhuxiao
+ * 消息接收
+ * @author pangxiaoyu
  * @site https://www.jeepay.vip
  * @date 2021-04-27 15:50
  */
 @Slf4j
 @Component
-@Profile(CS.MQTYPE.ACTIVE_MQ)
-public class MqTopic4ModifySysConfig extends ActiveMQTopic{
+@Profile(CS.MQTYPE.RABBIT_MQ)
+public class RabbitMqReceive {
 
-    @Autowired private MqReceiveServiceImpl mqReceiveServiceImpl;
+    @Autowired private MqReceiveCommon mqReceiveCommon;
 
-    public MqTopic4ModifySysConfig(){
-        super(CS.MQ.TOPIC_MODIFY_SYS_CONFIG);
+    /**
+     * @author: pangxiaoyu
+     * @date: 2021/6/7 16:17
+     * @describe: 接收 商户用户登录信息清除消息
+     */
+    @RabbitListener(queues = CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE)
+    public void receiveRemoveMchUser(String userIdStr) {
+        mqReceiveCommon.removeMchUser(userIdStr);
     }
 
     /** 接收 更新系统配置项的消息 **/
-    @JmsListener(destination = CS.MQ.TOPIC_MODIFY_SYS_CONFIG, containerFactory = "jmsListenerContainer")
-    public void receive(String msg) {
-        mqReceiveServiceImpl.initDbConfig(msg);
+    @RabbitListener(bindings = {@QueueBinding(value = @Queue(),exchange = @Exchange(name = CS.FANOUT_EXCHANGE_SYS_CONFIG,type = "fanout"))})
+    public void receiveInitDbConfig(String msg) {
+        mqReceiveCommon.initDbConfig(msg);
     }
-
 }

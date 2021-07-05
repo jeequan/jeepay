@@ -35,11 +35,11 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class MqReceiveServiceImpl {
+public class MqReceiveCommon {
 
     @Autowired private SysConfigService sysConfigService;
 
-    public void mchUserRemove(String userIdStr) {
+    public void removeMchUser(String userIdStr) {
         log.info("成功接收删除商户用户登录的订阅通知, msg={}", userIdStr);
         // 字符串转List<Long>
         List<Long> userIdList = JSONArray.parseArray(userIdStr, Long.class);
