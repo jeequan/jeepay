@@ -63,13 +63,13 @@ public class RabbitMqConfig {
         return new Queue(CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE,true);
     }
 
-    //Fanout交换机 起名：fanoutExchange
+    //创建 fanout 交换机
     @Bean("fanoutExchange")
     FanoutExchange fanoutExchange() {
         return new FanoutExchange(CS.FANOUT_EXCHANGE_SYS_CONFIG,true,false);
     }
 
-    //交换机 起名：directExchange
+    //创建 direct 交换机
     @Bean("directExchange")
     DirectExchange directExchange() {
         return new DirectExchange(CS.DIRECT_EXCHANGE,true,false);

@@ -46,7 +46,7 @@ public class RabbitMqConfig {
         return new Queue(CS.MQ.QUEUE_PAYORDER_MCH_NOTIFY,true);
     }
 
-    //Topic交换机 起名：testDirectExchange
+    //创建 custom 交换机
     @Bean
     CustomExchange customExchange() {
         Map<String, Object> args = new HashMap<>();

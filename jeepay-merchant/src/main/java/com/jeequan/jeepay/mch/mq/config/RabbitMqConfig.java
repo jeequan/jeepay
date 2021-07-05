@@ -44,7 +44,7 @@ public class RabbitMqConfig {
         return new Queue(CS.MQ.TOPIC_MODIFY_MCH_APP,true);
     }
 
-    //交换机 起名：directExchange
+    //创建 direct 交换机
     @Bean("directExchange")
     DirectExchange directExchange() {
         return new DirectExchange(CS.DIRECT_EXCHANGE,true,false);
