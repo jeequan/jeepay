@@ -26,6 +26,9 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -45,6 +48,30 @@ public class RequestKitBean {
 
     /** reqContext对象中的key: 转换好的json对象 */
     private static final String REQ_CONTEXT_KEY_PARAMJSON = "REQ_CONTEXT_KEY_PARAMJSON";
+
+    /** JSON 格式通过请求主体（BODY）传输  获取参数 **/
+    public String getReqParamFromBody() {
+
+        String body = "";
+
+        if(isConvertJSON()){
+
+            try {
+                String str;
+                while((str = request.getReader().readLine()) != null){
+                    body += str;
+                }
+
+                return body;
+
+            } catch (Exception e) {
+                log.error("请求参数转换异常！ params=[{}]", body);
+                throw new BizException(ApiCodeEnum.PARAMS_ERROR, "转换异常");
+            }
+        }else {
+            return body;
+        }
+    }
 
 
     /**request.getParameter 获取参数 并转换为JSON格式 **/

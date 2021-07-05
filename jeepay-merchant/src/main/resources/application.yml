@@ -50,9 +50,24 @@ spring:
         timeout: 1000
         database: 2    #1库：运营平台  #2库：商户系统 #3库：支付网关
         password:
+
+    # 注意：以下MQ配置需注意【如需使用activeMQ则需将rabbitMQ配置注释即可】
+#    profiles:
+#        include:
+#            - activeMQ
+    #      - rabbitMQ # 需要安装延迟队列插件：https://www.rabbitmq.com/blog/2015/04/16/scheduling-messages-with-rabbitmq/
+
     #activeMQ配置
-    activemq:
-        broker-url: tcp://localhost:61616  #连接地址
+#    activemq:
+#        broker-url: tcp://localhost:61616  #连接地址
+
+        #rabbitmq配置
+        #  rabbitmq:
+        #    addresses: 127.0.0.1:5672
+        #    username: guest
+        #    password: guest
+        #    dynamic: true
+        #    virtual-host: /
 
 #日志配置参数。
     # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。

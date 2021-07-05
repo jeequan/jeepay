@@ -13,43 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mch.mq.topic;
+package com.jeequan.jeepay.mch.mq.activemq.queue;
 
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.service.impl.SysConfigService;
+import com.jeequan.jeepay.mch.mq.receive.MqReceiveCommon;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.command.ActiveMQTopic;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 /**
- * 更新系统配置mq
+ * 商户用户登录信息清除
  *
- * @author terrfly
- * @modify zhuxiao
+ * @author pangxiaoyu
  * @site https://www.jeepay.vip
  * @date 2021-04-27 15:50
  */
 @Slf4j
 @Component
-public class MqTopic4ModifySysConfig extends ActiveMQTopic{
+@Profile(CS.MQTYPE.ACTIVE_MQ)
+public class MqQueueReceive extends ActiveMQQueue {
 
-    @Autowired private SysConfigService sysConfigService;
+    @Autowired private MqReceiveCommon mqReceiveCommon;
 
-    public MqTopic4ModifySysConfig(){
-        super(CS.MQ.TOPIC_MODIFY_SYS_CONFIG);
+    public MqQueueReceive(){
+        super(CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE);
     }
 
-    /** 接收 更新系统配置项的消息 **/
-    @JmsListener(destination = CS.MQ.TOPIC_MODIFY_SYS_CONFIG, containerFactory = "jmsListenerContainer")
-    public void receive(String msg) {
-
-        log.info("成功接收更新系统配置的订阅通知, msg={}", msg);
-        sysConfigService.initDBConfig(msg);
-        log.info("系统配置静态属性已重置");
+    /**
+     * @author: pangxiaoyu
+     * @date: 2021/6/7 16:17
+     * @describe: 接收 商户用户登录信息清除消息
+     */
+    @JmsListener(destination = CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE)
+    public void receive(String userIdStr) {
+        mqReceiveCommon.removeMchUser(userIdStr);
     }
-
-
 
 }

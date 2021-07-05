@@ -13,40 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mch.mq.topic;
+package com.jeequan.jeepay.mgr.mq.config;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.utils.JsonKit;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.command.ActiveMQTopic;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
+import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
+import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.jms.ConnectionFactory;
+
 /*
-* 更改商户应用信息
+* JMS消息配置项
 *
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 17:10
 */
-@Slf4j
 @Component
-public class MqTopic4ModifyMchApp extends ActiveMQTopic{
+@Profile(CS.MQTYPE.ACTIVE_MQ)
+public class JMSConfig {
 
-    @Autowired private JmsTemplate jmsTemplate;
-
-    public MqTopic4ModifyMchApp(){
-        super(CS.MQ.TOPIC_MODIFY_MCH_APP);
+    /** 新增jmsListenerContainer, 用于接收topic类型的消息 **/
+    @Bean
+    public JmsListenerContainerFactory<?> jmsListenerContainer(ConnectionFactory factory){
+        DefaultJmsListenerContainerFactory bean = new DefaultJmsListenerContainerFactory();
+        bean.setPubSubDomain(true);
+        bean.setConnectionFactory(factory);
+        return bean;
     }
-
-    /** 推送消息到各个节点 **/
-    public void push(String mchNo, String appId) {
-        JSONObject jsonObject = JsonKit.newJson("mchNo", mchNo);
-        jsonObject.put("appId", appId);
-
-        this.jmsTemplate.convertAndSend(this, jsonObject.toString());
-    }
-
 }

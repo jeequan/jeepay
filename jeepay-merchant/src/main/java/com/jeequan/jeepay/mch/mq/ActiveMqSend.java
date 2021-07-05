@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mgr.mq.topic;
+package com.jeequan.jeepay.mch.mq;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.utils.JsonKit;
+import com.jeequan.jeepay.core.mq.MqCommonService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.command.ActiveMQTopic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
@@ -33,20 +36,37 @@ import org.springframework.stereotype.Component;
 */
 @Slf4j
 @Component
-public class MqTopic4ModifyMchApp extends ActiveMQTopic{
+@Profile(CS.MQTYPE.ACTIVE_MQ)
+public class ActiveMqSend extends MqCommonService {
 
     @Autowired private JmsTemplate jmsTemplate;
 
-    public MqTopic4ModifyMchApp(){
-        super(CS.MQ.TOPIC_MODIFY_MCH_APP);
+    @Bean("activeMqSendModifyMchApp")
+    public ActiveMQTopic mqTopic4ModifyMchApp(){
+        return new ActiveMQTopic(CS.MQ.TOPIC_MODIFY_MCH_APP);
     }
 
-    /** 推送消息到各个节点 **/
-    public void push(String mchNo, String appId) {
-        JSONObject jsonObject = JsonKit.newJson("mchNo", mchNo);
-        jsonObject.put("appId", appId);
+    @Lazy
+    @Autowired
+    @Qualifier("activeMqSendModifyMchApp")
+    private ActiveMQTopic mqTopic4ModifyMchApp;
 
-        this.jmsTemplate.convertAndSend(this, jsonObject.toString());
+    /** 推送消息到各个节点 **/
+    @Override
+    public void send(String msg, String sendType) {
+        if (sendType.equals(CS.MQ.MQ_TYPE_MODIFY_MCH_APP)) { // 商户应用修改
+            topicModifyMchApp(msg);
+        }
+    }
+
+    @Override
+    public void send(String msg, long delay, String sendType) {
+
+    }
+
+    /** 发送商户应用修改信息 **/
+    public void topicModifyMchApp(String msg) {
+        this.jmsTemplate.convertAndSend(mqTopic4ModifyMchApp, msg);
     }
 
 }

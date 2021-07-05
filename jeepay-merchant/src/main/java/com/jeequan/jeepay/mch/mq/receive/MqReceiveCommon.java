@@ -13,44 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mch.mq.queue;
+package com.jeequan.jeepay.mch.mq.receive;
 
 import com.alibaba.fastjson.JSONArray;
 import com.jeequan.jeepay.core.cache.RedisUtil;
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.command.ActiveMQQueue;
-import org.springframework.jms.annotation.JmsListener;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * 更新商户配置mq
+ * 处理公共接收消息方法
  *
- * @author pangxiaoyu
+ * @author xiaoyu
  * @site https://www.jeepay.vip
- * @date 2021-04-27 15:50
+ * @date 2021/6/25 17:10
  */
 @Slf4j
-@Component
-public class MqQueue4ModifyMchUserRemove extends ActiveMQQueue {
+@Service
+public class MqReceiveCommon {
 
-    public MqQueue4ModifyMchUserRemove(){
-        super(CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE);
-    }
+    @Autowired private SysConfigService sysConfigService;
 
-    /**
-     * @author: pangxiaoyu
-     * @date: 2021/6/7 16:17
-     * @describe: 接收 更新系统配置项的消息
-     */
-    @JmsListener(destination = CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE)
-    public void receive(String userIdStr) {
-
+    public void removeMchUser(String userIdStr) {
         log.info("成功接收删除商户用户登录的订阅通知, msg={}", userIdStr);
         // 字符串转List<Long>
         List<Long> userIdList = JSONArray.parseArray(userIdStr, Long.class);
@@ -73,6 +62,9 @@ public class MqQueue4ModifyMchUserRemove extends ActiveMQQueue {
         log.info("无权限登录用户信息已清除");
     }
 
-
-
+    public void initDbConfig(String msg) {
+        log.info("成功接收更新系统配置的订阅通知, msg={}", msg);
+        sysConfigService.initDBConfig(msg);
+        log.info("系统配置静态属性已重置");
+    }
 }

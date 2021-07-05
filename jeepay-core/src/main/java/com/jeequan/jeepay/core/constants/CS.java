@@ -148,8 +148,29 @@ public class CS {
         /** 清除商户登录用户信息 **/
         String QUEUE_MODIFY_MCH_USER_REMOVE = "queue.modify.mch.user.remove";
 
+        /** 用于activemq 发布订阅模式交换机**/
+        String FANOUT_MODIFY_SYS_CONFIG = "fanout.modify.sys.config";
+
+        /** MQ消息类型 **/
+        String MQ_TYPE_MODIFY_MCH_APP = "modify.mch.app";
+        String MQ_TYPE_MODIFY_ISV_INFO = "modify.isv.info";
+        String MQ_TYPE_MODIFY_MCH_INFO = "modify.mch.info";
+        String MQ_TYPE_MODIFY_SYS_CONFIG = "modify.sys.config";
+        String MQ_TYPE_CHANNEL_ORDER_QUERY = "channel.order.query";
+        String MQ_TYPE_PAY_ORDER_MCH_NOTIFY = "pay.order.mch.notify";
+        String MQ_TYPE_MCH_LOGIN_USER_REMOVE = "mch.login.user.remove";
+
     }
 
+    /** RabbitMQ交换机类型 **/
+    public static final String DIRECT_EXCHANGE = "directExchange";
+    public static final String DELAYED_EXCHANGE = "delayedExchange"; // 延迟交换机
+    public static final String FANOUT_EXCHANGE_SYS_CONFIG = "fanoutExchangeSysConfig";
+    /** 切换MQ的类型 **/
+    public static class MQTYPE{
+        public static final String ACTIVE_MQ = "activeMQ";
+        public static final String RABBIT_MQ = "rabbitMQ";
+    }
 
     //菜单类型
     public interface ENT_TYPE{

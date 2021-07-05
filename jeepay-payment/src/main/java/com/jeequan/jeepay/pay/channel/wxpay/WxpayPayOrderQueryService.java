@@ -22,6 +22,7 @@ import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvsubMchParams;
 import com.jeequan.jeepay.pay.channel.IPayOrderQueryService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayV3Util;
@@ -76,7 +77,17 @@ public class WxpayPayOrderQueryService implements IPayOrderQueryService {
 
             }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) {   //V3
 
-                JSONObject resultJSON = WxpayV3Util.queryOrderV3(payOrder.getPayOrderId(), mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig());
+                String reqUrl;
+                String query;
+                if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
+                    WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvsubMchParams.class);
+                    reqUrl = String.format("/v3/pay/partner/transactions/out-trade-no/%s", payOrder.getPayOrderId());
+                    query = String.format("?sp_mchid=%s&sub_mchid=%s", mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig().getMchId(), isvsubMchParams.getSubMchId());
+                }else {
+                    reqUrl = String.format("/v3/pay/transactions/out-trade-no/%s", payOrder.getPayOrderId());
+                    query = String.format("?mchid=%s", mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig().getMchId());
+                }
+                JSONObject resultJSON = WxpayV3Util.queryOrderV3(reqUrl + query, mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig());
 
                 String channelState = resultJSON.getString("trade_state");
                 if ("SUCCESS".equals(channelState)) {

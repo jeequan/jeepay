@@ -16,12 +16,13 @@
 package com.jeequan.jeepay.pay.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.RefundOrder;
+import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.core.utils.StringKit;
-import com.jeequan.jeepay.pay.mq.queue.MqQueue4PayOrderMchNotify;
 import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRS;
 import com.jeequan.jeepay.pay.rqrs.refund.QueryRefundOrderRS;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
@@ -42,8 +43,8 @@ import org.springframework.stereotype.Service;
 public class PayMchNotifyService {
 
     @Autowired private MchNotifyRecordService mchNotifyRecordService;
-    @Autowired private MqQueue4PayOrderMchNotify mqPayOrderMchNotifyQueue;
     @Autowired private ConfigContextService configContextService;
+    @Autowired private MqCommonService mqCommonService;
 
 
     /** 商户通知信息， 只有订单是终态，才会发送通知， 如明确成功和明确失败 **/
@@ -84,7 +85,7 @@ public class PayMchNotifyService {
 
             //推送到MQ
             Long notifyId = mchNotifyRecord.getNotifyId();
-            mqPayOrderMchNotifyQueue.send(notifyId + "");
+            mqCommonService.send(notifyId + "", CS.MQ.MQ_TYPE_PAY_ORDER_MCH_NOTIFY);
 
         } catch (Exception e) {
             log.error("推送失败！", e);
@@ -129,7 +130,7 @@ public class PayMchNotifyService {
 
             //推送到MQ
             Long notifyId = mchNotifyRecord.getNotifyId();
-            mqPayOrderMchNotifyQueue.send(notifyId + "");
+            mqCommonService.send(notifyId + "", CS.MQ.MQ_TYPE_PAY_ORDER_MCH_NOTIFY);
 
         } catch (Exception e) {
             log.error("推送失败！", e);

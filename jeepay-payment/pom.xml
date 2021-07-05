@@ -73,6 +73,12 @@
             <artifactId>spring-boot-starter-activemq</artifactId>
         </dependency>
 
+        <!-- 添加对rabbitMQ的支持  -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
         <!--wx_pay  https://github.com/wechat-group/WxJava  -->
         <dependency>
             <groupId>com.github.binarywang</groupId>

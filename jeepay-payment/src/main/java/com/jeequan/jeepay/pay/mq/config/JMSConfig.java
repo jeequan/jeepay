@@ -13,35 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mgr.mq.queue;
+package com.jeequan.jeepay.pay.mq.config;
 
 import com.jeequan.jeepay.core.constants.CS;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.command.ActiveMQQueue;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
+import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
+import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.stereotype.Component;
 
-/**
-* 商户订单回调MQ通知
+import javax.jms.ConnectionFactory;
+
+/*
+* JMS消息配置项
 *
 * @author terrfly
 * @site https://www.jeepay.vip
-* @date 2021/6/21 18:03
+* @date 2021/6/8 17:31
 */
-@Slf4j
 @Component
-public class MqQueue4PayOrderMchNotify extends ActiveMQQueue{
+@Profile(CS.MQTYPE.ACTIVE_MQ)
+public class JMSConfig {
 
-    @Autowired private JmsTemplate jmsTemplate;
-
-    public MqQueue4PayOrderMchNotify(){
-        super(CS.MQ.QUEUE_PAYORDER_MCH_NOTIFY);
+    /** 新增jmsListenerContainer, 用于接收topic类型的消息 **/
+    @Bean
+    public JmsListenerContainerFactory<?> jmsListenerContainer(ConnectionFactory factory){
+        DefaultJmsListenerContainerFactory bean = new DefaultJmsListenerContainerFactory();
+        bean.setPubSubDomain(true);
+        bean.setConnectionFactory(factory);
+        return bean;
     }
-
-    /** 发送MQ消息 **/
-    public void send(Long notifyId) {
-        this.jmsTemplate.convertAndSend(this, notifyId + "");
-    }
-
 }

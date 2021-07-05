@@ -19,11 +19,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
+import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.mgr.mq.queue.MqQueue4PayOrderMchNotify;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MchNotifyController extends CommonCtrl {
 
     @Autowired private MchNotifyRecordService mchNotifyService;
-    @Autowired private MqQueue4PayOrderMchNotify mqQueue4PayOrderMchNotify;
+    @Autowired private MqCommonService mqCommonService;
 
     /**
      * @author: pangxiaoyu
@@ -106,7 +107,7 @@ public class MchNotifyController extends CommonCtrl {
         mchNotifyService.getBaseMapper().updateIngAndAddNotifyCountLimit(notifyId);
 
         //调起MQ重发
-        mqQueue4PayOrderMchNotify.send(notifyId);
+        mqCommonService.send(notifyId+"", CS.MQ.MQ_TYPE_PAY_ORDER_MCH_NOTIFY);
 
         return ApiRes.ok(mchNotify);
     }

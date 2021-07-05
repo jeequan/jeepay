@@ -13,28 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.rqrs;
+package com.jeequan.jeepay.core.mq;
 
-import lombok.Data;
+/**
+ * @author xiaoyu
+ * @site https://www.jeepay.vip
+ * @date 2021/6/25 17:10
+ */
+public abstract class MqCommonService {
 
-import javax.validation.constraints.NotBlank;
+    /**
+     * 消息发送
+     * @param msg
+     * @param sendType
+     */
+    public abstract void send(String msg, String sendType);
 
-/*
-* 商户获取渠道用户ID 请求参数对象
-*
-* @author terrfly
-* @site https://www.jeepay.vip
-* @date 2021/6/8 17:40
-*/
-@Data
-public class ChannelUserIdRQ extends AbstractMchAppRQ{
-
-    /** 接口代码,  AUTO表示：自动获取 **/
-    @NotBlank(message="接口代码不能为空")
-    private String ifCode;
-
-    /** 回调地址 **/
-    @NotBlank(message="回调地址不能为空")
-    private String redirectUrl;
+    /**
+     * 延迟消息发送
+     * @param msg
+     * @param delay
+     * @param sendType
+     */
+    public abstract void send(String msg, long delay, String sendType);
 
 }

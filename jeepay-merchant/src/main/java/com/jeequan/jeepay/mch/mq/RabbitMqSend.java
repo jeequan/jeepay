@@ -13,45 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mgr.mq.queue;
+package com.jeequan.jeepay.mch.mq;
 
-import com.alibaba.fastjson.JSONArray;
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.core.mq.MqCommonService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.command.ActiveMQQueue;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-
 /**
- * 商户用户信息清除
- *
- * @author pangxiaoyu
+ * RabbitMq
+ * 商户应用修改推送
+ * @author xiaoyu
  * @site https://www.jeepay.vip
- * @date 2021-06-07 07:15
+ * @date 2021/6/25 17:10
  */
 @Slf4j
 @Component
-public class MqQueue4ModifyMchUserRemove extends ActiveMQQueue{
+@Profile(CS.MQTYPE.RABBIT_MQ)
+public class RabbitMqSend extends MqCommonService {
 
-    @Autowired private JmsTemplate jmsTemplate;
+    @Autowired private RabbitTemplate rabbitTemplate;
 
-    public MqQueue4ModifyMchUserRemove(){
-        super(CS.MQ.QUEUE_MODIFY_MCH_USER_REMOVE);
-    }
-
-    /**
-     * @author: pangxiaoyu
-     * @date: 2021/6/7 16:16
-     * @describe: 推送消息到各个节点
-     */
-    public void push(Collection<Long> userIdList) {
-        if(userIdList == null || userIdList.isEmpty()){
-            return ;
+    /** 推送消息 **/
+    @Override
+    public void send(String msg, String sendType) {
+        if (sendType.equals(CS.MQ.MQ_TYPE_MODIFY_MCH_APP)) { // 商户应用修改
+            directModifyMchApp(msg);
         }
-        this.jmsTemplate.convertAndSend(this,JSONArray.toJSONString(userIdList));
     }
 
+    @Override
+    public void send(String msg, long delay, String sendType) {
+
+    }
+
+    /** 发送商户应用修改信息 **/
+    public void directModifyMchApp(String msg) {
+        rabbitTemplate.convertAndSend(CS.DIRECT_EXCHANGE, CS.MQ.TOPIC_MODIFY_MCH_APP, msg);
+    }
 }

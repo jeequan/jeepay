@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mgr.mq.topic;
+package com.jeequan.jeepay.mch.mq.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
@@ -22,13 +22,14 @@ import org.springframework.stereotype.Component;
 
 import javax.jms.ConnectionFactory;
 
-/*
-* JMS消息配置项
-*
-* @author terrfly
-* @site https://www.jeepay.vip
-* @date 2021/6/8 17:10
-*/
+/**
+ * JMS消息配置项
+ *
+ * @author terrfly
+ * @modify zhuxiao
+ * @site https://www.jeepay.vip
+ * @date 2021-04-27 15:50
+ */
 @Component
 public class JMSConfig {
 

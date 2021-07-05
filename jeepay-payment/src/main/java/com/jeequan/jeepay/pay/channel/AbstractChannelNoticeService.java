@@ -71,6 +71,11 @@ public abstract class AbstractChannelNoticeService implements IChannelNoticeServ
         return requestKitBean.getReqParamJSON();
     }
 
+    /**request.getParameter 获取参数 并转换为JSON格式 **/
+    protected String getReqParamFromBody() {
+        return requestKitBean.getReqParamFromBody();
+    }
+
     /** 获取文件路径 **/
     protected String getCertFilePath(String certFilePath) {
         return channelCertConfigKitBean.getCertFilePath(certFilePath);
