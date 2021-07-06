@@ -50,3 +50,6 @@ unpackage/
 
 # [vscode IDE]
 .vscode/
+
+# [mac]
+.DS_Store
