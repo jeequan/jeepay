@@ -13,7 +13,7 @@
 		<img src="https://img.shields.io/badge/spring%20boot-2.4.5-yellowgreen" />
 	</a>
     <a target="_blank" href="https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html">
-		<img src="https://img.shields.io/badge/JDK-8+-green.svg" />
+		<img src="https://img.shields.io/badge/JDK-8-green.svg" />
 	</a>
 	<a target="_blank" href="http://www.gnu.org/licenses/lgpl.html">
 		<img src="https://img.shields.io/badge/license-LGPL--3.0-blue" />
@@ -82,11 +82,11 @@ Jeepay = Jee + pay，是由原XxPay支付系统作者带领团队开发，“Jee
 |Jdk | Java环境 | 1.8
 |Spring Boot | 开发框架 | 2.4.5
 |Redis | 分布式缓存 | 3.2.8 或 高版本
-|MySQL | 数据库 | 5.7.X
-|ActiveMQ | 消息中间件 | 5.15.8 或 高版本
+|MySQL | 数据库 | 5.7.X 或 高版本
+|MQ | 消息中间件 | ActiveMQ 或 RabbitMQ
 |[Ant Design Vue](https://www.antdv.com/docs/vue/introduce-cn/) | Ant Design的Vue实现，前端开发使用 | 2.1.2
 |[MyBatis-Plus](https://mp.baomidou.com/) | MyBatis增强工具 | 3.4.2
-|[WxJava](https://gitee.com/binary/weixin-java-tools) | 微信开发Java SDK | 4.0.0
+|[WxJava](https://gitee.com/binary/weixin-java-tools) | 微信开发Java SDK | 4.1.0
 |[Hutool](https://www.hutool.cn/) | Java工具类库 | 5.6.6
 
 > 项目结构
@@ -126,9 +126,11 @@ jeepay
 
 ## 🍯 系统截图
 
-`以下截图是从实际已完成功能界面截取,截图时间为：2021-05-29 02:05`
+`以下截图是从实际已完成功能界面截取,截图时间为：2021-07-06 08:59`
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/001.png "Jeepay演示界面")
+
+![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/023.png "Jeepay演示界面")
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/002.png "Jeepay演示界面")
 
@@ -158,6 +160,6 @@ jeepay
 
 ![计全科技公众号](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jee-qrcode.jpg "计全科技公众号")
 
-微信扫码加入交流群，或添加微信号：`jiquanltd` 邀请进群
+微信扫描下方二维码，邀请进官方微信交流群（加好友备注：邀请进群或jeepay咨询）。
 
-![Jeepay微信交流群](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/wx_qun_705.png "Jeepay微信交流群")
+![Jeepay微信交流群](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/wx_my.png "Jeepay微信交流群")
