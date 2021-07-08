@@ -148,16 +148,16 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                     channelResult.setChannelUserId(payer.getOpenid()); //支付用户ID
                 }
 
+                JSONObject resJSON = new JSONObject();
+                resJSON.put("code", "SUCCESS");
+                resJSON.put("message", "成功");
+
+                ResponseEntity okResponse = jsonResp(resJSON);
+                channelResult.setResponseEntity(okResponse); //响应数据
+
             }else {
                 throw ResponseException.buildText("API_VERSION ERROR");
             }
-
-            JSONObject resJSON = new JSONObject();
-            resJSON.put("code", "SUCCESS");
-            resJSON.put("message", "成功");
-
-            ResponseEntity okResponse = jsonResp(resJSON);
-            channelResult.setResponseEntity(okResponse); //响应数据
 
             return channelResult;
 
