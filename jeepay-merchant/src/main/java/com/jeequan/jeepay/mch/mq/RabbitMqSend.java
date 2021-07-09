@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * RabbitMq
- * 商户应用修改推送
  * @author xiaoyu
  * @site https://www.jeepay.vip
  * @date 2021/6/25 17:10
