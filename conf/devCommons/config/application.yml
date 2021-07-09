@@ -1,15 +1,54 @@
 #################################
-# 开发环境通用配置文件放置目录
+# 开发环境通用配置文件(每个项目通用配置)
 #################################
+server:
+  servlet:
+    context-path: / #设置应用的目录.  前缀需要带/, 无需设置后缀, 示例 【 /xxx 】 or 【 / 】
 spring:
+  servlet:
+    multipart:
+      enabled: true #是否启用http上传处理
+      max-request-size: 10MB #最大请求文件的大小
+      max-file-size: 10MB #设置单个文件最大长度
+  resources:
+    static-locations: classpath:/static #项目静态资源路径 （可直接通过http访问）
+  freemarker:
+    template-loader-path: classpath:/templates  #freemarker模板目录
+    template-encoding: UTF-8
+    suffix: .ftl
+    settings:
+      classic_compatible: true # 如果变量为null,转化为空字符串,比如做比较的时候按照空字符做比较
+      number_format: '#' #数字格式进行原样显示，不加格式化字符例如  100,00
   datasource:
     # yml填写url连接串， 无需将&符号进行转义
     url: jdbc:mysql://127.0.0.1:3306/jeepaydb?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
     username: root
     password:
+    druid:
+      # 连接池配置项
+      initial-size: 5 #初始化时建立物理连接的个数
+      min-idle: 5 #最小连接池数量
+      max-active: 30 #最大连接池数量
+      max-wait: 60000 #获取连接时最大等待时间，单位毫秒
+      # 检测相关
+      test-while-idle: true # 建议配置为true，不影响性能，并且保证安全性。申请连接的时候检测，如果空闲时间大于timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效。
+      test-on-borrow: false # 申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。
+      test-on-return: false # 归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。
+      time-between-eviction-runs-millis: 60000 #配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      min-evictable-idle-time-millis: 300000 #连接保持空闲而不被驱逐的最小时间
+      validation-query: SELECT 1 FROM DUAL
+      # 是否缓存preparedStatement
+      pool-prepared-statements: false # 是否缓存preparedStatement，也就是PSCache。PSCache对支持游标的数据库性能提升巨大，比如说oracle。在mysql下建议关闭。
+      max-pool-prepared-statement-per-connection-size: 20 # 要启用PSCache，必须配置大于0，当大于0时，poolPreparedStatements自动触发修改为true。
+      # 配置监控统计拦截的filters，去掉后监控界面sql无法统计 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+      filters: stat,wall
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  cache:
+    type: redis
   redis:
     host: 127.0.0.1
     port: 6379
+    timeout: 1000
     password:
 
   # 注意：以下MQ配置需注意【如需使用activeMQ则需将rabbitMQ配置注释即可】
@@ -41,5 +80,11 @@ logging:
 
 #系统业务参数
 isys:
+  #是否允许跨域请求 [生产环境建议关闭， 若api与前端项目没有在同一个域名下时，应开启此配置或在nginx统一配置允许跨域]
+  allow-cors: true
+
+  # 文件系统配置项（系统内oss， 并非云oss）
   oss-file:
     root-path: /home/jeepay/upload #存储根路径 ( 无需以‘/’结尾 )
+    public-path: ${isys.oss-file.root-path}/public #公共读取块  ( 一般配合root-path参数进行设置，需以‘/’ 开头, 无需以‘/’结尾 )
+    private-path: ${isys.oss-file.root-path}/private #私有化本地访问，不允许url方式公共读取 ( 一般配合root-path参数进行设置，需以‘/’ 开头, 无需以‘/’结尾  )
