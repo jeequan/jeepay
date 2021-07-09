@@ -16,19 +16,26 @@ spring:
   profiles:
     include:
       - activeMQ
-  #      - rabbitMQ # 需要安装延迟队列插件：https://www.rabbitmq.com/blog/2015/04/16/scheduling-messages-with-rabbitmq/
+      #- rabbitMQ # 需要安装延迟队列插件：https://www.rabbitmq.com/blog/2015/04/16/scheduling-messages-with-rabbitmq/
+      #- rocketMQ
 
   #activeMQ配置
   activemq:
     broker-url: tcp://localhost:61616  #连接地址
 
   #rabbitmq配置
-  #  rabbitmq:
-  #    addresses: 127.0.0.1:5672
-  #    username: guest
-  #    password: guest
-  #    dynamic: true
-  #    virtual-host: /
+    rabbitmq:
+      addresses: 127.0.0.1:5672
+      username: guest
+      password: guest
+      dynamic: true
+      virtual-host: /
+
+  #rocketmq配置
+rocketmq:
+  name-server: 127.0.0.1:9876
+  producer:
+    group: rocket-group
 
   #日志配置参数。
   # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
