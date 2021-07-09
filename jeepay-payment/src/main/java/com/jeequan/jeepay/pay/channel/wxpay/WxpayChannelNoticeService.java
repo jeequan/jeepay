@@ -125,6 +125,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                 channelResult.setChannelOrderId(result.getTransactionId()); //渠道订单号
                 channelResult.setChannelUserId(result.getOpenid()); //支付用户ID
                 channelResult.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+                channelResult.setResponseEntity(textResp("SUCCESS"));
 
             }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) { // V3
                 // 获取回调参数
