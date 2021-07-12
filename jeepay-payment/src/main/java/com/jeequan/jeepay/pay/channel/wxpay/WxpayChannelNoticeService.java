@@ -17,6 +17,7 @@ package com.jeequan.jeepay.pay.channel.wxpay;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
+import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyV3Result;
 import com.github.binarywang.wxpay.config.WxPayConfig;
@@ -125,6 +126,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                 channelResult.setChannelOrderId(result.getTransactionId()); //渠道订单号
                 channelResult.setChannelUserId(result.getOpenid()); //支付用户ID
                 channelResult.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+                channelResult.setResponseEntity(textResp(WxPayNotifyResponse.successResp("OK")));
 
             }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) { // V3
                 // 获取回调参数
@@ -148,16 +150,16 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                     channelResult.setChannelUserId(payer.getOpenid()); //支付用户ID
                 }
 
+                JSONObject resJSON = new JSONObject();
+                resJSON.put("code", "SUCCESS");
+                resJSON.put("message", "成功");
+
+                ResponseEntity okResponse = jsonResp(resJSON);
+                channelResult.setResponseEntity(okResponse); //响应数据
+
             }else {
                 throw ResponseException.buildText("API_VERSION ERROR");
             }
-
-            JSONObject resJSON = new JSONObject();
-            resJSON.put("code", "SUCCESS");
-            resJSON.put("message", "成功");
-
-            ResponseEntity okResponse = jsonResp(resJSON);
-            channelResult.setResponseEntity(okResponse); //响应数据
 
             return channelResult;
 

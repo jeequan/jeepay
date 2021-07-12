@@ -42,6 +42,7 @@ import com.jeequan.jeepay.service.impl.IsvInfoService;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
+import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
 import me.chanjar.weixin.mp.config.impl.WxMpDefaultConfigImpl;
@@ -59,6 +60,7 @@ import java.util.concurrent.ConcurrentHashMap;
 * @site https://www.jeepay.vip
 * @date 2021/6/8 17:41
 */
+@Slf4j
 @Service
 public class ConfigContextService {
 
@@ -354,7 +356,8 @@ public class ConfigContextService {
             try {
                 alipayClient = new DefaultAlipayClient(certAlipayRequest);
             } catch (AlipayApiException e) {
-                e.printStackTrace();
+                log.error("error" ,e);
+                alipayClient = null;
             }
         }else{
             alipayClient = new DefaultAlipayClient(sandbox == CS.YES ? AlipayConfig.SANDBOX_SERVER_URL : AlipayConfig.PROD_SERVER_URL

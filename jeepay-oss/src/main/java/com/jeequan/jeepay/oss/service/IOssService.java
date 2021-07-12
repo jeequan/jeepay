@@ -13,28 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mch.config;
+package com.jeequan.jeepay.oss.service;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import com.jeequan.jeepay.oss.constant.OssSavePlaceEnum;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 系统Yml配置参数定义Bean
+ * OSSService 接口
  *
  * @author terrfly
  * @site https://www.jeepay.vip
- * @date 2021-04-27 15:50
+ * @date 2021/7/12 18:18
  */
-@Component
-@ConfigurationProperties(prefix="isys")
-@Data
-public class SystemYmlConfig {
+public interface IOssService {
 
-	/** 是否允许跨域请求 [生产环境建议关闭， 若api与前端项目没有在同一个域名下时，应开启此配置或在nginx统一配置允许跨域]  **/
-	private Boolean allowCors;
+    /** 上传文件 & 生成下载/预览URL **/
+    String upload2PreviewUrl(OssSavePlaceEnum ossSavePlaceEnum, MultipartFile multipartFile, String saveDirAndFileName);
 
-	/** 生成jwt的秘钥。 要求每个系统有单独的秘钥管理机制。 **/
-	private String jwtSecret;
+    /** 将文件下载到本地
+     * 返回是否 写入成功
+     * false: 写入失败， 或者文件不存在
+     * **/
+    boolean downloadFile(OssSavePlaceEnum ossSavePlaceEnum, String source, String target);
 
 }

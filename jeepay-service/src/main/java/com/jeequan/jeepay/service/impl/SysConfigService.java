@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.entity.SysConfig;
 import com.jeequan.jeepay.core.model.DBApplicationConfig;
+import com.jeequan.jeepay.core.service.ISysConfigService;
 import com.jeequan.jeepay.service.mapper.SysConfigMapper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ import java.util.Set;
  * @since 2020-07-29
  */
 @Service
-public class SysConfigService extends ServiceImpl<SysConfigMapper, SysConfig> {
+public class SysConfigService extends ServiceImpl<SysConfigMapper, SysConfig> implements ISysConfigService {
 
     @Autowired
     private SysConfigService sysConfigService;

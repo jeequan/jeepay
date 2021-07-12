@@ -72,8 +72,8 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
     /** 跳转通知地址 **/
     private String returnUrl;
 
-    /** 订单失效时间 **/
-    private String expiredTime;
+    /** 订单失效时间, 单位：秒 **/
+    private Integer expiredTime;
 
     /** 特定渠道发起额外参数 **/
     private String channelExtra;

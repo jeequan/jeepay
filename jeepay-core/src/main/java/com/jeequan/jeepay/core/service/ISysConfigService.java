@@ -13,25 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.config;
+package com.jeequan.jeepay.core.service;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import com.jeequan.jeepay.core.model.DBApplicationConfig;
 
-/**
- * 系统Yml配置参数定义Bean
- *
- * @author terrfly
- * @site https://www.jeepay.vip
- * @date 2021-04-27 15:50
- */
-@Component
-@ConfigurationProperties(prefix="isys")
-@Data
-public class SystemYmlConfig {
+public interface ISysConfigService {
 
-	/** 是否允许跨域请求 [生产环境建议关闭， 若api与前端项目没有在同一个域名下时，应开启此配置或在nginx统一配置允许跨域]  **/
-	private Boolean allowCors;
+    /** 获取应用的配置参数 **/
+    DBApplicationConfig getDBApplicationConfig();
 
 }

@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mgr.ctrl.common;
+package com.jeequan.jeepay.oss.ctrl;
 
 import cn.hutool.core.lang.UUID;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
+import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.core.model.OssFileConfig;
 import com.jeequan.jeepay.core.utils.FileKit;
-import com.jeequan.jeepay.mgr.config.SystemYmlConfig;
-import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.service.impl.SysConfigService;
+import com.jeequan.jeepay.oss.model.OssFileConfig;
+import com.jeequan.jeepay.oss.service.IOssService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
 
 /*
 * 统一文件上传接口（ossFile）
@@ -39,10 +36,9 @@ import java.io.File;
 */
 @RestController
 @RequestMapping("/api/ossFiles")
-public class OssFileController extends CommonCtrl {
+public class OssFileController extends AbstractCtrl {
 
-    @Autowired private SystemYmlConfig systemYmlConfig;
-    @Autowired private SysConfigService sysConfigService;
+    @Autowired private IOssService ossService;
 
     /** 上传文件 （单文件上传） */
     @PostMapping("/{bizType}")
@@ -50,7 +46,6 @@ public class OssFileController extends CommonCtrl {
 
         if( file == null ) return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "选择文件不存在");
         try {
-
 
             OssFileConfig ossFileConfig = OssFileConfig.getOssFileConfigByBizType(bizType);
 
@@ -70,35 +65,10 @@ public class OssFileController extends CommonCtrl {
                 throw new BizException("上传大小请限制在["+ossFileConfig.getMaxSize() / 1024 / 1024 +"M]以内！");
             }
 
-
-            boolean isAllowPublicRead = ossFileConfig.isAllowPublicRead(); //是否允许公共读，  true：公共读，  false：私有文件
-
-            //公共读 & 是否上传到oss
-            boolean isYunOss = false; //TODO 暂时不支持云oss方式
-            if(isAllowPublicRead && isYunOss){
-                return null;
-            }
-
-            //以下为文件上传到本地
-
-            // 新文件地址
-            String newFileName = UUID.fastUUID() + "." + fileSuffix;
-
-            // 保存的文件夹名称
-            String saveFilePath = isAllowPublicRead ? systemYmlConfig.getOssFile().getPublicPath() : systemYmlConfig.getOssFile().getPrivatePath();
-            saveFilePath = saveFilePath + File.separator + bizType + File.separator + newFileName;
-
-
-            //保存文件
-            saveFile(file, saveFilePath);
-
-            //返回响应结果
-            String resultUrl = bizType + "/" + newFileName;
-            if(isAllowPublicRead){ //允许公共读取
-                resultUrl = sysConfigService.getDBApplicationConfig().getOssPublicSiteUrl() + "/" + resultUrl;
-            }
-
-            return ApiRes.ok(resultUrl);
+            // 新文件地址 (xxx/xxx.jpg 格式)
+            String saveDirAndFileName = bizType + "/" + UUID.fastUUID() + "." + fileSuffix;
+            String url = ossService.upload2PreviewUrl(ossFileConfig.getOssSavePlaceEnum(), file, saveDirAndFileName);
+            return ApiRes.ok(url);
 
         } catch (BizException biz) {
             throw biz;

@@ -128,28 +128,28 @@ public class CS {
     public interface MQ{
 
         /** 更新配置的通知消息 **/
-        String TOPIC_MODIFY_SYS_CONFIG = "topic.modify.sys.config";
+        String TOPIC_MODIFY_SYS_CONFIG = "topic-modify-sys-config";
 
         /** 更新商户配置信息 **/
-        String TOPIC_MODIFY_MCH_INFO = "topic.modify.mch.info";
+        String TOPIC_MODIFY_MCH_INFO = "topic-modify-mch-info";
 
         /** 更新商户应用配置信息 **/
-        String TOPIC_MODIFY_MCH_APP = "topic.modify.mch.app";
+        String TOPIC_MODIFY_MCH_APP = "topic-modify-mch-app";
 
         /** 更新服务商配置信息 **/
-        String TOPIC_MODIFY_ISV_INFO = "topic.modify.isv.info";
+        String TOPIC_MODIFY_ISV_INFO = "topic-modify-isv-info";
 
         /** 支付订单 商户通知MQ **/
-        String QUEUE_PAYORDER_MCH_NOTIFY = "queue.payorder.mch.notify";
+        String QUEUE_PAYORDER_MCH_NOTIFY = "queue-payorder-mch-notify";
 
         /** 轮询查单 MQ **/
-        String QUEUE_CHANNEL_ORDER_QUERY = "queue.channel.order.query";
+        String QUEUE_CHANNEL_ORDER_QUERY = "queue-channel-order-query";
 
         /** 清除商户登录用户信息 **/
-        String QUEUE_MODIFY_MCH_USER_REMOVE = "queue.modify.mch.user.remove";
+        String QUEUE_MODIFY_MCH_USER_REMOVE = "queue-modify-mch-user-remove";
 
         /** 用于activemq 发布订阅模式交换机**/
-        String FANOUT_MODIFY_SYS_CONFIG = "fanout.modify.sys.config";
+        String FANOUT_MODIFY_SYS_CONFIG = "fanout-modify-sys-config";
 
         /** MQ消息类型 **/
         String MQ_TYPE_MODIFY_MCH_APP = "modify.mch.app";
@@ -170,6 +170,7 @@ public class CS {
     public static class MQTYPE{
         public static final String ACTIVE_MQ = "activeMQ";
         public static final String RABBIT_MQ = "rabbitMQ";
+        public static final String ROCKET_MQ = "rocketMQ";
     }
 
     //菜单类型

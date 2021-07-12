@@ -13,28 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mch.config;
+package com.jeequan.jeepay.oss.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * 系统Yml配置参数定义Bean
- *
- * @author terrfly
- * @site https://www.jeepay.vip
- * @date 2021-04-27 15:50
- */
-@Component
-@ConfigurationProperties(prefix="isys")
+* aliyun oss 的yml配置参数
+*
+* @author terrfly
+* @site https://www.jeepay.vip
+* @date 2021/7/12 18:18
+*/
 @Data
-public class SystemYmlConfig {
+@Component
+@ConfigurationProperties(prefix="isys.oss.aliyun-oss")
+public class AliyunOssYmlConfig {
 
-	/** 是否允许跨域请求 [生产环境建议关闭， 若api与前端项目没有在同一个域名下时，应开启此配置或在nginx统一配置允许跨域]  **/
-	private Boolean allowCors;
-
-	/** 生成jwt的秘钥。 要求每个系统有单独的秘钥管理机制。 **/
-	private String jwtSecret;
-
+	private String endpoint;
+	private String publicBucketName;
+	private String privateBucketName;
+	private String accessKeyId;
+	private String accessKeySecret;
 }
+
+
+

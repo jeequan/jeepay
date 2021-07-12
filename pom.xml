@@ -25,16 +25,19 @@
 
     <module>jeepay-core</module>  <!-- 基础函数, 包含工具类等 -->
     <module>jeepay-service</module>  <!-- db service等 -->
+    <module>jeepay-oss</module>	<!-- oss服务支撑 -->
   	<module>jeepay-manager</module>	<!-- 运营平台管理端 -->
   	<module>jeepay-merchant</module>	<!-- 商户平台管理端 -->
     <module>jeepay-payment</module>	<!-- 支付统一网关 -->
+
+
   </modules>
 
   <!-- 配置属性声明, 支持自定义参数 -->
   <properties>
     <java.version>1.8</java.version> <!-- 指定java版本号 -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> <!-- 项目构建输出编码 -->
-    <isys.version>1.2.0</isys.version> <!-- 指定当前[项目]版本号 -->
+    <isys.version>1.3.0</isys.version> <!-- 指定当前[项目]版本号 -->
 
     <!-- 其他工具包 -->
     <jeepay.sdk.java.version>1.1.0</jeepay.sdk.java.version>
@@ -44,6 +47,7 @@
     <spring.security.version>5.4.6</spring.security.version> <!-- 用于core的scope依赖 -->
     <jjwt.version>0.9.1</jjwt.version>
     <binarywang.weixin.java.version>4.1.0</binarywang.weixin.java.version>
+    <rocketmq.spring.boot.starter.version>2.0.3</rocketmq.spring.boot.starter.version>
 
   </properties>
 
@@ -117,6 +121,13 @@
             <groupId>com.alipay.sdk</groupId>
             <artifactId>alipay-sdk-java</artifactId>
             <version>4.13.50.ALL</version>
+        </dependency>
+
+        <!-- 阿里云oss组件  -->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.13.0</version>
         </dependency>
 
     </dependencies>

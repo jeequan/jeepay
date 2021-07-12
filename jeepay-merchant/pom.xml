@@ -25,6 +25,13 @@
             <version>${isys.version}</version>
         </dependency>
 
+        <!-- 依赖[ oss ]包  -->
+        <dependency>
+            <groupId>com.jeequan</groupId>
+            <artifactId>jeepay-oss</artifactId>
+            <version>${isys.version}</version>
+        </dependency>
+
         <!-- 依赖 sping-boot-web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -93,6 +100,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
+        <!-- 添加对rocketMQ的支持  -->
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-spring-boot-starter</artifactId>
+            <version>${rocketmq.spring.boot.starter.version}</version>
         </dependency>
 
         <!-- 引入 jeepay-sdk-java -->

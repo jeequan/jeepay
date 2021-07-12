@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.core.model;
+package com.jeequan.jeepay.oss.model;
 
+import com.jeequan.jeepay.oss.constant.OssSavePlaceEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
@@ -53,13 +54,13 @@ public class OssFileConfig {
 
     private static final Map<String, OssFileConfig> ALL_BIZ_TYPE_MAP = new HashMap<>();
     static{
-        ALL_BIZ_TYPE_MAP.put(BIZ_TYPE.AVATAR, new OssFileConfig(true, IMG_SUFFIX, DEFAULT_MAX_SIZE) );
-        ALL_BIZ_TYPE_MAP.put(BIZ_TYPE.IF_BG, new OssFileConfig(true, IMG_SUFFIX, DEFAULT_MAX_SIZE) );
-        ALL_BIZ_TYPE_MAP.put(BIZ_TYPE.CERT, new OssFileConfig(false, new HashSet<>(Arrays.asList(ALL_SUFFIX_FLAG)), DEFAULT_MAX_SIZE) );
+        ALL_BIZ_TYPE_MAP.put(BIZ_TYPE.AVATAR, new OssFileConfig(OssSavePlaceEnum.PUBLIC, IMG_SUFFIX, DEFAULT_MAX_SIZE) );
+        ALL_BIZ_TYPE_MAP.put(BIZ_TYPE.IF_BG, new OssFileConfig(OssSavePlaceEnum.PUBLIC, IMG_SUFFIX, DEFAULT_MAX_SIZE) );
+        ALL_BIZ_TYPE_MAP.put(BIZ_TYPE.CERT, new OssFileConfig(OssSavePlaceEnum.PRIVATE, new HashSet<>(Arrays.asList(ALL_SUFFIX_FLAG)), DEFAULT_MAX_SIZE) );
     }
 
-    /** 是否允许公共读 **/
-    private boolean allowPublicRead = false;
+    /** 存储位置 **/
+    private OssSavePlaceEnum ossSavePlaceEnum;
 
     /** 允许的文件后缀, 默认全部类型 **/
     private Set<String> allowFileSuffix = new HashSet<>(Arrays.asList(ALL_SUFFIX_FLAG));

@@ -30,7 +30,6 @@ import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 /**
@@ -59,21 +58,24 @@ public class MqReceiveCommon {
 
     /** 接收 [商户配置信息] 的消息 **/
     public void modifyMchInfo(String mchNo) {
-        log.info("接收 [商户配置信息] 的消息, msg={}", mchNo);
+        log.info("成功接收 [商户配置信息] 的消息, msg={}", mchNo);
         configContextService.initMchInfoConfigContext(mchNo);
+        log.info(" [商户配置信息] 已重置");
     }
 
     /** 接收 [商户应用支付参数配置信息] 的消息 **/
     public void modifyMchApp(String mchNoAndAppId) {
-        log.info("接收 [商户应用支付参数配置信息] 的消息, msg={}", mchNoAndAppId);
+        log.info("成功接收 [商户应用支付参数配置信息] 的消息, msg={}", mchNoAndAppId);
         JSONObject jsonObject = (JSONObject) JSONObject.parse(mchNoAndAppId);
         configContextService.initMchAppConfigContext(jsonObject.getString("mchNo"), jsonObject.getString("appId"));
+        log.info(" [商户应用支付参数配置信息] 已重置");
     }
 
     /** 重置ISV信息 **/
     public void modifyIsvInfo(String isvNo) {
-        log.info("重置ISV信息, msg={}", isvNo);
+        log.info("成功接收 [ISV信息] 重置, msg={}", isvNo);
         configContextService.initIsvConfigContext(isvNo);
+        log.info("[ISV信息] 已重置");
     }
 
     /** 接收商户订单回调通知 **/
@@ -109,11 +111,13 @@ public class MqReceiveCommon {
             //通知成功
             if("SUCCESS".equalsIgnoreCase(res)){
                 mchNotifyRecordService.updateNotifyResult(notifyId, MchNotifyRecord.STATE_SUCCESS, res);
+                return;
             }
 
             //通知次数 >= 最大通知次数时， 更新响应结果为异常， 不在继续延迟发送消息
             if( currentCount >= record.getNotifyCountLimit() ){
                 mchNotifyRecordService.updateNotifyResult(notifyId, MchNotifyRecord.STATE_FAIL, res);
+                return;
             }
 
             // 继续发送MQ 延迟发送
