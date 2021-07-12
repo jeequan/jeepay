@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion> <!-- POM模型版本 -->
+
+  <groupId>com.jeequan</groupId> <!-- 组织名, 类似于包名 -->
+  <artifactId>jeepay-oss</artifactId>  <!-- 项目名称 -->
+  <packaging>jar</packaging> <!-- 项目的最终打包类型/发布形式, 可选[jar, war, pom, maven-plugin]等 -->
+  <version>${isys.version}</version> <!-- 项目当前版本号 -->
+  <description>Jeepay计全支付系统 [jeepay-oss]</description> <!-- 项目描述 -->
+  <url>https://www.jeequan.com</url>
+
+  <parent>
+    <groupId>com.jeequan</groupId>
+    <artifactId>jeepay</artifactId>
+    <version>Final</version>
+  </parent>
+
+  <!-- 项目依赖声明 -->
+  <dependencies>
+
+    <dependency>
+      <groupId>com.jeequan</groupId>
+      <artifactId>jeepay-core</artifactId>
+      <version>${isys.version}</version>
+    </dependency>
+
+    <!-- 添加 spring-webmvc 基础依赖  -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
+    </dependency>
+
+    <!-- slf4j -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <!-- spring-boot 相关注解  -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot</artifactId>
+      <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+      <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
+    </dependency>
+
+    <!-- 阿里云oss组件  -->
+    <dependency>
+      <groupId>com.aliyun.oss</groupId>
+      <artifactId>aliyun-sdk-oss</artifactId>
+      <scope>provided</scope> <!-- 当对象存储使用aliyunOSS时，需要改为：compile， 否则使用provided仅用于编译代码 -->
+    </dependency>
+
+
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>src/main/java</directory>
+        <includes><include>**/*.xml</include></includes><!-- maven可以将mapper.xml进行打包处理，否则仅对java文件处理 -->
+      </resource>
+    </resources>
+
+  </build>
+
+</project>

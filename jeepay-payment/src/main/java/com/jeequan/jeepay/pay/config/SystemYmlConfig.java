@@ -17,7 +17,6 @@ package com.jeequan.jeepay.pay.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -34,23 +33,5 @@ public class SystemYmlConfig {
 
 	/** 是否允许跨域请求 [生产环境建议关闭， 若api与前端项目没有在同一个域名下时，应开启此配置或在nginx统一配置允许跨域]  **/
 	private Boolean allowCors;
-
-	@NestedConfigurationProperty //指定该属性为嵌套值, 否则默认为简单值导致对象为空（外部类不存在该问题， 内部static需明确指定）
-	private OssFile ossFile;
-
-	/** 系统oss配置信息 **/
-	@Data
-	public static class OssFile{
-
-		/** 存储根路径 **/
-		private String rootPath;
-
-		/** 公共读取块 **/
-		private String publicPath;
-
-		/** 私有读取块 **/
-		private String privatePath;
-
-	}
 
 }

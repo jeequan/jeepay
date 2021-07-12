@@ -16,6 +16,8 @@
 package com.jeequan.jeepay.mgr.ctrl.common;
 
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
+import com.jeequan.jeepay.oss.config.OssYmlConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,6 +40,8 @@ import java.io.InputStream;
 @Controller
 public class StaticController extends CommonCtrl {
 
+    @Autowired private OssYmlConfig ossYmlConfig;
+
     /** 图片预览 **/
     @GetMapping("/api/anon/localOssFiles/**/*.*")
     public ResponseEntity<?> imgView() {
@@ -45,7 +49,7 @@ public class StaticController extends CommonCtrl {
         try {
 
             //查找图片文件
-            File imgFile = new File(mainConfig.getOssFile().getPublicPath() + File.separator + request.getRequestURI().substring(24));
+            File imgFile = new File(ossYmlConfig.getOss().getFilePublicPath() + File.separator + request.getRequestURI().substring(24));
             if(!imgFile.isFile() || !imgFile.exists()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
             //输出文件流（图片格式）

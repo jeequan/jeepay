@@ -17,7 +17,6 @@ package com.jeequan.jeepay.mgr.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -38,23 +37,6 @@ public class SystemYmlConfig {
 	/** 生成jwt的秘钥。 要求每个系统有单独的秘钥管理机制。 **/
 	private String jwtSecret;
 
-	@NestedConfigurationProperty //指定该属性为嵌套值, 否则默认为简单值导致对象为空（外部类不存在该问题， 内部static需明确指定）
-	private OssFile ossFile;
-
-	/** 系统oss配置信息 **/
-	@Data
-	public static class OssFile{
-
-		/** 存储根路径 **/
-		private String rootPath;
-
-		/** 公共读取块 **/
-		private String publicPath;
-
-		/** 私有读取块 **/
-		private String privatePath;
-
-	}
 }
 
 

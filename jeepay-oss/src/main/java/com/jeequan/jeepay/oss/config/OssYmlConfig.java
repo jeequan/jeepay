@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.mch.config;
+package com.jeequan.jeepay.oss.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,15 +27,32 @@ import org.springframework.stereotype.Component;
  * @site https://www.jeepay.vip
  * @date 2021-04-27 15:50
  */
+@Data
 @Component
 @ConfigurationProperties(prefix="isys")
-@Data
-public class SystemYmlConfig {
+public class OssYmlConfig {
 
-	/** 是否允许跨域请求 [生产环境建议关闭， 若api与前端项目没有在同一个域名下时，应开启此配置或在nginx统一配置允许跨域]  **/
-	private Boolean allowCors;
+	@NestedConfigurationProperty //指定该属性为嵌套值, 否则默认为简单值导致对象为空（外部类不存在该问题， 内部static需明确指定）
+	private Oss oss;
 
-	/** 生成jwt的秘钥。 要求每个系统有单独的秘钥管理机制。 **/
-	private String jwtSecret;
+	/** 系统oss配置信息 **/
+	@Data
+	public static class Oss{
 
+		/** 存储根路径 **/
+		private String fileRootPath;
+
+		/** 公共读取块 **/
+		private String filePublicPath;
+
+		/** 私有读取块 **/
+		private String filePrivatePath;
+
+		/** oss类型 **/
+		private String serviceType;
+
+	}
 }
+
+
+

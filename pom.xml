@@ -25,9 +25,12 @@
 
     <module>jeepay-core</module>  <!-- 基础函数, 包含工具类等 -->
     <module>jeepay-service</module>  <!-- db service等 -->
+    <module>jeepay-oss</module>	<!-- oss服务支撑 -->
   	<module>jeepay-manager</module>	<!-- 运营平台管理端 -->
   	<module>jeepay-merchant</module>	<!-- 商户平台管理端 -->
     <module>jeepay-payment</module>	<!-- 支付统一网关 -->
+
+
   </modules>
 
   <!-- 配置属性声明, 支持自定义参数 -->
@@ -118,6 +121,13 @@
             <groupId>com.alipay.sdk</groupId>
             <artifactId>alipay-sdk-java</artifactId>
             <version>4.13.50.ALL</version>
+        </dependency>
+
+        <!-- 阿里云oss组件  -->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.13.0</version>
         </dependency>
 
     </dependencies>
