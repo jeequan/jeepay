@@ -63,18 +63,18 @@ spring:
     broker-url: tcp://localhost:61616  #连接地址
 
   #rabbitmq配置
-    rabbitmq:
-      addresses: 127.0.0.1:5672
-      username: guest
-      password: guest
-      dynamic: true
-      virtual-host: /
+  #  rabbitmq:
+  #    addresses: 127.0.0.1:5672
+  #    username: guest
+  #    password: guest
+  #    dynamic: true
+  #    virtual-host: /
 
-  #rocketmq配置
-rocketmq:
-  name-server: 127.0.0.1:9876
-  producer:
-    group: rocket-group
+#rocketmq配置
+# rocketmq:
+#   name-server: 127.0.0.1:9876
+#   producer:
+#     group: rocket-group
 
   #日志配置参数。
   # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
@@ -96,7 +96,7 @@ isys:
     file-private-path: ${isys.oss.file-root-path}/private #私有化本地访问，不允许url方式公共读取 ( 一般配合root-path参数进行设置，需以‘/’ 开头, 无需以‘/’结尾  )
 
     # [local]: 本地存储，所有的文件将存在放本地，可通过nfs, rsync工具实现多机共享；
-    # [aliyun-oss]: 将文件统一上传到阿里云oss服务器;
+    # [aliyun-oss]: 将文件统一上传到阿里云oss服务器;  注意：需调整jeepay-oss/pom.xml中的aliyun-sdk-oss组件依赖方式
     service-type: local
 
     # 阿里云OSS服务配置信息

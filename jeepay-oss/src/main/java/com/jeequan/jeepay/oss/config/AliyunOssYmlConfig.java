@@ -20,12 +20,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * 系统Yml配置参数定义Bean
- *
- * @author terrfly
- * @site https://www.jeepay.vip
- * @date 2021-04-27 15:50
- */
+* aliyun oss 的yml配置参数
+*
+* @author terrfly
+* @site https://www.jeepay.vip
+* @date 2021/7/12 18:18
+*/
 @Data
 @Component
 @ConfigurationProperties(prefix="isys.oss.aliyun-oss")
