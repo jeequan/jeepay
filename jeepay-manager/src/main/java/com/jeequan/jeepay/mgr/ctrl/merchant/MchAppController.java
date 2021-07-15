@@ -26,6 +26,7 @@ import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.core.utils.JsonKit;
+import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
@@ -59,14 +60,7 @@ public class MchAppController extends CommonCtrl {
     public ApiRes list() {
         MchApp mchApp = getObject(MchApp.class);
 
-        LambdaQueryWrapper<MchApp> wrapper = MchApp.gw();
-        if (StringUtils.isNotEmpty(mchApp.getMchNo())) wrapper.eq(MchApp::getMchNo, mchApp.getMchNo());
-        if (StringUtils.isNotEmpty(mchApp.getAppId())) wrapper.eq(MchApp::getAppId, mchApp.getAppId());
-        if (StringUtils.isNotEmpty(mchApp.getAppName())) wrapper.eq(MchApp::getAppName, mchApp.getAppName());
-        if (mchApp.getState() != null) wrapper.eq(MchApp::getState, mchApp.getState());
-        wrapper.orderByDesc(MchApp::getCreatedAt);
-
-        IPage<MchApp> pages = mchAppService.page(getIPage(), wrapper);
+        IPage<MchApp> pages = mchAppService.selectPage(getIPage(), mchApp);
         return ApiRes.ok(pages);
     }
 
@@ -101,7 +95,7 @@ public class MchAppController extends CommonCtrl {
     @PreAuthorize("hasAnyAuthority('ENT_MCH_APP_VIEW', 'ENT_MCH_APP_EDIT')")
     @GetMapping("/{appId}")
     public ApiRes detail(@PathVariable("appId") String appId) {
-        MchApp mchApp = mchAppService.getById(appId);
+        MchApp mchApp = mchAppService.selectById(appId);
         if (mchApp == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }

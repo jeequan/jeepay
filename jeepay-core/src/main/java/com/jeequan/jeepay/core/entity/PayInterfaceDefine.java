@@ -71,6 +71,11 @@ public class PayInterfaceDefine extends BaseModel implements Serializable {
     private Byte isIsvMode;
 
     /**
+     * 支付参数配置页面类型:1-JSON渲染,2-自定义
+     */
+    private Byte configPageType;
+
+    /**
      * ISV接口配置定义描述,json字符串
      */
     private String isvParams;

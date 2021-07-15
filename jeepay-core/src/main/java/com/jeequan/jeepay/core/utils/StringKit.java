@@ -16,6 +16,7 @@
 package com.jeequan.jeepay.core.utils;
 
 import cn.hutool.core.net.url.UrlBuilder;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
@@ -63,6 +64,85 @@ public class StringKit {
 		}
 
 		return url.startsWith("http://") ||url.startsWith("https://");
+	}
+
+	/**
+	 * 对字符加星号处理：除前面几位和后面几位外，其他的字符以星号代替
+	 *
+	 * @param content 传入的字符串
+	 * @param frontNum 保留前面字符的位数
+	 * @param endNum 保留后面字符的位数
+	 * @return 带星号的字符串
+	 */
+	public static String str2Star2(String content, int frontNum, int endNum) {
+		if (frontNum >= content.length() || frontNum < 0) {
+			return content;
+		}
+		if (endNum >= content.length() || endNum < 0) {
+			return content;
+		}
+		if (frontNum + endNum >= content.length()) {
+			return content;
+		}
+		String starStr = "";
+		for (int i = 0; i < (content.length() - frontNum - endNum); i++) {
+			starStr = starStr + "*";
+		}
+		return content.substring(0, frontNum) + starStr
+				+ content.substring(content.length() - endNum, content.length());
+	}
+
+	/**
+	 * 对字符加星号处理：除前面几位和后面几位外，其他的字符以星号代替
+	 *
+	 * @param content 传入的字符串
+	 * @param frontNum 保留前面字符的位数
+	 * @param endNum 保留后面字符的位数
+	 * @param starNum 指定star的数量
+	 * @return 带星号的字符串
+	 */
+	public static String str2Star(String content, int frontNum, int endNum, int starNum) {
+		if (frontNum >= content.length() || frontNum < 0) {
+			return content;
+		}
+		if (endNum >= content.length() || endNum < 0) {
+			return content;
+		}
+		if (frontNum + endNum >= content.length()) {
+			return content;
+		}
+		String starStr = "";
+		for (int i = 0; i < starNum; i++) {
+			starStr = starStr + "*";
+		}
+		return content.substring(0, frontNum) + starStr
+				+ content.substring(content.length() - endNum, content.length());
+	}
+
+
+	/**
+	 * 合并两个json字符串
+	 * key相同，则后者覆盖前者的值
+	 * key不同，则合并至前者
+	 * @param originStr
+	 * @param mergeStr
+	 * @return 合并后的json字符串
+	 */
+	public static String marge(String originStr, String mergeStr) {
+
+		if (StringUtils.isAnyBlank(originStr, mergeStr)) {
+			return null;
+		}
+
+		JSONObject originJSON = JSONObject.parseObject(originStr);
+		JSONObject mergeJSON = JSONObject.parseObject(mergeStr);
+
+		if (originJSON == null || mergeJSON == null) {
+			return null;
+		}
+
+		originJSON.putAll(mergeJSON);
+		return originJSON.toJSONString();
 	}
 
 }

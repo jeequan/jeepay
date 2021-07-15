@@ -39,4 +39,9 @@ public abstract class NormalMchParams {
         return null;
     }
 
+    /**
+     *  敏感数据脱敏
+     */
+    public abstract String deSenData();
+
 }

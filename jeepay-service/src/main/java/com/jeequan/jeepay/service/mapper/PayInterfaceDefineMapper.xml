@@ -8,6 +8,7 @@
         <result column="if_name" property="ifName" />
         <result column="is_mch_mode" property="isMchMode" />
         <result column="is_isv_mode" property="isIsvMode" />
+        <result column="config_page_type" property="configPageType" />
         <result column="isv_params" property="isvParams" />
         <result column="isvsub_mch_params" property="isvsubMchParams" />
         <result column="normal_mch_params" property="normalMchParams" />

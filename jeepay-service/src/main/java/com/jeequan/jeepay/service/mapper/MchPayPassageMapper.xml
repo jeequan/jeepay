@@ -18,7 +18,7 @@
 
     <!-- 根据支付方式查询可用的支付接口列表  -->
     <select id="selectAvailablePayInterfaceList" resultType="com.alibaba.fastjson.JSONObject" parameterType="java.util.Map">
-        select pid.if_code ifCode, pid.if_name ifName, pid.bg_color bgColor, pid.icon icon, pic.if_params ifParams, pic.if_rate ifRate from t_pay_interface_define pid
+        select pid.if_code ifCode, pid.if_name ifName, pid.config_page_type configPageType, pid.bg_color bgColor, pid.icon icon, pic.if_params ifParams, pic.if_rate ifRate from t_pay_interface_define pid
         inner join t_pay_interface_config pic on pid.if_code = pic.if_code
         where JSON_CONTAINS(pid.way_codes, JSON_OBJECT('wayCode', #{wayCode}))
         and pid.state = 1

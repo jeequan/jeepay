@@ -21,12 +21,13 @@ import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
 import com.jeequan.jeepay.core.model.params.ysf.YsfpayIsvParams;
 
-/*
+/**
  * 抽象类 isv参数定义
  *
  * @author terrfly
  * @site https://www.jeepay.vip
  * @date 2021/6/8 16:33
+ * @modify ZhuXiao
  */
 public abstract class IsvParams {
 
@@ -41,5 +42,10 @@ public abstract class IsvParams {
         }
         return null;
     }
+
+    /**
+     *  敏感数据脱敏
+    */
+    public abstract String deSenData();
 
 }

@@ -15,8 +15,12 @@
  */
 package com.jeequan.jeepay.core.model.params.alipay;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.model.params.IsvParams;
+import com.jeequan.jeepay.core.utils.StringKit;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 /*
 * 支付宝 isv参数定义
@@ -57,5 +61,18 @@ public class AlipayIsvParams extends IsvParams {
 
     /** 支付宝根证书 **/
     private String alipayRootCert;
+
+    @Override
+    public String deSenData() {
+
+        AlipayIsvParams isvParams = this;
+        if (StringUtils.isNotBlank(this.privateKey)) {
+            isvParams.setPrivateKey(StringKit.str2Star(this.privateKey, 4, 4, 6));
+        }
+        if (StringUtils.isNotBlank(this.alipayPublicKey)) {
+            isvParams.setAlipayPublicKey(StringKit.str2Star(this.alipayPublicKey, 6, 6, 6));
+        }
+        return ((JSONObject) JSON.toJSON(isvParams)).toJSONString();
+    }
 
 }

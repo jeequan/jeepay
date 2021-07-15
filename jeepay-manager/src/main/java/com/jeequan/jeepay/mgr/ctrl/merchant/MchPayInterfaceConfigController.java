@@ -20,14 +20,19 @@ import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchApp;
+import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.core.utils.JsonKit;
+import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchAppService;
+import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -47,8 +52,9 @@ import java.util.List;
 public class MchPayInterfaceConfigController extends CommonCtrl {
 
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private MchAppService mchAppService;
     @Autowired private MqCommonService mqCommonService;
+    @Autowired private MchAppService mchAppService;
+    @Autowired private MchInfoService mchInfoService;
 
     /**
      * @Author: ZhuXiao
@@ -72,8 +78,25 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     @GetMapping("/{appId}/{ifCode}")
     public ApiRes getByAppId(@PathVariable(value = "appId") String appId, @PathVariable(value = "ifCode") String ifCode) {
         PayInterfaceConfig payInterfaceConfig = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_MCH_APP, appId, ifCode);
-        if (payInterfaceConfig != null && payInterfaceConfig.getIfRate() != null) {
-            payInterfaceConfig.setIfRate(payInterfaceConfig.getIfRate().multiply(new BigDecimal("100")));
+        if (payInterfaceConfig != null) {
+            // 费率转换为百分比数值
+            if (payInterfaceConfig.getIfRate() != null) {
+                payInterfaceConfig.setIfRate(payInterfaceConfig.getIfRate().multiply(new BigDecimal("100")));
+            }
+
+            // 敏感数据脱敏
+            if (StringUtils.isNotBlank(payInterfaceConfig.getIfParams())) {
+                MchApp mchApp = mchAppService.getById(appId);
+                MchInfo mchInfo = mchInfoService.getById(mchApp.getMchNo());
+
+                // 普通商户的支付参数执行数据脱敏
+                if (mchInfo.getType() == CS.MCH_TYPE_NORMAL) {
+                    NormalMchParams mchParams = NormalMchParams.factory(payInterfaceConfig.getIfCode(), payInterfaceConfig.getIfParams());
+                    if (mchParams != null) {
+                        payInterfaceConfig.setIfParams(mchParams.deSenData());
+                    }
+                }
+            }
         }
         return ApiRes.ok(payInterfaceConfig);
     }
@@ -116,6 +139,9 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
         //若配置存在，为saveOrUpdate添加ID，第一次配置添加创建者
         if (dbRecoed != null) {
             payInterfaceConfig.setId(dbRecoed.getId());
+
+            // 合并支付参数
+            payInterfaceConfig.setIfParams(StringKit.marge(dbRecoed.getIfParams(), payInterfaceConfig.getIfParams()));
         }else {
             payInterfaceConfig.setCreatedUid(userId);
             payInterfaceConfig.setCreatedBy(realName);

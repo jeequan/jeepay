@@ -57,15 +57,9 @@ public class MchAppController extends CommonCtrl {
     @GetMapping
     public ApiRes list() {
         MchApp mchApp = getObject(MchApp.class);
+        mchApp.setMchNo(getCurrentMchNo());
 
-        LambdaQueryWrapper<MchApp> wrapper = MchApp.gw();
-        wrapper.eq(MchApp::getMchNo, getCurrentMchNo());
-        if (StringUtils.isNotEmpty(mchApp.getAppId())) wrapper.eq(MchApp::getAppId, mchApp.getAppId());
-        if (StringUtils.isNotEmpty(mchApp.getAppName())) wrapper.eq(MchApp::getAppName, mchApp.getAppName());
-        if (mchApp.getState() != null) wrapper.eq(MchApp::getState, mchApp.getState());
-        wrapper.orderByDesc(MchApp::getCreatedAt);
-
-        IPage<MchApp> pages = mchAppService.page(getIPage(true), wrapper);
+        IPage<MchApp> pages = mchAppService.selectPage(getIPage(true), mchApp);
         return ApiRes.ok(pages);
     }
 
@@ -97,7 +91,7 @@ public class MchAppController extends CommonCtrl {
     @PreAuthorize("hasAnyAuthority('ENT_MCH_APP_VIEW', 'ENT_MCH_APP_EDIT')")
     @GetMapping("/{appId}")
     public ApiRes detail(@PathVariable("appId") String appId) {
-        MchApp mchApp = mchAppService.getById(appId);
+        MchApp mchApp = mchAppService.selectById(appId);
 
         if (mchApp == null || !mchApp.getMchNo().equals(getCurrentMchNo())) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
