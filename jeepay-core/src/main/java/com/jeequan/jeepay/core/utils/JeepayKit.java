@@ -20,9 +20,7 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.exception.BizException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import sun.misc.BASE64Decoder;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -34,7 +32,7 @@ import java.util.regex.Pattern;
 
 /*
 * jeepay工具类
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 16:50
@@ -42,13 +40,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class JeepayKit {
 
-    public static byte[] AES_KEY = null;
-    static{
-        try {
-            AES_KEY = new BASE64Decoder().decodeBuffer("4ChT08phkz59hquD795X7w==");
-        } catch (IOException e) {
-        }
-    }
+    public static byte[] AES_KEY = "4ChT08phkz59hquD795X7w==".getBytes();
 
     /** 加密 **/
     public static String aesEncode(String str){
