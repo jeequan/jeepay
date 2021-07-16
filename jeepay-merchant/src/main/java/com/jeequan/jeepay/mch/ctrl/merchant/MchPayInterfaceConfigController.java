@@ -17,6 +17,7 @@ package com.jeequan.jeepay.mch.ctrl.merchant;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.aop.MethodLog;
+import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchInfo;
@@ -29,8 +30,10 @@ import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.core.utils.JsonKit;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
+import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
+import com.jeequan.jeepay.service.impl.SysConfigService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,6 +56,8 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
     @Autowired private MchInfoService mchInfoService;
     @Autowired private MqCommonService mqCommonService;
+    @Autowired private MchAppService mchAppService;
+    @Autowired private SysConfigService sysConfigService;
 
     /**
      * @Author: ZhuXiao
@@ -155,5 +160,26 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
 
         return ApiRes.ok();
     }
+
+    /** 查询支付宝商户授权URL **/
+    @GetMapping("/alipayIsvsubMchAuthUrls/{mchAppId}")
+    public ApiRes queryAlipayIsvsubMchAuthUrl(@PathVariable String mchAppId) {
+
+        MchApp mchApp = mchAppService.getById(mchAppId);
+
+        if (mchApp == null || !mchApp.getMchNo().equals(getCurrentMchNo())) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+
+        MchInfo mchInfo = mchInfoService.getById(mchApp.getMchNo());
+        String authUrl = sysConfigService.getDBApplicationConfig().genAlipayIsvsubMchAuthUrl(mchInfo.getIsvNo(), mchAppId);
+        String authQrImgUrl = sysConfigService.getDBApplicationConfig().genScanImgUrl(authUrl);
+
+        JSONObject result = new JSONObject();
+        result.put("authUrl", authUrl);
+        result.put("authQrImgUrl", authQrImgUrl);
+        return ApiRes.ok(result);
+    }
+
 
 }
