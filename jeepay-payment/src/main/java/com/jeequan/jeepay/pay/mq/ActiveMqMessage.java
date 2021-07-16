@@ -22,6 +22,7 @@ import com.jeequan.jeepay.pay.mq.receive.MqReceiveCommon;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ScheduledMessage;
 import org.apache.activemq.command.ActiveMQQueue;
+import org.apache.activemq.command.ActiveMQTopic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -75,6 +76,16 @@ public class ActiveMqMessage extends MqCommonService {
     @Qualifier("activePayOrderMchNotifyInner")
     private Queue mqQueue4PayOrderMchNotifyInner;
 
+    @Bean("activeMqSendModifyMchApp")
+    public ActiveMQTopic mqTopic4ModifyMchApp(){
+        return new ActiveMQTopic(CS.MQ.TOPIC_MODIFY_MCH_APP);
+    }
+
+    @Lazy
+    @Autowired
+    @Qualifier("activeMqSendModifyMchApp")
+    private ActiveMQTopic mqTopic4ModifyMchApp;
+
     /**
      * 发送消息
      * @param msg
@@ -86,6 +97,8 @@ public class ActiveMqMessage extends MqCommonService {
             channelOrderQuery(msg);
         }else if (sendType.equals(CS.MQ.MQ_TYPE_PAY_ORDER_MCH_NOTIFY)) {
             payOrderMchNotify(msg);
+        }else if (sendType.equals(CS.MQ.MQ_TYPE_MODIFY_MCH_APP)) {   // 商户应用修改
+            this.jmsTemplate.convertAndSend(mqTopic4ModifyMchApp, msg);
         }
     }
 

@@ -32,7 +32,6 @@ import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -52,8 +51,8 @@ import java.util.List;
 public class MchPayInterfaceConfigController extends CommonCtrl {
 
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private MqCommonService mqCommonService;
     @Autowired private MchAppService mchAppService;
+    @Autowired private MqCommonService mqCommonService;
     @Autowired private MchInfoService mchInfoService;
 
     /**
@@ -156,6 +155,23 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
         mqCommonService.send(jsonObject.toJSONString(), CS.MQ.MQ_TYPE_MODIFY_MCH_APP); // 推送mq到目前节点进行更新数据
 
         return ApiRes.ok();
+    }
+
+
+
+    /** 查询支付宝商户授权URL **/
+    @GetMapping("/alipayIsvsubMchAuthUrls/{mchAppId}")
+    public ApiRes queryAlipayIsvsubMchAuthUrl(@PathVariable String mchAppId) {
+
+        MchApp mchApp = mchAppService.getById(mchAppId);
+        MchInfo mchInfo = mchInfoService.getById(mchApp.getMchNo());
+        String authUrl = sysConfigService.getDBApplicationConfig().genAlipayIsvsubMchAuthUrl(mchInfo.getIsvNo(), mchAppId);
+        String authQrImgUrl = sysConfigService.getDBApplicationConfig().genScanImgUrl(authUrl);
+
+        JSONObject result = new JSONObject();
+        result.put("authUrl", authUrl);
+        result.put("authQrImgUrl", authQrImgUrl);
+        return ApiRes.ok(result);
     }
 
 }

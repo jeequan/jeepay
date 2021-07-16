@@ -127,6 +127,7 @@ public class PayInterfaceConfigService extends ServiceImpl<PayInterfaceConfigMap
                     .isNotNull(PayInterfaceConfig::getIfParams));
 
             for (PayInterfaceConfig config : isvConfigList) {
+                config.addExt("mchType", mchInfo.getType());
                 isvPayConfigMap.put(config.getIfCode(), config);
             }
         }
