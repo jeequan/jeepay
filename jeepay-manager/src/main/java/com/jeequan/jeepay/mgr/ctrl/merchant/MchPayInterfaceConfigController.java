@@ -32,6 +32,8 @@ import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
+import com.jeequan.jeepay.service.impl.SysConfigService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -54,6 +56,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     @Autowired private MchAppService mchAppService;
     @Autowired private MqCommonService mqCommonService;
     @Autowired private MchInfoService mchInfoService;
+    @Autowired private SysConfigService sysConfigService;
 
     /**
      * @Author: ZhuXiao
