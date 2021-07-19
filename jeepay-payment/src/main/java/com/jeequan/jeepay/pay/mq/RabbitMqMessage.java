@@ -53,6 +53,8 @@ public class RabbitMqMessage extends MqCommonService {
             channelOrderQuery(msg);
         }else if (sendType.equals(CS.MQ.MQ_TYPE_PAY_ORDER_MCH_NOTIFY)) {
             payOrderMchNotify(msg);
+        }else if (sendType.equals(CS.MQ.MQ_TYPE_MODIFY_MCH_APP)) {   // 商户应用修改
+            directModifyMchApp(msg);
         }
     }
 
@@ -90,6 +92,12 @@ public class RabbitMqMessage extends MqCommonService {
             return a;
         });
     }
+
+    /** 发送商户应用修改消息 **/
+    public void directModifyMchApp(String msg) {
+        rabbitTemplate.convertAndSend(CS.DIRECT_EXCHANGE, CS.MQ.TOPIC_MODIFY_MCH_APP, msg);
+    }
+
 
     /** 接收 查单消息 **/
     @RabbitListener(queues = CS.MQ.QUEUE_CHANNEL_ORDER_QUERY)

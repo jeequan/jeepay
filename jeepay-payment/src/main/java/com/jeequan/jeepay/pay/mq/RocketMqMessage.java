@@ -57,6 +57,8 @@ public class RocketMqMessage extends MqCommonService {
             channelOrderQuery(msg);
         }else if (sendType.equals(CS.MQ.MQ_TYPE_PAY_ORDER_MCH_NOTIFY)) {
             payOrderMchNotify(msg);
+        }else if (sendType.equals(CS.MQ.MQ_TYPE_MODIFY_MCH_INFO)) {  // 商户信息修改
+            modifyMchInfo(msg);
         }
     }
 
@@ -127,4 +129,17 @@ public class RocketMqMessage extends MqCommonService {
             mqReceiveCommon.payOrderMchNotify(msg);
         }
     }
+
+
+    /** 发送商户信息修改消息 **/
+    public void modifyMchInfo(String msg) {
+        sendMsg(msg, CS.MQ.TOPIC_MODIFY_MCH_INFO);
+    }
+
+    public void sendMsg(String msg, String group) {
+        // 这里的分组和消息名称未做区分
+        rocketMQTemplate.getProducer().setProducerGroup(group);
+        this.rocketMQTemplate.convertAndSend(group, msg);
+    }
+
 }

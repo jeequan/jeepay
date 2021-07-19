@@ -17,17 +17,24 @@ package com.jeequan.jeepay.mch.ctrl.merchant;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.aop.MethodLog;
+import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.core.utils.JsonKit;
+import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
+import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
+import com.jeequan.jeepay.service.impl.SysConfigService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -49,6 +56,8 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
     @Autowired private MchInfoService mchInfoService;
     @Autowired private MqCommonService mqCommonService;
+    @Autowired private MchAppService mchAppService;
+    @Autowired private SysConfigService sysConfigService;
 
     /**
      * @Author: ZhuXiao
@@ -78,8 +87,24 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     @GetMapping("/{appId}/{ifCode}")
     public ApiRes getByMchNo(@PathVariable(value = "appId") String appId, @PathVariable(value = "ifCode") String ifCode) {
         PayInterfaceConfig payInterfaceConfig = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_MCH_APP, appId, ifCode);
-        if (payInterfaceConfig != null && payInterfaceConfig.getIfRate() != null) {
-            payInterfaceConfig.setIfRate(payInterfaceConfig.getIfRate().multiply(new BigDecimal("100")));
+        if (payInterfaceConfig != null) {
+            // 费率转换为百分比数值
+            if (payInterfaceConfig.getIfRate() != null) {
+                payInterfaceConfig.setIfRate(payInterfaceConfig.getIfRate().multiply(new BigDecimal("100")));
+            }
+
+            // 敏感数据脱敏
+            if (StringUtils.isNotBlank(payInterfaceConfig.getIfParams())) {
+                MchInfo mchInfo = mchInfoService.getById(getCurrentMchNo());
+
+                // 普通商户的支付参数执行数据脱敏
+                if (mchInfo.getType() == CS.MCH_TYPE_NORMAL) {
+                    NormalMchParams mchParams = NormalMchParams.factory(payInterfaceConfig.getIfCode(), payInterfaceConfig.getIfParams());
+                    if (mchParams != null) {
+                        payInterfaceConfig.setIfParams(mchParams.deSenData());
+                    }
+                }
+            }
         }
         return ApiRes.ok(payInterfaceConfig);
     }
@@ -117,6 +142,9 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
         //若配置存在，为saveOrUpdate添加ID，第一次配置添加创建者
         if (dbRecoed != null) {
             payInterfaceConfig.setId(dbRecoed.getId());
+
+            // 合并支付参数
+            payInterfaceConfig.setIfParams(StringKit.marge(dbRecoed.getIfParams(), payInterfaceConfig.getIfParams()));
         }else {
             payInterfaceConfig.setCreatedUid(userId);
             payInterfaceConfig.setCreatedBy(realName);
@@ -132,5 +160,26 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
 
         return ApiRes.ok();
     }
+
+    /** 查询支付宝商户授权URL **/
+    @GetMapping("/alipayIsvsubMchAuthUrls/{mchAppId}")
+    public ApiRes queryAlipayIsvsubMchAuthUrl(@PathVariable String mchAppId) {
+
+        MchApp mchApp = mchAppService.getById(mchAppId);
+
+        if (mchApp == null || !mchApp.getMchNo().equals(getCurrentMchNo())) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+
+        MchInfo mchInfo = mchInfoService.getById(mchApp.getMchNo());
+        String authUrl = sysConfigService.getDBApplicationConfig().genAlipayIsvsubMchAuthUrl(mchInfo.getIsvNo(), mchAppId);
+        String authQrImgUrl = sysConfigService.getDBApplicationConfig().genScanImgUrl(authUrl);
+
+        JSONObject result = new JSONObject();
+        result.put("authUrl", authUrl);
+        result.put("authQrImgUrl", authQrImgUrl);
+        return ApiRes.ok(result);
+    }
+
 
 }

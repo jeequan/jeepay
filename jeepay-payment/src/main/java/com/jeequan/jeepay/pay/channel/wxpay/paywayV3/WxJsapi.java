@@ -23,13 +23,13 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.channel.wxpay.WxpayPaymentService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayV3Util;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
+import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxJsapiOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxJsapiOrderRS;
-import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
-import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.springframework.stereotype.Service;
 
 /*
@@ -57,16 +57,15 @@ public class WxJsapi extends WxpayPaymentService {
         // 构造请求数据
         JSONObject reqJSON = buildV3OrderRequest(payOrder, mchAppConfigContext);
 
-        String reqUrl;  // 请求地址
+        wxPayService.getConfig().setTradeType(WxPayConstants.TradeType.JSAPI);
+        String reqUrl;
         if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
             reqUrl = WxpayV3Util.ISV_URL_MAP.get(WxPayConstants.TradeType.JSAPI);
-
             JSONObject payer = new JSONObject();
             payer.put("sp_openid", bizRQ.getOpenid());
             reqJSON.put("payer", payer);
         }else {
             reqUrl = WxpayV3Util.NORMALMCH_URL_MAP.get(WxPayConstants.TradeType.JSAPI);
-
             JSONObject payer = new JSONObject();
             payer.put("openid", bizRQ.getOpenid());
             reqJSON.put("payer", payer);

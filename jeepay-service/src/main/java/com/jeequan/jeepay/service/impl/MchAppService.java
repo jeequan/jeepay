@@ -1,5 +1,7 @@
 package com.jeequan.jeepay.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
@@ -8,7 +10,9 @@ import com.jeequan.jeepay.core.entity.MchPayPassage;
 import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.service.mapper.MchAppMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,5 +52,31 @@ public class MchAppService extends ServiceImpl<MchAppMapper, MchApp> {
         if (!removeById(appId)) {
             throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_DELETE);
         }
+    }
+
+    public MchApp selectById(String appId) {
+        MchApp mchApp = this.getById(appId);
+        if (mchApp == null) {
+            return null;
+        }
+        mchApp.setAppSecret(StringKit.str2Star(mchApp.getAppSecret(), 6, 6, 6));
+
+        return mchApp;
+    }
+
+    public IPage<MchApp> selectPage(IPage iPage, MchApp mchApp) {
+
+        LambdaQueryWrapper<MchApp> wrapper = MchApp.gw();
+        if (StringUtils.isNotBlank(mchApp.getMchNo())) wrapper.eq(MchApp::getMchNo, mchApp.getMchNo());
+        if (StringUtils.isNotEmpty(mchApp.getAppId())) wrapper.eq(MchApp::getAppId, mchApp.getAppId());
+        if (StringUtils.isNotEmpty(mchApp.getAppName())) wrapper.eq(MchApp::getAppName, mchApp.getAppName());
+        if (mchApp.getState() != null) wrapper.eq(MchApp::getState, mchApp.getState());
+        wrapper.orderByDesc(MchApp::getCreatedAt);
+
+        IPage<MchApp> pages = this.page(iPage, wrapper);
+
+        pages.getRecords().stream().forEach(item -> item.setAppSecret(StringKit.str2Star(item.getAppSecret(), 6, 6, 6)));
+
+        return pages;
     }
 }

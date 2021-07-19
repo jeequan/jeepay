@@ -15,21 +15,26 @@
  */
 package com.jeequan.jeepay.mgr.ctrl.isv;
 
+import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.model.params.IsvParams;
 import com.jeequan.jeepay.core.mq.MqCommonService;
+import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 服务商支付接口管理类
@@ -67,8 +72,16 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
     @GetMapping("/{isvNo}/{ifCode}")
     public ApiRes getByMchNo(@PathVariable(value = "isvNo") String isvNo, @PathVariable(value = "ifCode") String ifCode) {
         PayInterfaceConfig payInterfaceConfig = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_ISV, isvNo, ifCode);
-        if (payInterfaceConfig != null && payInterfaceConfig.getIfRate() != null) {
-            payInterfaceConfig.setIfRate(payInterfaceConfig.getIfRate().multiply(new BigDecimal("100")));
+        if (payInterfaceConfig != null) {
+            if (payInterfaceConfig.getIfRate() != null) {
+                payInterfaceConfig.setIfRate(payInterfaceConfig.getIfRate().multiply(new BigDecimal("100")));
+            }
+            if (StringUtils.isNotBlank(payInterfaceConfig.getIfParams())) {
+                IsvParams isvParams = IsvParams.factory(payInterfaceConfig.getIfCode(), payInterfaceConfig.getIfParams());
+                if (isvParams != null) {
+                    payInterfaceConfig.setIfParams(isvParams.deSenData());
+                }
+            }
         }
         return ApiRes.ok(payInterfaceConfig);
     }
@@ -105,6 +118,9 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
         //若配置存在，为saveOrUpdate添加ID，第一次配置添加创建者
         if (dbRecoed != null) {
             payInterfaceConfig.setId(dbRecoed.getId());
+
+            // 合并支付参数
+            payInterfaceConfig.setIfParams(StringKit.marge(dbRecoed.getIfParams(), payInterfaceConfig.getIfParams()));
         }else {
             payInterfaceConfig.setCreatedUid(userId);
             payInterfaceConfig.setCreatedBy(realName);

@@ -27,6 +27,7 @@ import com.github.binarywang.wxpay.v3.auth.PrivateKeySigner;
 import com.github.binarywang.wxpay.v3.auth.WxPayCredentials;
 import com.github.binarywang.wxpay.v3.auth.WxPayValidator;
 import com.github.binarywang.wxpay.v3.util.PemUtils;
+import com.github.binarywang.wxpay.v3.util.SignUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
@@ -71,9 +72,9 @@ public class WxpayV3Util {
         ISV_URL_MAP.put(WxPayConstants.TradeType.MWEB, "/v3/pay/partner/transactions/h5");
     }
 
-    public static JSONObject unifiedOrderV3(String url, JSONObject reqJSON, WxPayConfig wxPayConfig) throws WxPayException {
-        String response = postV3(PAY_BASE_URL + url, reqJSON.toJSONString(), wxPayConfig);
-        return JSON.parseObject(response);
+    public static JSONObject unifiedOrderV3(String reqUrl, JSONObject reqJSON, WxPayConfig wxPayConfig) throws WxPayException {
+        String response = postV3(PAY_BASE_URL + reqUrl, reqJSON.toJSONString(), wxPayConfig);
+        return JSONObject.parseObject(getPayInfo(response, wxPayConfig));
     }
 
     public static JSONObject queryOrderV3(String url, WxPayConfig wxPayConfig) throws WxPayException {
@@ -213,6 +214,61 @@ public class WxpayV3Util {
                 .build());
 
         return httpPost;
+    }
+
+    public static String getPayInfo(String response, WxPayConfig wxPayConfig)  throws WxPayException {
+
+        try {
+            JSONObject resJSON = JSON.parseObject(response);
+            String timestamp = String.valueOf(System.currentTimeMillis() / 1000L);
+            String nonceStr = SignUtils.genRandomStr();
+            String prepayId = resJSON.getString("prepay_id");
+
+            switch(wxPayConfig.getTradeType()) {
+                case WxPayConstants.TradeType.JSAPI: {
+                    Map<String, String> payInfo = new HashMap<>(); // 如果用JsonObject会出现签名错误
+
+                    payInfo.put("appId", wxPayConfig.getAppId());
+                    payInfo.put("timeStamp", timestamp);
+                    payInfo.put("nonceStr", nonceStr);
+                    payInfo.put("package", "prepay_id=" + prepayId);
+                    payInfo.put("signType", "RSA");
+
+                    String beforeSign = String.format("%s\n%s\n%s\n%s\n", wxPayConfig.getAppId(), timestamp, nonceStr, "prepay_id=" + prepayId);
+                    payInfo.put("paySign", SignUtils.sign(beforeSign, PemUtils.loadPrivateKey(new FileInputStream(wxPayConfig.getPrivateKeyPath()))));
+                    // 签名以后在增加prepayId参数
+                    payInfo.put("prepayId", prepayId);
+                    return JSON.toJSONString(payInfo);
+                }
+                case WxPayConstants.TradeType.MWEB: {
+                    return response;
+                }
+                case WxPayConstants.TradeType.APP: {
+                    Map<String, String> payInfo = new HashMap<>();
+                    // APP支付绑定的是微信开放平台上的账号，APPID为开放平台上绑定APP后发放的参数
+                    String wxAppId = wxPayConfig.getSubAppId();
+                    // 此map用于参与调起sdk支付的二次签名,格式全小写，timestamp只能是10位,格式固定，切勿修改
+                    String partnerId = wxPayConfig.getSubMchId();
+                    String packageValue = "Sign=WXPay";
+                    // 此map用于客户端与微信服务器交互
+                    String beforeSign = String.format("%s\n%s\n%s\n%s\n", wxAppId, timestamp, nonceStr, "prepay_id=" + prepayId);
+                    payInfo.put("sign", SignUtils.sign(beforeSign, PemUtils.loadPrivateKey(new FileInputStream(wxPayConfig.getPrivateKeyPath()))));
+                    payInfo.put("prepayId", prepayId);
+                    payInfo.put("partnerId", partnerId);
+                    payInfo.put("appId", wxAppId);
+                    payInfo.put("package", packageValue);
+                    payInfo.put("timeStamp", timestamp);
+                    payInfo.put("nonceStr", nonceStr);
+                    return JSON.toJSONString(payInfo);
+                }
+                case WxPayConstants.TradeType.NATIVE:
+                    return response;
+                default:
+                    return null;
+            }
+        } catch (Exception e) {
+            throw (e instanceof WxPayException) ? (WxPayException) e : new WxPayException(e.getMessage(), e);
+        }
     }
 
 }

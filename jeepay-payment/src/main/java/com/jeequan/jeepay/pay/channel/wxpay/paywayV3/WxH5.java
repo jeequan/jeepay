@@ -24,13 +24,13 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.channel.wxpay.WxpayPaymentService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayV3Util;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
+import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxH5OrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxH5OrderRS;
-import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
-import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.springframework.stereotype.Service;
 
 /*
@@ -54,6 +54,7 @@ public class WxH5 extends WxpayPaymentService {
         WxH5OrderRQ bizRQ = (WxH5OrderRQ) rq;
 
         WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+        wxPayService.getConfig().setTradeType(WxPayConstants.TradeType.MWEB);
 
         // 构造请求数据
         JSONObject reqJSON = buildV3OrderRequest(payOrder, mchAppConfigContext);
