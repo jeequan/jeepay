@@ -58,7 +58,8 @@ public class WxNative extends WxpayPaymentService {
         // 构造请求数据
         JSONObject reqJSON = buildV3OrderRequest(payOrder, mchAppConfigContext);
 
-        String reqUrl;  // 请求地址
+        wxPayService.getConfig().setTradeType(WxPayConstants.TradeType.NATIVE);
+        String reqUrl;
         if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
             reqUrl = WxpayV3Util.ISV_URL_MAP.get(WxPayConstants.TradeType.NATIVE);
         }else {
