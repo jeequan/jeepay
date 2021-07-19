@@ -27,6 +27,7 @@ import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.util.PaywayUtil;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /*
@@ -93,7 +94,9 @@ public class WxpayPaymentService extends AbstractPaymentService {
         if(mchAppConfigContext.isIsvsubMch()){
             WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
             request.setSubMchId(isvsubMchParams.getSubMchId());
-            request.setSubAppId(isvsubMchParams.getSubMchAppId());
+            if (StringUtils.isNotBlank(isvsubMchParams.getSubMchAppId())) {
+                request.setSubAppId(isvsubMchParams.getSubMchAppId());
+            }
         }
 
         return request;
@@ -128,7 +131,9 @@ public class WxpayPaymentService extends AbstractPaymentService {
             reqJSON.put("sp_appid", wxPayService.getConfig().getAppId());
             reqJSON.put("sp_mchid", wxPayService.getConfig().getMchId());
             reqJSON.put("sub_mchid", isvsubMchParams.getSubMchId());
-            reqJSON.put("sub_appid", isvsubMchParams.getSubMchAppId());
+            if (StringUtils.isNotBlank(isvsubMchParams.getSubMchAppId())) {
+                reqJSON.put("sub_appid", isvsubMchParams.getSubMchAppId());
+            }
         }else { // 普通商户
             reqJSON.put("appid", wxPayService.getConfig().getAppId());
             reqJSON.put("mchid", wxPayService.getConfig().getMchId());
