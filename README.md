@@ -82,8 +82,8 @@ Jeepay = Jee + pay，是由原XxPay支付系统作者带领团队开发，“Jee
 |Jdk | Java环境 | 1.8
 |Spring Boot | 开发框架 | 2.4.5
 |Redis | 分布式缓存 | 3.2.8 或 高版本
-|MySQL | 数据库 | 5.7.X 或 高版本
-|MQ | 消息中间件 | ActiveMQ 或 RabbitMQ
+|MySQL | 数据库 | 5.7.X 或 8.0 高版本
+|MQ | 消息中间件 | ActiveMQ 或 RabbitMQ 或 RocketMQ
 |[Ant Design Vue](https://www.antdv.com/docs/vue/introduce-cn/) | Ant Design的Vue实现，前端开发使用 | 2.1.2
 |[MyBatis-Plus](https://mp.baomidou.com/) | MyBatis增强工具 | 3.4.2
 |[WxJava](https://gitee.com/binary/weixin-java-tools) | 微信开发Java SDK | 4.1.0
@@ -109,10 +109,10 @@ jeepay
 
 > 开发部署
 
-- 系统开发：[https://www.jeepay.vip/#/develop/dev_serv](https://www.jeepay.vip/#/develop/dev_serv)
-- 通道对接：[https://www.jeepay.vip/#/develop/dev_channel](https://www.jeepay.vip/#/develop/dev_channel)
-- 线上部署：[https://www.jeepay.vip/#/develop/deploy](https://www.jeepay.vip/#/develop/deploy)
-- 接口文档：[https://www.jeepay.vip/#/interface/payment_api](https://www.jeepay.vip/#/interface/payment_api)
+- 系统开发：[https://docs.jeequan.com/docs/jeepay/dev_serv](https://docs.jeequan.com/docs/jeepay/dev_serv)
+- 通道对接：[https://docs.jeequan.com/docs/jeepay/dev_channel](https://docs.jeequan.com/docs/jeepay/dev_channel)
+- 线上部署：[https://docs.jeequan.com/docs/jeepay/deploy](https://www.jeepay.vip/#/develop/deploy)
+- 接口文档：[https://docs.jeequan.com/docs/jeepay/payment_api](https://docs.jeequan.com/docs/jeepay/payment_api)
 
 ## 🍿 功能模块
 
