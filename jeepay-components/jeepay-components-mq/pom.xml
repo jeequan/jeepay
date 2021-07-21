@@ -4,43 +4,61 @@
   <modelVersion>4.0.0</modelVersion> <!-- POM模型版本 -->
 
   <groupId>com.jeequan</groupId> <!-- 组织名, 类似于包名 -->
-  <artifactId>jeepay-service</artifactId>  <!-- 项目名称 -->
+  <artifactId>jeepay-components-mq</artifactId>  <!-- 项目名称 -->
   <packaging>jar</packaging> <!-- 项目的最终打包类型/发布形式, 可选[jar, war, pom, maven-plugin]等 -->
   <version>${isys.version}</version> <!-- 项目当前版本号 -->
-  <description>Jeepay计全支付系统 [jeepay-service]</description> <!-- 项目描述 -->
+  <description>Jeepay计全支付系统 [jeepay-components-mq]</description> <!-- 项目描述 -->
   <url>https://www.jeequan.com</url>
 
   <parent>
     <groupId>com.jeequan</groupId>
-    <artifactId>jeepay</artifactId>
+    <artifactId>jeepay-components</artifactId>
     <version>Final</version>
   </parent>
 
   <!-- 项目依赖声明 -->
   <dependencies>
 
+    <!-- 依赖 [spring-context] 基础包 -->
     <dependency>
-      <groupId>com.jeequan</groupId>
-      <artifactId>jeepay-core</artifactId>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <scope>provided</scope>
     </dependency>
 
-    <!-- MySql 数据库连接包 -->
+    <!-- 可选依赖 [spring-redis]  -->
     <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+      <scope>provided</scope>
     </dependency>
 
-    <!-- Druid 连接池 -->
+    <!-- 添加 spring-webmvc 基础依赖  -->
     <dependency>
-      <groupId>com.alibaba</groupId>
-      <artifactId>druid-spring-boot-starter</artifactId>
-      <version>1.2.6</version>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
     </dependency>
 
-    <!-- orm映射框架：mybatis-plus,  自动引入spring-tx -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
+    </dependency>
+
+    <!-- mybatis plus -->
     <dependency>
       <groupId>com.baomidou</groupId>
       <artifactId>mybatis-plus-boot-starter</artifactId>
+      <version>${mybatis.plus.starter.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- JWT  -->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Spring Security -->
@@ -48,6 +66,18 @@
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-core</artifactId>
       <scope>provided</scope>
+    </dependency>
+
+    <!-- alibaba FastJSON -->
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>fastjson</artifactId>
+    </dependency>
+
+    <!-- commons-lang3 -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
     </dependency>
 
   </dependencies>

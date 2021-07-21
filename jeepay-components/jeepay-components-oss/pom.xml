@@ -4,15 +4,15 @@
   <modelVersion>4.0.0</modelVersion> <!-- POM模型版本 -->
 
   <groupId>com.jeequan</groupId> <!-- 组织名, 类似于包名 -->
-  <artifactId>jeepay-oss</artifactId>  <!-- 项目名称 -->
+  <artifactId>jeepay-components-oss</artifactId>  <!-- 项目名称 -->
   <packaging>jar</packaging> <!-- 项目的最终打包类型/发布形式, 可选[jar, war, pom, maven-plugin]等 -->
   <version>${isys.version}</version> <!-- 项目当前版本号 -->
-  <description>Jeepay计全支付系统 [jeepay-oss]</description> <!-- 项目描述 -->
+  <description>Jeepay计全支付系统 [jeepay-components-oss]</description> <!-- 项目描述 -->
   <url>https://www.jeequan.com</url>
 
   <parent>
     <groupId>com.jeequan</groupId>
-    <artifactId>jeepay</artifactId>
+    <artifactId>jeepay-components</artifactId>
     <version>Final</version>
   </parent>
 
@@ -22,7 +22,6 @@
     <dependency>
       <groupId>com.jeequan</groupId>
       <artifactId>jeepay-core</artifactId>
-      <version>${isys.version}</version>
     </dependency>
 
     <!-- 添加 spring-webmvc 基础依赖  -->

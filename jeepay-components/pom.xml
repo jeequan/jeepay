@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion> <!-- POM模型版本 -->
+
+  <groupId>com.jeequan</groupId> <!-- 组织名, 类似于包名 -->
+  <artifactId>jeepay-components</artifactId>  <!-- 项目名称  -->
+  <packaging>pom</packaging> <!-- 项目的最终打包类型/发布形式, 可选[jar, war, pom, maven-plugin]等 -->
+
+  <name>jeepay-components</name>
+  <version>Final</version> <!-- pom版本号/项目总版本号， 每个子项目引入的版本号必须一致。  最外层的pom.xml版本号保持不变，始终为Final版本。 更新版本请更改isys.version属性  -->
+  <description>Jeepay计全支付系统</description> <!-- 项目描述 -->
+  <url>https://www.jeequan.com</url>
+
+  <parent>
+    <groupId>com.jeequan</groupId>
+    <artifactId>jeepay</artifactId>
+    <version>Final</version>
+  </parent>
+
+  <!-- 声明子项目 -->
+  <modules>
+    <module>jeepay-components-oss</module><!-- oss服务支撑 -->
+    <module>jeepay-components-mq</module><!-- MQ消息服务 -->
+  </modules>
+
+
+</project>

@@ -25,19 +25,21 @@
 
     <module>jeepay-core</module>  <!-- 基础函数, 包含工具类等 -->
     <module>jeepay-service</module>  <!-- db service等 -->
-    <module>jeepay-oss</module>	<!-- oss服务支撑 -->
+
   	<module>jeepay-manager</module>	<!-- 运营平台管理端 -->
   	<module>jeepay-merchant</module>	<!-- 商户平台管理端 -->
     <module>jeepay-payment</module>	<!-- 支付统一网关 -->
 
-
+    <module>jeepay-components</module> <!-- 组件包 -->
   </modules>
 
   <!-- 配置属性声明, 支持自定义参数 -->
   <properties>
+
+    <isys.version>1.4.0</isys.version> <!-- 指定当前[项目]版本号 -->
+
     <java.version>1.8</java.version> <!-- 指定java版本号 -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> <!-- 项目构建输出编码 -->
-    <isys.version>1.4.0</isys.version> <!-- 指定当前[项目]版本号 -->
 
     <!-- 其他工具包 -->
     <jeepay.sdk.java.version>1.1.0</jeepay.sdk.java.version>
@@ -55,6 +57,34 @@
   <!-- 依赖包管理， 按需添加 -->
   <dependencyManagement>
     <dependencies>
+
+        <!-- 依赖 [ core ]包。  -->
+        <dependency>
+            <groupId>com.jeequan</groupId>
+            <artifactId>jeepay-core</artifactId>
+            <version>${isys.version}</version>
+        </dependency>
+
+        <!-- 依赖[ service ]包, 会自动传递依赖[ core ]包。  -->
+        <dependency>
+            <groupId>com.jeequan</groupId>
+            <artifactId>jeepay-service</artifactId>
+            <version>${isys.version}</version>
+        </dependency>
+
+        <!-- 依赖[ oss ]包  -->
+        <dependency>
+            <groupId>com.jeequan</groupId>
+            <artifactId>jeepay-components-oss</artifactId>
+            <version>${isys.version}</version>
+        </dependency>
+
+        <!-- 依赖[ oss ]包  -->
+        <dependency>
+            <groupId>com.jeequan</groupId>
+            <artifactId>jeepay-components-mq</artifactId>
+            <version>${isys.version}</version>
+        </dependency>
 
         <!-- jeepay sdk 支付工具包 -->
         <dependency>

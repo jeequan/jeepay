@@ -22,14 +22,12 @@
         <dependency>
             <groupId>com.jeequan</groupId>
             <artifactId>jeepay-service</artifactId>
-            <version>${isys.version}</version>
         </dependency>
 
         <!-- 依赖[ oss ]包  -->
         <dependency>
             <groupId>com.jeequan</groupId>
-            <artifactId>jeepay-oss</artifactId>
-            <version>${isys.version}</version>
+            <artifactId>jeepay-components-oss</artifactId>
         </dependency>
 
         <!-- 依赖 sping-boot-web -->
