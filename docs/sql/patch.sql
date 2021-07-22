@@ -10,6 +10,7 @@ ALTER TABLE `t_mch_notify_record` ADD COLUMN `notify_count_limit` INT(11) NOT NU
 ## -- ++++ ++++
 
 
+## -- ++++ [v1.4.0] ++++
 -- 支付接口定义表 新增支付参数配置页面是否为自定义
 ALTER TABLE `t_pay_interface_define` ADD COLUMN `config_page_type` TINYINT(6) NOT NULL DEFAULT 1 COMMENT '支付参数配置页面类型:1-JSON渲染,2-自定义' after `is_isv_mode`;
 
@@ -40,5 +41,5 @@ VALUES ('ysfpay', '云闪付官方', 0, 1, 1,
         NULL,
         '[{"wayCode": "YSF_BAR"}, {"wayCode": "ALI_JSAPI"}, {"wayCode": "WX_JSAPI"}, {"wayCode": "ALI_BAR"}, {"wayCode": "WX_BAR"}]',
         'http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/ysfpay.png', 'red', 1, '云闪付官方通道');
-
+## -- ++++ ++++
 
