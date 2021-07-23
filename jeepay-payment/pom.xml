@@ -30,7 +30,7 @@
             <artifactId>jeepay-components-oss</artifactId>
         </dependency>
 
-        <!-- 依赖[ oss ]包  -->
+        <!-- 依赖[ mq ]包  -->
         <dependency>
             <groupId>com.jeequan</groupId>
             <artifactId>jeepay-components-mq</artifactId>

@@ -19,65 +19,30 @@
   <!-- 项目依赖声明 -->
   <dependencies>
 
-    <!-- 依赖 [spring-context] 基础包 -->
+    <!-- 依赖Core项目  -->
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <scope>provided</scope>
+      <groupId>com.jeequan</groupId>
+      <artifactId>jeepay-core</artifactId>
     </dependency>
 
-    <!-- 可选依赖 [spring-redis]  -->
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
+    </dependency>
+
+    <!-- 添加对activeMQ的支持  -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-redis</artifactId>
+      <artifactId>spring-boot-starter-activemq</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- 添加对rabbitMQ的支持  -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-amqp</artifactId>
       <scope>provided</scope>
-    </dependency>
-
-    <!-- 添加 spring-webmvc 基础依赖  -->
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-webmvc</artifactId>
-      <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
-    </dependency>
-
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
-    </dependency>
-
-    <!-- mybatis plus -->
-    <dependency>
-      <groupId>com.baomidou</groupId>
-      <artifactId>mybatis-plus-boot-starter</artifactId>
-      <version>${mybatis.plus.starter.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- JWT  -->
-    <dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- Spring Security -->
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- alibaba FastJSON -->
-    <dependency>
-      <groupId>com.alibaba</groupId>
-      <artifactId>fastjson</artifactId>
-    </dependency>
-
-    <!-- commons-lang3 -->
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
     </dependency>
 
   </dependencies>

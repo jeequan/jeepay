@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.oss.service;
+package com.jeequan.jeepay.components.oss.service;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.GetObjectRequest;
-import com.jeequan.jeepay.oss.config.AliyunOssYmlConfig;
-import com.jeequan.jeepay.oss.constant.OssSavePlaceEnum;
+import com.jeequan.jeepay.components.oss.config.AliyunOssYmlConfig;
+import com.jeequan.jeepay.components.oss.constant.OssSavePlaceEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

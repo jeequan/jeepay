@@ -30,6 +30,12 @@
             <artifactId>jeepay-components-oss</artifactId>
         </dependency>
 
+        <!-- 依赖[ mq ]包  -->
+        <dependency>
+            <groupId>com.jeequan</groupId>
+            <artifactId>jeepay-components-mq</artifactId>
+        </dependency>
+
         <!-- 依赖 sping-boot-web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

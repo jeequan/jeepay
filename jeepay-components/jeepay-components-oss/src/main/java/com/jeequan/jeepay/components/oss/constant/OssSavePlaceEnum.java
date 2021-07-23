@@ -13,30 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.oss.config;
+package com.jeequan.jeepay.components.oss.constant;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
-/**
-* aliyun oss 的yml配置参数
-*
+/*
+* oss 存储位置
 * @author terrfly
 * @site https://www.jeepay.vip
-* @date 2021/7/12 18:18
+* @date 2021/7/12 10:48
 */
-@Data
-@Component
-@ConfigurationProperties(prefix="isys.oss.aliyun-oss")
-public class AliyunOssYmlConfig {
+public enum OssSavePlaceEnum {
 
-	private String endpoint;
-	private String publicBucketName;
-	private String privateBucketName;
-	private String accessKeyId;
-	private String accessKeySecret;
+    PUBLIC, //公共读取
+
+    PRIVATE;  //私有存储
+
 }
-
-
-

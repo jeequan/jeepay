@@ -13,18 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.oss.constant;
+package com.jeequan.jeepay.components.oss.constant;
+
+import lombok.Getter;
 
 /*
-* oss 存储位置
+* oss 服务枚举值
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/7/12 10:48
 */
-public enum OssSavePlaceEnum {
+@Getter
+public enum OssServiceTypeEnum {
 
-    PUBLIC, //公共读取
+    LOCAL("local"), //本地存储
 
-    PRIVATE;  //私有存储
+    ALIYUN_OSS("aliyun-oss");  //阿里云oss
 
+    /** 名称 **/
+    private String serviceName;
+
+    OssServiceTypeEnum(String serviceName){
+        this.serviceName = serviceName;
+    }
 }

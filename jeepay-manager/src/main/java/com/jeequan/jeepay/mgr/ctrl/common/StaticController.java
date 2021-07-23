@@ -16,7 +16,7 @@
 package com.jeequan.jeepay.mgr.ctrl.common;
 
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.oss.config.OssYmlConfig;
+import com.jeequan.jeepay.components.oss.config.OssYmlConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.oss.service;
+package com.jeequan.jeepay.components.oss.service;
 
-import com.jeequan.jeepay.oss.constant.OssSavePlaceEnum;
+import com.jeequan.jeepay.components.oss.constant.OssSavePlaceEnum;
 import org.springframework.web.multipart.MultipartFile;
 
 /**

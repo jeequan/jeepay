@@ -1,12 +1,9 @@
 package com.jeequan.jeepay.pay.util;
 
-import cn.hutool.core.io.FileUtil;
-import com.jeequan.jeepay.core.exception.BizException;
-import com.jeequan.jeepay.oss.config.OssYmlConfig;
-import com.jeequan.jeepay.oss.constant.OssSavePlaceEnum;
-import com.jeequan.jeepay.oss.constant.OssServiceTypeEnum;
-import com.jeequan.jeepay.oss.service.IOssService;
-import com.jeequan.jeepay.pay.config.SystemYmlConfig;
+import com.jeequan.jeepay.components.oss.config.OssYmlConfig;
+import com.jeequan.jeepay.components.oss.constant.OssSavePlaceEnum;
+import com.jeequan.jeepay.components.oss.constant.OssServiceTypeEnum;
+import com.jeequan.jeepay.components.oss.service.IOssService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

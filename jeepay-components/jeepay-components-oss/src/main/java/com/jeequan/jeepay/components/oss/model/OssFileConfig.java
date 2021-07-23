@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.oss.model;
+package com.jeequan.jeepay.components.oss.model;
 
-import com.jeequan.jeepay.oss.constant.OssSavePlaceEnum;
+import com.jeequan.jeepay.components.oss.constant.OssSavePlaceEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;

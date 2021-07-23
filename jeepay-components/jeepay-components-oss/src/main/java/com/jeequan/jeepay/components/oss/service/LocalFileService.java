@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.oss.service;
+package com.jeequan.jeepay.components.oss.service;
 
 import com.jeequan.jeepay.core.service.ISysConfigService;
-import com.jeequan.jeepay.oss.config.OssYmlConfig;
-import com.jeequan.jeepay.oss.constant.OssSavePlaceEnum;
+import com.jeequan.jeepay.components.oss.config.OssYmlConfig;
+import com.jeequan.jeepay.components.oss.constant.OssSavePlaceEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -28,7 +28,7 @@ import java.io.File;
 
 /**
 * 本地存储 实现类
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/7/12 18:19

@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.oss.ctrl;
+package com.jeequan.jeepay.components.oss.ctrl;
 
 import cn.hutool.core.lang.UUID;
+import com.jeequan.jeepay.components.oss.service.IOssService;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.utils.FileKit;
-import com.jeequan.jeepay.oss.model.OssFileConfig;
-import com.jeequan.jeepay.oss.service.IOssService;
+import com.jeequan.jeepay.components.oss.model.OssFileConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
