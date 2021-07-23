@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.mq.config;
+package com.jeequan.jeepay.components.mq.executor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,8 +30,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 * @site https://www.jeepay.vip
 * @date 2021/6/8 17:33
 */
-//@Configuration
-//@EnableAsync
+@Configuration
+@EnableAsync
 public class MqThreadExecutor {
 
     public static final String EXECUTOR_PAYORDER_MCH_NOTIFY = "mqQueue4PayOrderMchNotifyExecutor";
@@ -56,7 +56,5 @@ public class MqThreadExecutor {
         executor.initialize();
         return executor;
     }
-
-
 
 }
