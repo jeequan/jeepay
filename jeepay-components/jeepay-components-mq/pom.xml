@@ -35,7 +35,7 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-activemq</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
 
     <!-- 添加对rabbitMQ的支持  -->
@@ -49,7 +49,7 @@
     <dependency>
       <groupId>org.apache.rocketmq</groupId>
       <artifactId>rocketmq-spring-boot-starter</artifactId>
-      <scope>compile</scope>
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>
