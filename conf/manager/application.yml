@@ -61,9 +61,16 @@ spring:
     timeout: 1000
     password:
 
-#  #activeMQ配置 ( 注意： activeMQ配置项需在spring的下级 )
+# #activeMQ配置 ( 注意： activeMQ配置项需在spring的下级 )
   activemq:
-    broker-url: tcp://localhost:61616  #连接地址
+    broker-url: failover:(tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0)  #连接地址
+    in-memory: false # Jeepay项目不可使用内存模式， 需要连接多个消费者。
+    user: system # activeMQ默认无需账密认证。 打开认证：activemq.xml添加simpleAuthenticationPlugin标签，账密在credentials.properties文件。
+    password: manager
+    pool:
+      enabled: true
+      max-connections: 10
+      idle-timeout: 30000  # 空闲的连接过期时间，默认为30秒
 #
 #  #rabbitmq配置  ( 注意： rabbitmq配置项需在spring的下级 )
 #  rabbitmq:
