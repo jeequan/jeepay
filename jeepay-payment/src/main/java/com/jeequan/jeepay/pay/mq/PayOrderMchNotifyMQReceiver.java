@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.pay.mq;
 
+import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.http.HttpException;
 import cn.hutool.http.HttpUtil;
 import com.jeequan.jeepay.components.mq.model.PayOrderMchNotifyMQ;
@@ -68,8 +69,9 @@ public class PayOrderMchNotifyMQReceiver implements PayOrderMchNotifyMQ.IMQRecei
             String res = "";
             try {
                 res = HttpUtil.createPost(notifyUrl).timeout(20000).execute().body();
-            } catch (HttpException e) {
+            } catch (Exception e) {
                 log.error("http error", e);
+                res = "连接["+ UrlBuilder.of(notifyUrl).getHost() +"]异常:【" + e.getMessage() + "】";
             }
 
             if(currentCount == 1){ //第一次通知: 更新为已通知
@@ -93,11 +95,11 @@ public class PayOrderMchNotifyMQReceiver implements PayOrderMchNotifyMQ.IMQRecei
             // 通知延时次数
             //        1   2  3  4   5   6
             //        0  30 60 90 120 150
-            mqSender.send(PayOrderMchNotifyMQ.build(notifyId), currentCount * 30 * 1000);
+            mqSender.send(PayOrderMchNotifyMQ.build(notifyId), currentCount * 30);
 
             return;
         }catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return;
         }
     }
