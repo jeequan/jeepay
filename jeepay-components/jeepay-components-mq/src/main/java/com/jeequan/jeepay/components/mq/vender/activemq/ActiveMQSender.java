@@ -52,7 +52,7 @@ public class ActiveMQSender implements IMQSender {
     public void send(AbstractMQ mqModel, int delay) {
         jmsTemplate.send(activeMQConfig.getDestination(mqModel), session -> {
             TextMessage tm = session.createTextMessage(mqModel.toMessage());
-            tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay);
+            tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay * 1000);
             tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_PERIOD, 1*1000);
             tm.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_REPEAT, 1);
             return tm;
