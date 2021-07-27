@@ -31,26 +31,31 @@
       <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
     </dependency>
 
-    <!-- 添加对activeMQ的支持  -->
+    <!-- ↓↓↓↓↓↓ MQ依赖包 ↓↓↓↓↓↓ -->
+    <!-- 使用的厂商 scope=compile,  否则需要scope=provided(仅编译，不依赖) -->
+
+    <!-- ActiveMQ  -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-activemq</artifactId>
-      <scope>compile</scope>
+<!--      <scope>provided</scope>-->
     </dependency>
 
-    <!-- 添加对rabbitMQ的支持  -->
+    <!-- RabbitMQ  -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-amqp</artifactId>
       <scope>provided</scope>
     </dependency>
 
-    <!-- 添加对rocketMQ的支持  -->
+    <!-- RocketMQ -->
     <dependency>
       <groupId>org.apache.rocketmq</groupId>
       <artifactId>rocketmq-spring-boot-starter</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <!-- ↑↑↑↑↑↑ MQ依赖包 ↑↑↑↑↑↑ -->
 
   </dependencies>
 

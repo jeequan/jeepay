@@ -61,30 +61,23 @@ spring:
     timeout: 1000
     password:
 
-  # 注意：以下MQ配置需注意【如需使用activeMQ则需将rabbitMQ配置注释即可】
-  profiles:
-    include:
-      - activeMQ
-      #- rabbitMQ # 需要安装延迟队列插件：https://www.rabbitmq.com/blog/2015/04/16/scheduling-messages-with-rabbitmq/
-      #- rocketMQ
-
-  #activeMQ配置
+#  #activeMQ配置 ( 注意： activeMQ配置项需在spring的下级 )
   activemq:
     broker-url: tcp://localhost:61616  #连接地址
+#
+#  #rabbitmq配置  ( 注意： rabbitmq配置项需在spring的下级 )
+#  rabbitmq:
+#    addresses: 127.0.0.1:5672
+#    username: guest
+#    password: guest
+#    dynamic: true
+#    virtual-host: /
 
-  #rabbitmq配置
-  #  rabbitmq:
-  #    addresses: 127.0.0.1:5672
-  #    username: guest
-  #    password: guest
-  #    dynamic: true
-  #    virtual-host: /
-
-  #rocketmq配置
-  # rocketmq:
-  #   name-server: 127.0.0.1:9876
-  #   producer:
-  #     group: rocket-group
+## rocketmq配置 ( 注意：rocketmq配置项请放置到根目录， 不是spring的二级配置！  )
+#rocketmq:
+#  name-server: 127.0.0.1:9876
+#  producer:
+#    group: JEEPAY-GROUP
 
   #日志配置参数。
   # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
@@ -117,4 +110,7 @@ isys:
       private-bucket-name: bucket2  #私有 桶名称
       access-key-id: KEY_KEY_KEY   #AccessKeyId
       access-key-secret: SECRET_SECRET_SECRET  #AccessKeySecret
+
+  mq:
+    vender: activeMQ #  切换MQ厂商， 支持：【 activeMQ  rabbitMQ  rocketMQ 】， 需正确配置 【对应的yml参数】 和 【jeepay-components-mq项目下pom.xml中的依赖包】。
 

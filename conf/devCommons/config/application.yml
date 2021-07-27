@@ -101,5 +101,5 @@ isys:
       access-key-secret: SECRET_SECRET_SECRET  #AccessKeySecret
 
   mq:
-    vender: activeMQ #  activeMQ  rabbitMQ  rocketMQ
+    vender: activeMQ #  切换MQ厂商， 支持：【 activeMQ  rabbitMQ  rocketMQ 】， 需正确配置 【对应的yml参数】 和 【jeepay-components-mq项目下pom.xml中的依赖包】。
 
