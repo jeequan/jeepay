@@ -144,7 +144,7 @@ public class AlipayBizController extends AbstractCtrl {
                 MchApp mchApp = mchAppService.getById(mchAppId);
 
                 // 更新应用配置信息
-                mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.MCH_APP, null, mchApp.getMchNo(), mchApp.getAppId()));
+                mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, mchApp.getMchNo(), mchApp.getAppId()));
 
             }
         } catch (Exception e) {

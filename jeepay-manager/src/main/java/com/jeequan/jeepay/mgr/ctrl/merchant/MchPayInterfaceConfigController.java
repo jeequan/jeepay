@@ -155,7 +155,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
         }
 
         // 推送mq到目前节点进行更新数据
-        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.MCH_APP, null, mchApp.getMchNo(), infoId));
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, mchApp.getMchNo(), infoId));
 
         return ApiRes.ok();
     }

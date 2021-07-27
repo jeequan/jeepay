@@ -118,7 +118,7 @@ public class MchInfoController extends CommonCtrl {
         mqSender.send(CleanMchLoginAuthCacheMQ.build(userIdList));
 
         // 推送mq到目前节点进行更新数据
-        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.MCH_INFO, null, mchNo, null));
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_INFO, null, mchNo, null));
         return ApiRes.ok();
     }
 
@@ -173,7 +173,7 @@ public class MchInfoController extends CommonCtrl {
         }
 
         // 推送mq到目前节点进行更新数据
-        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.MCH_INFO, null, mchNo, null));
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_INFO, null, mchNo, null));
 
         return ApiRes.ok();
     }

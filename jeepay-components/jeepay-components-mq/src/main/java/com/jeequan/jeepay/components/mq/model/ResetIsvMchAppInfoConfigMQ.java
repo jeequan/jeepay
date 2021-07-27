@@ -42,16 +42,18 @@ public class ResetIsvMchAppInfoConfigMQ extends AbstractMQ {
     /** 内置msg 消息体定义 **/
     private MsgPayload payload;
 
+    // 重置类型 （枚举类型，无法json反序列化）
+    public static final byte RESET_TYPE_ISV_INFO = 1;
+    public static final byte RESET_TYPE_MCH_INFO = 2;
+    public static final byte RESET_TYPE_MCH_APP = 3;
+
     /**  【！重要配置项！】 定义Msg消息载体 **/
     @Data
     @AllArgsConstructor
     public static class MsgPayload {
-        public enum RESET_TYPE{
-            ISV_INFO, MCH_INFO, MCH_APP
-        }
 
         /** 重置类型 **/
-        private Enum resetType;
+        private Byte resetType;
 
         /** isvNo **/
         private String isvNo;
@@ -82,7 +84,7 @@ public class ResetIsvMchAppInfoConfigMQ extends AbstractMQ {
     }
 
     /**  【！重要配置项！】 构造MQModel , 一般用于发送MQ时 **/
-    public static ResetIsvMchAppInfoConfigMQ build(Enum resetType, String isvNo, String mchNo, String appId){
+    public static ResetIsvMchAppInfoConfigMQ build(Byte resetType, String isvNo, String mchNo, String appId){
         return new ResetIsvMchAppInfoConfigMQ(new MsgPayload(resetType, isvNo, mchNo, appId));
     }
 

@@ -38,11 +38,11 @@ public class ResetIsvMchAppInfoMQReceiver implements ResetIsvMchAppInfoConfigMQ.
     @Override
     public void receive(ResetIsvMchAppInfoConfigMQ.MsgPayload payload) {
 
-        if(payload.getResetType() == ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.ISV_INFO){
+        if(payload.getResetType() == ResetIsvMchAppInfoConfigMQ.RESET_TYPE_ISV_INFO){
             this.modifyIsvInfo(payload.getIsvNo());
-        }else if(payload.getResetType() == ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.MCH_INFO){
+        }else if(payload.getResetType() == ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_INFO){
             this.modifyMchInfo(payload.getMchNo());
-        }else if(payload.getResetType() == ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.MCH_APP){
+        }else if(payload.getResetType() == ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP){
             this.modifyMchApp(payload.getMchNo(), payload.getAppId());
         }
 

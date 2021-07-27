@@ -154,7 +154,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
         if (!result) {
             throw new BizException("配置失败");
         }
-        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.MCH_APP, null, getCurrentMchNo(), infoId));
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, getCurrentMchNo(), infoId));
 
         return ApiRes.ok();
     }

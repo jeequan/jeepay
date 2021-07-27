@@ -133,7 +133,7 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
         }
 
         // 推送mq到目前节点进行更新数据
-        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.ISV_INFO, infoId, null, null));
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_ISV_INFO, infoId, null, null));
 
         return ApiRes.ok();
     }
