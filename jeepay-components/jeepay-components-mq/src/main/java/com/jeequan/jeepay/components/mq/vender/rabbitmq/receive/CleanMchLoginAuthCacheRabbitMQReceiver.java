@@ -13,38 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.components.mq.vender.activemq.receive;
+package com.jeequan.jeepay.components.mq.vender.rabbitmq.receive;
 
-import com.jeequan.jeepay.components.mq.model.ResetAppConfigMQ;
 import com.jeequan.jeepay.components.mq.constant.MQVenderCS;
+import com.jeequan.jeepay.components.mq.executor.MqThreadExecutor;
+import com.jeequan.jeepay.components.mq.model.CleanMchLoginAuthCacheMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQMsgReceiver;
-import com.jeequan.jeepay.components.mq.vender.activemq.ActiveMQConfig;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.jms.annotation.JmsListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
-* activeMQ消息接收器：仅在vender=activeMQ时 && 项目实现IMQReceiver接口时 进行实例化
-* 业务：  更新系统配置参数
-*
-* @author terrfly
-* @site https://www.jeepay.vip
-* @date 2021/7/22 17:06
-*/
+ * rabbitMQ消息接收器：仅在vender=rabbitMQ时 && 项目实现IMQReceiver接口时 进行实例化
+ * 业务：  清除商户登录信息
+ *
+ * @author terrfly
+ * @site https://www.jeepay.vip
+ * @date 2021/7/22 17:06
+ */
 @Component
-@ConditionalOnProperty(name = MQVenderCS.YML_VENDER_KEY, havingValue = MQVenderCS.ACTIVE_MQ)
-@ConditionalOnBean(ResetAppConfigMQ.IMQReceiver.class)
-public class ResetAppConfigActiveMQReceiver implements IMQMsgReceiver {
+@ConditionalOnProperty(name = MQVenderCS.YML_VENDER_KEY, havingValue = MQVenderCS.RABBIT_MQ)
+@ConditionalOnBean(CleanMchLoginAuthCacheMQ.IMQReceiver.class)
+public class CleanMchLoginAuthCacheRabbitMQReceiver implements IMQMsgReceiver {
 
     @Autowired
-    private ResetAppConfigMQ.IMQReceiver mqReceiver;
+    private CleanMchLoginAuthCacheMQ.IMQReceiver mqReceiver;
 
-    /** 接收 【 MQSendTypeEnum.BROADCAST  】 广播类型的消息 **/
-    @JmsListener(destination = ResetAppConfigMQ.MQ_NAME, containerFactory = ActiveMQConfig.TOPIC_LISTENER_CONTAINER)
+    /** 接收 【 queue 】 类型的消息 **/
+    @Async(MqThreadExecutor.EXECUTOR_PAYORDER_MCH_NOTIFY)
+    @RabbitListener(queues = CleanMchLoginAuthCacheMQ.MQ_NAME)
     public void receiveMsg(String msg){
-        mqReceiver.receive(ResetAppConfigMQ.parse(msg));
+        mqReceiver.receive(CleanMchLoginAuthCacheMQ.parse(msg));
     }
 
 }

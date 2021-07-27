@@ -51,23 +51,23 @@ spring:
     timeout: 1000
     password:
 
-  #activeMQ配置
+#  #activeMQ配置 ( 注意： activeMQ配置项需在spring的下级 )
   activemq:
     broker-url: tcp://localhost:61616  #连接地址
+#
+#  #rabbitmq配置  ( 注意： rabbitmq配置项需在spring的下级 )
+#  rabbitmq:
+#    addresses: 127.0.0.1:5672
+#    username: guest
+#    password: guest
+#    dynamic: true
+#    virtual-host: /
 
-#  rabbitmq配置
-#    rabbitmq:
-#      addresses: 127.0.0.1:5672
-#      username: guest
-#      password: guest
-#      dynamic: true
-#      virtual-host: /
-
-#rocketmq配置
-# rocketmq:
-#   name-server: 127.0.0.1:9876
-#   producer:
-#     group: rocket-group
+## rocketmq配置 ( 注意：rocketmq配置项请放置到根目录， 不是spring的二级配置！  )
+#rocketmq:
+#  name-server: 127.0.0.1:9876
+#  producer:
+#    group: JEEPAY-GROUP
 
   #日志配置参数。
   # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
@@ -101,5 +101,5 @@ isys:
       access-key-secret: SECRET_SECRET_SECRET  #AccessKeySecret
 
   mq:
-    vender: rabbitMQ #  activeMQ  rabbitMQ  rocketMQ
+    vender: activeMQ #  activeMQ  rabbitMQ  rocketMQ
 

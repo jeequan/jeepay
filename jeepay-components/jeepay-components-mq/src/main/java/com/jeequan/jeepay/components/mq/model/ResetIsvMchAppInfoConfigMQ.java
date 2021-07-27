@@ -19,14 +19,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.components.mq.constant.MQSendTypeEnum;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
 *
 * 定义MQ消息格式
-* 业务场景： [ 支付订单的商户通知消息 ]
+* 业务场景： [ 更新服务商/商户/商户应用配置信息 ]
 *
 * @author terrfly
 * @site https://www.jeepay.vip
@@ -35,10 +34,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PayOrderMchNotifyMQ extends AbstractMQ {
+public class ResetIsvMchAppInfoConfigMQ extends AbstractMQ {
 
     /** 【！重要配置项！】 定义MQ名称 **/
-    public static final String MQ_NAME = "QUEUE_PAY_ORDER_MCH_NOTIFY";
+    public static final String MQ_NAME = "BROADCAST_RESET_ISV_MCH_APP_INFO_CONFIG";
 
     /** 内置msg 消息体定义 **/
     private MsgPayload payload;
@@ -47,11 +46,24 @@ public class PayOrderMchNotifyMQ extends AbstractMQ {
     @Data
     @AllArgsConstructor
     public static class MsgPayload {
+        public enum RESET_TYPE{
+            ISV_INFO, MCH_INFO, MCH_APP
+        }
 
-        /** 通知单号 **/
-        private Long notifyId;
+        /** 重置类型 **/
+        private Enum resetType;
+
+        /** isvNo **/
+        private String isvNo;
+
+        /** mchNo **/
+        private String mchNo;
+
+        /** appId **/
+        private String appId;
 
     }
+
 
     @Override
     public String getMQName() {
@@ -61,7 +73,7 @@ public class PayOrderMchNotifyMQ extends AbstractMQ {
     /**  【！重要配置项！】 **/
     @Override
     public MQSendTypeEnum getMQType(){
-        return MQSendTypeEnum.QUEUE;  // QUEUE - 点对点 、 BROADCAST - 广播模式
+        return MQSendTypeEnum.BROADCAST;  // QUEUE - 点对点 、 BROADCAST - 广播模式
     }
 
     @Override
@@ -70,8 +82,8 @@ public class PayOrderMchNotifyMQ extends AbstractMQ {
     }
 
     /**  【！重要配置项！】 构造MQModel , 一般用于发送MQ时 **/
-    public static PayOrderMchNotifyMQ build(Long notifyId){
-        return new PayOrderMchNotifyMQ(new MsgPayload(notifyId));
+    public static ResetIsvMchAppInfoConfigMQ build(Enum resetType, String isvNo, String mchNo, String appId){
+        return new ResetIsvMchAppInfoConfigMQ(new MsgPayload(resetType, isvNo, mchNo, appId));
     }
 
     /** 解析MQ消息， 一般用于接收MQ消息时 **/

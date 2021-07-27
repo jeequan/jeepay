@@ -13,40 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.components.mq.vender.activemq.receive;
+package com.jeequan.jeepay.components.mq.vender.rocketmq.receive;
 
-import com.jeequan.jeepay.components.mq.executor.MqThreadExecutor;
-import com.jeequan.jeepay.components.mq.model.PayOrderMchNotifyMQ;
-import com.jeequan.jeepay.components.mq.vender.IMQMsgReceiver;
 import com.jeequan.jeepay.components.mq.constant.MQVenderCS;
+import com.jeequan.jeepay.components.mq.executor.MqThreadExecutor;
+import com.jeequan.jeepay.components.mq.model.PayOrderReissueMQ;
+import com.jeequan.jeepay.components.mq.vender.IMQMsgReceiver;
+import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * activeMQ 消息接收器：仅在vender=activeMQ时 && 项目实现IMQReceiver接口时 进行实例化
- * 业务：  支付订单商户通知
+ * rocketMQ消息接收器：仅在vender=rocketMQ时 && 项目实现IMQReceiver接口时 进行实例化
+ * 业务：  支付订单补单（一般用于没有回调的接口，比如微信的条码支付）
  *
  * @author terrfly
  * @site https://www.jeepay.vip
  * @date 2021/7/22 17:06
  */
 @Component
-@ConditionalOnProperty(name = MQVenderCS.YML_VENDER_KEY, havingValue = MQVenderCS.ACTIVE_MQ)
-@ConditionalOnBean(PayOrderMchNotifyMQ.IMQReceiver.class)
-public class PayOrderMchNotifyActiveMQReceiver implements IMQMsgReceiver {
+@ConditionalOnProperty(name = MQVenderCS.YML_VENDER_KEY, havingValue = MQVenderCS.ROCKET_MQ)
+@ConditionalOnBean(PayOrderReissueMQ.IMQReceiver.class)
+@RocketMQMessageListener(topic = PayOrderReissueMQ.MQ_NAME, consumerGroup = PayOrderReissueMQ.MQ_NAME)
+public class PayOrderReissueRocketMQReceiver implements IMQMsgReceiver, RocketMQListener<String> {
 
     @Autowired
-    private PayOrderMchNotifyMQ.IMQReceiver mqReceiver;
+    private PayOrderReissueMQ.IMQReceiver mqReceiver;
 
     /** 接收 【 queue 】 类型的消息 **/
-    @Async(MqThreadExecutor.EXECUTOR_PAYORDER_MCH_NOTIFY)
-    @JmsListener(destination = PayOrderMchNotifyMQ.MQ_NAME)
     public void receiveMsg(String msg){
-        mqReceiver.receive(PayOrderMchNotifyMQ.parse(msg));
+        mqReceiver.receive(PayOrderReissueMQ.parse(msg));
+    }
+
+    @Override
+    @Async(MqThreadExecutor.EXECUTOR_PAYORDER_MCH_NOTIFY)
+    public void onMessage(String message) {
+        this.receiveMsg(message);
     }
 
 }

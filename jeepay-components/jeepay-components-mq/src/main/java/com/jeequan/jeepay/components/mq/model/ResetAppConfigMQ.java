@@ -37,7 +37,7 @@ import lombok.NoArgsConstructor;
 public class ResetAppConfigMQ extends AbstractMQ {
 
     /** 【！重要配置项！】 定义MQ名称 **/
-    public static final String MQ_NAME = "TOPIC_RESET_APP_CONFIG";
+    public static final String MQ_NAME = "BROADCAST_RESET_APP_CONFIG";
 
     /** 内置msg 消息体定义 **/
     private MsgPayload payload;
@@ -46,6 +46,9 @@ public class ResetAppConfigMQ extends AbstractMQ {
     @Data
     @AllArgsConstructor
     public static class MsgPayload {
+
+        private String groupKey;
+
     }
 
     @Override
@@ -56,7 +59,7 @@ public class ResetAppConfigMQ extends AbstractMQ {
     /**  【！重要配置项！】 **/
     @Override
     public MQSendTypeEnum getMQType(){
-        return MQSendTypeEnum.TOPIC;  // QUEUE - 点对点 、 Topic - 订阅模式
+        return MQSendTypeEnum.BROADCAST;  // QUEUE - 点对点 、 BROADCAST - 广播模式
     }
 
     @Override
@@ -65,8 +68,8 @@ public class ResetAppConfigMQ extends AbstractMQ {
     }
 
     /**  【！重要配置项！】 构造MQModel , 一般用于发送MQ时 **/
-    public static ResetAppConfigMQ build(){
-        return new ResetAppConfigMQ(new MsgPayload());
+    public static ResetAppConfigMQ build(String groupKey){
+        return new ResetAppConfigMQ(new MsgPayload(groupKey));
     }
 
     /** 解析MQ消息， 一般用于接收MQ消息时 **/

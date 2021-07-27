@@ -76,8 +76,8 @@ public class RabbitMQConfig {
             rabbitMQBeanProcessor.beanDefinitionRegistry.registerBeanDefinition(amq.getMQName(),
                     BeanDefinitionBuilder.rootBeanDefinition(Queue.class).addConstructorArgValue(amq.getMQName()).getBeanDefinition());
 
-            // topic模式
-            if(amq.getMQType() == MQSendTypeEnum.TOPIC){
+            // 广播模式
+            if(amq.getMQType() == MQSendTypeEnum.BROADCAST){
 
                 // 动态注册交换机， 交换机名称/bean名称 =  FANOUT_EXCHANGE_NAME_PREFIX + amq.getMQName()
                 rabbitMQBeanProcessor.beanDefinitionRegistry.registerBeanDefinition(FANOUT_EXCHANGE_NAME_PREFIX +amq.getMQName(),

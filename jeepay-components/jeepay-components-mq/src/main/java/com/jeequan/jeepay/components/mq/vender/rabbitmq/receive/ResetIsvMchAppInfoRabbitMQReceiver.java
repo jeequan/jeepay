@@ -15,9 +15,9 @@
  */
 package com.jeequan.jeepay.components.mq.vender.rabbitmq.receive;
 
-import com.jeequan.jeepay.components.mq.model.ResetAppConfigMQ;
-import com.jeequan.jeepay.components.mq.vender.IMQMsgReceiver;
 import com.jeequan.jeepay.components.mq.constant.MQVenderCS;
+import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
+import com.jeequan.jeepay.components.mq.vender.IMQMsgReceiver;
 import com.jeequan.jeepay.components.mq.vender.rabbitmq.RabbitMQConfig;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 
 /**
 * rabbitMQ消息接收器：仅在vender=rabbitMQ时 && 项目实现IMQReceiver接口时 进行实例化
-* 业务：  更新系统配置参数
+* 业务：  更新服务商/商户/商户应用配置信息
 *
 * @author terrfly
 * @site https://www.jeepay.vip
@@ -39,11 +39,11 @@ import org.springframework.stereotype.Component;
 */
 @Component
 @ConditionalOnProperty(name = MQVenderCS.YML_VENDER_KEY, havingValue = MQVenderCS.RABBIT_MQ)
-@ConditionalOnBean(ResetAppConfigMQ.IMQReceiver.class)
-public class ResetAppConfigRabbitMQReceiver implements IMQMsgReceiver {
+@ConditionalOnBean(ResetIsvMchAppInfoConfigMQ.IMQReceiver.class)
+public class ResetIsvMchAppInfoRabbitMQReceiver implements IMQMsgReceiver {
 
     @Autowired
-    private ResetAppConfigMQ.IMQReceiver mqReceiver;
+    private ResetIsvMchAppInfoConfigMQ.IMQReceiver mqReceiver;
 
     /** 接收 【 MQSendTypeEnum.BROADCAST  】 广播类型的消息
      *
@@ -57,10 +57,10 @@ public class ResetAppConfigRabbitMQReceiver implements IMQMsgReceiver {
      * **/
     @RabbitListener(
             bindings = {@QueueBinding(value = @Queue(), // 注意这里不要定义队列名称,系统会随机产生
-            exchange = @Exchange(name = RabbitMQConfig.FANOUT_EXCHANGE_NAME_PREFIX + ResetAppConfigMQ.MQ_NAME,
+            exchange = @Exchange(name = RabbitMQConfig.FANOUT_EXCHANGE_NAME_PREFIX + ResetIsvMchAppInfoConfigMQ.MQ_NAME,
             type = ExchangeTypes.FANOUT ))} )
     public void receiveMsg(String msg){
-        mqReceiver.receive(ResetAppConfigMQ.parse(msg));
+        mqReceiver.receive(ResetIsvMchAppInfoConfigMQ.parse(msg));
     }
 
 }

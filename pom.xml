@@ -49,7 +49,7 @@
     <spring.security.version>5.4.7</spring.security.version> <!-- 用于core的scope依赖 -->
     <jjwt.version>0.9.1</jjwt.version>
     <binarywang.weixin.java.version>4.1.0</binarywang.weixin.java.version>
-    <rocketmq.spring.boot.starter.version>2.0.3</rocketmq.spring.boot.starter.version>
+    <rocketmq.spring.boot.starter.version>2.2.0</rocketmq.spring.boot.starter.version>
 
   </properties>
 
@@ -158,6 +158,13 @@
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
             <version>3.13.0</version>
+        </dependency>
+
+        <!-- 添加对rocketMQ的支持  -->
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-spring-boot-starter</artifactId>
+            <version>${rocketmq.spring.boot.starter.version}</version>
         </dependency>
 
     </dependencies>

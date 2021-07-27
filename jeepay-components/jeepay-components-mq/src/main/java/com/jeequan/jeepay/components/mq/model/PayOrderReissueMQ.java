@@ -50,6 +50,9 @@ public class PayOrderReissueMQ extends AbstractMQ {
         /** 支付订单号 **/
         private String payOrderId;
 
+        /** 通知次数 **/
+        private Integer count;
+
     }
 
     @Override
@@ -60,7 +63,7 @@ public class PayOrderReissueMQ extends AbstractMQ {
     /**  【！重要配置项！】 **/
     @Override
     public MQSendTypeEnum getMQType(){
-        return MQSendTypeEnum.QUEUE;  // QUEUE - 点对点 、 Topic - 订阅模式
+        return MQSendTypeEnum.QUEUE;  // QUEUE - 点对点 、 BROADCAST - 广播模式
     }
 
     @Override
@@ -69,8 +72,8 @@ public class PayOrderReissueMQ extends AbstractMQ {
     }
 
     /**  【！重要配置项！】 构造MQModel , 一般用于发送MQ时 **/
-    public static PayOrderReissueMQ build(String payOrderId){
-        return new PayOrderReissueMQ(new MsgPayload(payOrderId));
+    public static PayOrderReissueMQ build(String payOrderId, Integer count){
+        return new PayOrderReissueMQ(new MsgPayload(payOrderId, count));
     }
 
     /** 解析MQ消息， 一般用于接收MQ消息时 **/

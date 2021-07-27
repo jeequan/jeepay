@@ -19,14 +19,15 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.components.mq.constant.MQSendTypeEnum;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
 *
 * 定义MQ消息格式
-* 业务场景： [ 支付订单的商户通知消息 ]
+* 业务场景： [ 清除商户登录信息 ]
 *
 * @author terrfly
 * @site https://www.jeepay.vip
@@ -35,10 +36,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PayOrderMchNotifyMQ extends AbstractMQ {
+public class CleanMchLoginAuthCacheMQ extends AbstractMQ {
 
     /** 【！重要配置项！】 定义MQ名称 **/
-    public static final String MQ_NAME = "QUEUE_PAY_ORDER_MCH_NOTIFY";
+    public static final String MQ_NAME = "QUEUE_CLEAN_MCH_LOGIN_AUTH_CACHE";
 
     /** 内置msg 消息体定义 **/
     private MsgPayload payload;
@@ -48,8 +49,8 @@ public class PayOrderMchNotifyMQ extends AbstractMQ {
     @AllArgsConstructor
     public static class MsgPayload {
 
-        /** 通知单号 **/
-        private Long notifyId;
+        /** 用户ID集合 **/
+        private List<Long> userIdList;
 
     }
 
@@ -70,8 +71,8 @@ public class PayOrderMchNotifyMQ extends AbstractMQ {
     }
 
     /**  【！重要配置项！】 构造MQModel , 一般用于发送MQ时 **/
-    public static PayOrderMchNotifyMQ build(Long notifyId){
-        return new PayOrderMchNotifyMQ(new MsgPayload(notifyId));
+    public static CleanMchLoginAuthCacheMQ build(List<Long> userIdList){
+        return new CleanMchLoginAuthCacheMQ(new MsgPayload(userIdList));
     }
 
     /** 解析MQ消息， 一般用于接收MQ消息时 **/
