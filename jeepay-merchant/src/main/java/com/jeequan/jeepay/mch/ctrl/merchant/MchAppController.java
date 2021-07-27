@@ -17,19 +17,18 @@ package com.jeequan.jeepay.mch.ctrl.merchant;
 
 import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
+import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.core.utils.JsonKit;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchAppService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -46,7 +45,7 @@ import org.springframework.web.bind.annotation.*;
 public class MchAppController extends CommonCtrl {
 
     @Autowired private MchAppService mchAppService;
-    @Autowired private MqCommonService mqCommonService;
+    @Autowired private IMQSender mqSender;
 
     /**
      * @Author: ZhuXiao
@@ -122,9 +121,7 @@ public class MchAppController extends CommonCtrl {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
         }
         // 推送修改应用消息
-        JSONObject jsonObject = JsonKit.newJson("mchNo", mchApp.getMchNo());
-        jsonObject.put("appId", appId);
-        mqCommonService.send(jsonObject.toJSONString(), CS.MQ.MQ_TYPE_MODIFY_MCH_APP);
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.MCH_APP, null, mchApp.getMchNo(), appId));
         return ApiRes.ok();
     }
 
@@ -146,9 +143,7 @@ public class MchAppController extends CommonCtrl {
         mchAppService.removeByAppId(appId);
 
         // 推送mq到目前节点进行更新数据
-        JSONObject jsonObject = JsonKit.newJson("mchNo", mchApp.getMchNo());
-        jsonObject.put("appId", appId);
-        mqCommonService.send(jsonObject.toJSONString(), CS.MQ.MQ_TYPE_MODIFY_MCH_APP);
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.MCH_APP, null, mchApp.getMchNo(), appId));
         return ApiRes.ok();
     }
 

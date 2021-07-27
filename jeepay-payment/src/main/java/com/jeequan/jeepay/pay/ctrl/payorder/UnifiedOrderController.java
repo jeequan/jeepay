@@ -15,9 +15,6 @@
  */
 package com.jeequan.jeepay.pay.ctrl.payorder;
 
-import com.jeequan.jeepay.components.mq.model.PayOrderMchNotifyMQ;
-import com.jeequan.jeepay.components.mq.model.ResetAppConfigMQ;
-import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayWay;
@@ -49,32 +46,11 @@ public class UnifiedOrderController extends AbstractPayOrderController {
     @Autowired private PayWayService payWayService;
     @Autowired private ConfigContextService configContextService;
 
-
-    @Autowired
-    private IMQSender mqSender;
-
-
     /**
      * 统一下单接口
      * **/
     @PostMapping("/api/pay/unifiedOrder")
     public ApiRes unifiedOrder(){
-
-
-        if(true){
-
-//            imqSender.send(PayOrderMchNotifyMQ.build("T00001"));
-            mqSender.send(ResetAppConfigMQ.build(), 19);
-
-
-            mqSender.send(PayOrderMchNotifyMQ.build("123"));
-
-            mqSender.send(ResetAppConfigMQ.build(), 20);
-
-
-            return null;
-        }
-
 
         //获取参数 & 验签
         UnifiedOrderRQ rq = getRQByWithMchSign(UnifiedOrderRQ.class);

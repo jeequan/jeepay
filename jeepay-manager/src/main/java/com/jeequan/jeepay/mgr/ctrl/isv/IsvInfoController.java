@@ -18,12 +18,12 @@ package com.jeequan.jeepay.mgr.ctrl.isv;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
+import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
-import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.IsvInfo;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.IsvInfoService;
 import org.apache.commons.lang3.StringUtils;
@@ -46,7 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class IsvInfoController extends CommonCtrl {
 
     @Autowired private IsvInfoService isvInfoService;
-    @Autowired private MqCommonService mqCommonService;
+    @Autowired private IMQSender mqSender;
 
     /**
      * @author: pangxiaoyu
@@ -96,7 +96,9 @@ public class IsvInfoController extends CommonCtrl {
     @RequestMapping(value="/{isvNo}", method = RequestMethod.DELETE)
     public ApiRes delete(@PathVariable("isvNo") String isvNo) {
         isvInfoService.removeByIsvNo(isvNo);
-        mqCommonService.send(isvNo, CS.MQ.MQ_TYPE_MODIFY_ISV_INFO); // 推送mq到目前节点进行更新数据
+
+        // 推送mq到目前节点进行更新数据
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.ISV_INFO, isvNo, null, null));
         return ApiRes.ok();
     }
 
@@ -112,7 +114,10 @@ public class IsvInfoController extends CommonCtrl {
         IsvInfo isvInfo = getObject(IsvInfo.class);
         isvInfo.setIsvNo(isvNo);
         boolean result = isvInfoService.updateById(isvInfo);
-        mqCommonService.send(isvNo, CS.MQ.MQ_TYPE_MODIFY_ISV_INFO); // 推送mq到目前节点进行更新数据
+
+        // 推送mq到目前节点进行更新数据
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.ISV_INFO, isvNo, null, null));
+
         if (!result)  return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
         return ApiRes.ok();
     }

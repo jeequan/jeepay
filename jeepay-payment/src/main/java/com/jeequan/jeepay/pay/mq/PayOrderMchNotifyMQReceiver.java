@@ -20,7 +20,6 @@ import cn.hutool.http.HttpUtil;
 import com.jeequan.jeepay.components.mq.model.PayOrderMchNotifyMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
-import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;

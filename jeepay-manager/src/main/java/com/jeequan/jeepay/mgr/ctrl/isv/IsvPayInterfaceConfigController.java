@@ -16,6 +16,8 @@
 package com.jeequan.jeepay.mgr.ctrl.isv;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
+import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
@@ -23,7 +25,6 @@ import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.params.IsvParams;
-import com.jeequan.jeepay.core.mq.MqCommonService;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
@@ -48,7 +49,7 @@ import java.util.Map;
 public class IsvPayInterfaceConfigController extends CommonCtrl {
 
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private MqCommonService mqCommonService;
+    @Autowired private IMQSender mqSender;
 
    /**
     * @Author: ZhuXiao
@@ -130,7 +131,10 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
         if (!result) {
             return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "配置失败");
         }
-        mqCommonService.send(infoId, CS.MQ.MQ_TYPE_MODIFY_ISV_INFO); // 推送mq到目前节点进行更新数据
+
+        // 推送mq到目前节点进行更新数据
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.ISV_INFO, infoId, null, null));
+
         return ApiRes.ok();
     }
 

@@ -20,6 +20,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.domain.AlipayOpenAuthTokenAppModel;
 import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
 import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
+import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
+import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
 import com.jeequan.jeepay.core.entity.MchApp;
@@ -27,8 +29,6 @@ import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayConfig;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
-import com.jeequan.jeepay.core.mq.MqCommonService;
-import com.jeequan.jeepay.core.utils.JsonKit;
 import com.jeequan.jeepay.pay.channel.alipay.AlipayKit;
 import com.jeequan.jeepay.pay.model.AlipayClientWrapper;
 import com.jeequan.jeepay.pay.model.IsvConfigContext;
@@ -61,8 +61,8 @@ public class AlipayBizController extends AbstractCtrl {
     @Autowired private ConfigContextService configContextService;
     @Autowired private SysConfigService sysConfigService;
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private MqCommonService mqCommonService;
     @Autowired private MchAppService mchAppService;
+    @Autowired private IMQSender mqSender;
 
     /** 跳转到支付宝的授权页面 （统一从pay项目获取到isv配置信息）
      * isvAndMchNo 格式:  ISVNO_MCHAPPID
@@ -143,9 +143,8 @@ public class AlipayBizController extends AbstractCtrl {
 
                 MchApp mchApp = mchAppService.getById(mchAppId);
 
-                JSONObject jsonObject = JsonKit.newJson("mchNo", mchApp.getMchNo());
-                jsonObject.put("appId", mchApp.getAppId());
-                mqCommonService.send(jsonObject.toJSONString(), CS.MQ.MQ_TYPE_MODIFY_MCH_APP); // 推送mq到目前节点进行更新数据
+                // 更新应用配置信息
+                mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.MCH_APP, null, mchApp.getMchNo(), mchApp.getAppId()));
 
             }
         } catch (Exception e) {

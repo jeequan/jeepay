@@ -16,6 +16,8 @@
 package com.jeequan.jeepay.mch.ctrl.merchant;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
+import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
@@ -26,8 +28,6 @@ import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.params.NormalMchParams;
-import com.jeequan.jeepay.core.mq.MqCommonService;
-import com.jeequan.jeepay.core.utils.JsonKit;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchAppService;
@@ -55,9 +55,9 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
 
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
     @Autowired private MchInfoService mchInfoService;
-    @Autowired private MqCommonService mqCommonService;
     @Autowired private MchAppService mchAppService;
     @Autowired private SysConfigService sysConfigService;
+    @Autowired private IMQSender mqSender;
 
     /**
      * @Author: ZhuXiao
@@ -154,9 +154,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
         if (!result) {
             throw new BizException("配置失败");
         }
-        JSONObject jsonObject = JsonKit.newJson("mchNo", getCurrentMchNo());
-        jsonObject.put("appId", infoId);
-        mqCommonService.send(jsonObject.toJSONString(), CS.MQ.MQ_TYPE_MODIFY_MCH_APP);
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.MsgPayload.RESET_TYPE.MCH_APP, null, getCurrentMchNo(), infoId));
 
         return ApiRes.ok();
     }
