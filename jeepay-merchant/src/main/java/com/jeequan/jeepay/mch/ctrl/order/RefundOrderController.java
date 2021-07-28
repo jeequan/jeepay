@@ -56,10 +56,9 @@ public class RefundOrderController extends CommonCtrl {
         RefundOrder refundOrder = getObject(RefundOrder.class);
         JSONObject paramJSON = getReqParamJSON();
         LambdaQueryWrapper<RefundOrder> wrapper = RefundOrder.gw();
-        wrapper.eq(RefundOrder::getMchNo, getCurrentUser().getSysUser().getBelongInfoId());
+        wrapper.eq(RefundOrder::getMchNo, getCurrentMchNo());
         if (StringUtils.isNotEmpty(refundOrder.getRefundOrderId())) wrapper.eq(RefundOrder::getRefundOrderId, refundOrder.getRefundOrderId());
         if (StringUtils.isNotEmpty(refundOrder.getPayOrderId())) wrapper.eq(RefundOrder::getPayOrderId, refundOrder.getPayOrderId());
-        if (StringUtils.isNotEmpty(refundOrder.getChannelPayOrderNo())) wrapper.eq(RefundOrder::getChannelPayOrderNo, refundOrder.getChannelPayOrderNo());
         if (StringUtils.isNotEmpty(refundOrder.getMchRefundNo())) wrapper.eq(RefundOrder::getMchRefundNo, refundOrder.getMchRefundNo());
         if (refundOrder.getState() != null) wrapper.eq(RefundOrder::getState, refundOrder.getState());
         if (StringUtils.isNotEmpty(refundOrder.getChannelPayOrderNo())) wrapper.eq(RefundOrder::getChannelPayOrderNo, refundOrder.getChannelPayOrderNo());

@@ -66,9 +66,9 @@ public class PayOrderController extends CommonCtrl {
         JSONObject paramJSON = getReqParamJSON();
 
         LambdaQueryWrapper<PayOrder> wrapper = PayOrder.gw();
-        wrapper.eq(PayOrder::getMchNo, getCurrentUser().getSysUser().getBelongInfoId());
+        wrapper.eq(PayOrder::getMchNo, getCurrentMchNo());
         if (StringUtils.isNotEmpty(payOrder.getPayOrderId())) wrapper.eq(PayOrder::getPayOrderId, payOrder.getPayOrderId());
-        if (StringUtils.isNotEmpty(payOrder.getMchOrderNo())) wrapper.eq(PayOrder::getMchOrderNo, getCurrentMchNo());
+        if (StringUtils.isNotEmpty(payOrder.getMchOrderNo())) wrapper.eq(PayOrder::getMchOrderNo, payOrder.getMchOrderNo());
         if (StringUtils.isNotEmpty(payOrder.getWayCode())) wrapper.eq(PayOrder::getWayCode, payOrder.getWayCode());
         if (payOrder.getState() != null) wrapper.eq(PayOrder::getState, payOrder.getState());
         if (payOrder.getNotifyState() != null) wrapper.eq(PayOrder::getNotifyState, payOrder.getNotifyState());

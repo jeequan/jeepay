@@ -64,7 +64,6 @@ public class RefundOrderController extends CommonCtrl {
         if (refundOrder.getMchType() != null) wrapper.eq(RefundOrder::getMchType, refundOrder.getMchType());
         if (StringUtils.isNotEmpty(refundOrder.getMchRefundNo())) wrapper.eq(RefundOrder::getMchRefundNo, refundOrder.getMchRefundNo());
         if (refundOrder.getState() != null) wrapper.eq(RefundOrder::getState, refundOrder.getState());
-        if (StringUtils.isNotEmpty(refundOrder.getChannelPayOrderNo())) wrapper.eq(RefundOrder::getChannelPayOrderNo, refundOrder.getChannelPayOrderNo());
         if (StringUtils.isNotEmpty(refundOrder.getAppId())) wrapper.eq(RefundOrder::getAppId, refundOrder.getAppId());
         if (paramJSON != null) {
             if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) wrapper.ge(RefundOrder::getCreatedAt, paramJSON.getString("createdStart"));
