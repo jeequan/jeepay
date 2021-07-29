@@ -75,7 +75,7 @@ public class OssFileController extends AbstractCtrl {
         } catch (BizException biz) {
             throw biz;
         } catch (Exception e) {
-            logger.error("upload error, fileName = {}", file == null ? null :file.getOriginalFilename(), e);
+            logger.error("upload error, fileName = {}", file.getOriginalFilename(), e);
             throw new BizException(ApiCodeEnum.SYSTEM_ERROR);
         }
     }

@@ -15,7 +15,7 @@
  */
 package com.jeequan.jeepay.core.ctrls;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -120,7 +120,7 @@ public abstract class AbstractCtrl {
             return null;
         }
 
-        return MutablePair.of("ascend".equalsIgnoreCase(sortOrderFlag), StrUtil.toUnderlineCase(sortField).toLowerCase());
+        return MutablePair.of("ascend".equalsIgnoreCase(sortOrderFlag), CharSequenceUtil.toUnderlineCase(sortField).toLowerCase());
     }
 
 
@@ -210,9 +210,9 @@ public abstract class AbstractCtrl {
 
         if(result instanceof BaseModel){  //如果属于BaseModel, 处理apiExtVal
             JSONObject resultTemp = (JSONObject) JSON.toJSON(result);
-            for (String key : params.keySet()) {  //遍历原始参数
-                if(!resultTemp.containsKey(key)){
-                    ((BaseModel) result).addExt(key, params.get(key));
+            for (Map.Entry<String, Object> entry : params.entrySet()) {  //遍历原始参数
+                if(!resultTemp.containsKey(entry.getKey())){
+                    ((BaseModel) result).addExt(entry.getKey(), entry.getValue());
                 }
             }
         }

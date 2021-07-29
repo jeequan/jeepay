@@ -267,7 +267,7 @@ public abstract class AbstractPayOrderController extends ApiController {
 
         if(mchAppConfigContext.getMchType() == MchInfo.TYPE_NORMAL){ //普通商户
 
-            if(mchAppConfigContext == null || mchAppConfigContext.getNormalMchParamsByIfCode(ifCode) == null){
+            if(mchAppConfigContext.getNormalMchParamsByIfCode(ifCode) == null){
                 throw new BizException("商户应用参数未配置");
             }
         }else if(mchAppConfigContext.getMchType() == MchInfo.TYPE_ISVSUB){ //特约商户

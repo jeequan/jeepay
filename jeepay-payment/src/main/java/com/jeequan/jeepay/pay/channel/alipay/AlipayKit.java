@@ -15,7 +15,7 @@
  */
 package com.jeequan.jeepay.pay.channel.alipay;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.alipay.api.AlipayObject;
 import com.alipay.api.AlipayRequest;
 import com.alipay.api.domain.*;
@@ -101,7 +101,7 @@ public class AlipayKit {
         }else{
             result = StringUtils.defaultIfEmpty(subMsg, msg);
         }
-        return StrUtil.maxLength(result, 253);
+        return CharSequenceUtil.maxLength(result, 253);
     }
 
 }

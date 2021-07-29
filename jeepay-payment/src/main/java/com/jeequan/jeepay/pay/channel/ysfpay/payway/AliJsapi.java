@@ -15,17 +15,18 @@
  */
 package com.jeequan.jeepay.pay.channel.ysfpay.payway;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.pay.channel.ysfpay.YsfpayPaymentService;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
+import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliJsapiOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliJsapiOrderRS;
-import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
-import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -77,7 +78,7 @@ public class AliJsapi extends YsfpayPaymentService {
             //00-交易成功， 02-用户支付中 , 12-交易重复， 需要发起查询处理    其他认为失败
             if("00".equals(respCode)){
                 //付款信息
-                JSONObject payDataJSON = JSONObject.parseObject(resJSON.getString("payData"));
+                JSONObject payDataJSON = JSON.parseObject(resJSON.getString("payData"));
                 String tradeNo = "";
 
                 if(StringUtils.isNotBlank(payDataJSON.getString("tradeNo"))){

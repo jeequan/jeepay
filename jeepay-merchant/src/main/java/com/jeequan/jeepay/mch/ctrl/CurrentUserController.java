@@ -16,6 +16,7 @@
 package com.jeequan.jeepay.mch.ctrl;
 
 import cn.hutool.core.codec.Base64;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.aop.MethodLog;
@@ -70,7 +71,7 @@ public class CurrentUserController extends CommonCtrl{
 		List<SysEntitlement> allMenuList = new ArrayList<>();    //所有菜单集合
 
 		//2. 查询出用户所有菜单集合 (包含左侧显示菜单 和 其他类型菜单 )
-		if(entIdList != null && !entIdList.isEmpty()){
+		if(!entIdList.isEmpty()){
 			allMenuList = sysEntitlementService.list(SysEntitlement.gw()
 					.in(SysEntitlement::getEntId, entIdList)
 					.in(SysEntitlement::getEntType, Arrays.asList(CS.ENT_TYPE.MENU_LEFT, CS.ENT_TYPE.MENU_OTHER))
@@ -79,7 +80,7 @@ public class CurrentUserController extends CommonCtrl{
 		}
 
 		//4. 转换为json树状结构
-		JSONArray jsonArray = (JSONArray) JSONArray.toJSON(allMenuList);
+		JSONArray jsonArray = (JSONArray) JSON.toJSON(allMenuList);
 		List<JSONObject> allMenuRouteTree = new TreeDataBuilder(jsonArray,
 				"entId", "pid", "children", "entSort", true)
 				.buildTreeObject();
