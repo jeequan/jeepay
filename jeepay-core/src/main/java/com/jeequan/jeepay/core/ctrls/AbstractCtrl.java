@@ -77,7 +77,9 @@ public abstract class AbstractCtrl {
     /** 获取页码 **/
     protected int getPageIndex() {
         Integer pageIndex = getReqParamJSON().getInteger(PAGE_INDEX_PARAM_NAME);
-        if(pageIndex == null) return DEFAULT_PAGE_INDEX;
+        if(pageIndex == null) {
+            return DEFAULT_PAGE_INDEX;
+        }
         return pageIndex;
     }
 
@@ -90,8 +92,12 @@ public abstract class AbstractCtrl {
     protected int getPageSize(boolean allowQueryAll) {
         Integer pageSize = getReqParamJSON().getInteger(PAGE_SIZE_PARAM_NAME);
 
-        if(allowQueryAll && pageSize != null && pageSize == -1) return Integer.MAX_VALUE; // -1代表获取全部数据，查询int最大值的数据
-        if(pageSize == null || pageSize < 0) return DEFAULT_PAGE_SIZE;
+        if(allowQueryAll && pageSize != null && pageSize == -1) {
+            return Integer.MAX_VALUE; // -1代表获取全部数据，查询int最大值的数据
+        }
+        if(pageSize == null || pageSize < 0) {
+            return DEFAULT_PAGE_SIZE;
+        }
         return pageSize;
     }
 
@@ -135,7 +141,9 @@ public abstract class AbstractCtrl {
     /** 获取请求参数值 [ T 类型 ], [ 如为null返回默认值 ] **/
     protected  <T> T getValDefault(String key, T defaultValue, Class<T> cls) {
         T value = getVal(key, cls);
-        if(value == null) return defaultValue;
+        if(value == null) {
+            return defaultValue;
+        }
         return value;
     }
 
@@ -222,7 +230,9 @@ public abstract class AbstractCtrl {
 
         for(String key : keys) {
             String value = getReqParamJSON().getString(key);
-            if(StringUtils.isEmpty(value)) throw new BizException(ApiCodeEnum.PARAMS_ERROR, genParamRequiredMsg(key));
+            if(StringUtils.isEmpty(value)) {
+                throw new BizException(ApiCodeEnum.PARAMS_ERROR, genParamRequiredMsg(key));
+            }
         }
     }
 
@@ -236,7 +246,9 @@ public abstract class AbstractCtrl {
     /** 得到前端传入的金额元,转换成长整型分 (非必填) **/
     public Long getAmountL(String name) {
         String amountStr = getValString(name);  // 前端填写的为元,可以为小数点2位
-        if(StringUtils.isEmpty(amountStr)) return null;
+        if(StringUtils.isEmpty(amountStr)) {
+            return null;
+        }
         Long amountL = new BigDecimal(amountStr.trim()).multiply(new BigDecimal(100)).longValue(); // // 转成分
         return amountL;
     }
@@ -288,7 +300,9 @@ public abstract class AbstractCtrl {
 
         //如果文件夹不存在则创建文件夹
         File dir = saveFile.getParentFile();
-        if(!dir.exists()) dir.mkdirs();
+        if(!dir.exists()) {
+            dir.mkdirs();
+        }
         file.transferTo(saveFile);
     }
 

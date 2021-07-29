@@ -22,7 +22,7 @@ import java.io.Serializable;
 
 /*
 * BaseModel 封装公共处理函数
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 16:49
@@ -47,7 +47,9 @@ public class BaseModel<T> implements Serializable{
 	//设置扩展字段
 	public BaseModel addExt(String key, Object val) {
 
-		if(ext == null) ext = new JSONObject();
+		if(ext == null) {
+            ext = new JSONObject();
+        }
 		ext.put(key,val);
 		return this;
 	}

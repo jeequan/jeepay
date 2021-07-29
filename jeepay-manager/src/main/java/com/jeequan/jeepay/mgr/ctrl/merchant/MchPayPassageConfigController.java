@@ -69,8 +69,12 @@ public class MchPayPassageConfigController extends CommonCtrl {
 
         //支付方式集合
         LambdaQueryWrapper<PayWay> wrapper = PayWay.gw();
-        if (StrUtil.isNotBlank(wayCode)) wrapper.eq(PayWay::getWayCode, wayCode);
-        if (StrUtil.isNotBlank(wayName)) wrapper.like(PayWay::getWayName, wayName);
+        if (StrUtil.isNotBlank(wayCode)) {
+            wrapper.eq(PayWay::getWayCode, wayCode);
+        }
+        if (StrUtil.isNotBlank(wayName)) {
+            wrapper.like(PayWay::getWayName, wayName);
+        }
         IPage<PayWay> payWayPage = payWayService.page(getIPage(), wrapper);
 
         if (!CollectionUtils.isEmpty(payWayPage.getRecords())) {

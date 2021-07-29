@@ -45,7 +45,7 @@ public class StringKit {
 		if(StringUtils.isEmpty(url) || map == null || map.isEmpty()){
 			return url;
 		}
-		UrlBuilder result = UrlBuilder.create().of(url);
+		UrlBuilder result = UrlBuilder.of(url);
 		map.forEach((k, v) -> {
 			if(k != null && v != null){
 				result.addQuery(k, v.toString());

@@ -80,7 +80,9 @@ public class SysRoleEntRelaController extends CommonCtrl {
 	public ApiRes relas(@PathVariable("roleId") String roleId) {
 
 		SysRole sysRole = sysRoleService.getOne(SysRole.gw().eq(SysRole::getRoleId, roleId).eq(SysRole::getBelongInfoId, getCurrentMchNo()));
-		if (sysRole == null) throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+		if (sysRole == null) {
+            throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
 
 		List<String> entIdList = JSONArray.parseArray(getValStringRequired("entIdListStr"), String.class);
 

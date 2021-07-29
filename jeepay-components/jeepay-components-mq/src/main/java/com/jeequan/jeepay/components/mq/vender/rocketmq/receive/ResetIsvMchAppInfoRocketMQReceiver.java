@@ -44,6 +44,7 @@ public class ResetIsvMchAppInfoRocketMQReceiver implements IMQMsgReceiver, Rocke
     private ResetIsvMchAppInfoConfigMQ.IMQReceiver mqReceiver;
 
     /** 接收 【 MQSendTypeEnum.BROADCAST  】 广播类型的消息 **/
+    @Override
     public void receiveMsg(String msg){
         mqReceiver.receive(ResetIsvMchAppInfoConfigMQ.parse(msg));
     }

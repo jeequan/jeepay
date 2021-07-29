@@ -87,7 +87,9 @@ public class SysUserController extends CommonCtrl {
 	public ApiRes detail(@PathVariable("recordId") Integer recordId) {
 
 		SysUser sysUser = sysUserService.getById(recordId);
-		if (sysUser == null) throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+		if (sysUser == null) {
+            throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
 		if (!sysUser.getBelongInfoId().equals(getCurrentUser().getSysUser().getBelongInfoId())) {
 			throw new BizException(ApiCodeEnum.SYS_PERMISSION_ERROR);
 		}
@@ -140,9 +142,13 @@ public class SysUserController extends CommonCtrl {
 		SysUser sysUser = getObject(SysUser.class);
 		sysUser.setSysUserId(recordId);
 		// 如果当前用户为非超管则用户状态为普通用户
-		if (getCurrentUser().getSysUser().getIsAdmin() != CS.YES) sysUser.setIsAdmin(CS.NO);
+		if (getCurrentUser().getSysUser().getIsAdmin() != CS.YES) {
+            sysUser.setIsAdmin(CS.NO);
+        }
 		SysUser dbRecord = sysUserService.getOne(SysUser.gw().eq(SysUser::getSysUserId, recordId).eq(SysUser::getBelongInfoId, getCurrentMchNo()));
-		if (dbRecord == null) throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+		if (dbRecord == null) {
+            throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
 
 		//判断是否自己禁用自己
 		if(recordId.equals(getCurrentUser().getSysUser().getSysUserId()) && sysUser.getState() != null && sysUser.getState() == CS.PUB_DISABLE){

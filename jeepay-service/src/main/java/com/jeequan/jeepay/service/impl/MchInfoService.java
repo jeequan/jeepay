@@ -74,7 +74,9 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
 
         // 插入商户基本信息
         boolean saveResult = save(mchInfo);
-        if (!saveResult) throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
+        if (!saveResult) {
+            throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
+        }
 
         // 插入用户信息
         SysUser sysUser = new SysUser();
@@ -98,14 +100,18 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
         mchApp.setCreatedBy(sysUser.getRealname());
         mchApp.setCreatedUid(sysUser.getSysUserId());
         saveResult = mchAppService.save(mchApp);
-        if (!saveResult) throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
+        if (!saveResult) {
+            throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
+        }
 
         // 存入商户默认用户ID
         MchInfo updateRecord = new MchInfo();
         updateRecord.setMchNo(mchInfo.getMchNo());
         updateRecord.setInitUserId(sysUser.getSysUserId());
         saveResult = updateById(updateRecord);
-        if (!saveResult) throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
+        if (!saveResult) {
+            throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
+        }
 
     }
 
@@ -115,11 +121,15 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
         try {
             // 0.当前商户是否存在
             MchInfo mchInfo = getById(mchNo);
-            if (mchInfo == null) throw new BizException("该商户不存在");
+            if (mchInfo == null) {
+                throw new BizException("该商户不存在");
+            }
 
             // 1.查看当前商户是否存在交易数据
             int payCount = payOrderService.count(PayOrder.gw().eq(PayOrder::getMchNo, mchNo));
-            if (payCount > 0) throw new BizException("该商户已存在交易数据，不可删除");
+            if (payCount > 0) {
+                throw new BizException("该商户已存在交易数据，不可删除");
+            }
 
             // 2.删除当前商户配置的支付通道
             mchPayPassageService.remove(MchPayPassage.gw().eq(MchPayPassage::getMchNo, mchNo));
@@ -158,7 +168,9 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
 
             // 7.删除当前商户
             boolean removeMchInfo = removeById(mchNo);
-            if (!removeMchInfo) throw new BizException("删除当前商户失败");
+            if (!removeMchInfo) {
+                throw new BizException("删除当前商户失败");
+            }
             return userIdList;
         }catch (Exception e) {
             throw new BizException(e.getMessage());

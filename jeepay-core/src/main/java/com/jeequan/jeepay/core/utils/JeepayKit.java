@@ -109,13 +109,15 @@ public class JeepayKit {
     }
 
     public static String toHex(byte input[]) {
-        if (input == null)
+        if (input == null) {
             return null;
+        }
         StringBuffer output = new StringBuffer(input.length * 2);
         for (int i = 0; i < input.length; i++) {
             int current = input[i] & 0xff;
-            if (current < 16)
+            if (current < 16) {
                 output.append("0");
+            }
             output.append(Integer.toString(current, 16));
         }
 
@@ -124,13 +126,17 @@ public class JeepayKit {
 
     /** map 转换为  url参数 **/
     public static String genUrlParams(Map<String, Object> paraMap) {
-        if(paraMap == null || paraMap.isEmpty()) return "";
+        if(paraMap == null || paraMap.isEmpty()) {
+            return "";
+        }
         StringBuffer urlParam = new StringBuffer();
         Set<String> keySet = paraMap.keySet();
         int i = 0;
         for(String key:keySet) {
             urlParam.append(key).append("=").append( paraMap.get(key) == null ? "" : paraMap.get(key) );
-            if(++i == keySet.size()) break;
+            if(++i == keySet.size()) {
+                break;
+            }
             urlParam.append("&");
         }
         return urlParam.toString();
@@ -139,7 +145,9 @@ public class JeepayKit {
     /** 校验微信/支付宝二维码是否符合规范， 并根据支付类型返回对应的支付方式  **/
     public static String getPayWayCodeByBarCode(String barCode){
 
-        if(StringUtils.isEmpty(barCode)) throw new BizException("条码为空");
+        if(StringUtils.isEmpty(barCode)) {
+            throw new BizException("条码为空");
+        }
 
         //微信 ： 用户付款码条形码规则：18位纯数字，以10、11、12、13、14、15开头
         //文档： https://pay.weixin.qq.com/wiki/doc/api/micropay.php?chapter=5_1

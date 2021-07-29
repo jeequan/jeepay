@@ -32,7 +32,9 @@ public class RegKit {
 
 	/** 正则验证 */
 	public static boolean match(String text, String reg){
-		if(text == null) return false;
+		if(text == null) {
+            return false;
+        }
 		return text.matches(reg);
 	}
 

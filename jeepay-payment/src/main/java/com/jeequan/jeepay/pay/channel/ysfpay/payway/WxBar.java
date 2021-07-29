@@ -49,6 +49,7 @@ public class WxBar extends YsfpayPaymentService {
         return null;
     }
 
+    @Override
     public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
         String logPrefix = "【云闪付条码(wechat)支付】";
 

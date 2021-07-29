@@ -70,8 +70,12 @@ public class MchPayPassageConfigController extends CommonCtrl {
 
         //支付方式集合
         LambdaQueryWrapper<PayWay> wrapper = PayWay.gw();
-        if (StrUtil.isNotBlank(wayCode)) wrapper.eq(PayWay::getWayCode, wayCode);
-        if (StrUtil.isNotBlank(wayName)) wrapper.like(PayWay::getWayName, wayName);
+        if (StrUtil.isNotBlank(wayCode)) {
+            wrapper.eq(PayWay::getWayCode, wayCode);
+        }
+        if (StrUtil.isNotBlank(wayName)) {
+            wrapper.like(PayWay::getWayName, wayName);
+        }
         IPage<PayWay> payWayPage = payWayService.page(getIPage(), wrapper);
 
         if (!CollectionUtils.isEmpty(payWayPage.getRecords())) {
@@ -131,8 +135,12 @@ public class MchPayPassageConfigController extends CommonCtrl {
     @GetMapping("/{id}")
     public ApiRes detail(@PathVariable("id") Long id) {
         MchPayPassage payPassage = mchPayPassageService.getById(id);
-        if (payPassage == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
-        if (!payPassage.getMchNo().equals(getCurrentUser().getSysUser().getBelongInfoId())) return ApiRes.fail(ApiCodeEnum.SYS_PERMISSION_ERROR);
+        if (payPassage == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+        if (!payPassage.getMchNo().equals(getCurrentUser().getSysUser().getBelongInfoId())) {
+            return ApiRes.fail(ApiCodeEnum.SYS_PERMISSION_ERROR);
+        }
         payPassage.setRate(payPassage.getRate().multiply(new BigDecimal("100")));
         return ApiRes.ok(payPassage);
     }

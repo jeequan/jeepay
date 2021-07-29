@@ -23,7 +23,7 @@ import java.util.Date;
 
 /*
 * 时间工具类
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 16:58
@@ -33,13 +33,17 @@ public class DateKit {
 	/** 获取参数时间当天的开始时间  **/
 	public static Date getBegin(Date date){
 
-		if(date == null) return null;
+		if(date == null) {
+            return null;
+        }
 		return DateUtil.beginOfDay(date).toJdkDate();
 	}
 
 	/** 获取参数时间当天的结束时间 **/
 	public static Date getEnd(Date date){
-		if(date == null) return null;
+		if(date == null) {
+            return null;
+        }
 		return DateUtil.endOfDay(date).toJdkDate();
 	}
 
@@ -98,7 +102,9 @@ public class DateKit {
 		}else if("customDate".equals(dateType) || "customDateTime".equals(dateType)){ //自定义格式
 
 			String[] timeArray = dateVal.split(","); //以逗号分割
-			if(timeArray.length != 2) throw new BizException("查询自定义时间参数有误");
+			if(timeArray.length != 2) {
+                throw new BizException("查询自定义时间参数有误");
+            }
 
 			String timeStr1 = "N".equalsIgnoreCase(timeArray[0]) ? null : timeArray[0] ;  //开始时间，
 			String timeStr2 = "N".equalsIgnoreCase(timeArray[1]) ? null : timeArray[1];  //结束时间， N表示为空， 占位使用

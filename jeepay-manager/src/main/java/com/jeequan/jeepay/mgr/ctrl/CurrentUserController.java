@@ -99,9 +99,15 @@ public class CurrentUserController extends CommonCtrl{
 		Byte sex = getValByte("sex");
 		SysUser updateRecord = new SysUser();
 		updateRecord.setSysUserId(getCurrentUser().getSysUser().getSysUserId());
-		if (StringUtils.isNotEmpty(avatarUrl)) updateRecord.setAvatarUrl(avatarUrl);
-		if (StringUtils.isNotEmpty(realname)) updateRecord.setRealname(realname);
-		if (sex != null) updateRecord.setSex(sex);
+		if (StringUtils.isNotEmpty(avatarUrl)) {
+            updateRecord.setAvatarUrl(avatarUrl);
+        }
+		if (StringUtils.isNotEmpty(realname)) {
+            updateRecord.setRealname(realname);
+        }
+		if (sex != null) {
+            updateRecord.setSex(sex);
+        }
 		sysUserService.updateById(updateRecord);
 
 

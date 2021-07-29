@@ -49,26 +49,43 @@ public class AlipayKit {
         AlipayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayIsvsubMchParams.class);
 
         // 子商户信息
-        if(req instanceof AlipayTradePayRequest) ((AlipayTradePayRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
-        else if(req instanceof AlipayTradeAppPayRequest) ((AlipayTradeAppPayRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
-        else if(req instanceof AlipayTradeCreateRequest) ((AlipayTradeCreateRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
-        else if(req instanceof AlipayTradePagePayRequest) ((AlipayTradePagePayRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
-        else if(req instanceof AlipayTradePrecreateRequest) ((AlipayTradePrecreateRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
-        else if(req instanceof AlipayTradeWapPayRequest) ((AlipayTradeWapPayRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
-        else if(req instanceof AlipayTradeQueryRequest) ((AlipayTradeQueryRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
-        else if(req instanceof AlipayTradeRefundRequest) ((AlipayTradeRefundRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
-        else if(req instanceof AlipayTradeFastpayRefundQueryRequest) ((AlipayTradeFastpayRefundQueryRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
+        if(req instanceof AlipayTradePayRequest) {
+            ((AlipayTradePayRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
+        } else if(req instanceof AlipayTradeAppPayRequest) {
+            ((AlipayTradeAppPayRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
+        } else if(req instanceof AlipayTradeCreateRequest) {
+            ((AlipayTradeCreateRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
+        } else if(req instanceof AlipayTradePagePayRequest) {
+            ((AlipayTradePagePayRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
+        } else if(req instanceof AlipayTradePrecreateRequest) {
+            ((AlipayTradePrecreateRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
+        } else if(req instanceof AlipayTradeWapPayRequest) {
+            ((AlipayTradeWapPayRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
+        } else if(req instanceof AlipayTradeQueryRequest) {
+            ((AlipayTradeQueryRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
+        } else if(req instanceof AlipayTradeRefundRequest) {
+            ((AlipayTradeRefundRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
+        } else if(req instanceof AlipayTradeFastpayRefundQueryRequest) {
+            ((AlipayTradeFastpayRefundQueryRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
+        }
 
         // 服务商信息
         ExtendParams extendParams = new ExtendParams();
         extendParams.setSysServiceProviderId(isvParams.getPid());
 
-        if(model instanceof AlipayTradePayModel) ((AlipayTradePayModel)model).setExtendParams(extendParams);
-        else if(model instanceof AlipayTradeAppPayModel) ((AlipayTradeAppPayModel)model).setExtendParams(extendParams);
-        else if(model instanceof AlipayTradeCreateModel) ((AlipayTradeCreateModel)model).setExtendParams(extendParams);
-        else if(model instanceof AlipayTradePagePayModel) ((AlipayTradePagePayModel)model).setExtendParams(extendParams);
-        else if(model instanceof AlipayTradePrecreateModel) ((AlipayTradePrecreateModel)model).setExtendParams(extendParams);
-        else if(model instanceof AlipayTradeWapPayModel) ((AlipayTradeWapPayModel)model).setExtendParams(extendParams);
+        if(model instanceof AlipayTradePayModel) {
+            ((AlipayTradePayModel)model).setExtendParams(extendParams);
+        } else if(model instanceof AlipayTradeAppPayModel) {
+            ((AlipayTradeAppPayModel)model).setExtendParams(extendParams);
+        } else if(model instanceof AlipayTradeCreateModel) {
+            ((AlipayTradeCreateModel)model).setExtendParams(extendParams);
+        } else if(model instanceof AlipayTradePagePayModel) {
+            ((AlipayTradePagePayModel)model).setExtendParams(extendParams);
+        } else if(model instanceof AlipayTradePrecreateModel) {
+            ((AlipayTradePrecreateModel)model).setExtendParams(extendParams);
+        } else if(model instanceof AlipayTradeWapPayModel) {
+            ((AlipayTradeWapPayModel)model).setExtendParams(extendParams);
+        }
     }
 
 

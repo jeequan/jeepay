@@ -75,15 +75,17 @@ public class AmountUtil {
             l = Math.abs(l);
         }
         s = Long.toString(l);
-        if(s.length() == 1)
+        if(s.length() == 1) {
             return(negative ? ("-0.0" + s) : ("0.0" + s));
-        if(s.length() == 2)
+        }
+        if(s.length() == 2) {
             return(negative ? ("-0." + s) : ("0." + s));
-        else
+        } else {
             return(negative ? ("-" + s.substring(0, s.length() - 2) + "." + s
                     .substring(s.length() - 2)) : (s.substring(0,
                     s.length() - 2)
                     + "." + s.substring(s.length() - 2)));
+        }
     }
 
 
@@ -94,7 +96,9 @@ public class AmountUtil {
      * @return
      */
     public static String convertCent2Dollar(Long s){
-        if(s == null) return "";
+        if(s == null) {
+            return "";
+        }
         return new BigDecimal(s).divide(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP).toString();
     }
 
@@ -106,24 +110,14 @@ public class AmountUtil {
     public static String convertCent2DollarShort(String s) {
         String ss = convertCent2Dollar(s);
         ss = "" + Double.parseDouble(ss);
-        if(ss.endsWith(".0"))
+        if(ss.endsWith(".0")) {
             return ss.substring(0, ss.length() - 2);
-        if(ss.endsWith(".00"))
+        }
+        if(ss.endsWith(".00")) {
             return ss.substring(0, ss.length() - 3);
-        else
+        } else {
             return ss;
-    }
-
-    /**
-     * 判断金额为2位小数
-     * @param str
-     * @return
-     */
-    public static boolean isAmount(String str){
-        if(str == null) return false;
-        Pattern pattern = Pattern.compile("^(([1-9]{1}\\d*)|([0]{1}))(\\.(\\d){0,2})?$"); // 判断小数点后2位的数字的正则表达式
-        Matcher match = pattern.matcher(str);
-        return match.matches();
+        }
     }
 
 }

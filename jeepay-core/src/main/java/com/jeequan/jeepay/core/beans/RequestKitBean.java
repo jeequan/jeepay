@@ -88,7 +88,9 @@ public class RequestKitBean {
                     body += str;
                 }
 
-                if(StringUtils.isEmpty(body)) return returnObject;
+                if(StringUtils.isEmpty(body)) {
+                    return returnObject;
+                }
                 return JSONObject.parseObject(body);
 
             } catch (Exception e) {

@@ -58,9 +58,15 @@ public class IsvInfoController extends CommonCtrl {
     public ApiRes list() {
         IsvInfo isvInfo = getObject(IsvInfo.class);
         LambdaQueryWrapper<IsvInfo> wrapper = IsvInfo.gw();
-        if (StringUtils.isNotEmpty(isvInfo.getIsvNo())) wrapper.eq(IsvInfo::getIsvNo, isvInfo.getIsvNo());
-        if (StringUtils.isNotEmpty(isvInfo.getIsvName())) wrapper.eq(IsvInfo::getIsvName, isvInfo.getIsvName());
-        if (isvInfo.getState() != null) wrapper.eq(IsvInfo::getState, isvInfo.getState());
+        if (StringUtils.isNotEmpty(isvInfo.getIsvNo())) {
+            wrapper.eq(IsvInfo::getIsvNo, isvInfo.getIsvNo());
+        }
+        if (StringUtils.isNotEmpty(isvInfo.getIsvName())) {
+            wrapper.eq(IsvInfo::getIsvName, isvInfo.getIsvName());
+        }
+        if (isvInfo.getState() != null) {
+            wrapper.eq(IsvInfo::getState, isvInfo.getState());
+        }
         wrapper.orderByDesc(IsvInfo::getCreatedAt);
         IPage<IsvInfo> pages = isvInfoService.page(getIPage(true), wrapper);
 
@@ -82,7 +88,9 @@ public class IsvInfoController extends CommonCtrl {
         isvInfo.setCreatedUid(getCurrentUser().getSysUser().getSysUserId());
         isvInfo.setCreatedBy(getCurrentUser().getSysUser().getRealname());
         boolean result = isvInfoService.save(isvInfo);
-        if (!result)  return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
+        if (!result) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
+        }
         return ApiRes.ok();
     }
 
@@ -118,7 +126,9 @@ public class IsvInfoController extends CommonCtrl {
         // 推送mq到目前节点进行更新数据
         mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_ISV_INFO, isvNo, null, null));
 
-        if (!result)  return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
+        if (!result) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
+        }
         return ApiRes.ok();
     }
 
@@ -131,7 +141,9 @@ public class IsvInfoController extends CommonCtrl {
     @RequestMapping(value="/{isvNo}", method = RequestMethod.GET)
     public ApiRes detail(@PathVariable("isvNo") String isvNo) {
         IsvInfo isvInfo = isvInfoService.getById(isvNo);
-        if (isvInfo == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        if (isvInfo == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
         return ApiRes.ok(isvInfo);
     }
 }

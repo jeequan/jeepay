@@ -42,6 +42,7 @@ public class ResetAppConfigActiveMQReceiver implements IMQMsgReceiver {
     private ResetAppConfigMQ.IMQReceiver mqReceiver;
 
     /** 接收 【 MQSendTypeEnum.BROADCAST  】 广播类型的消息 **/
+    @Override
     @JmsListener(destination = ResetAppConfigMQ.MQ_NAME, containerFactory = ActiveMQConfig.TOPIC_LISTENER_CONTAINER)
     public void receiveMsg(String msg){
         mqReceiver.receive(ResetAppConfigMQ.parse(msg));

@@ -44,7 +44,9 @@ public class OssFileController extends AbstractCtrl {
     @PostMapping("/{bizType}")
     public ApiRes singleFileUpload(@RequestParam("file") MultipartFile file, @PathVariable("bizType") String bizType) {
 
-        if( file == null ) return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "选择文件不存在");
+        if( file == null ) {
+            return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "选择文件不存在");
+        }
         try {
 
             OssFileConfig ossFileConfig = OssFileConfig.getOssFileConfigByBizType(bizType);

@@ -20,7 +20,7 @@ import com.jeequan.jeepay.core.exception.BizException;
 
 /*
 * 文件工具类
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 16:50
@@ -34,7 +34,9 @@ public class FileKit {
 	 * @return
 	 */
 	public static String getFileSuffix(String fullFileName, boolean appendDot){
-		if(fullFileName == null || fullFileName.indexOf(".") < 0 || fullFileName.length() <= 1) return "";
+		if(fullFileName == null || fullFileName.indexOf(".") < 0 || fullFileName.length() <= 1) {
+            return "";
+        }
 		return (appendDot? "." : "") + fullFileName.substring(fullFileName.lastIndexOf(".") + 1);
 	}
 

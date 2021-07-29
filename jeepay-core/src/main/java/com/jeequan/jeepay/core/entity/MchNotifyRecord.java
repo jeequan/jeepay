@@ -42,13 +42,13 @@ import java.util.Date;
 public class MchNotifyRecord extends BaseModel implements Serializable {
 
     //订单类型:1-支付,2-退款
-    public static final Byte TYPE_PAY_ORDER = 1;
-    public static final Byte TYPE_REFUND_ORDER = 2;
+    public static final byte TYPE_PAY_ORDER = 1;
+    public static final byte TYPE_REFUND_ORDER = 2;
 
     //通知状态
-    public static final Byte STATE_ING = 1;
-    public static final Byte STATE_SUCCESS = 2;
-    public static final Byte STATE_FAIL = 3;
+    public static final byte STATE_ING = 1;
+    public static final byte STATE_SUCCESS = 2;
+    public static final byte STATE_FAIL = 3;
 
     //gw
     public static final LambdaQueryWrapper<MchNotifyRecord> gw(){

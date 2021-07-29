@@ -43,6 +43,7 @@ public class PayOrderReissueActiveMQReceiver implements IMQMsgReceiver {
     private PayOrderReissueMQ.IMQReceiver mqReceiver;
 
     /** 接收 【 queue 】 类型的消息 **/
+    @Override
     @Async(MqThreadExecutor.EXECUTOR_PAYORDER_MCH_NOTIFY)
     @JmsListener(destination = PayOrderReissueMQ.MQ_NAME)
     public void receiveMsg(String msg){

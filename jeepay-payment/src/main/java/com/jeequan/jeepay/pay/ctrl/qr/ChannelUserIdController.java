@@ -121,7 +121,9 @@ public class ChannelUserIdController extends AbstractPayOrderController {
         String ua = request.getHeader("User-Agent");
 
         // 无法识别扫码客户端
-        if (StringUtils.isBlank(ua)) return null;
+        if (StringUtils.isBlank(ua)) {
+            return null;
+        }
 
         if(ua.contains("Alipay")) {
             return CS.IF_CODE.ALIPAY;  //支付宝服务窗支付

@@ -57,10 +57,18 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
 //        if(roleIdList.isEmpty()) throw new BizException("请选择角色信息！");
 
         // 判断数据来源
-        if( StringUtils.isEmpty(sysUser.getLoginUsername()) ) throw new BizException("登录用户名不能为空！");
-        if( StringUtils.isEmpty(sysUser.getRealname()) )throw new BizException("姓名不能为空！");
-        if( StringUtils.isEmpty(sysUser.getTelphone()) ) throw new BizException("手机号不能为空！");
-        if(sysUser.getSex() == null ) throw new BizException("性别不能为空！");
+        if( StringUtils.isEmpty(sysUser.getLoginUsername()) ) {
+            throw new BizException("登录用户名不能为空！");
+        }
+        if( StringUtils.isEmpty(sysUser.getRealname()) ) {
+            throw new BizException("姓名不能为空！");
+        }
+        if( StringUtils.isEmpty(sysUser.getTelphone()) ) {
+            throw new BizException("手机号不能为空！");
+        }
+        if(sysUser.getSex() == null ) {
+            throw new BizException("性别不能为空！");
+        }
 
         //登录用户名不可重复
         if( count(SysUser.gw().eq(SysUser::getSysType, sysType).eq(SysUser::getLoginUsername, sysUser.getLoginUsername())) > 0 ){
@@ -105,7 +113,9 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
         Long sysUserId = sysUser.getSysUserId();
         SysUser dbRecord = getById(sysUserId);
 
-        if (dbRecord == null) throw new BizException("该用户不存在");
+        if (dbRecord == null) {
+            throw new BizException("该用户不存在");
+        }
 
         //修改了手机号， 需要修改auth表信息
         if(!dbRecord.getTelphone().equals(sysUser.getTelphone())){

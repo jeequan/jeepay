@@ -54,7 +54,9 @@ public class MchPayPassageService extends ServiceImpl<MchPayPassageMapper, MchPa
         params.put("infoType", infoType);
         params.put("mchType", mchType);
         List<JSONObject> list = baseMapper.selectAvailablePayInterfaceList(params);
-        if (CollectionUtils.isEmpty(list)) return null;
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
 
         // 添加通道状态
         for (JSONObject object : list) {

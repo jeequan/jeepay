@@ -53,6 +53,7 @@ public class SysConfigService extends ServiceImpl<SysConfigMapper, SysConfig> im
     }
 
     /** 获取实际的数据 **/
+    @Override
     public DBApplicationConfig getDBApplicationConfig() {
 
         if(APPLICATION_CONFIG.getRight() == null ){
@@ -80,7 +81,9 @@ public class SysConfigService extends ServiceImpl<SysConfigMapper, SysConfig> im
             sysConfig.setConfigKey(k);
             sysConfig.setConfigVal(updateMap.get(k));
             boolean update = sysConfigService.saveOrUpdate(sysConfig);
-            if (update) count ++;
+            if (update) {
+                count ++;
+            }
         }
         return count;
     }

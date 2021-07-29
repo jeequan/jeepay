@@ -61,17 +61,35 @@ public class MchNotifyController extends CommonCtrl {
         MchNotifyRecord mchNotify = getObject(MchNotifyRecord.class);
         JSONObject paramJSON = getReqParamJSON();
         LambdaQueryWrapper<MchNotifyRecord> wrapper = MchNotifyRecord.gw();
-        if (StringUtils.isNotEmpty(mchNotify.getOrderId())) wrapper.eq(MchNotifyRecord::getOrderId, mchNotify.getOrderId());
-        if (StringUtils.isNotEmpty(mchNotify.getMchNo())) wrapper.eq(MchNotifyRecord::getMchNo, mchNotify.getMchNo());
-        if (StringUtils.isNotEmpty(mchNotify.getIsvNo())) wrapper.eq(MchNotifyRecord::getIsvNo, mchNotify.getIsvNo());
-        if (StringUtils.isNotEmpty(mchNotify.getMchOrderNo())) wrapper.eq(MchNotifyRecord::getMchOrderNo, mchNotify.getMchOrderNo());
-        if (mchNotify.getOrderType() != null) wrapper.eq(MchNotifyRecord::getOrderType, mchNotify.getOrderType());
-        if (mchNotify.getState() != null) wrapper.eq(MchNotifyRecord::getState, mchNotify.getState());
-        if (StringUtils.isNotEmpty(mchNotify.getAppId())) wrapper.eq(MchNotifyRecord::getAppId, mchNotify.getAppId());
+        if (StringUtils.isNotEmpty(mchNotify.getOrderId())) {
+            wrapper.eq(MchNotifyRecord::getOrderId, mchNotify.getOrderId());
+        }
+        if (StringUtils.isNotEmpty(mchNotify.getMchNo())) {
+            wrapper.eq(MchNotifyRecord::getMchNo, mchNotify.getMchNo());
+        }
+        if (StringUtils.isNotEmpty(mchNotify.getIsvNo())) {
+            wrapper.eq(MchNotifyRecord::getIsvNo, mchNotify.getIsvNo());
+        }
+        if (StringUtils.isNotEmpty(mchNotify.getMchOrderNo())) {
+            wrapper.eq(MchNotifyRecord::getMchOrderNo, mchNotify.getMchOrderNo());
+        }
+        if (mchNotify.getOrderType() != null) {
+            wrapper.eq(MchNotifyRecord::getOrderType, mchNotify.getOrderType());
+        }
+        if (mchNotify.getState() != null) {
+            wrapper.eq(MchNotifyRecord::getState, mchNotify.getState());
+        }
+        if (StringUtils.isNotEmpty(mchNotify.getAppId())) {
+            wrapper.eq(MchNotifyRecord::getAppId, mchNotify.getAppId());
+        }
 
         if (paramJSON != null) {
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) wrapper.ge(MchNotifyRecord::getCreatedAt, paramJSON.getString("createdStart"));
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) wrapper.le(MchNotifyRecord::getCreatedAt, paramJSON.getString("createdEnd"));
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) {
+                wrapper.ge(MchNotifyRecord::getCreatedAt, paramJSON.getString("createdStart"));
+            }
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) {
+                wrapper.le(MchNotifyRecord::getCreatedAt, paramJSON.getString("createdEnd"));
+            }
         }
         wrapper.orderByDesc(MchNotifyRecord::getCreatedAt);
         IPage<MchNotifyRecord> pages = mchNotifyService.page(getIPage(), wrapper);
@@ -88,7 +106,9 @@ public class MchNotifyController extends CommonCtrl {
     @RequestMapping(value="/{notifyId}", method = RequestMethod.GET)
     public ApiRes detail(@PathVariable("notifyId") String notifyId) {
         MchNotifyRecord mchNotify = mchNotifyService.getById(notifyId);
-        if (mchNotify == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        if (mchNotify == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
         return ApiRes.ok(mchNotify);
     }
 
@@ -101,8 +121,12 @@ public class MchNotifyController extends CommonCtrl {
     @RequestMapping(value="resend/{notifyId}", method = RequestMethod.POST)
     public ApiRes resend(@PathVariable("notifyId") Long notifyId) {
         MchNotifyRecord mchNotify = mchNotifyService.getById(notifyId);
-        if (mchNotify == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
-        if (mchNotify.getState() != MchNotifyRecord.STATE_FAIL) throw new BizException("请选择失败的通知记录");
+        if (mchNotify == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+        if (mchNotify.getState() != MchNotifyRecord.STATE_FAIL) {
+            throw new BizException("请选择失败的通知记录");
+        }
 
         //更新通知中
         mchNotifyService.getBaseMapper().updateIngAndAddNotifyCountLimit(notifyId);

@@ -51,7 +51,9 @@ public class RedisUtil {
 
     /** 获取缓存数据, String类型 */
     public static String getString(String key) {
-        if(key == null) return null;
+        if(key == null) {
+            return null;
+        }
         return  (String)getStringRedisTemplate().opsForValue().get(key);
     }
 

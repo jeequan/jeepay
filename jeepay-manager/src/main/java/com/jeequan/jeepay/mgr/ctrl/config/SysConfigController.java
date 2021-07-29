@@ -83,7 +83,9 @@ public class SysConfigController extends CommonCtrl {
 		JSONObject paramJSON = getReqParamJSON();
 		Map<String, String> updateMap = JSONObject.toJavaObject(paramJSON, Map.class);
 		int update = sysConfigService.updateByConfigKey(updateMap);
-		if(update <= 0) return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "更新失败");
+		if(update <= 0) {
+            return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "更新失败");
+        }
 
 		mqSender.send(ResetAppConfigMQ.build(groupKey));
 		return ApiRes.ok();

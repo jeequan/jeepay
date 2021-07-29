@@ -70,11 +70,21 @@ public class MchInfoController extends CommonCtrl {
         MchInfo mchInfo = getObject(MchInfo.class);
 
         LambdaQueryWrapper<MchInfo> wrapper = MchInfo.gw();
-        if (StringUtils.isNotEmpty(mchInfo.getMchNo())) wrapper.eq(MchInfo::getMchNo, mchInfo.getMchNo());
-        if (StringUtils.isNotEmpty(mchInfo.getIsvNo())) wrapper.eq(MchInfo::getIsvNo, mchInfo.getIsvNo());
-        if (StringUtils.isNotEmpty(mchInfo.getMchName())) wrapper.eq(MchInfo::getMchName, mchInfo.getMchName());
-        if (mchInfo.getType() != null) wrapper.eq(MchInfo::getType, mchInfo.getType());
-        if (mchInfo.getState() != null) wrapper.eq(MchInfo::getState, mchInfo.getState());
+        if (StringUtils.isNotEmpty(mchInfo.getMchNo())) {
+            wrapper.eq(MchInfo::getMchNo, mchInfo.getMchNo());
+        }
+        if (StringUtils.isNotEmpty(mchInfo.getIsvNo())) {
+            wrapper.eq(MchInfo::getIsvNo, mchInfo.getIsvNo());
+        }
+        if (StringUtils.isNotEmpty(mchInfo.getMchName())) {
+            wrapper.eq(MchInfo::getMchName, mchInfo.getMchName());
+        }
+        if (mchInfo.getType() != null) {
+            wrapper.eq(MchInfo::getType, mchInfo.getType());
+        }
+        if (mchInfo.getState() != null) {
+            wrapper.eq(MchInfo::getState, mchInfo.getState());
+        }
         wrapper.orderByDesc(MchInfo::getCreatedAt);
 
         IPage<MchInfo> pages = mchInfoService.page(getIPage(), wrapper);
@@ -187,10 +197,14 @@ public class MchInfoController extends CommonCtrl {
     @RequestMapping(value="/{mchNo}", method = RequestMethod.GET)
     public ApiRes detail(@PathVariable("mchNo") String mchNo) {
         MchInfo mchInfo = mchInfoService.getById(mchNo);
-        if (mchInfo == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        if (mchInfo == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
 
         SysUser sysUser = sysUserService.getById(mchInfo.getInitUserId());
-        if (sysUser != null) mchInfo.addExt("loginUserName", sysUser.getLoginUsername());
+        if (sysUser != null) {
+            mchInfo.addExt("loginUserName", sysUser.getLoginUsername());
+        }
         return ApiRes.ok(mchInfo);
     }
 }

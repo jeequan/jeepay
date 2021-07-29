@@ -50,7 +50,9 @@ public class StaticController extends CommonCtrl {
 
             //查找图片文件
             File imgFile = new File(ossYmlConfig.getOss().getFilePublicPath() + File.separator + request.getRequestURI().substring(24));
-            if(!imgFile.isFile() || !imgFile.exists()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            if(!imgFile.isFile() || !imgFile.exists()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
 
             //输出文件流（图片格式）
             HttpHeaders httpHeaders = new HttpHeaders();

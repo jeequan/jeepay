@@ -73,18 +73,40 @@ public class PayOrderController extends CommonCtrl {
         PayOrder payOrder = getObject(PayOrder.class);
         JSONObject paramJSON = getReqParamJSON();
         LambdaQueryWrapper<PayOrder> wrapper = PayOrder.gw();
-        if (StringUtils.isNotEmpty(payOrder.getPayOrderId())) wrapper.eq(PayOrder::getPayOrderId, payOrder.getPayOrderId());
-        if (StringUtils.isNotEmpty(payOrder.getMchNo())) wrapper.eq(PayOrder::getMchNo, payOrder.getMchNo());
-        if (StringUtils.isNotEmpty(payOrder.getIsvNo())) wrapper.eq(PayOrder::getIsvNo, payOrder.getIsvNo());
-        if (payOrder.getMchType() != null) wrapper.eq(PayOrder::getMchType, payOrder.getMchType());
-        if (StringUtils.isNotEmpty(payOrder.getWayCode())) wrapper.eq(PayOrder::getWayCode, payOrder.getWayCode());
-        if (StringUtils.isNotEmpty(payOrder.getMchOrderNo())) wrapper.eq(PayOrder::getMchOrderNo, payOrder.getMchOrderNo());
-        if (payOrder.getState() != null) wrapper.eq(PayOrder::getState, payOrder.getState());
-        if (payOrder.getNotifyState() != null) wrapper.eq(PayOrder::getNotifyState, payOrder.getNotifyState());
-        if (StringUtils.isNotEmpty(payOrder.getAppId())) wrapper.eq(PayOrder::getAppId, payOrder.getAppId());
+        if (StringUtils.isNotEmpty(payOrder.getPayOrderId())) {
+            wrapper.eq(PayOrder::getPayOrderId, payOrder.getPayOrderId());
+        }
+        if (StringUtils.isNotEmpty(payOrder.getMchNo())) {
+            wrapper.eq(PayOrder::getMchNo, payOrder.getMchNo());
+        }
+        if (StringUtils.isNotEmpty(payOrder.getIsvNo())) {
+            wrapper.eq(PayOrder::getIsvNo, payOrder.getIsvNo());
+        }
+        if (payOrder.getMchType() != null) {
+            wrapper.eq(PayOrder::getMchType, payOrder.getMchType());
+        }
+        if (StringUtils.isNotEmpty(payOrder.getWayCode())) {
+            wrapper.eq(PayOrder::getWayCode, payOrder.getWayCode());
+        }
+        if (StringUtils.isNotEmpty(payOrder.getMchOrderNo())) {
+            wrapper.eq(PayOrder::getMchOrderNo, payOrder.getMchOrderNo());
+        }
+        if (payOrder.getState() != null) {
+            wrapper.eq(PayOrder::getState, payOrder.getState());
+        }
+        if (payOrder.getNotifyState() != null) {
+            wrapper.eq(PayOrder::getNotifyState, payOrder.getNotifyState());
+        }
+        if (StringUtils.isNotEmpty(payOrder.getAppId())) {
+            wrapper.eq(PayOrder::getAppId, payOrder.getAppId());
+        }
         if (paramJSON != null) {
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) wrapper.ge(PayOrder::getCreatedAt, paramJSON.getString("createdStart"));
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) wrapper.le(PayOrder::getCreatedAt, paramJSON.getString("createdEnd"));
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) {
+                wrapper.ge(PayOrder::getCreatedAt, paramJSON.getString("createdStart"));
+            }
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) {
+                wrapper.le(PayOrder::getCreatedAt, paramJSON.getString("createdEnd"));
+            }
         }
         wrapper.orderByDesc(PayOrder::getCreatedAt);
         IPage<PayOrder> pages = payOrderService.page(getIPage(), wrapper);
@@ -114,7 +136,9 @@ public class PayOrderController extends CommonCtrl {
     @RequestMapping(value="/{payOrderId}", method = RequestMethod.GET)
     public ApiRes detail(@PathVariable("payOrderId") String payOrderId) {
         PayOrder payOrder = payOrderService.getById(payOrderId);
-        if (payOrder == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        if (payOrder == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
         return ApiRes.ok(payOrder);
     }
 
@@ -134,7 +158,9 @@ public class PayOrderController extends CommonCtrl {
         String refundReason = getValStringRequired("refundReason");
 
         PayOrder payOrder = payOrderService.getById(payOrderId);
-        if (payOrder == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        if (payOrder == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
 
         if(payOrder.getState() != PayOrder.STATE_SUCCESS){
             throw new BizException("订单状态不正确");

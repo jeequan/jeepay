@@ -56,18 +56,40 @@ public class RefundOrderController extends CommonCtrl {
         RefundOrder refundOrder = getObject(RefundOrder.class);
         JSONObject paramJSON = getReqParamJSON();
         LambdaQueryWrapper<RefundOrder> wrapper = RefundOrder.gw();
-        if (StringUtils.isNotEmpty(refundOrder.getRefundOrderId())) wrapper.eq(RefundOrder::getRefundOrderId, refundOrder.getRefundOrderId());
-        if (StringUtils.isNotEmpty(refundOrder.getPayOrderId())) wrapper.eq(RefundOrder::getPayOrderId, refundOrder.getPayOrderId());
-        if (StringUtils.isNotEmpty(refundOrder.getChannelPayOrderNo())) wrapper.eq(RefundOrder::getChannelPayOrderNo, refundOrder.getChannelPayOrderNo());
-        if (StringUtils.isNotEmpty(refundOrder.getMchNo())) wrapper.eq(RefundOrder::getMchNo, refundOrder.getMchNo());
-        if (StringUtils.isNotEmpty(refundOrder.getIsvNo())) wrapper.eq(RefundOrder::getIsvNo, refundOrder.getIsvNo());
-        if (refundOrder.getMchType() != null) wrapper.eq(RefundOrder::getMchType, refundOrder.getMchType());
-        if (StringUtils.isNotEmpty(refundOrder.getMchRefundNo())) wrapper.eq(RefundOrder::getMchRefundNo, refundOrder.getMchRefundNo());
-        if (refundOrder.getState() != null) wrapper.eq(RefundOrder::getState, refundOrder.getState());
-        if (StringUtils.isNotEmpty(refundOrder.getAppId())) wrapper.eq(RefundOrder::getAppId, refundOrder.getAppId());
+        if (StringUtils.isNotEmpty(refundOrder.getRefundOrderId())) {
+            wrapper.eq(RefundOrder::getRefundOrderId, refundOrder.getRefundOrderId());
+        }
+        if (StringUtils.isNotEmpty(refundOrder.getPayOrderId())) {
+            wrapper.eq(RefundOrder::getPayOrderId, refundOrder.getPayOrderId());
+        }
+        if (StringUtils.isNotEmpty(refundOrder.getChannelPayOrderNo())) {
+            wrapper.eq(RefundOrder::getChannelPayOrderNo, refundOrder.getChannelPayOrderNo());
+        }
+        if (StringUtils.isNotEmpty(refundOrder.getMchNo())) {
+            wrapper.eq(RefundOrder::getMchNo, refundOrder.getMchNo());
+        }
+        if (StringUtils.isNotEmpty(refundOrder.getIsvNo())) {
+            wrapper.eq(RefundOrder::getIsvNo, refundOrder.getIsvNo());
+        }
+        if (refundOrder.getMchType() != null) {
+            wrapper.eq(RefundOrder::getMchType, refundOrder.getMchType());
+        }
+        if (StringUtils.isNotEmpty(refundOrder.getMchRefundNo())) {
+            wrapper.eq(RefundOrder::getMchRefundNo, refundOrder.getMchRefundNo());
+        }
+        if (refundOrder.getState() != null) {
+            wrapper.eq(RefundOrder::getState, refundOrder.getState());
+        }
+        if (StringUtils.isNotEmpty(refundOrder.getAppId())) {
+            wrapper.eq(RefundOrder::getAppId, refundOrder.getAppId());
+        }
         if (paramJSON != null) {
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) wrapper.ge(RefundOrder::getCreatedAt, paramJSON.getString("createdStart"));
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) wrapper.le(RefundOrder::getCreatedAt, paramJSON.getString("createdEnd"));
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) {
+                wrapper.ge(RefundOrder::getCreatedAt, paramJSON.getString("createdStart"));
+            }
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) {
+                wrapper.le(RefundOrder::getCreatedAt, paramJSON.getString("createdEnd"));
+            }
         }
         wrapper.orderByDesc(RefundOrder::getCreatedAt);
         IPage<RefundOrder> pages = refundOrderService.page(getIPage(), wrapper);
@@ -84,7 +106,9 @@ public class RefundOrderController extends CommonCtrl {
     @RequestMapping(value="/{refundOrderId}", method = RequestMethod.GET)
     public ApiRes detail(@PathVariable("refundOrderId") String refundOrderId) {
         RefundOrder refundOrder = refundOrderService.getById(refundOrderId);
-        if (refundOrder == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        if (refundOrder == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
         return ApiRes.ok(refundOrder);
     }
 }

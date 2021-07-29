@@ -92,7 +92,9 @@ public class SysRoleController extends CommonCtrl {
 	@RequestMapping(value="/{recordId}", method = RequestMethod.GET)
 	public ApiRes detail(@PathVariable("recordId") String recordId) {
 		SysRole sysRole = sysRoleService.getOne(SysRole.gw().eq(SysRole::getRoleId, recordId).eq(SysRole::getBelongInfoId, getCurrentMchNo()));
-		if (sysRole == null) throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+		if (sysRole == null) {
+            throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
 		return ApiRes.ok(sysRole);
 	}
 
@@ -158,7 +160,9 @@ public class SysRoleController extends CommonCtrl {
 	@RequestMapping(value="/{recordId}", method = RequestMethod.DELETE)
 	public ApiRes del(@PathVariable("recordId") String recordId) {
 		SysRole sysRole = sysRoleService.getOne(SysRole.gw().eq(SysRole::getRoleId, recordId).eq(SysRole::getBelongInfoId, getCurrentMchNo()));
-		if (sysRole == null) throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+		if (sysRole == null) {
+            throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
 
 		if(sysUserRoleRelaService.count(SysUserRoleRela.gw().eq(SysUserRoleRela::getRoleId, recordId)) > 0){
 			throw new BizException("当前角色已分配到用户， 不可删除！");

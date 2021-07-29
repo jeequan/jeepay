@@ -43,6 +43,7 @@ public class CleanMchLoginAuthCacheRocketMQReceiver implements IMQMsgReceiver, R
     private CleanMchLoginAuthCacheMQ.IMQReceiver mqReceiver;
 
     /** 接收 【 queue 】 类型的消息 **/
+    @Override
     public void receiveMsg(String msg){
         mqReceiver.receive(CleanMchLoginAuthCacheMQ.parse(msg));
     }

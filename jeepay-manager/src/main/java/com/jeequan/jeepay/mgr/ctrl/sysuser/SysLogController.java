@@ -62,12 +62,22 @@ public class SysLogController extends CommonCtrl {
         // 查询列表
         LambdaQueryWrapper<SysLog> condition = SysLog.gw();
         condition.orderByDesc(SysLog::getCreatedAt);
-        if (sysLog.getUserId() != null) condition.eq(SysLog::getUserId, sysLog.getUserId());
-        if (sysLog.getUserName() != null) condition.eq(SysLog::getUserName, sysLog.getUserName());
-        if (StringUtils.isNotEmpty(sysLog.getSysType())) condition.eq(SysLog::getSysType, sysLog.getSysType());
+        if (sysLog.getUserId() != null) {
+            condition.eq(SysLog::getUserId, sysLog.getUserId());
+        }
+        if (sysLog.getUserName() != null) {
+            condition.eq(SysLog::getUserName, sysLog.getUserName());
+        }
+        if (StringUtils.isNotEmpty(sysLog.getSysType())) {
+            condition.eq(SysLog::getSysType, sysLog.getSysType());
+        }
         if (paramJSON != null) {
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) condition.ge(SysLog::getCreatedAt, paramJSON.getString("createdStart"));
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) condition.le(SysLog::getCreatedAt, paramJSON.getString("createdEnd"));
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) {
+                condition.ge(SysLog::getCreatedAt, paramJSON.getString("createdStart"));
+            }
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) {
+                condition.le(SysLog::getCreatedAt, paramJSON.getString("createdEnd"));
+            }
         }
         IPage<SysLog> pages = sysLogService.page(getIPage(), condition);
         return ApiRes.page(pages);
@@ -82,7 +92,9 @@ public class SysLogController extends CommonCtrl {
     @RequestMapping(value="/{sysLogId}", method = RequestMethod.GET)
     public ApiRes detail(@PathVariable("sysLogId") String sysLogId) {
         SysLog sysLog = sysLogService.getById(sysLogId);
-        if (sysLog == null) return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        if (sysLog == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
         return ApiRes.ok(sysLog);
     }
 
@@ -101,7 +113,9 @@ public class SysLogController extends CommonCtrl {
             idsList.add(Long.valueOf(id));
         }
         boolean result = sysLogService.removeByIds(idsList);
-        if (!result)  return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_DELETE);
+        if (!result) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_DELETE);
+        }
         return ApiRes.ok();
     }
 }

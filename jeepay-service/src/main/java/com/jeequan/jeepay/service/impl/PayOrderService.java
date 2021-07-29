@@ -127,21 +127,41 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
 
     public Map payCount(String mchNo, Byte state, Byte refundState, String dayStart, String dayEnd) {
         Map param = new HashMap<>();
-        if (state != null) param.put("state", state);
-        if (refundState != null) param.put("refundState", refundState);
-        if (StrUtil.isNotBlank(mchNo)) param.put("mchNo", mchNo);
-        if (StrUtil.isNotBlank(dayStart)) param.put("createTimeStart", dayStart);
-        if (StrUtil.isNotBlank(dayEnd)) param.put("createTimeEnd", dayEnd);
+        if (state != null) {
+            param.put("state", state);
+        }
+        if (refundState != null) {
+            param.put("refundState", refundState);
+        }
+        if (StrUtil.isNotBlank(mchNo)) {
+            param.put("mchNo", mchNo);
+        }
+        if (StrUtil.isNotBlank(dayStart)) {
+            param.put("createTimeStart", dayStart);
+        }
+        if (StrUtil.isNotBlank(dayEnd)) {
+            param.put("createTimeEnd", dayEnd);
+        }
         return payOrderMapper.payCount(param);
     }
 
     public List<Map> payTypeCount(String mchNo, Byte state, Byte refundState, String dayStart, String dayEnd) {
         Map param = new HashMap<>();
-        if (state != null) param.put("state", state);
-        if (refundState != null) param.put("refundState", refundState);
-        if (StrUtil.isNotBlank(mchNo)) param.put("mchNo", mchNo);
-        if (StrUtil.isNotBlank(dayStart)) param.put("createTimeStart", dayStart);
-        if (StrUtil.isNotBlank(dayEnd)) param.put("createTimeEnd", dayEnd);
+        if (state != null) {
+            param.put("state", state);
+        }
+        if (refundState != null) {
+            param.put("refundState", refundState);
+        }
+        if (StrUtil.isNotBlank(mchNo)) {
+            param.put("mchNo", mchNo);
+        }
+        if (StrUtil.isNotBlank(dayStart)) {
+            param.put("createTimeStart", dayStart);
+        }
+        if (StrUtil.isNotBlank(dayEnd)) {
+            param.put("createTimeEnd", dayEnd);
+        }
         return payOrderMapper.payTypeCount(param);
     }
 
@@ -183,12 +203,16 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
             String dayEnd = DateUtil.endOfDay(date).toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN);
             // 每日交易金额查询
             dayAmount = payCount(mchNo, PayOrder.STATE_SUCCESS, null, dayStart, dayEnd);
-            if (dayAmount != null) payAmount = new BigDecimal(dayAmount.get("payAmount").toString());
+            if (dayAmount != null) {
+                payAmount = new BigDecimal(dayAmount.get("payAmount").toString());
+            }
             if (i == 0) {
                 todayAmount = dayAmount.get("payAmount").toString();
                 todayPayCount = dayAmount.get("payCount").toString();
             }
-            if (i == 1) yesterdayAmount = dayAmount.get("payAmount").toString();
+            if (i == 1) {
+                yesterdayAmount = dayAmount.get("payAmount").toString();
+            }
             payWeek = payWeek.add(payAmount);
             array.add(payAmount);
         }
@@ -234,7 +258,9 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
             createdEnd = DateUtil.formatDate(today) + " 23:59:59";
         }
 
-        if (StrUtil.isNotBlank(mchNo)) param.put("mchNo", mchNo);
+        if (StrUtil.isNotBlank(mchNo)) {
+            param.put("mchNo", mchNo);
+        }
         param.put("createTimeStart", createdStart);
         param.put("createTimeEnd", createdEnd);
         // 查询收款的记录

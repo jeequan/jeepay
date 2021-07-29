@@ -110,7 +110,9 @@ public class JeeUserDetails implements UserDetails {
 
     public static JeeUserDetails getCurrentUserDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) return null;
+        if (authentication == null) {
+            return null;
+        }
 
         try {
             return (JeeUserDetails) authentication.getPrincipal();

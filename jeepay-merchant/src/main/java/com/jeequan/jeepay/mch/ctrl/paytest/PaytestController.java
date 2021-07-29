@@ -108,8 +108,12 @@ public class PaytestController extends CommonCtrl {
 
         //设置扩展参数
         JSONObject extParams = new JSONObject();
-        if(StringUtils.isNotEmpty(payDataType)) extParams.put("payDataType", payDataType.trim());
-        if(StringUtils.isNotEmpty(authCode)) extParams.put("authCode", authCode.trim());
+        if(StringUtils.isNotEmpty(payDataType)) {
+            extParams.put("payDataType", payDataType.trim());
+        }
+        if(StringUtils.isNotEmpty(authCode)) {
+            extParams.put("authCode", authCode.trim());
+        }
         model.setChannelExtra(extParams.toString());
 
         JeepayClient jeepayClient = new JeepayClient(sysConfigService.getDBApplicationConfig().getPaySiteUrl(), mchApp.getAppSecret());

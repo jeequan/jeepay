@@ -45,6 +45,7 @@ public class PayOrderMchNotifyRocketMQReceiver implements IMQMsgReceiver, Rocket
     private PayOrderMchNotifyMQ.IMQReceiver mqReceiver;
 
     /** 接收 【 queue 】 类型的消息 **/
+    @Override
     public void receiveMsg(String msg){
         mqReceiver.receive(PayOrderMchNotifyMQ.parse(msg));
     }

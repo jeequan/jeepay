@@ -53,7 +53,9 @@ public class LocalFileService implements IOssService{
 
             //如果文件夹不存在则创建文件夹
             File dir = saveFile.getParentFile();
-            if(!dir.exists()) dir.mkdirs();
+            if(!dir.exists()) {
+                dir.mkdirs();
+            }
             multipartFile.transferTo(saveFile);
 
         } catch (Exception e) {

@@ -63,7 +63,9 @@ public class PayOrderReissueMQReceiver implements PayOrderReissueMQ.IMQReceiver 
                 return;
             }
 
-            if (payOrder == null) return;
+            if (payOrder == null) {
+                return;
+            }
             ChannelRetMsg channelRetMsg = channelOrderReissueService.processPayOrder(payOrder);
 
             //返回null 可能为接口报错等， 需要再次轮询

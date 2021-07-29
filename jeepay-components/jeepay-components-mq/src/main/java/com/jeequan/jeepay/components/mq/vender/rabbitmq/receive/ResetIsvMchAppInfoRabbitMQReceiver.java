@@ -55,6 +55,7 @@ public class ResetIsvMchAppInfoRabbitMQReceiver implements IMQMsgReceiver {
      *   参考： https://bbs.csdn.net/topics/392509262?list=70088931
      *
      * **/
+    @Override
     @RabbitListener(
             bindings = {@QueueBinding(value = @Queue(), // 注意这里不要定义队列名称,系统会随机产生
             exchange = @Exchange(name = RabbitMQConfig.FANOUT_EXCHANGE_NAME_PREFIX + ResetIsvMchAppInfoConfigMQ.MQ_NAME,

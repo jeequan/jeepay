@@ -42,7 +42,9 @@ public class ApiResBodyAdviceKit {
     public static Object beforeBodyWrite(Object body) {
 
         //空的情况 不处理
-        if(body == null ) return null;
+        if(body == null ) {
+            return null;
+        }
 
         if(body instanceof OriginalRes){
             return ((OriginalRes) body).getData();

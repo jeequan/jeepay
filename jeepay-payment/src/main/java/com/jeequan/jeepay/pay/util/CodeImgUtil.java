@@ -44,18 +44,18 @@ import java.util.Map;
 
 /*
 * 二维码生成器
-* 
+*
 * @author terrfly
 * @site https://www.jeepay.vip
 * @date 2021/6/8 17:54
 */
 public class CodeImgUtil {
-	
+
 	private static final Logger _log = LoggerFactory.getLogger(CodeImgUtil.class);
-	
+
 	// 二维码尺寸List
 	private static List<Integer> sizeList = new ArrayList<Integer>();
-	
+
 	static {
 		sizeList.add(258);
 		sizeList.add(344);
@@ -63,13 +63,13 @@ public class CodeImgUtil {
 		sizeList.add(860);
 		sizeList.add(1280);
 	}
-	
+
 	public static List<Integer> getEwmSizeList() {
 		return sizeList;
 	}
-	
-	
-	//TODO 
+
+
+	//TODO
 	// 图片宽度的一般
 	private static final int IMAGE_WIDTH = 25;
 	private static final int IMAGE_HEIGHT = 25;
@@ -80,7 +80,7 @@ public class CodeImgUtil {
 	private static MultiFormatWriter mutiWriter = new MultiFormatWriter();
 
 	/**
-	 * 
+	 *
 	 * @param content
 	 *            二维码显示的文本
 	 * @param width
@@ -114,7 +114,7 @@ public class CodeImgUtil {
 
 	/**
 	 * 得到BufferedImage
-	 * 
+	 *
 	 * @param content
 	 *            二维码显示的文本
 	 * @param width
@@ -134,7 +134,7 @@ public class CodeImgUtil {
 		// 读取源图像
 		BufferedImage scaleImage = scale(srcImagePath, IMAGE_WIDTH,
 				IMAGE_HEIGHT, false);
-		
+
 		int[][] srcPixels = new int[IMAGE_WIDTH][IMAGE_HEIGHT];
 		for (int i = 0; i < scaleImage.getWidth(); i++) {
 			for (int j = 0; j < scaleImage.getHeight(); j++) {
@@ -200,7 +200,7 @@ public class CodeImgUtil {
 
 	/**
 	 * 把传入的原始图像按高度和宽度进行缩放，生成符合要求的图标
-	 * 
+	 *
 	 * @param srcImageFile
 	 *            源文件地址
 	 * @param height
@@ -214,9 +214,9 @@ public class CodeImgUtil {
 	private static BufferedImage scale(String srcImageFile, int height,
 			int width, boolean hasFiller) throws IOException {
 		double ratio = 0.0; // 缩放比例
-		
+
 		URL url = new URL(srcImageFile);
-		
+
 		BufferedImage srcImage = ImageIO.read(url);
 		Image destImage = srcImage.getScaledInstance(width, height,
 				BufferedImage.SCALE_SMOOTH);
@@ -239,38 +239,39 @@ public class CodeImgUtil {
 			Graphics2D graphic = image.createGraphics();
 			graphic.setColor(Color.white);
 			graphic.fillRect(0, 0, width, height);
-			if (width == destImage.getWidth(null))
-				graphic.drawImage(destImage, 0, (height - destImage
-						.getHeight(null)) / 2, destImage.getWidth(null),
-						destImage.getHeight(null), Color.white, null);
-			else
-				graphic.drawImage(destImage,
-						(width - destImage.getWidth(null)) / 2, 0, destImage
-								.getWidth(null), destImage.getHeight(null),
-						Color.white, null);
+			if (width == destImage.getWidth(null)) {
+                graphic.drawImage(destImage, 0, (height - destImage
+                        .getHeight(null)) / 2, destImage.getWidth(null),
+                        destImage.getHeight(null), Color.white, null);
+            } else {
+                graphic.drawImage(destImage,
+                        (width - destImage.getWidth(null)) / 2, 0, destImage
+                                .getWidth(null), destImage.getHeight(null),
+                        Color.white, null);
+            }
 			graphic.dispose();
 			destImage = image;
 		}
 		return (BufferedImage) destImage;
 	}
-	
-	/** 
-     * 生成图像 
+
+	/**
+     * 生成图像
      *  filePath 存放图片的路径
      *  fileName 图片的名称
      *  info     生成图片的链接地址（例如：weixin://wxpay/s/Anp43md）
      *  width    图片的宽度
      *  height   图片的高度
-     * @throws WriterException 
-     * @throws IOException 
-     */  
+     * @throws WriterException
+     * @throws IOException
+     */
     public static String codeImgEncode(String filePath, String fileName, String info, int width, int height) throws WriterException, IOException {
     	String format="png";
-        Map<EncodeHintType, Object> hints = new HashMap<EncodeHintType, Object>();  
-        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");  
-        BitMatrix bitMatrix = new MultiFormatWriter().encode(info,  
-                BarcodeFormat.QR_CODE, width, height, hints);// 生成矩阵  
-        Path path = FileSystems.getDefault().getPath(filePath, fileName); 
+        Map<EncodeHintType, Object> hints = new HashMap<EncodeHintType, Object>();
+        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+        BitMatrix bitMatrix = new MultiFormatWriter().encode(info,
+                BarcodeFormat.QR_CODE, width, height, hints);// 生成矩阵
+        Path path = FileSystems.getDefault().getPath(filePath, fileName);
         File dir = new File(filePath);
         _log.error("==================" + filePath);
 		if (!dir.exists()) {
@@ -299,30 +300,30 @@ public class CodeImgUtil {
 
 
 	/**
-     * 解析图像 
-     */  
+     * 解析图像
+     */
     public static void codeImgDecode() {
-        String filePath = "D://zxing.png";  
-        BufferedImage image;  
-        try {  
-            image = ImageIO.read(new File(filePath));  
+        String filePath = "D://zxing.png";
+        BufferedImage image;
+        try {
+            image = ImageIO.read(new File(filePath));
             LuminanceSource source = new BufferedImageLuminanceSource(image);
-            Binarizer binarizer = new HybridBinarizer(source);  
-            BinaryBitmap binaryBitmap = new BinaryBitmap(binarizer);  
-            Map<DecodeHintType, Object> hints = new HashMap<DecodeHintType, Object>();  
-            hints.put(DecodeHintType.CHARACTER_SET, "UTF-8");  
-            Result result = new MultiFormatReader().decode(binaryBitmap, hints);// 对图像进行解码  
+            Binarizer binarizer = new HybridBinarizer(source);
+            BinaryBitmap binaryBitmap = new BinaryBitmap(binarizer);
+            Map<DecodeHintType, Object> hints = new HashMap<DecodeHintType, Object>();
+            hints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
+            Result result = new MultiFormatReader().decode(binaryBitmap, hints);// 对图像进行解码
             JSONObject content = JSON.parseObject(result.getText());
-            System.out.println("图片中内容：  ");  
-            System.out.println("author： " + content.getString("author"));  
-            System.out.println("zxing：  " + content.getString("zxing"));  
-            System.out.println("图片中格式：  ");  
-            System.out.println("encode： " + result.getBarcodeFormat());  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        } catch (NotFoundException e) {  
-            e.printStackTrace();  
-        }  
+            System.out.println("图片中内容：  ");
+            System.out.println("author： " + content.getString("author"));
+            System.out.println("zxing：  " + content.getString("zxing"));
+            System.out.println("图片中格式：  ");
+            System.out.println("encode： " + result.getBarcodeFormat());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -337,8 +338,9 @@ public class CodeImgUtil {
 		resMatrix.clear();
 		for (int i = 0; i < resWidth; i++) {
 			for (int j = 0; j < resHeight; j++) {
-				if (matrix.get(i + rec[0], j + rec[1]))
-					resMatrix.set(i, j);
+				if (matrix.get(i + rec[0], j + rec[1])) {
+                    resMatrix.set(i, j);
+                }
 			}
 		}
 		return resMatrix;

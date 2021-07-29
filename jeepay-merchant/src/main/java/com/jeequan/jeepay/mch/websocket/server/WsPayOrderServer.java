@@ -74,7 +74,9 @@ public class WsPayOrderServer {
             this.session = session;
 
             Set<WsPayOrderServer> wsServerSet = wsOrderIdMap.get(payOrderId);
-            if(wsServerSet == null) wsServerSet = new CopyOnWriteArraySet<>();
+            if(wsServerSet == null) {
+                wsServerSet = new CopyOnWriteArraySet<>();
+            }
             wsServerSet.add(this);
             wsOrderIdMap.put(payOrderId, wsServerSet);
 
@@ -94,7 +96,9 @@ public class WsPayOrderServer {
 
         Set wsSet = wsOrderIdMap.get(this.payOrderId);
         wsSet.remove(this);
-        if(wsSet.isEmpty()) wsOrderIdMap.remove(this.payOrderId);
+        if(wsSet.isEmpty()) {
+            wsOrderIdMap.remove(this.payOrderId);
+        }
 
         subOnlineCount(); //在线数减1
         logger.info("cid[{}],payOrderId[{}]连接关闭！当前在线人数为{}", cid, payOrderId, onlineClientSize);
