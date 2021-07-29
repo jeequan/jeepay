@@ -45,7 +45,7 @@ import java.util.Map;
 * 抽象公共Ctrl
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2020/02/18 17:28
 */
 public abstract class AbstractCtrl {

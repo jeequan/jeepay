@@ -34,7 +34,7 @@ import java.util.Arrays;
 * spring-boot 主启动程序
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2019/11/7 15:19
 */
 @SpringBootApplication

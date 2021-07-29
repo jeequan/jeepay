@@ -18,7 +18,7 @@ package com.jeequan.jeepay.components.mq.constant;
 /**
 * 定义MQ消息类型
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/7/23 16:49
 */
 public enum MQSendTypeEnum {

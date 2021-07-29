@@ -49,7 +49,7 @@ import java.util.*;
 * 认证Service
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:12
 */
 @Slf4j

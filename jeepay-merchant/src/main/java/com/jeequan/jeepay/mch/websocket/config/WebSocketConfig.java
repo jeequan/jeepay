@@ -23,7 +23,7 @@ import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 * 开启WebSocket支持
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/22 12:57
 */
 @Configuration

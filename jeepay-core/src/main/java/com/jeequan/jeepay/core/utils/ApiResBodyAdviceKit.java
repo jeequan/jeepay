@@ -31,7 +31,7 @@ import java.util.Collection;
  *      2. 处理model的扩展字段 (只需要在model中设置[ext]参数， 可以实现json自动转换为外层字段。 )
  *         比如 model为 {id:1, ext:{abc:222}}  则自动转换为： {id:1, abc:222}
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 16:49
 */
 public class ApiResBodyAdviceKit {

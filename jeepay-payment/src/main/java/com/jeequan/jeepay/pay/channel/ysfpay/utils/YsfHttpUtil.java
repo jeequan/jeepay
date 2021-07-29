@@ -39,9 +39,9 @@ import java.util.Map.Entry;
 
 /*
 * 参考云闪付demo实现的 httputils
-* 
+*
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:25
 */
 public class YsfHttpUtil {

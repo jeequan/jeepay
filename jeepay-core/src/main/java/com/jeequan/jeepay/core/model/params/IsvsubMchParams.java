@@ -25,7 +25,7 @@ import com.jeequan.jeepay.core.model.params.ysf.YsfpayIsvsubMchParams;
  * 抽象类 特约商户参数定义
  *
  * @author terrfly
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021/6/8 16:33
  */
 public abstract class IsvsubMchParams {

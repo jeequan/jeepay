@@ -19,7 +19,7 @@ package com.jeequan.jeepay.core.utils;
 *
 * 正则验证kit
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 16:56
 */
 public class RegKit {

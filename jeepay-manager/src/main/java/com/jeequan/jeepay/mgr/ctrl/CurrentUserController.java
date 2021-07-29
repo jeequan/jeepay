@@ -43,7 +43,7 @@ import java.util.*;
 * 当前登录者的信息相关接口
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:10
 */
 @RestController

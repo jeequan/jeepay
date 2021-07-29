@@ -32,7 +32,7 @@ import javax.validation.constraints.NotNull;
 * 聚合支付接口（统一下单）
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:33
 */
 @Data

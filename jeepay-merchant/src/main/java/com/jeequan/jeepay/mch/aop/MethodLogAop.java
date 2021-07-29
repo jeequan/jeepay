@@ -49,7 +49,7 @@ import java.util.concurrent.ScheduledExecutorService;
  *
  * @author terrfly
  * @modify pangxiaoyu
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
 @Component

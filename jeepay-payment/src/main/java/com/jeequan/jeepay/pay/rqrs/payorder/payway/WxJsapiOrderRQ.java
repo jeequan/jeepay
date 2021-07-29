@@ -25,7 +25,7 @@ import javax.validation.constraints.NotBlank;
  * 支付方式： WX_JSAPI
  *
  * @author zhuxiao
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021/6/8 17:34
  */
 @Data

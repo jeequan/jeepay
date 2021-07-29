@@ -32,7 +32,7 @@ import java.io.IOException;
 * 异常信息自定义返回数据
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 16:30
 */
 @Configuration

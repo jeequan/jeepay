@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
  * 业务：  支付订单补单（一般用于没有回调的接口，比如微信的条码支付）
  *
  * @author terrfly
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021/7/22 17:06
  */
 @Component

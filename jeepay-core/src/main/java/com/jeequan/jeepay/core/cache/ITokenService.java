@@ -22,7 +22,7 @@ import com.jeequan.jeepay.core.model.security.JeeUserDetails;
 * token service
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/5/24 09:06
 */
 public class ITokenService {

@@ -47,7 +47,7 @@ import java.util.*;
  * 商户管理类
  *
  * @author pangxiaoyu
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
 @RestController

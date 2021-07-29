@@ -25,7 +25,7 @@ import com.jeequan.jeepay.core.model.params.ysf.YsfpayIsvParams;
  * 抽象类 isv参数定义
  *
  * @author terrfly
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021/6/8 16:33
  * @modify ZhuXiao
  */

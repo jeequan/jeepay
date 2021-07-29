@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 * 放置到内存， 避免多次查询操作
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:29
 */
 @Data

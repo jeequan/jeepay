@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
  * 接收MQ消息
  * 业务： 更新服务商/商户/商户应用配置信息；
  * @author terrfly
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021/7/27 9:23
  */
 @Slf4j

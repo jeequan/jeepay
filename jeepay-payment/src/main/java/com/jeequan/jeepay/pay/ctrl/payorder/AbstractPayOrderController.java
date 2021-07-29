@@ -53,7 +53,7 @@ import java.util.Date;
 * 创建支付订单抽象类
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:26
 */
 @Slf4j

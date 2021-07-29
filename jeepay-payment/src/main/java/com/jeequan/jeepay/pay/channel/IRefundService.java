@@ -25,7 +25,7 @@ import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRQ;
 * 调起上游渠道侧退款接口
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/17 9:35
 */
 public interface IRefundService {

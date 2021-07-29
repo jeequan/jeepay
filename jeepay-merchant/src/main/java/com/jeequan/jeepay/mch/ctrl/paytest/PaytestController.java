@@ -42,7 +42,7 @@ import java.util.Set;
 * 支付测试类
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/22 9:43
 */
 @RestController

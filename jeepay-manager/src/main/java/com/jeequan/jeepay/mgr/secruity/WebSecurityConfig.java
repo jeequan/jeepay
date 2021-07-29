@@ -40,7 +40,7 @@ import org.springframework.web.filter.CorsFilter;
 * Spring Security 配置项
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:11
 */
 @Configuration
@@ -99,25 +99,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 		        .csrf().disable()
 
                 .cors().and()
-		
+
                 // 认证失败处理方式
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-		
+
 		        // 基于token，所以不需要session
 		        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-		
+
 		        .authorizeRequests()
-		        
+
 		        // 除上面外的所有请求全部需要鉴权认证
 		        .anyRequest().authenticated();
-		
+
 		        // 添加JWT filter
 		        httpSecurity.addFilterBefore(new JeeAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         // 禁用缓存
         httpSecurity.headers().cacheControl();
     }
-    
+
     @Override
     public void configure(WebSecurity web) throws Exception {
         //ignore文件 ： 无需进入spring security 框架
@@ -145,5 +145,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         		"/api/anon/**" //匿名访问接口
         );
     }
-    
+
 }

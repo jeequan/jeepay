@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
  * 系统Yml配置参数定义Bean
  *
  * @author terrfly
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
 @Data

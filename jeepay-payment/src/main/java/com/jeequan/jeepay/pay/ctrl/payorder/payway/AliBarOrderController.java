@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 * 支付宝 条码支付 controller
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:25
 */
 @Slf4j

@@ -24,7 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 * 根据set的值，响应不同的payDataType
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:32
 */
 @Data

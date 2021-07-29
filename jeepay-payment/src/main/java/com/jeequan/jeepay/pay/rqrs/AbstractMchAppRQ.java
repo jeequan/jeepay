@@ -24,7 +24,7 @@ import javax.validation.constraints.NotBlank;
 * 通用RQ, 包含mchNo和appId 必填项
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/16 10:30
 */
 @Data

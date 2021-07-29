@@ -24,7 +24,7 @@ import org.springframework.beans.BeanUtils;
 * 查询退款单 响应参数
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/17 14:08
 */
 @Data

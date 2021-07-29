@@ -26,7 +26,7 @@ import java.util.*;
 * 定义文件上传的配置信息
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 16:38
 */
 @Data

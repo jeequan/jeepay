@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
  * 业务：  清除商户登录信息
  *
  * @author terrfly
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021/7/22 17:06
  */
 @Component

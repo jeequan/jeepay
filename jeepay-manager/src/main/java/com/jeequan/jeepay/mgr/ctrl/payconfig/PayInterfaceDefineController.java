@@ -38,7 +38,7 @@ import java.util.List;
  * 支付接口定义管理类
  *
  * @author zhuxiao
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
 @RestController

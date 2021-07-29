@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 * 退款订单过期定时任务
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/17 14:36
 */
 @Slf4j

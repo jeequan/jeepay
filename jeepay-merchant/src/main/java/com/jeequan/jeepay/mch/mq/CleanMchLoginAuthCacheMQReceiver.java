@@ -28,7 +28,7 @@ import java.util.List;
 * 接收MQ消息
 * 业务： 清除商户登录信息
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/7/27 9:23
 */
 @Slf4j

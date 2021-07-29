@@ -35,7 +35,7 @@ import java.io.IOException;
 * 支付测试 - 回调函数
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/22 14:22
 */
 @RestController

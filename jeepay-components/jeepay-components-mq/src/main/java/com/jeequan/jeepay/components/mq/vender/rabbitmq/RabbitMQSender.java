@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  *  rabbitMQ 消息发送器的实现
  *
  * @author terrfly
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021/7/23 16:52
  */
 @Component

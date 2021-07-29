@@ -38,7 +38,7 @@ import java.util.Set;
 * 3. 将Queue模式绑定到延时消息的交换机
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/7/23 16:33
 */
 @Component

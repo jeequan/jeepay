@@ -24,7 +24,7 @@ import org.springframework.beans.BeanUtils;
 *  查询订单 响应参数
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:40
 */
 @Data

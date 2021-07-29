@@ -21,7 +21,7 @@ import com.jeequan.jeepay.components.mq.constant.MQSendTypeEnum;
 * 定义MQ消息格式
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/7/22 15:33
 */
 public abstract class AbstractMQ {

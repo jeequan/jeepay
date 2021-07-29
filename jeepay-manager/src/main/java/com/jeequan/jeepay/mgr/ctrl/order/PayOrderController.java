@@ -49,7 +49,7 @@ import java.util.Map;
  * 支付订单类
  *
  * @author pangxiaoyu
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
 @RestController
@@ -146,7 +146,7 @@ public class PayOrderController extends CommonCtrl {
     /**
      * 发起订单退款
      * @author terrfly
-     * @site https://www.jeepay.vip
+     * @site https://www.jeequan.com
      * @date 2021/6/17 16:38
      */
     @MethodLog(remark = "发起订单退款")

@@ -57,7 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 * 商户/服务商 配置信息上下文服务
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:41
 */
 @Slf4j
@@ -330,7 +330,7 @@ public class ConfigContextService {
     * 构建支付宝client 包装类
     *
     * @author terrfly
-    * @site https://www.jeepay.vip
+    * @site https://www.jeequan.com
     * @date 2021/6/8 17:46
     */
     private AlipayClientWrapper buildAlipayClientWrapper(Byte useCert, Byte sandbox, String appId, String privateKey, String alipayPublicKey, String signType, String appCert,

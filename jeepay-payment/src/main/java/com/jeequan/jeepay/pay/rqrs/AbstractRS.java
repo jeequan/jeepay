@@ -24,7 +24,7 @@ import java.io.Serializable;
 * 接口抽象RS对象, 本身无需实例化
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:39
 */
 @Data

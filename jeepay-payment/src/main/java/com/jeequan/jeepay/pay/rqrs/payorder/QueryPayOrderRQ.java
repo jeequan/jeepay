@@ -24,7 +24,7 @@ import javax.validation.constraints.NotBlank;
 * 查询订单请求参数对象
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:40
 */
 @Data

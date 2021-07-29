@@ -28,7 +28,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  *
  * @author terrfly
  * @modify zhuxiao
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
 @ControllerAdvice

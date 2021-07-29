@@ -27,7 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 * 【微信支付】支付通道工具包
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:21
 */
 public class WxpayKit {

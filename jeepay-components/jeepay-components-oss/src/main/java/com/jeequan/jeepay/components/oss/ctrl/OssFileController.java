@@ -31,7 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 * 统一文件上传接口（ossFile）
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:07
 */
 @RestController

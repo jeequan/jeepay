@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 * Redis工具类
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/5/24 17:58
 */
 public class RedisUtil {

@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 * 商户通知 service
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:43
 */
 @Slf4j

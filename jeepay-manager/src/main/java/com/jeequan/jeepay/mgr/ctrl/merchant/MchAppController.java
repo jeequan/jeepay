@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.*;
  * 商户应用管理类
  *
  * @author zhuxiao
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-06-16 09:15
  */
 @RestController

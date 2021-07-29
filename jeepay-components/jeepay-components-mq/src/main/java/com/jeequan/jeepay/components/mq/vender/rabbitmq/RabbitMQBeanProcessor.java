@@ -37,7 +37,7 @@ import java.util.Map;
  *  4. 动态配置RabbitMQ所需的bean。
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/7/23 16:27
 */
 @Configuration

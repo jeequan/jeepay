@@ -34,7 +34,7 @@ import java.util.Map;
  * 首页统计类
  *
  * @author pangxiaoyu
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
 @Slf4j

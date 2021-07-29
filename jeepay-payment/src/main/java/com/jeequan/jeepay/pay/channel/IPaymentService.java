@@ -24,7 +24,7 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 * 调起上游渠道侧支付接口
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/5/8 15:13
 */
 public interface IPaymentService {

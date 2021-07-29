@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 * activeMQ的配置项
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/7/23 16:51
 */
 @Component

@@ -46,7 +46,7 @@ import java.util.Map;
 * 二维码生成器
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:54
 */
 public class CodeImgUtil {

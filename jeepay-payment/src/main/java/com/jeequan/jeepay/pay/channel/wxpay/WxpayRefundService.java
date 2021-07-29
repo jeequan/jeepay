@@ -41,7 +41,7 @@ import org.springframework.stereotype.Service;
  * 退款接口： 微信官方
  *
  * @author xiaoyu
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021/6/17 16:38
  */
 @Slf4j

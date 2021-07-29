@@ -50,7 +50,7 @@ import java.util.*;
  * 认证Service
  *
  * @modify zhuxiao
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
 @Slf4j

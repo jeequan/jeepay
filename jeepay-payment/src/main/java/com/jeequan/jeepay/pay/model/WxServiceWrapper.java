@@ -24,7 +24,7 @@ import me.chanjar.weixin.mp.api.WxMpService;
 * wxService 包装类
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:30
 */
 @Data

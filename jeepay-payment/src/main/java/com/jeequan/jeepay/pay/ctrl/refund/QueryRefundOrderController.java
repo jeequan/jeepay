@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 * 商户退款单查询controller
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/17 15:20
 */
 @Slf4j

@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 * 渠道侧的通知解析实现 【分为同步跳转（doReturn）和异步回调(doNotify) 】
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/5/8 15:14
 */
 public interface IChannelNoticeService {

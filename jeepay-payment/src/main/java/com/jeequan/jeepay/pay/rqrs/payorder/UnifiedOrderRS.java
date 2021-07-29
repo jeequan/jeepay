@@ -25,7 +25,7 @@ import lombok.Data;
 * 创建订单(统一订单) 响应参数
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:34
 */
 @Data

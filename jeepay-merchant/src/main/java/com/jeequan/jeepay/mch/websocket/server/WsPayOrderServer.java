@@ -37,7 +37,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * /ws/payOrder/{訂單ID}/{客戶端自定義ID}
  *
  * @author terrfly
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021/6/22 12:57
  */
 @ServerEndpoint("/api/anon/ws/payOrder/{payOrderId}/{cid}")

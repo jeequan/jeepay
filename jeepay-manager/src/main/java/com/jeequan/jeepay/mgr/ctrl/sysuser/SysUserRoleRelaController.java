@@ -39,7 +39,7 @@ import java.util.List;
 * 用户角色关联关系
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:13
 */
 @RestController

@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 * 退款接口抽象类
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/17 9:37
 */
 public abstract class AbstractRefundService implements IRefundService{

@@ -42,7 +42,7 @@ import javax.servlet.http.HttpServletRequest;
 * 渠道侧的通知入口Controller 【分为同步跳转（doReturn）和异步回调(doNotify) 】
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:26
 */
 @Slf4j

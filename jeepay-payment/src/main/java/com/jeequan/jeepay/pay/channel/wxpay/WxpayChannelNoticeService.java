@@ -53,7 +53,7 @@ import java.security.PrivateKey;
 * 微信回调
 *
 * @author zhuxiao
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 18:10
 */
 @Service

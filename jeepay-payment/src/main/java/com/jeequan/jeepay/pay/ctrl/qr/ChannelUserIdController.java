@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 * 商户获取渠道用户ID接口
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:27
 */
 @RestController

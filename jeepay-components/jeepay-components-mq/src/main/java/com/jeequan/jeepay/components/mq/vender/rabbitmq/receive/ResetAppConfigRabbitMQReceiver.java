@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 * 业务：  更新系统配置参数
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/7/22 17:06
 */
 @Component

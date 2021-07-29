@@ -24,7 +24,7 @@ import java.io.Serializable;
 * BaseModel 封装公共处理函数
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 16:49
 */
 public class BaseModel<T> implements Serializable{

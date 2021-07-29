@@ -23,7 +23,7 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 * 查单（渠道侧）接口定义
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/5/19 15:16
 */
 public interface IPayOrderQueryService {

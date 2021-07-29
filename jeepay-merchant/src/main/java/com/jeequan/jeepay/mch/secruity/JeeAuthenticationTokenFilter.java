@@ -42,7 +42,7 @@ import java.io.IOException;
  * 避免使用@Component等bean自动装配注解：@Component会将filter被spring实例化为web容器的全局filter，导致重复过滤。
  * @modify terrfly
  * @version V1.0
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  * <p>
  */

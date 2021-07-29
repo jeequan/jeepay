@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 服务商管理类
  *
  * @author pangxiaoyu
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
 @RestController

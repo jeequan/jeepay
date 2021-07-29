@@ -32,7 +32,7 @@ import java.util.Date;
  * CommandLineRunner  / ApplicationRunner都可以达到要求， 只是调用参数有所不同。
  *
  * @author terrfly
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
 @Component

@@ -19,7 +19,7 @@ package com.jeequan.jeepay.core.constants;
 * 接口返回码
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/5/24 17:07
 */
 public enum ApiCodeEnum{

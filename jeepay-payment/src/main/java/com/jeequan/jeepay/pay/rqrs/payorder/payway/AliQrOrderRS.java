@@ -22,7 +22,7 @@ import lombok.Data;
  * 支付方式： ALI_QR
  *
  * @author terrfly
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021/6/8 17:34
  */
 @Data

@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 * 微信查单接口
 *
 * @author zhuxiao
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 18:10
 */
 @Service

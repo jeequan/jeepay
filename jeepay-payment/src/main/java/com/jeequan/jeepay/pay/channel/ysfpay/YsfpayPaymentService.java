@@ -42,7 +42,7 @@ import java.util.Date;
  * 云闪付下单
  *
  * @author pangxiaoyu
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
 @Service

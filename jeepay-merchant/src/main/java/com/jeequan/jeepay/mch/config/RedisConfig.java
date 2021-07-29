@@ -27,7 +27,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  * redis管理类
  *
  * @author terrfly
- * @site https://www.jeepay.vip
+ * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
 @Configuration

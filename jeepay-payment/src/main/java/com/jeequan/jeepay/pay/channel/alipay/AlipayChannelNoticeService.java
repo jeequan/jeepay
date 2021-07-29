@@ -38,7 +38,7 @@ import java.util.Map;
 * 支付宝 回调接口实现类
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:20
 */
 @Service

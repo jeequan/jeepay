@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull;
 * 创建退款订单请求参数对象
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/16 15:41
 */
 @Data

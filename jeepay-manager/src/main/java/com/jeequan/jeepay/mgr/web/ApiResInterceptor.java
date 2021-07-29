@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 * 数据响应拦截器
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:12
 */
 @Component

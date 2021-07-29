@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 * 支付宝 查单接口实现类
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/8 17:20
 */
 @Service

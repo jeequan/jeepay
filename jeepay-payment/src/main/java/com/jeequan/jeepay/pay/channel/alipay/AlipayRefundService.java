@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 * 退款接口： 支付宝官方
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/6/17 9:38
 */
 @Service
