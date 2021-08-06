@@ -5,7 +5,7 @@
 	<strong>适合互联网企业使用的开源支付系统</strong>
 </p>
 <p align="center">
-	👉 <a href="https://www.jeepay.vip">https://www.jeepay.vip</a> 👈
+	👉 <a href="https://www.jeequan.com">https://www.jeequan.com</a> 👈
 </p>
 
 <p align="center">
@@ -160,6 +160,6 @@ jeepay
 
 ![计全科技公众号](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jee-qrcode.jpg "计全科技公众号")
 
-微信扫描下方二维码，邀请进官方微信交流群（加好友备注：邀请进群或jeepay咨询）。
+微信扫描下方二维码，邀请进官方微信交流群（加好友备注：邀请进群或jeepay咨询），开源不易，进群前请先点Star给与支持。
 
 ![Jeepay微信交流群](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/wx_my.png "Jeepay微信交流群")
