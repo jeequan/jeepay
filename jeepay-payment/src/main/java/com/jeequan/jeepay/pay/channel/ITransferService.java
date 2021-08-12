@@ -15,23 +15,30 @@
  */
 package com.jeequan.jeepay.pay.channel;
 
-import com.jeequan.jeepay.core.entity.PayOrder;
-import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.rqrs.transfer.TransferOrderRQ;
 
 /**
-* 查单（渠道侧）接口定义
+* 转账接口
 *
 * @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/5/19 15:16
+* @site https://www.jeepay.vip
+* @date 2021/8/11 13:59
 */
-public interface IPayOrderQueryService {
+public interface ITransferService {
 
-    /** 获取到接口code **/
+    /* 获取到接口code **/
     String getIfCode();
 
-    /** 查询订单 **/
-    ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
+    /** 是否支持该支付入账方式 */
+    boolean isSupport(String entryType);
+
+    /** 前置检查如参数等信息是否符合要求， 返回错误信息或直接抛出异常即可  */
+    String preCheck(TransferOrderRQ bizRQ, TransferOrder refundOrder);
+
+    /** 调起退款接口，并响应数据；  内部处理普通商户和服务商模式  **/
+    ChannelRetMsg transfer(TransferOrderRQ bizRQ, TransferOrder refundOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
 
 }

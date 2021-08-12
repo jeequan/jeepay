@@ -49,6 +49,11 @@ public class MchNotifyRecordService extends ServiceImpl<MchNotifyRecordMapper, M
         return findByOrderAndType(orderId, MchNotifyRecord.TYPE_REFUND_ORDER);
     }
 
+    /** 查询退款订单订单 */
+    public MchNotifyRecord findByTransferOrder(String transferId){
+        return findByOrderAndType(transferId, MchNotifyRecord.TYPE_TRANSFER_ORDER);
+    }
+
     public Integer updateNotifyResult(Long notifyId, Byte state, String resResult){
         return baseMapper.updateNotifyResult(notifyId, state, resResult);
     }

@@ -13,25 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.channel;
+package com.jeequan.jeepay.pay.rqrs.transfer;
 
-import com.jeequan.jeepay.core.entity.PayOrder;
-import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
-import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
+import lombok.Data;
 
-/**
-* 查单（渠道侧）接口定义
+/*
+* 查询转账单请求参数对象
 *
 * @author terrfly
 * @site https://www.jeequan.com
-* @date 2021/5/19 15:16
+* @date 2021/6/17 14:07
 */
-public interface IPayOrderQueryService {
+@Data
+public class QueryTransferOrderRQ extends AbstractMchAppRQ {
 
-    /** 获取到接口code **/
-    String getIfCode();
+    /** 商户转账单号 **/
+    private String mchRefundNo;
 
-    /** 查询订单 **/
-    ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
+    /** 支付系统转账单号 **/
+    private String transferId;
 
 }

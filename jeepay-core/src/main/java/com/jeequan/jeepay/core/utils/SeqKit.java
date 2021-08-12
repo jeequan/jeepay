@@ -34,9 +34,11 @@ public class SeqKit {
 	private static final AtomicLong PAY_ORDER_SEQ = new AtomicLong(0L);
 	private static final AtomicLong REFUND_ORDER_SEQ = new AtomicLong(0L);
 	private static final AtomicLong MHO_ORDER_SEQ = new AtomicLong(0L);
+	private static final AtomicLong TRANSFER_ID_SEQ = new AtomicLong(0L);
 	private static final String PAY_ORDER_SEQ_PREFIX = "P";
 	private static final String REFUND_ORDER_SEQ_PREFIX = "R";
 	private static final String MHO_ORDER_SEQ_PREFIX = "M";
+	private static final String TRANSFER_ID_SEQ_PREFIX = "T";
 
 	/** 生成支付订单号 **/
 	public static String genPayOrderId() {
@@ -58,6 +60,13 @@ public class SeqKit {
 		return String.format("%s%s%04d", MHO_ORDER_SEQ_PREFIX,
 				DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
 				(int) MHO_ORDER_SEQ.getAndIncrement() % 10000);
+	}
+
+	/** 模拟生成商户订单号 **/
+	public static String genTransferId() {
+		return String.format("%s%s%04d", TRANSFER_ID_SEQ_PREFIX,
+				DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
+				(int) TRANSFER_ID_SEQ.getAndIncrement() % 10000);
 	}
 
 }

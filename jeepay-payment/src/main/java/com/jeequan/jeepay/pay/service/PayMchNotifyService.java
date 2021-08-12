@@ -21,10 +21,12 @@ import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.RefundOrder;
+import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRS;
 import com.jeequan.jeepay.pay.rqrs.refund.QueryRefundOrderRS;
+import com.jeequan.jeepay.pay.rqrs.transfer.QueryTransferOrderRS;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -138,6 +140,51 @@ public class PayMchNotifyService {
     }
 
 
+    /** 商户通知信息，转账订单的通知接口 **/
+    public void transferOrderNotify(TransferOrder dbTransferOrder){
+
+        try {
+            // 通知地址为空
+            if(StringUtils.isEmpty(dbTransferOrder.getNotifyUrl())){
+                return ;
+            }
+
+            //获取到通知对象
+            MchNotifyRecord mchNotifyRecord = mchNotifyRecordService.findByTransferOrder(dbTransferOrder.getTransferId());
+
+            if(mchNotifyRecord != null){
+                log.info("当前已存在通知消息， 不再发送。");
+                return ;
+            }
+
+            //商户app私钥
+            String appSecret = configContextService.getMchAppConfigContext(dbTransferOrder.getMchNo(), dbTransferOrder.getAppId()).getMchApp().getAppSecret();
+
+            // 封装通知url
+            String notifyUrl = createNotifyUrl(dbTransferOrder, appSecret);
+            mchNotifyRecord = new MchNotifyRecord();
+            mchNotifyRecord.setOrderId(dbTransferOrder.getTransferId());
+            mchNotifyRecord.setOrderType(MchNotifyRecord.TYPE_TRANSFER_ORDER);
+            mchNotifyRecord.setMchNo(dbTransferOrder.getMchNo());
+            mchNotifyRecord.setMchOrderNo(dbTransferOrder.getMchOrderNo()); //商户订单号
+            mchNotifyRecord.setIsvNo(dbTransferOrder.getIsvNo());
+            mchNotifyRecord.setAppId(dbTransferOrder.getAppId());
+            mchNotifyRecord.setNotifyUrl(notifyUrl);
+            mchNotifyRecord.setResResult("");
+            mchNotifyRecord.setNotifyCount(0);
+            mchNotifyRecord.setState(MchNotifyRecord.STATE_ING); // 通知中
+            mchNotifyRecordService.save(mchNotifyRecord);
+
+            //推送到MQ
+            Long notifyId = mchNotifyRecord.getNotifyId();
+            mqSender.send(PayOrderMchNotifyMQ.build(notifyId));
+
+        } catch (Exception e) {
+            log.error("推送失败！", e);
+        }
+    }
+
+
     /**
      * 创建响应URL
      */
@@ -169,6 +216,23 @@ public class PayMchNotifyService {
 
         // 生成通知
         return StringKit.appendUrlQuery(refundOrder.getNotifyUrl(), jsonObject);
+    }
+
+
+    /**
+     * 创建响应URL
+     */
+    public String createNotifyUrl(TransferOrder transferOrder, String appSecret) {
+
+        QueryTransferOrderRS rs = QueryTransferOrderRS.buildByRecord(transferOrder);
+        JSONObject jsonObject = (JSONObject)JSONObject.toJSON(rs);
+        jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
+
+        // 报文签名
+        jsonObject.put("sign", JeepayKit.getSign(jsonObject, appSecret));
+
+        // 生成通知
+        return StringKit.appendUrlQuery(transferOrder.getNotifyUrl(), jsonObject);
     }
 
 

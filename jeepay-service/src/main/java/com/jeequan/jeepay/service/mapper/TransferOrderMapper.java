@@ -13,25 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.channel;
+package com.jeequan.jeepay.service.mapper;
 
-import com.jeequan.jeepay.core.entity.PayOrder;
-import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
-import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jeequan.jeepay.core.entity.TransferOrder;
 
 /**
-* 查单（渠道侧）接口定义
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/5/19 15:16
-*/
-public interface IPayOrderQueryService {
-
-    /** 获取到接口code **/
-    String getIfCode();
-
-    /** 查询订单 **/
-    ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
+ * <p>
+ * 转账订单表 Mapper 接口
+ * </p>
+ *
+ * @author [mybatis plus generator]
+ * @since 2021-08-11
+ */
+public interface TransferOrderMapper extends BaseMapper<TransferOrder> {
 
 }

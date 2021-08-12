@@ -41,9 +41,10 @@ import java.util.Date;
 @TableName("t_mch_notify_record")
 public class MchNotifyRecord extends BaseModel implements Serializable {
 
-    //订单类型:1-支付,2-退款
+    //订单类型:1-支付,2-退款, 3-转账
     public static final byte TYPE_PAY_ORDER = 1;
     public static final byte TYPE_REFUND_ORDER = 2;
+    public static final byte TYPE_TRANSFER_ORDER = 3;
 
     //通知状态
     public static final byte STATE_ING = 1;

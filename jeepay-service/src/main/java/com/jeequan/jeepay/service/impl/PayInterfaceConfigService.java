@@ -19,10 +19,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.entity.MchApp;
-import com.jeequan.jeepay.core.entity.MchInfo;
-import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
-import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
+import com.jeequan.jeepay.core.entity.*;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.service.mapper.PayInterfaceConfigMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,4 +152,21 @@ public class PayInterfaceConfigService extends ServiceImpl<PayInterfaceConfigMap
         }
         return defineList;
     }
+
+
+
+    /** 查询商户app使用已正确配置了通道信息 */
+    public boolean mchAppHasAvailableIfCode(String appId, String ifCode){
+
+        return this.count(
+                PayInterfaceConfig.gw()
+                        .eq(PayInterfaceConfig::getIfCode, ifCode)
+                        .eq(PayInterfaceConfig::getState, CS.PUB_USABLE)
+                        .eq(PayInterfaceConfig::getInfoId, appId)
+                        .eq(PayInterfaceConfig::getInfoType, CS.INFO_TYPE_MCH_APP)
+                ) > 0;
+
+    }
+
+
 }
