@@ -67,11 +67,9 @@ public class WxpayTransferService implements ITransferService {
 
         try {
 
-            WxpayNormalMchParams params = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), WxpayNormalMchParams.class);
-
             EntPayRequest request = new EntPayRequest();
-            request.setMchAppid(params.getAppId());  // 商户账号appid
-            request.setMchId(params.getMchId());  //商户号
+            request.setMchAppid(mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig().getAppId());  // 商户账号appid
+            request.setMchId(mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig().getMchId());  //商户号
 
             request.setPartnerTradeNo(transferOrder.getTransferId()); //商户订单号
             request.setOpenid(transferOrder.getAccountNo()); //openid
