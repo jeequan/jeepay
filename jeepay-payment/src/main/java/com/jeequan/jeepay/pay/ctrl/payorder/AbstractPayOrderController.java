@@ -261,7 +261,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             throw new BizException("无此支付通道接口");
         }
 
-        if(!paymentService.isSupport(ifCode)){
+        if(!paymentService.isSupport(wayCode)){
             throw new BizException("接口不支持该支付方式");
         }
 
