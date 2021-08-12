@@ -143,11 +143,6 @@ public class TransferOrder implements Serializable {
     private Byte state;
 
     /**
-     * 向下游回调状态, 0-未发送,  1-已发送
-     */
-    private Byte notifyState;
-
-    /**
      * 特定渠道发起额外参数
      */
     private String channelExtra;

@@ -74,7 +74,8 @@ public class PayOrderMchNotifyMQReceiver implements PayOrderMchNotifyMQ.IMQRecei
                 res = "连接["+ UrlBuilder.of(notifyUrl).getHost() +"]异常:【" + e.getMessage() + "】";
             }
 
-            if(currentCount == 1){ //第一次通知: 更新为已通知
+            //支付订单 & 第一次通知: 更新为已通知
+            if(currentCount == 1 && MchNotifyRecord.TYPE_PAY_ORDER == record.getOrderType()){
                 payOrderService.updateNotifySent(record.getOrderId());
             }
 

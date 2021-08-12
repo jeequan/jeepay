@@ -385,7 +385,6 @@ CREATE TABLE `t_transfer_order` (
            `transfer_desc` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '转账备注信息',
            `client_ip` VARCHAR(32) DEFAULT NULL COMMENT '客户端IP',
            `state` TINYINT(6) NOT NULL DEFAULT '0' COMMENT '支付状态: 0-订单生成, 1-转账中, 2-转账成功, 3-转账失败, 4-订单关闭',
-           `notify_state` TINYINT(6) NOT NULL DEFAULT '0' COMMENT '向下游回调状态, 0-未发送,  1-已发送',
            `channel_extra` VARCHAR(512) DEFAULT NULL COMMENT '特定渠道发起额外参数',
            `channel_order_no` VARCHAR(64) DEFAULT NULL COMMENT '渠道订单号',
            `err_code` VARCHAR(128) DEFAULT NULL COMMENT '渠道支付错误码',
