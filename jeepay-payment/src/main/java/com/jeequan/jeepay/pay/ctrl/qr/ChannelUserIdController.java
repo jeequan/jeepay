@@ -72,6 +72,7 @@ public class ChannelUserIdController extends AbstractPayOrderController {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("mchNo", rq.getMchNo());
         jsonObject.put("appId", rq.getAppId());
+        jsonObject.put("extParam", rq.getExtParam());
         jsonObject.put("ifCode", ifCode);
         jsonObject.put("redirectUrl", rq.getRedirectUrl());
 
@@ -95,6 +96,7 @@ public class ChannelUserIdController extends AbstractPayOrderController {
         String mchNo = callbackData.getString("mchNo");
         String appId = callbackData.getString("appId");
         String ifCode = callbackData.getString("ifCode");
+        String extParam = callbackData.getString("extParam");
         String redirectUrl = callbackData.getString("redirectUrl");
 
         // 获取接口
@@ -111,7 +113,11 @@ public class ChannelUserIdController extends AbstractPayOrderController {
         String channelUserId = channelUserService.getChannelUserId(getReqParamJSON(), mchAppConfigContext);
 
         //同步跳转
-        response.sendRedirect(StringKit.appendUrlQuery(redirectUrl, JsonKit.newJson("channelUserId", channelUserId)));
+        JSONObject appendParams = new JSONObject();
+        appendParams.put("appId", appId);
+        appendParams.put("channelUserId", channelUserId);
+        appendParams.put("extParam", extParam);
+        response.sendRedirect(StringKit.appendUrlQuery(redirectUrl, appendParams));
     }
 
 

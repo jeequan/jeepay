@@ -33,6 +33,9 @@ public class ChannelUserIdRQ extends AbstractMchAppRQ{
     @NotBlank(message="接口代码不能为空")
     private String ifCode;
 
+    /** 商户扩展参数，将原样返回 **/
+    private String extParam;
+
     /** 回调地址 **/
     @NotBlank(message="回调地址不能为空")
     private String redirectUrl;
