@@ -19,6 +19,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.service.mapper.TransferOrderMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,6 +95,20 @@ public class TransferOrderService extends ServiceImpl<TransferOrderMapper, Trans
             return updateIng2Fail(transferId, channelOrderNo, channelErrCode, channelErrMsg);
         }
         return false;
+    }
+
+
+
+    /** 查询商户订单 **/
+    public TransferOrder queryMchOrder(String mchNo, String mchOrderNo, String transferId){
+
+        if(StringUtils.isNotEmpty(transferId)){
+            return getOne(TransferOrder.gw().eq(TransferOrder::getMchNo, mchNo).eq(TransferOrder::getTransferId, transferId));
+        }else if(StringUtils.isNotEmpty(mchOrderNo)){
+            return getOne(TransferOrder.gw().eq(TransferOrder::getMchNo, mchNo).eq(TransferOrder::getMchOrderNo, mchOrderNo));
+        }else{
+            return null;
+        }
     }
 
 

@@ -67,6 +67,8 @@ public class AlipayKit {
             ((AlipayTradeRefundRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
         } else if(req instanceof AlipayTradeFastpayRefundQueryRequest) {
             ((AlipayTradeFastpayRefundQueryRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
+        } else if(req instanceof AlipayFundTransToaccountTransferRequest) {
+            ((AlipayFundTransToaccountTransferRequest)req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
         }
 
         // 服务商信息
