@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.core.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.Data;
@@ -60,6 +61,7 @@ public class TransferOrder implements Serializable {
     /**
      * 转账订单号
      */
+    @TableId
     private String transferId;
 
     /**
