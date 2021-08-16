@@ -83,7 +83,13 @@ public class PayMchNotifyService {
             mchNotifyRecord.setResResult("");
             mchNotifyRecord.setNotifyCount(0);
             mchNotifyRecord.setState(MchNotifyRecord.STATE_ING); // 通知中
-            mchNotifyRecordService.save(mchNotifyRecord);
+
+            try {
+                mchNotifyRecordService.save(mchNotifyRecord);
+            } catch (Exception e) {
+                log.info("数据库已存在[{}]消息，本次不再推送。", mchNotifyRecord.getOrderId());
+                return ;
+            }
 
             //推送到MQ
             Long notifyId = mchNotifyRecord.getNotifyId();
@@ -128,7 +134,13 @@ public class PayMchNotifyService {
             mchNotifyRecord.setResResult("");
             mchNotifyRecord.setNotifyCount(0);
             mchNotifyRecord.setState(MchNotifyRecord.STATE_ING); // 通知中
-            mchNotifyRecordService.save(mchNotifyRecord);
+
+            try {
+                mchNotifyRecordService.save(mchNotifyRecord);
+            } catch (Exception e) {
+                log.info("数据库已存在[{}]消息，本次不再推送。", mchNotifyRecord.getOrderId());
+                return ;
+            }
 
             //推送到MQ
             Long notifyId = mchNotifyRecord.getNotifyId();
@@ -173,7 +185,13 @@ public class PayMchNotifyService {
             mchNotifyRecord.setResResult("");
             mchNotifyRecord.setNotifyCount(0);
             mchNotifyRecord.setState(MchNotifyRecord.STATE_ING); // 通知中
-            mchNotifyRecordService.save(mchNotifyRecord);
+
+            try {
+                mchNotifyRecordService.save(mchNotifyRecord);
+            } catch (Exception e) {
+                log.info("数据库已存在[{}]消息，本次不再推送。", mchNotifyRecord.getOrderId());
+                return ;
+            }
 
             //推送到MQ
             Long notifyId = mchNotifyRecord.getNotifyId();
