@@ -331,7 +331,7 @@ public abstract class AbstractPayOrderController extends ApiController {
 
         //判断是否需要轮询查单
         if(channelRetMsg.isNeedQuery()){
-            mqSender.send(PayOrderReissueMQ.build(payOrderId, 1), 5* 1000);
+            mqSender.send(PayOrderReissueMQ.build(payOrderId, 1), 5);
         }
 
     }
