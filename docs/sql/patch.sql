@@ -94,3 +94,12 @@ insert into t_sys_entitlement values('ENT_MCH_TRANSFER_CHANNEL_USER', '按钮：
 insert into t_sys_entitlement values('ENT_MCH_TRANSFER_DO', '按钮：发起转账', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_TRANSFER', '0', 'MCH', now(), now());
 
 ## -- ++++ ++++
+
+## -- ++++ [v1.6.0] ===> [未确定] ++++
+
+-- 订单页的支付方式筛选项添加权限并可分配： 避免API权限导致页面出现异常
+insert into t_sys_entitlement values('ENT_PAY_ORDER_SEARCH_PAY_WAY', '筛选项：支付方式', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_PAY_ORDER_SEARCH_PAY_WAY', '筛选项：支付方式', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER', '0', 'MCH', now(), now());
+
+## -- ++++ ++++
+

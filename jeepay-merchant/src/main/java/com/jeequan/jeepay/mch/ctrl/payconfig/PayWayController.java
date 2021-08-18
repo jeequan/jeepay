@@ -25,6 +25,7 @@ import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.PayWayService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,7 +50,7 @@ public class PayWayController extends CommonCtrl {
 	 * @Description: list
 	 * @Date: 15:52 2021/4/27
 	*/
-//	@PreAuthorize("hasAuthority('ENT_PC_WAY_LIST')")
+	@PreAuthorize("hasAuthority('ENT_PAY_ORDER_SEARCH_PAY_WAY')")
 	@GetMapping
 	public ApiRes list() {
 

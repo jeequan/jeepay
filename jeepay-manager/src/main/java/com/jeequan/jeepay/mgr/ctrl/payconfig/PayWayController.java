@@ -54,7 +54,7 @@ public class PayWayController extends CommonCtrl {
 	 * @Description: list
 	 * @Date: 15:52 2021/4/27
 	*/
-	@PreAuthorize("hasAuthority('ENT_PC_WAY_LIST')")
+	@PreAuthorize("hasAnyAuthority('ENT_PC_WAY_LIST', 'ENT_PAY_ORDER_SEARCH_PAY_WAY')")
 	@GetMapping
 	public ApiRes list() {
 
