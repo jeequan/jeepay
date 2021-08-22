@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeequan.jeepay.service.mapper.PayOrderDivisionRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jeequan.jeepay.core.entity.PayOrderDivisionRecord">
+        <id column="record_id" property="recordId" />
+        <result column="mch_no" property="mchNo" />
+        <result column="isv_no" property="isvNo" />
+        <result column="app_id" property="appId" />
+        <result column="mch_name" property="mchName" />
+        <result column="mch_type" property="mchType" />
+        <result column="if_code" property="ifCode" />
+        <result column="pay_order_id" property="payOrderId" />
+        <result column="pay_order_channel_order_no" property="payOrderChannelOrderNo" />
+        <result column="pay_order_amount" property="payOrderAmount" />
+        <result column="pay_order_division_amount" property="payOrderDivisionAmount" />
+        <result column="batch_order_id" property="batchOrderId" />
+        <result column="channel_batch_order_id" property="channelBatchOrderId" />
+        <result column="state" property="state" />
+        <result column="channel_resp_result" property="channelRespResult" />
+        <result column="receiver_id" property="receiverId" />
+        <result column="receiver_group_id" property="receiverGroupId" />
+        <result column="acc_type" property="accType" />
+        <result column="acc_no" property="accNo" />
+        <result column="acc_name" property="accName" />
+        <result column="relation_type" property="relationType" />
+        <result column="relation_type_name" property="relationTypeName" />
+        <result column="division_profit" property="divisionProfit" />
+        <result column="cal_division_amount" property="calDivisionAmount" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+</mapper>

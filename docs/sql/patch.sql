@@ -101,5 +101,25 @@ insert into t_sys_entitlement values('ENT_MCH_TRANSFER_DO', '按钮：发起转�
 insert into t_sys_entitlement values('ENT_PAY_ORDER_SEARCH_PAY_WAY', '筛选项：支付方式', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER', '0', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_PAY_ORDER_SEARCH_PAY_WAY', '筛选项：支付方式', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER', '0', 'MCH', now(), now());
 
+
+-- 插入表结构，并插入默认数据（默认费率 0）
+alter table `t_pay_order` add column `mch_fee_rate` decimal(20,6) NOT NULL COMMENT '商户手续费费率快照' after `amount`;
+alter table `t_pay_order` add column `mch_fee_amount` BIGINT(20) NOT NULL COMMENT '商户手续费,单位分' after `mch_fee_rate`;
+alter table `t_pay_order` add column `mch_income_amount` BIGINT(20) NOT NULL COMMENT '商户入账金额（支付金额-手续费）,单位分' after `mch_fee_amount`;
+update `t_pay_order` set mch_fee_rate = 0;
+update `t_pay_order` set mch_fee_amount = 0;
+update `t_pay_order` set mch_income_amount = amount - mch_fee_amount;
+
+alter table `t_pay_order` drop column `division_flag`;
+alter table `t_pay_order` drop column `division_time`;
+
+alter table `t_pay_order` add column `division_mode` TINYINT(6) DEFAULT 0 COMMENT '订单分账模式：0-该笔订单不允许分账, 1-支付成功按配置自动完成分账, 2-商户手动分账(解冻商户金额)' after `refund_amount`;
+alter table `t_pay_order` add column `division_state` TINYINT(6) DEFAULT 0 COMMENT '订单分账状态：0-未发生分账, 1-等待分账任务处理, 2-分账处理中, 3-分账任务已结束(不体现状态)' after `division_mode`;
+alter table `t_pay_order` add column `division_last_time` DATETIME COMMENT '最新分账时间' after `division_state`;
+
+-- TODO 分账的两张表
+
+
+
 ## -- ++++ ++++
 

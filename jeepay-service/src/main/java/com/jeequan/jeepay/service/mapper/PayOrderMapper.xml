@@ -14,6 +14,9 @@
         <result column="if_code" property="ifCode" />
         <result column="way_code" property="wayCode" />
         <result column="amount" property="amount" />
+        <result column="mch_fee_rate" property="mchFeeRate" />
+        <result column="mch_fee_amount" property="mchFeeAmount" />
+        <result column="mch_income_amount" property="mchIncomeAmount" />
         <result column="currency" property="currency" />
         <result column="state" property="state" />
         <result column="notify_state" property="notifyState" />
@@ -26,8 +29,9 @@
         <result column="refund_state" property="refundState" />
         <result column="refund_times" property="refundTimes" />
         <result column="refund_amount" property="refundAmount" />
-        <result column="division_flag" property="divisionFlag" />
-        <result column="division_time" property="divisionTime" />
+        <result column="division_mode" property="divisionMode" />
+        <result column="division_state" property="divisionState" />
+        <result column="division_last_time" property="divisionLastTime" />
         <result column="err_code" property="errCode" />
         <result column="err_msg" property="errMsg" />
         <result column="ext_param" property="extParam" />

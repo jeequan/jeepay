@@ -15,30 +15,34 @@
  */
 package com.jeequan.jeepay.pay.channel;
 
-import com.jeequan.jeepay.core.entity.PayOrder;
-import com.jeequan.jeepay.pay.rqrs.AbstractRS;
-import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
+import com.jeequan.jeepay.core.entity.MchDivisionReceiver;
+import com.jeequan.jeepay.core.entity.PayOrderDivisionRecord;
+import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.rqrs.transfer.TransferOrderRQ;
 
-/*
-* 调起上游渠道侧支付接口
+import java.util.List;
+
+/**
+* 分账接口
 *
 * @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/5/8 15:13
+* @site https://www.jeepay.vip
+* @date 2021/8/22 08:59
 */
-public interface IPaymentService {
+public interface IDivisionService {
 
     /** 获取到接口code **/
     String getIfCode();
 
-    /** 是否支持该支付方式 */
-    boolean isSupport(String wayCode);
+    /** 是否支持该分账 */
+    boolean isSupport();
 
-    /** 前置检查如参数等信息是否符合要求， 返回错误信息或直接抛出异常即可  */
-    String preCheck(UnifiedOrderRQ bizRQ, PayOrder payOrder);
+    /** 绑定关系 **/
+    boolean bind(MchDivisionReceiver mchDivisionReceiver, MchAppConfigContext mchAppConfigContext);
 
-    /** 调起支付接口，并响应数据；  内部处理普通商户和服务商模式  **/
-    AbstractRS pay(UnifiedOrderRQ bizRQ, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
+    /** 单次分账 （无需调用完结接口，或自动解冻商户资金)  **/
+    boolean singleDivision(List<PayOrderDivisionRecord> recordList, MchAppConfigContext mchAppConfigContext);
 
 }

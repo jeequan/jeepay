@@ -55,12 +55,17 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
     @Autowired private PayWayMapper payWayMapper;
 
     /** 更新订单状态  【订单生成】 --》 【支付中】 **/
-    public boolean updateInit2Ing(String payOrderId, String ifCode, String wayCode){
+    public boolean updateInit2Ing(String payOrderId, PayOrder payOrder){
 
         PayOrder updateRecord = new PayOrder();
         updateRecord.setState(PayOrder.STATE_ING);
-        updateRecord.setIfCode(ifCode);
-        updateRecord.setWayCode(wayCode);
+
+        //同时更新， 未确定 --》 已确定的其他信息。  如支付接口的确认、 费率的计算。
+        updateRecord.setIfCode(payOrder.getIfCode());
+        updateRecord.setWayCode(payOrder.getWayCode());
+        updateRecord.setMchFeeRate(payOrder.getMchFeeRate());
+        updateRecord.setMchFeeAmount(payOrder.getMchFeeAmount());
+        updateRecord.setMchIncomeAmount(payOrder.getMchIncomeAmount());
 
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
                 .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_INIT));

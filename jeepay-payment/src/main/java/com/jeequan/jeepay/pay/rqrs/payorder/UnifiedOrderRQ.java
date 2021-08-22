@@ -21,6 +21,7 @@ import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.*;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.beans.BeanUtils;
 
 import javax.validation.constraints.Min;
@@ -84,6 +85,9 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
     /** 商户扩展参数 **/
     private String extParam;
 
+    /** 分账模式： 0-该笔订单不允许分账, 1-支付成功按配置自动完成分账, 2-商户手动分账(解冻商户金额) **/
+    @Range(min = 0, max = 2, message = "分账模式设置值有误")
+    private Byte divisionMode;
 
     /** 返回真实的bizRQ **/
     public UnifiedOrderRQ buildBizRQ(){

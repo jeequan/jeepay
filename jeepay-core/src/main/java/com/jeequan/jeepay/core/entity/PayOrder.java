@@ -24,6 +24,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -58,6 +59,17 @@ public class PayOrder extends BaseModel implements Serializable {
     public static final byte REFUND_STATE_NONE = 0; //未发生实际退款
     public static final byte REFUND_STATE_SUB = 1; //部分退款
     public static final byte REFUND_STATE_ALL = 2; //全额退款
+
+
+    public static final byte DIVISION_MODE_FORBID = 0; //该笔订单不允许分账
+    public static final byte DIVISION_MODE_AUTO = 1; //支付成功按配置自动完成分账
+    public static final byte DIVISION_MODE_MANUAL = 2; //商户手动分账(解冻商户金额)
+
+    public static final byte DIVISION_STATE_UNHAPPEN = 0; //未发生分账
+    public static final byte DIVISION_STATE_WAIT_TASK = 1; //等待分账任务处理
+    public static final byte DIVISION_STATE_ING = 2; //分账处理中
+    public static final byte DIVISION_STATE_FINISH = 3; //分账任务已结束(不体现状态)
+
 
     /**
      * 支付订单号
@@ -109,6 +121,21 @@ public class PayOrder extends BaseModel implements Serializable {
      * 支付金额,单位分
      */
     private Long amount;
+
+    /**
+     * 商户手续费费率快照
+     */
+    private BigDecimal mchFeeRate;
+
+    /**
+     * 商户手续费,单位分
+     */
+    private Long mchFeeAmount;
+
+    /**
+     * 商户入账金额（支付金额-手续费）,单位分
+     */
+    private Long mchIncomeAmount;
 
     /**
      * 三位货币代码,人民币:cny
@@ -171,14 +198,19 @@ public class PayOrder extends BaseModel implements Serializable {
     private Long refundAmount;
 
     /**
-     * 订单分账标志：0-否  1-是
+     * 订单分账模式：0-该笔订单不允许分账, 1-支付成功按配置自动完成分账, 2-商户手动分账(解冻商户金额)
      */
-    private Byte divisionFlag;
+    private Byte divisionMode;
 
     /**
-     * 预计分账发起时间
+     * 订单分账状态：0-未发生分账, 1-等待分账任务处理, 2-分账成功, 3-分账失败
      */
-    private Date divisionTime;
+    private Byte divisionState;
+
+    /**
+     * 最新分账时间
+     */
+    private Date divisionLastTime;
 
     /**
      * 渠道支付错误码
@@ -224,6 +256,5 @@ public class PayOrder extends BaseModel implements Serializable {
      * 更新时间
      */
     private Date updatedAt;
-
 
 }

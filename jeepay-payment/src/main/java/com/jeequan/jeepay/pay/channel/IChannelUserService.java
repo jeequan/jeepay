@@ -25,7 +25,7 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 */
 public interface IChannelUserService {
 
-    /* 获取到接口code **/
+    /** 获取到接口code **/
     String getIfCode();
 
     /** 获取重定向地址 **/

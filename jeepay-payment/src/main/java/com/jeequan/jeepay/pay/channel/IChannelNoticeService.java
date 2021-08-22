@@ -38,7 +38,7 @@ public interface IChannelNoticeService {
         DO_NOTIFY //异步回调
     }
 
-    /* 获取到接口code **/
+    /** 获取到接口code **/
     String getIfCode();
 
     /** 解析参数： 订单号 和 请求参数

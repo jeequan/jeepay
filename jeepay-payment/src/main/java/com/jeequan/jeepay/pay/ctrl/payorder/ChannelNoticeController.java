@@ -25,6 +25,7 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.pay.service.PayMchNotifyService;
+import com.jeequan.jeepay.pay.service.PayOrderProcessService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +53,7 @@ public class ChannelNoticeController extends AbstractCtrl {
     @Autowired private PayOrderService payOrderService;
     @Autowired private ConfigContextService configContextService;
     @Autowired private PayMchNotifyService payMchNotifyService;
+    @Autowired private PayOrderProcessService payOrderProcessService;
 
     /** 同步通知入口 **/
     @RequestMapping(value= {"/api/pay/return/{ifCode}", "/api/pay/return/{ifCode}/{payOrderId}"})
@@ -233,10 +235,9 @@ public class ChannelNoticeController extends AbstractCtrl {
                 return payNotifyService.doNotifyOrderStateUpdateFail(request);
             }
 
-            //订单支付成功 需要MQ通知下游商户
+            //订单支付成功 其他业务逻辑
             if(notifyResult.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS){
-                payOrder.setState(PayOrder.STATE_SUCCESS);
-                payMchNotifyService.payOrderNotify(payOrder);
+                payOrderProcessService.confirmSuccess(payOrder);
             }
 
             log.info("===== {}, 订单通知完成。 payOrderId={}, parseState = {} =====", logPrefix, payOrderId, notifyResult.getChannelState());

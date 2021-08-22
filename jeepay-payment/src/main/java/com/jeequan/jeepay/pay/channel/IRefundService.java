@@ -30,7 +30,7 @@ import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRQ;
 */
 public interface IRefundService {
 
-    /* 获取到接口code **/
+    /** 获取到接口code **/
     String getIfCode();
 
     /** 前置检查如参数等信息是否符合要求， 返回错误信息或直接抛出异常即可  */

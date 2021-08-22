@@ -16,6 +16,8 @@
 package com.jeequan.jeepay.pay.ctrl.payorder;
 
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.jeequan.jeepay.components.mq.model.PayOrderDivisionMQ;
 import com.jeequan.jeepay.components.mq.model.PayOrderReissueMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.constants.CS;
@@ -25,9 +27,7 @@ import com.jeequan.jeepay.core.entity.MchPayPassage;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.core.utils.SeqKit;
-import com.jeequan.jeepay.core.utils.SpringBeansUtil;
-import com.jeequan.jeepay.core.utils.StringKit;
+import com.jeequan.jeepay.core.utils.*;
 import com.jeequan.jeepay.pay.channel.IPaymentService;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.exception.ChannelException;
@@ -40,13 +40,16 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.QrCashierOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.QrCashierOrderRS;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.pay.service.PayMchNotifyService;
+import com.jeequan.jeepay.pay.service.PayOrderProcessService;
 import com.jeequan.jeepay.service.impl.MchPayPassageService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /*
@@ -62,7 +65,7 @@ public abstract class AbstractPayOrderController extends ApiController {
     @Autowired private MchPayPassageService mchPayPassageService;
     @Autowired private PayOrderService payOrderService;
     @Autowired private ConfigContextService configContextService;
-    @Autowired private PayMchNotifyService payMchNotifyService;
+    @Autowired private PayOrderProcessService payOrderProcessService;
     @Autowired private SysConfigService sysConfigService;
     @Autowired private IMQSender mqSender;
 
@@ -103,6 +106,7 @@ public abstract class AbstractPayOrderController extends ApiController {
                 bizRQ.setChannelExtra(payOrder.getChannelExtra());
                 bizRQ.setChannelUser(payOrder.getChannelUser());
                 bizRQ.setExtParam(payOrder.getExtParam());
+                bizRQ.setDivisionMode(payOrder.getDivisionMode());
             }
 
             String mchNo = bizRQ.getMchNo();
@@ -133,7 +137,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             if(isNewOrder && CS.PAY_WAY_CODE.QR_CASHIER.equals(wayCode)){
 
                 //生成订单
-                payOrder = genPayOrder(bizRQ, mchInfo, mchApp, null);
+                payOrder = genPayOrder(bizRQ, mchInfo, mchApp, null, null);
                 String payOrderId = payOrder.getPayOrderId();
                 //订单入库 订单状态： 生成状态  此时没有和任何上游渠道产生交互。
                 payOrderService.save(payOrder);
@@ -152,13 +156,19 @@ public abstract class AbstractPayOrderController extends ApiController {
                 return packageApiResByPayOrder(bizRQ, qrCashierOrderRS, payOrder);
             }
 
+            // 根据支付方式， 查询出 该商户 可用的支付接口
+            MchPayPassage mchPayPassage = mchPayPassageService.findMchPayPassage(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), wayCode);
+            if(mchPayPassage == null){
+                throw new BizException("商户应用不支持该支付方式");
+            }
+
             //获取支付接口
-            IPaymentService paymentService = checkMchWayCodeAndGetService(mchAppConfigContext, wayCode);
+            IPaymentService paymentService = checkMchWayCodeAndGetService(mchAppConfigContext, mchPayPassage);
             String ifCode = paymentService.getIfCode();
 
             //生成订单
             if(isNewOrder){
-                payOrder = genPayOrder(bizRQ, mchInfo, mchApp, ifCode);
+                payOrder = genPayOrder(bizRQ, mchInfo, mchApp, ifCode, mchPayPassage);
             }else{
                 payOrder.setIfCode(ifCode);
             }
@@ -203,7 +213,7 @@ public abstract class AbstractPayOrderController extends ApiController {
         }
     }
 
-    private PayOrder genPayOrder(UnifiedOrderRQ rq, MchInfo mchInfo, MchApp mchApp, String ifCode){
+    private PayOrder genPayOrder(UnifiedOrderRQ rq, MchInfo mchInfo, MchApp mchApp, String ifCode, MchPayPassage mchPayPassage){
 
         PayOrder payOrder = new PayOrder();
         payOrder.setPayOrderId(SeqKit.genPayOrderId()); //生成订单ID
@@ -216,6 +226,16 @@ public abstract class AbstractPayOrderController extends ApiController {
         payOrder.setIfCode(ifCode); //接口代码
         payOrder.setWayCode(rq.getWayCode()); //支付方式
         payOrder.setAmount(rq.getAmount()); //订单金额
+
+        if(mchPayPassage != null){
+            payOrder.setMchFeeRate(mchPayPassage.getRate()); //商户手续费费率快照
+        }else{
+            payOrder.setMchFeeRate(BigDecimal.ZERO); //预下单模式， 按照0计算入库， 后续进行更新
+        }
+
+        payOrder.setMchFeeAmount(AmountUtil.calPercentageFee(payOrder.getAmount(), payOrder.getMchFeeRate())); //商户手续费,单位分
+        payOrder.setMchIncomeAmount(payOrder.getAmount() - payOrder.getMchFeeAmount()); //商户入账金额（支付金额-手续费）,单位分
+
         payOrder.setCurrency(rq.getCurrency()); //币种
         payOrder.setState(PayOrder.STATE_INIT); //订单状态, 默认订单生成状态
         payOrder.setClientIp(StringUtils.defaultIfEmpty(rq.getClientIp(), getClientIp())); //客户端IP
@@ -223,10 +243,12 @@ public abstract class AbstractPayOrderController extends ApiController {
         payOrder.setBody(rq.getBody()); //商品描述信息
 //        payOrder.setChannelExtra(rq.getChannelExtra()); //特殊渠道发起的附件额外参数,  是否应该删除该字段了？？ 比如authCode不应该记录， 只是在传输阶段存在的吧？  之前的为了在payOrder对象需要传参。
         payOrder.setChannelUser(rq.getChannelUser()); //渠道用户标志
-        payOrder.setDivisionFlag(CS.NO); //分账标志， 默认为： 0-否
         payOrder.setExtParam(rq.getExtParam()); //商户扩展参数
         payOrder.setNotifyUrl(rq.getNotifyUrl()); //异步通知地址
         payOrder.setReturnUrl(rq.getReturnUrl()); //页面跳转地址
+
+        // 分账模式
+        payOrder.setDivisionMode(ObjectUtils.defaultIfNull(rq.getDivisionMode(), PayOrder.DIVISION_MODE_FORBID));
 
         Date nowDate = new Date();
 
@@ -246,13 +268,7 @@ public abstract class AbstractPayOrderController extends ApiController {
      * 校验： 商户的支付方式是否可用
      * 返回： 支付接口
      * **/
-    private IPaymentService checkMchWayCodeAndGetService(MchAppConfigContext mchAppConfigContext, String wayCode){
-
-        // 根据支付方式， 查询出 该商户 可用的支付接口
-        MchPayPassage mchPayPassage = mchPayPassageService.findMchPayPassage(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), wayCode);
-        if(mchPayPassage == null){
-            throw new BizException("商户应用不支持该支付方式");
-        }
+    private IPaymentService checkMchWayCodeAndGetService(MchAppConfigContext mchAppConfigContext, MchPayPassage mchPayPassage){
 
         // 接口代码
         String ifCode = mchPayPassage.getIfCode();
@@ -261,7 +277,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             throw new BizException("无此支付通道接口");
         }
 
-        if(!paymentService.isSupport(wayCode)){
+        if(!paymentService.isSupport(mchPayPassage.getWayCode())){
             throw new BizException("接口不支持该支付方式");
         }
 
@@ -306,7 +322,9 @@ public abstract class AbstractPayOrderController extends ApiController {
         if(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == channelRetMsg.getChannelState()) {
 
             this.updateInitOrderStateThrowException(PayOrder.STATE_SUCCESS, payOrder, channelRetMsg);
-            payMchNotifyService.payOrderNotify(payOrder);
+
+            //订单支付成功，其他业务逻辑
+            payOrderProcessService.confirmSuccess(payOrder);
 
         //明确失败
         }else if(ChannelRetMsg.ChannelState.CONFIRM_FAIL == channelRetMsg.getChannelState()) {
@@ -346,7 +364,7 @@ public abstract class AbstractPayOrderController extends ApiController {
         payOrder.setErrMsg(channelRetMsg.getChannelErrMsg());
 
 
-        boolean isSuccess = payOrderService.updateInit2Ing(payOrder.getPayOrderId(), payOrder.getIfCode(), payOrder.getWayCode());
+        boolean isSuccess = payOrderService.updateInit2Ing(payOrder.getPayOrderId(), payOrder);
         if(!isSuccess){
             throw new BizException("更新订单异常!");
         }

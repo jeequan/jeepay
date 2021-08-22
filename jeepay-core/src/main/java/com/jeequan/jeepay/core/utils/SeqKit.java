@@ -35,10 +35,13 @@ public class SeqKit {
 	private static final AtomicLong REFUND_ORDER_SEQ = new AtomicLong(0L);
 	private static final AtomicLong MHO_ORDER_SEQ = new AtomicLong(0L);
 	private static final AtomicLong TRANSFER_ID_SEQ = new AtomicLong(0L);
+	private static final AtomicLong DIVISION_BATCH_ID_SEQ = new AtomicLong(0L);
+
 	private static final String PAY_ORDER_SEQ_PREFIX = "P";
 	private static final String REFUND_ORDER_SEQ_PREFIX = "R";
 	private static final String MHO_ORDER_SEQ_PREFIX = "M";
 	private static final String TRANSFER_ID_SEQ_PREFIX = "T";
+	private static final String DIVISION_BATCH_ID_SEQ_PREFIX = "D";
 
 	/** 生成支付订单号 **/
 	public static String genPayOrderId() {
@@ -67,6 +70,13 @@ public class SeqKit {
 		return String.format("%s%s%04d", TRANSFER_ID_SEQ_PREFIX,
 				DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
 				(int) TRANSFER_ID_SEQ.getAndIncrement() % 10000);
+	}
+
+	/** 模拟生成分账批次号 **/
+	public static String genDivisionBatchId() {
+		return String.format("%s%s%04d", DIVISION_BATCH_ID_SEQ_PREFIX,
+				DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
+				(int) DIVISION_BATCH_ID_SEQ.getAndIncrement() % 10000);
 	}
 
 }
