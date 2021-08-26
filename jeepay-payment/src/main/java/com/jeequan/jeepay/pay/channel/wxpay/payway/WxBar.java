@@ -70,6 +70,11 @@ public class WxBar extends WxpayPaymentService {
         request.setSpbillCreateIp(payOrder.getClientIp());
         request.setAuthCode(bizRQ.getAuthCode().trim());
 
+        //订单分账， 将冻结商户资金。
+        if(isDivisionOrder(payOrder)){
+            request.setProfitSharing("Y");
+        }
+
         //放置isv信息
         WxpayKit.putApiIsvInfo(mchAppConfigContext, request);
 

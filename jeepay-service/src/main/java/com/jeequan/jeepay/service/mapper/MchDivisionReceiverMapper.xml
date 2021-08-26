@@ -5,8 +5,9 @@
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jeequan.jeepay.core.entity.MchDivisionReceiver">
         <id column="receiver_id" property="receiverId" />
+        <result column="receiver_alias" property="receiverAlias" />
         <result column="receiver_group_id" property="receiverGroupId" />
-        <result column="receiver_name" property="receiverName" />
+        <result column="receiver_group_name" property="receiverGroupName" />
         <result column="mch_no" property="mchNo" />
         <result column="isv_no" property="isvNo" />
         <result column="app_id" property="appId" />
@@ -18,7 +19,6 @@
         <result column="relation_type_name" property="relationTypeName" />
         <result column="division_profit" property="divisionProfit" />
         <result column="state" property="state" />
-        <result column="channel_bind_state" property="channelBindState" />
         <result column="channel_bind_result" property="channelBindResult" />
         <result column="channel_ext_info" property="channelExtInfo" />
         <result column="bind_success_time" property="bindSuccessTime" />

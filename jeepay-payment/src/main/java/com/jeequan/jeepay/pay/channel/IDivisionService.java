@@ -16,6 +16,7 @@
 package com.jeequan.jeepay.pay.channel;
 
 import com.jeequan.jeepay.core.entity.MchDivisionReceiver;
+import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayOrderDivisionRecord;
 import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
@@ -40,9 +41,9 @@ public interface IDivisionService {
     boolean isSupport();
 
     /** 绑定关系 **/
-    boolean bind(MchDivisionReceiver mchDivisionReceiver, MchAppConfigContext mchAppConfigContext);
+    ChannelRetMsg bind(MchDivisionReceiver mchDivisionReceiver, MchAppConfigContext mchAppConfigContext);
 
     /** 单次分账 （无需调用完结接口，或自动解冻商户资金)  **/
-    boolean singleDivision(List<PayOrderDivisionRecord> recordList, MchAppConfigContext mchAppConfigContext);
+    ChannelRetMsg singleDivision(PayOrder payOrder, List<PayOrderDivisionRecord> recordList, MchAppConfigContext mchAppConfigContext);
 
 }

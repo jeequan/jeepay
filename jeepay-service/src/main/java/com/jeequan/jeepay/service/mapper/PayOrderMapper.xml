@@ -16,7 +16,6 @@
         <result column="amount" property="amount" />
         <result column="mch_fee_rate" property="mchFeeRate" />
         <result column="mch_fee_amount" property="mchFeeAmount" />
-        <result column="mch_income_amount" property="mchIncomeAmount" />
         <result column="currency" property="currency" />
         <result column="state" property="state" />
         <result column="notify_state" property="notifyState" />

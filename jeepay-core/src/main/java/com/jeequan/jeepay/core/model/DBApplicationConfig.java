@@ -51,12 +51,12 @@ public class DBApplicationConfig implements Serializable {
 
     /** 生成  【jsapi统一收银台】oauth2获取用户ID回调地址 **/
     public String genOauth2RedirectUrlEncode(String payOrderId){
-        return URLUtil.encode(getPaySiteUrl() + "/cashier/index.html#/oauth2Callback/" + JeepayKit.aesEncode(payOrderId));
+        return URLUtil.encodeAll(getPaySiteUrl() + "/cashier/index.html#/oauth2Callback/" + JeepayKit.aesEncode(payOrderId));
     }
 
     /** 生成  【商户获取渠道用户ID接口】oauth2获取用户ID回调地址 **/
     public String genMchChannelUserIdApiOauth2RedirectUrlEncode(JSONObject param){
-        return URLUtil.encode(getPaySiteUrl() + "/api/channelUserId/oauth2Callback/" + JeepayKit.aesEncode(param.toJSONString()));
+        return URLUtil.encodeAll(getPaySiteUrl() + "/api/channelUserId/oauth2Callback/" + JeepayKit.aesEncode(param.toJSONString()));
     }
 
     /** 生成  【jsapi统一收银台二维码图片地址】 **/

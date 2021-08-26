@@ -108,7 +108,7 @@ public class PayOrderDivisionMQ extends AbstractMQ {
         private Long receiverId;
 
         /**
-         * 多渠道组合ID（便于商户接口使用） (与 receiverId 二选一)
+         * 组ID（便于商户接口使用） (与 receiverId 二选一)
          */
         private Long receiverGroupId;
 

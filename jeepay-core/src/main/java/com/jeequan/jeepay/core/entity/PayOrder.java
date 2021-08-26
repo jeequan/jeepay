@@ -133,11 +133,6 @@ public class PayOrder extends BaseModel implements Serializable {
     private Long mchFeeAmount;
 
     /**
-     * 商户入账金额（支付金额-手续费）,单位分
-     */
-    private Long mchIncomeAmount;
-
-    /**
      * 三位货币代码,人民币:cny
      */
     private String currency;
@@ -203,7 +198,7 @@ public class PayOrder extends BaseModel implements Serializable {
     private Byte divisionMode;
 
     /**
-     * 订单分账状态：0-未发生分账, 1-等待分账任务处理, 2-分账成功, 3-分账失败
+     * 0-未发生分账, 1-等待分账任务处理, 2-分账处理中, 3-分账任务已结束(不体现状态)
      */
     private Byte divisionState;
 

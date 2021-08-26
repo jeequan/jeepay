@@ -62,7 +62,6 @@ public class JeeUserDetails implements UserDetails {
         this.setSysUser(sysUser);
         this.setCredential(credential);
 
-        //TODO ....
         //做一些初始化操作
     }
 

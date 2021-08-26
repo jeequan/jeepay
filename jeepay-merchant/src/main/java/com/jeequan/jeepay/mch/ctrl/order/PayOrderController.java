@@ -85,6 +85,9 @@ public class PayOrderController extends CommonCtrl {
         if (StringUtils.isNotEmpty(payOrder.getAppId())) {
             wrapper.eq(PayOrder::getAppId, payOrder.getAppId());
         }
+        if (payOrder.getDivisionState() != null) {
+            wrapper.eq(PayOrder::getDivisionState, payOrder.getDivisionState());
+        }
         if (paramJSON != null) {
             if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) {
                 wrapper.ge(PayOrder::getCreatedAt, paramJSON.getString("createdStart"));

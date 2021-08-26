@@ -28,11 +28,6 @@ public class MchDivisionReceiver implements Serializable {
 
     private static final long serialVersionUID=1L;
 
-    public static final byte STATE_WAIT = 0; // 待分账
-    public static final byte STATE_SUCCESS = 1; // 分账成功
-    public static final byte STATE_FAIL = 2; // 分账失败
-
-
     //gw
     public static final LambdaQueryWrapper<MchDivisionReceiver> gw(){
         return new LambdaQueryWrapper<>();
@@ -45,14 +40,19 @@ public class MchDivisionReceiver implements Serializable {
     private Long receiverId;
 
     /**
-     * 多渠道组合ID（便于商户接口使用）
+     * 接收者账号别名
+     */
+    private String receiverAlias;
+
+    /**
+     * 组ID（便于商户接口使用）
      */
     private Long receiverGroupId;
 
     /**
-     * 接收者账号别名
+     * 组名称
      */
-    private String receiverName;
+    private String receiverGroupName;
 
     /**
      * 商户号
@@ -108,11 +108,6 @@ public class MchDivisionReceiver implements Serializable {
      * 分账状态（本系统状态，并不调用上游关联关系）: 1-正常分账, 0-暂停分账
      */
     private Byte state;
-
-    /**
-     * 上游绑定状态: 1-绑定成功, 2-绑定异常
-     */
-    private Byte channelBindState;
 
     /**
      * 上游绑定返回信息，一般用作查询绑定异常时的记录

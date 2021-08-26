@@ -90,6 +90,11 @@ public class WxpayPaymentService extends AbstractPaymentService {
         request.setNotifyUrl(getNotifyUrl());
         request.setProductId(System.currentTimeMillis()+"");
 
+        //订单分账， 将冻结商户资金。
+        if(isDivisionOrder(payOrder)){
+            request.setProfitSharing("Y");
+        }
+
         // 特约商户
         if(mchAppConfigContext.isIsvsubMch()){
             WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
@@ -124,6 +129,13 @@ public class WxpayPaymentService extends AbstractPaymentService {
         JSONObject sceneInfo = new JSONObject();
         sceneInfo.put("payer_client_ip", payOrder.getClientIp());
         reqJSON.put("scene_info", sceneInfo);
+
+        //订单分账， 将冻结商户资金。
+        if(isDivisionOrder(payOrder)){
+           JSONObject settleInfo = new JSONObject();
+           settleInfo.put("profit_sharing", true);
+           reqJSON.put("settle_info", settleInfo);
+        }
 
         WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
         if(mchAppConfigContext.isIsvsubMch()){ // 特约商户

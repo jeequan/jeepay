@@ -234,7 +234,6 @@ public abstract class AbstractPayOrderController extends ApiController {
         }
 
         payOrder.setMchFeeAmount(AmountUtil.calPercentageFee(payOrder.getAmount(), payOrder.getMchFeeRate())); //商户手续费,单位分
-        payOrder.setMchIncomeAmount(payOrder.getAmount() - payOrder.getMchFeeAmount()); //商户入账金额（支付金额-手续费）,单位分
 
         payOrder.setCurrency(rq.getCurrency()); //币种
         payOrder.setState(PayOrder.STATE_INIT); //订单状态, 默认订单生成状态

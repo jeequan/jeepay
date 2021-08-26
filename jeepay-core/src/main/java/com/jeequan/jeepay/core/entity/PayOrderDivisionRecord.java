@@ -3,6 +3,7 @@ package com.jeequan.jeepay.core.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -25,7 +26,15 @@ import java.util.Date;
 @TableName("t_pay_order_division_record")
 public class PayOrderDivisionRecord implements Serializable {
 
+    public static final byte STATE_WAIT = 0; // 待分账
+    public static final byte STATE_SUCCESS = 1; // 分账成功
+    public static final byte STATE_FAIL = 2; // 分账失败
+
     private static final long serialVersionUID=1L;
+
+    public static final LambdaQueryWrapper<PayOrderDivisionRecord> gw(){
+        return new LambdaQueryWrapper<>();
+    }
 
     /**
      * 分账记录ID
@@ -109,9 +118,14 @@ public class PayOrderDivisionRecord implements Serializable {
     private Long receiverId;
 
     /**
-     * 账号快照》 多渠道组合ID（便于商户存储）
+     * 账号快照》 组ID（便于商户接口使用）
      */
     private Long receiverGroupId;
+
+    /**
+     * 账号快照》 分账接收者别名
+     */
+    private String receiverAlias;
 
     /**
      * 账号快照》 分账接收账号类型: 0-个人 1-商户

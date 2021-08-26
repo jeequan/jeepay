@@ -21,6 +21,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.jeequan.jeepay.components.mq.model.PayOrderDivisionMQ;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchDivisionReceiver;
+import com.jeequan.jeepay.core.entity.MchDivisionReceiverGroup;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayOrderDivisionRecord;
 import com.jeequan.jeepay.core.exception.BizException;
@@ -31,7 +32,9 @@ import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.pay.channel.IDivisionService;
 import com.jeequan.jeepay.pay.channel.ITransferService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
+import com.jeequan.jeepay.service.impl.MchDivisionReceiverGroupService;
 import com.jeequan.jeepay.service.impl.MchDivisionReceiverService;
 import com.jeequan.jeepay.service.impl.PayOrderDivisionRecordService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
@@ -41,6 +44,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -58,6 +62,8 @@ public class PayOrderDivisionMQReceiver implements PayOrderDivisionMQ.IMQReceive
     private PayOrderService payOrderService;
     @Autowired
     private MchDivisionReceiverService mchDivisionReceiverService;
+    @Autowired
+    private MchDivisionReceiverGroupService mchDivisionReceiverGroupService;
     @Autowired
     private PayOrderDivisionRecordService payOrderDivisionRecordService;
     @Autowired
@@ -95,8 +101,8 @@ public class PayOrderDivisionMQReceiver implements PayOrderDivisionMQ.IMQReceive
                 return ;
             }
 
-            // 查询所有的分账接收对象
-            List<MchDivisionReceiver> allReceiver = queryReceiver(payOrder, payload.getReceiverList());
+            // 查询&过滤 所有的分账接收对象
+            List<MchDivisionReceiver> allReceiver = this.queryReceiver(payOrder, payload.getReceiverList());
 
             //得到全部分账比例 (所有待分账账号的分账比例总和)
             BigDecimal allDivisionProfit = BigDecimal.ZERO;
@@ -104,8 +110,11 @@ public class PayOrderDivisionMQReceiver implements PayOrderDivisionMQ.IMQReceive
                 allDivisionProfit = allDivisionProfit.add(receiver.getDivisionProfit());
             }
 
-            //剩余待分账金额 (用作最后一个分账账号的 计算， 避免出现分账金额超出最大)
-            Long subDivisionAmount = AmountUtil.calPercentageFee(payOrder.getMchIncomeAmount(), allDivisionProfit);
+            //计算分账金额 = 商家实际入账金额
+            Long payOrderDivisionAmount = payOrderService.calMchIncomeAmount(payOrder);
+
+            //剩余待分账金额 (用作最后一个分账账号的 计算， 避免出现分账金额超出最大) [结果向下取整 ， 避免出现金额溢出的情况。 ]
+            Long subDivisionAmount = AmountUtil.calPercentageFee(payOrderDivisionAmount, allDivisionProfit, BigDecimal.ROUND_FLOOR);
 
             List<PayOrderDivisionRecord> recordList = new ArrayList<>();
 
@@ -115,7 +124,7 @@ public class PayOrderDivisionMQReceiver implements PayOrderDivisionMQ.IMQReceive
 
             for (MchDivisionReceiver receiver : allReceiver) {
 
-                PayOrderDivisionRecord record = genRecord(batchOrderId, payOrder, receiver, subDivisionAmount);
+                PayOrderDivisionRecord record = genRecord(batchOrderId, payOrder, receiver, payOrderDivisionAmount, subDivisionAmount);
 
                 //剩余金额
                 subDivisionAmount = subDivisionAmount - record.getCalDivisionAmount();
@@ -134,14 +143,19 @@ public class PayOrderDivisionMQReceiver implements PayOrderDivisionMQ.IMQReceive
                     throw new BizException("通道无此分账接口");
                 }
 
-                divisionService.singleDivision(recordList, configContextService.getMchAppConfigContext(payOrder.getMchNo(), payOrder.getAppId()));
+                ChannelRetMsg channelRetMsg = divisionService.singleDivision(payOrder, recordList, configContextService.getMchAppConfigContext(payOrder.getMchNo(), payOrder.getAppId()));
 
-                if(true) {
+                // 确认分账成功
+                if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
 
                     //分账成功
+                    payOrderDivisionRecordService.updateRecordSuccessOrFail(recordList, PayOrderDivisionRecord.STATE_SUCCESS,
+                            channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelOriginResponse());
 
                 }else{
                     //分账失败
+                    payOrderDivisionRecordService.updateRecordSuccessOrFail(recordList, PayOrderDivisionRecord.STATE_FAIL,
+                            channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrMsg());
                 }
 
             } catch (BizException e) {
@@ -149,14 +163,14 @@ public class PayOrderDivisionMQReceiver implements PayOrderDivisionMQ.IMQReceive
 
             } catch (Exception e) {
                 log.error("{}, 调用分账接口异常", logPrefix, e);
-
-                //分账失败
-
+                payOrderDivisionRecordService.updateRecordSuccessOrFail(recordList, PayOrderDivisionRecord.STATE_FAIL,
+                        null, "系统异常：" + e.getMessage());
             }
 
             //更新 支付订单主表状态  分账任务已结束。
             payOrderService.update(new LambdaUpdateWrapper<PayOrder>()
                     .set(PayOrder::getDivisionState, PayOrder.DIVISION_STATE_FINISH)
+                    .set(PayOrder::getDivisionLastTime, new Date())
                     .eq(PayOrder::getPayOrderId, payload.getPayOrderId())
                     .eq(PayOrder::getDivisionState, PayOrder.DIVISION_STATE_ING)
             );
@@ -168,7 +182,8 @@ public class PayOrderDivisionMQReceiver implements PayOrderDivisionMQ.IMQReceive
 
 
     /** 生成对象信息 **/
-    private PayOrderDivisionRecord genRecord(String batchOrderId, PayOrder payOrder, MchDivisionReceiver receiver, Long subDivisionAmount){
+    private PayOrderDivisionRecord genRecord(String batchOrderId, PayOrder payOrder, MchDivisionReceiver receiver,
+                                             Long payOrderDivisionAmount, Long subDivisionAmount){
 
         PayOrderDivisionRecord record = new PayOrderDivisionRecord();
         record.setMchNo(payOrder.getMchNo());
@@ -180,11 +195,12 @@ public class PayOrderDivisionMQReceiver implements PayOrderDivisionMQ.IMQReceive
         record.setPayOrderId(payOrder.getPayOrderId());
         record.setPayOrderChannelOrderNo(payOrder.getChannelOrderNo()); //支付订单渠道订单号
         record.setPayOrderAmount(payOrder.getAmount()); //订单金额
-        record.setPayOrderDivisionAmount(payOrder.getMchIncomeAmount()); // 订单实际分账金额, 单位：分（订单金额 - 商户手续费 - 已退款金额）  //TODO 实际计算金额
+        record.setPayOrderDivisionAmount(payOrderDivisionAmount); // 订单计算分账金额
         record.setBatchOrderId(batchOrderId); //系统分账批次号
-        record.setState(MchDivisionReceiver.STATE_WAIT); //状态: 待分账
+        record.setState(PayOrderDivisionRecord.STATE_WAIT); //状态: 待分账
         record.setReceiverId(receiver.getReceiverId());
         record.setReceiverGroupId(receiver.getReceiverGroupId());
+        record.setReceiverAlias(receiver.getReceiverAlias());
         record.setAccType(receiver.getAccType());
         record.setAccNo(receiver.getAccNo());
         record.setAccName(receiver.getAccName());
@@ -195,7 +211,12 @@ public class PayOrderDivisionMQReceiver implements PayOrderDivisionMQ.IMQReceive
         if( subDivisionAmount <= 0 ) {
             record.setCalDivisionAmount(0L);
         }else{
+
+            //计算的分账金额
             record.setCalDivisionAmount(AmountUtil.calPercentageFee(record.getPayOrderDivisionAmount(), record.getDivisionProfit()));
+            if(record.getCalDivisionAmount() > subDivisionAmount){ // 分账金额超过剩余总金额时： 将按照剩余金额进行分账。
+                record.setCalDivisionAmount(subDivisionAmount);
+            }
         }
 
         return record;
@@ -212,6 +233,20 @@ public class PayOrderDivisionMQReceiver implements PayOrderDivisionMQ.IMQReceive
         queryWrapper.eq(MchDivisionReceiver::getIfCode, payOrder.getIfCode()); //ifCode
         queryWrapper.eq(MchDivisionReceiver::getState, CS.PUB_USABLE); // 可用状态的账号
 
+        // 未设置接收者账号信息， 需要查询 自动分账组的账号
+        if(customerDivisionReceiverList == null){
+
+            List<MchDivisionReceiverGroup> groups = mchDivisionReceiverGroupService.list(
+                    MchDivisionReceiverGroup.gw().eq(MchDivisionReceiverGroup::getMchNo, payOrder.getMchNo())
+                            .eq(MchDivisionReceiverGroup::getAutoDivisionFlag, CS.YES));
+
+            if(groups.isEmpty()){
+                return new ArrayList<>();
+            }
+
+            queryWrapper.eq(MchDivisionReceiver::getReceiverGroupId, groups.get(0).getReceiverGroupId());
+        }
+
         //全部分账账号
         List<MchDivisionReceiver> allMchReceiver = mchDivisionReceiverService.list(queryWrapper);
         if(allMchReceiver.isEmpty()){
@@ -227,7 +262,6 @@ public class PayOrderDivisionMQReceiver implements PayOrderDivisionMQ.IMQReceive
         if(customerDivisionReceiverList.isEmpty()){
             return new ArrayList<>();
         }
-
 
         // 过滤账号
         List<MchDivisionReceiver> filterMchReceiver = new ArrayList<>();

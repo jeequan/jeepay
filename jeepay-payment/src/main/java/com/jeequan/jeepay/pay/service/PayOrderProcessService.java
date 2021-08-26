@@ -75,7 +75,7 @@ public class PayOrderProcessService {
 
             if(updDivisionState){
                 //推送到分账MQ
-                mqSender.send(PayOrderDivisionMQ.build(payOrder.getPayOrderId(), null), 1); //1分钟后执行
+                mqSender.send(PayOrderDivisionMQ.build(payOrder.getPayOrderId(), null), 60); //1分钟后执行
             }
 
         } catch (Exception e) {

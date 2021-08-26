@@ -50,6 +50,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -181,6 +182,12 @@ public class ConfigContextService {
             return ;
         }
 
+
+        // 商户应用mchNo 与参数不匹配
+        if(!dbMchApp.getMchNo().equals(mchNo)){
+            return;
+        }
+
         //更新商户信息主体中的商户应用
         mchInfoConfigContext.putMchApp(dbMchApp);
 
@@ -256,19 +263,28 @@ public class ConfigContextService {
     /** 初始化 [ISV支付参数配置信息]  **/
     public synchronized void initIsvConfigContext(String isvNo){
 
+        //查询出所有商户的配置信息并更新
+        List<String> mchNoList = new ArrayList<>();
+        mchInfoService.list(MchInfo.gw().select(MchInfo::getMchNo).eq(MchInfo::getIsvNo, isvNo)).forEach(r -> mchNoList.add(r.getMchNo()));
+
+        // 查询出所有 所属当前服务商的所有应用集合
+        List<String> mchAppIdList = new ArrayList<>();
+        if(!mchNoList.isEmpty()){
+            mchAppService.list(MchApp.gw().select(MchApp::getAppId).in(MchApp::getMchNo, mchNoList)).forEach(r -> mchAppIdList.add(r.getAppId()));
+        }
+
         IsvConfigContext isvConfigContext = new IsvConfigContext();
         IsvInfo isvInfo = isvInfoService.getById(isvNo);
         if(isvInfo == null){
 
-            //查询出所有商户的配置信息并更新
-            mchInfoService.list(MchInfo.gw().select(MchInfo::getMchNo).eq(MchInfo::getIsvNo, isvNo)).forEach(mchInfoItem -> {
-
+            for (String appId : mchAppIdList) {
                 //将更新已存在缓存的商户配置信息 （每个商户下存储的为同一个 服务商配置的对象指针）
-                MchAppConfigContext mchAppConfigContext = mchAppConfigContextMap.get(mchInfoItem.getMchNo());
+                MchAppConfigContext mchAppConfigContext = mchAppConfigContextMap.get(appId);
                 if(mchAppConfigContext != null){
                     mchAppConfigContext.setIsvConfigContext(null);
                 }
-            });
+            }
+
             isvConfigContextMap.remove(isvNo); // 服务商有商户不可删除， 此处不再更新商户下的配置信息
             return ;
         }
@@ -314,16 +330,13 @@ public class ConfigContextService {
         isvConfigContextMap.put(isvNo, isvConfigContext);
 
         //查询出所有商户的配置信息并更新
-        mchInfoService.list(MchInfo.gw().select(MchInfo::getMchNo).eq(MchInfo::getIsvNo, isvNo)).forEach(mchInfoItem -> {
-
+        for (String appId : mchAppIdList) {
             //将更新已存在缓存的商户配置信息 （每个商户下存储的为同一个 服务商配置的对象指针）
-            MchAppConfigContext mchAppConfigContext = mchAppConfigContextMap.get(mchInfoItem.getMchNo());
+            MchAppConfigContext mchAppConfigContext = mchAppConfigContextMap.get(appId);
             if(mchAppConfigContext != null){
                 mchAppConfigContext.setIsvConfigContext(isvConfigContext);
             }
-
-        });
-
+        }
     }
 
 

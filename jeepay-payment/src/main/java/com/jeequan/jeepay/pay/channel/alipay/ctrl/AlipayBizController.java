@@ -83,7 +83,7 @@ public class AlipayBizController extends AbstractCtrl {
         }
 
         String redirectUrl = sysConfigService.getDBApplicationConfig().getPaySiteUrl() + "/api/channelbiz/alipay/appToAppAuthCallback";
-        response.sendRedirect(String.format(oauthUrl, alipayIsvParams.getAppId(), URLUtil.encode(redirectUrl), isvAndMchAppId));
+        response.sendRedirect(String.format(oauthUrl, alipayIsvParams.getAppId(), URLUtil.encodeAll(redirectUrl), isvAndMchAppId));
     }
 
     /** 支付宝授权回调地址 **/

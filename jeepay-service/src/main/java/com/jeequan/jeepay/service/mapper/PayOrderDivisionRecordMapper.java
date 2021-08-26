@@ -13,4 +13,7 @@ import com.jeequan.jeepay.core.entity.PayOrderDivisionRecord;
  */
 public interface PayOrderDivisionRecordMapper extends BaseMapper<PayOrderDivisionRecord> {
 
+    /** 查询全部分账成功金额 **/
+    Long sumSuccessDivisionAmount(String payOrderId);
+
 }

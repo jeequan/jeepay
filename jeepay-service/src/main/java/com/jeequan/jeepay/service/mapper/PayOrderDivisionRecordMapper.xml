@@ -21,6 +21,7 @@
         <result column="channel_resp_result" property="channelRespResult" />
         <result column="receiver_id" property="receiverId" />
         <result column="receiver_group_id" property="receiverGroupId" />
+        <result column="receiver_alias" property="receiverAlias" />
         <result column="acc_type" property="accType" />
         <result column="acc_no" property="accNo" />
         <result column="acc_name" property="accName" />
@@ -31,5 +32,12 @@
         <result column="created_at" property="createdAt" />
         <result column="updated_at" property="updatedAt" />
     </resultMap>
+
+
+    <select id="sumSuccessDivisionAmount" resultType="Long">
+        select ifnull(sum(cal_division_amount), 0) from t_pay_order_division_record
+        where pay_order_id = #{payOrderId} and state = 1
+    </select>
+
 
 </mapper>

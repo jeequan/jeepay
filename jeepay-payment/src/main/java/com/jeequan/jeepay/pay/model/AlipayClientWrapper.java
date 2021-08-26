@@ -58,8 +58,6 @@ public class AlipayClientWrapper {
                 alipayResp = alipayClient.execute(request);
             }
 
-            //判断返回的值： // TODO
-
             return alipayResp;
 
         } catch (AlipayApiException e) { // 调起接口前出现异常，如私钥问题。  调起后出现验签异常等。

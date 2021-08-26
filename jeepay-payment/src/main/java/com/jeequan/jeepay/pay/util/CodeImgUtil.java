@@ -69,7 +69,6 @@ public class CodeImgUtil {
 	}
 
 
-	//TODO
 	// 图片宽度的一般
 	private static final int IMAGE_WIDTH = 25;
 	private static final int IMAGE_HEIGHT = 25;

@@ -17,19 +17,21 @@ package com.jeequan.jeepay.pay.channel.wxpay;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.binarywang.wxpay.bean.profitsharing.ProfitSharingReceiverRequest;
-import com.github.binarywang.wxpay.bean.profitsharing.ProfitSharingReceiverResult;
-import com.github.binarywang.wxpay.bean.profitsharing.ProfitSharingRequest;
-import com.github.binarywang.wxpay.bean.profitsharing.ProfitSharingResult;
+import com.github.binarywang.wxpay.bean.profitsharing.*;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchDivisionReceiver;
+import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayOrderDivisionRecord;
+import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.pay.channel.IDivisionService;
+import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -54,11 +56,14 @@ public class WxpayDivisionService implements IDivisionService {
     }
 
     @Override
-    public boolean bind(MchDivisionReceiver mchDivisionReceiver, MchAppConfigContext mchAppConfigContext) {
+    public ChannelRetMsg bind(MchDivisionReceiver mchDivisionReceiver, MchAppConfigContext mchAppConfigContext) {
 
         try {
 
             ProfitSharingReceiverRequest request = new ProfitSharingReceiverRequest();
+
+            //放置isv信息
+            WxpayKit.putApiIsvInfo(mchAppConfigContext, request);
 
             JSONObject receiverJSON = new JSONObject();
 
@@ -73,30 +78,49 @@ public class WxpayDivisionService implements IDivisionService {
             ProfitSharingReceiverResult profitSharingReceiverResult =
                     mchAppConfigContext.getWxServiceWrapper().getWxPayService().getProfitSharingService().addReceiver(request);
 
+            // 明确成功
+            return ChannelRetMsg.confirmSuccess(null);
+
         } catch (WxPayException wxPayException) {
-            wxPayException.printStackTrace();
+            ChannelRetMsg channelRetMsg = ChannelRetMsg.confirmFail();
+            WxpayKit.commonSetErrInfo(channelRetMsg, wxPayException);
+            return channelRetMsg;
+
+        } catch (Exception e) {
+
+            log.error("请求微信绑定分账接口异常！", e);
+            ChannelRetMsg channelRetMsg = ChannelRetMsg.confirmFail();
+            channelRetMsg.setChannelErrMsg("系统异常：" + e.getMessage());
+            return channelRetMsg;
         }
-
-
-        return false;
     }
 
     @Override
-    public boolean singleDivision(List<PayOrderDivisionRecord> recordList, MchAppConfigContext mchAppConfigContext) {
+    public ChannelRetMsg singleDivision(PayOrder payOrder, List<PayOrderDivisionRecord> recordList, MchAppConfigContext mchAppConfigContext) {
 
         try {
 
-            if(true || recordList.isEmpty()){
-                return true;
-            }
-
             ProfitSharingRequest request = new ProfitSharingRequest();
-            request.setTransactionId(recordList.get(0).getPayOrderChannelOrderNo());
-            request.setOutOrderNo(recordList.get(0).getBatchOrderId());
+            request.setTransactionId(payOrder.getChannelOrderNo());
+
+            //放置isv信息
+            WxpayKit.putApiIsvInfo(mchAppConfigContext, request);
+
+            if(recordList.isEmpty()){
+                request.setOutOrderNo(SeqKit.genDivisionBatchId()); // 随机生成一个订单号
+            }else{
+                request.setOutOrderNo(recordList.get(0).getBatchOrderId()); //取到批次号
+            }
 
             JSONArray receiverJSONArray = new JSONArray();
 
-            for (PayOrderDivisionRecord record : recordList) {
+            for (int i = 0; i < recordList.size(); i++) {
+
+                PayOrderDivisionRecord record = recordList.get(i);
+                if(record.getCalDivisionAmount() <= 0){
+                    continue;
+                }
+
                 JSONObject receiverJSON = new JSONObject();
                 // 0-个人， 1-商户  (目前仅支持服务商appI获取个人openId, 即： PERSONAL_OPENID， 不支持 PERSONAL_SUB_OPENID )
                 receiverJSON.put("type", record.getAccType() == 0 ? "PERSONAL_OPENID" : "MERCHANT_ID");
@@ -106,15 +130,45 @@ public class WxpayDivisionService implements IDivisionService {
                 receiverJSONArray.add(receiverJSON);
             }
 
+            //不存在接收账号时，订单完结（解除冻结金额）
+            if(receiverJSONArray.isEmpty()){
+                return ChannelRetMsg.confirmSuccess(this.divisionFinish(payOrder, mchAppConfigContext));
+            }
+
             request.setReceivers(receiverJSONArray.toJSONString());
 
             ProfitSharingResult profitSharingResult = mchAppConfigContext.getWxServiceWrapper().getWxPayService().getProfitSharingService().profitSharing(request);
+            return ChannelRetMsg.confirmSuccess(profitSharingResult.getOrderId());
+
+        } catch (WxPayException wxPayException) {
+
+            ChannelRetMsg channelRetMsg = ChannelRetMsg.confirmFail();
+            WxpayKit.commonSetErrInfo(channelRetMsg, wxPayException);
+            return channelRetMsg;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("微信分账失败", e);
+            ChannelRetMsg channelRetMsg = ChannelRetMsg.confirmFail();
+            channelRetMsg.setChannelErrMsg(e.getMessage());
+            return channelRetMsg;
         }
-
-
-        return false;
     }
+
+
+    /** 调用订单的完结接口 (分账对象不存在时) */
+    private String divisionFinish(PayOrder payOrder,MchAppConfigContext mchAppConfigContext) throws WxPayException {
+
+        ProfitSharingFinishRequest request = new ProfitSharingFinishRequest();
+
+        //放置isv信息
+        WxpayKit.putApiIsvInfo(mchAppConfigContext, request);
+
+        request.setSubAppId(null); // 传入subAppId 将导致签名失败
+
+        request.setTransactionId(payOrder.getChannelOrderNo());
+        request.setOutOrderNo(SeqKit.genDivisionBatchId());
+        request.setDescription("完结分账");
+        return mchAppConfigContext.getWxServiceWrapper().getWxPayService().getProfitSharingService().profitSharingFinish(request).getOrderId();
+    }
+
 }

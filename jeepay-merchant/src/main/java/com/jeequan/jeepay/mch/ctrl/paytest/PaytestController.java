@@ -81,6 +81,13 @@ public class PaytestController extends CommonCtrl {
         String mchOrderNo = getValStringRequired("mchOrderNo");
         String wayCode = getValStringRequired("wayCode");
 
+        Byte divisionMode = getValByteRequired("divisionMode");
+        String orderTitle = getValStringRequired("orderTitle");
+
+        if(StringUtils.isEmpty(orderTitle)){
+            throw new BizException("订单标题不能为空");
+        }
+
         // 前端明确了支付参数的类型 payDataType
         String payDataType = getValString("payDataType");
         String authCode = getValString("authCode");
@@ -102,9 +109,10 @@ public class PaytestController extends CommonCtrl {
         model.setAmount(amount);
         model.setCurrency("CNY");
         model.setClientIp(getClientIp());
-        model.setSubject(getCurrentMchNo() + "商户联调");
-        model.setBody(getCurrentMchNo() + "商户联调");
+        model.setSubject(orderTitle + "[" + getCurrentMchNo() + "商户联调]");
+        model.setBody(orderTitle + "[" + getCurrentMchNo() + "商户联调]");
         model.setNotifyUrl(sysConfigService.getDBApplicationConfig().getMchSiteUrl() + "/api/anon/paytestNotify/payOrder"); //回调地址
+        model.setDivisionMode(divisionMode); //分账模式
 
         //设置扩展参数
         JSONObject extParams = new JSONObject();
