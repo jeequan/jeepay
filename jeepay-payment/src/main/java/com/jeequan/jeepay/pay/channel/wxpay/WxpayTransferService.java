@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 * 转账接口： 微信官方
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/8/11 14:05
 */
 @Slf4j

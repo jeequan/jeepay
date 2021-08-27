@@ -24,7 +24,7 @@ import com.jeequan.jeepay.pay.rqrs.transfer.TransferOrderRQ;
 * 转账接口
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/8/11 13:59
 */
 public interface ITransferService {

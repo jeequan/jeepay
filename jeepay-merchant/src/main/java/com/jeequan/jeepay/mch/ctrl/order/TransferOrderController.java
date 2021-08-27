@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 * 转账订单api
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/8/13 10:52
 */
 @RestController

@@ -362,7 +362,7 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
     *  计算支付订单商家入账金额
     * 商家订单入账金额 （支付金额 - 手续费 - 退款金额 - 总分账金额）
     * @author terrfly
-    * @site https://www.jeepay.vip
+    * @site https://www.jeequan.com
     * @date 2021/8/26 16:39
     */
     public Long calMchIncomeAmount(PayOrder dbPayOrder){

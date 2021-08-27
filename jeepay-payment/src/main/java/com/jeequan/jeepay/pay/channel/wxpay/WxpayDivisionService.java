@@ -38,7 +38,7 @@ import java.util.List;
 * 分账接口： 微信官方
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/8/22 09:05
 */
 @Slf4j

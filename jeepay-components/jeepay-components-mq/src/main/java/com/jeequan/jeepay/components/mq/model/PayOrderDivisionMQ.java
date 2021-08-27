@@ -54,6 +54,9 @@ public class PayOrderDivisionMQ extends AbstractMQ {
         /** 支付订单号 **/
         private String payOrderId;
 
+        /** 是否使用默认分组 **/
+        private Byte useSysAutoDivisionReceivers;
+
         /**
          * 分账接受者列表， 字段值为空表示系统默认配置项。
          * 格式：{receiverId: '1001', receiverGroupId: '1001', divisionProfit: '0.1'}
@@ -80,8 +83,8 @@ public class PayOrderDivisionMQ extends AbstractMQ {
     }
 
     /**  【！重要配置项！】 构造MQModel , 一般用于发送MQ时 **/
-    public static PayOrderDivisionMQ build(String payOrderId, List<CustomerDivisionReceiver> receiverList){
-        return new PayOrderDivisionMQ(new MsgPayload(payOrderId, receiverList));
+    public static PayOrderDivisionMQ build(String payOrderId, Byte useSysAutoDivisionReceivers, List<CustomerDivisionReceiver> receiverList){
+        return new PayOrderDivisionMQ(new MsgPayload(payOrderId, useSysAutoDivisionReceivers, receiverList));
     }
 
     /** 解析MQ消息， 一般用于接收MQ消息时 **/

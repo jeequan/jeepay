@@ -18,6 +18,7 @@ package com.jeequan.jeepay.pay.service;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.jeequan.jeepay.components.mq.model.PayOrderDivisionMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
+import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ import org.springframework.stereotype.Service;
 * 订单处理通用逻辑
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/8/22 16:50
 */
 @Service
@@ -75,7 +76,7 @@ public class PayOrderProcessService {
 
             if(updDivisionState){
                 //推送到分账MQ
-                mqSender.send(PayOrderDivisionMQ.build(payOrder.getPayOrderId(), null), 60); //1分钟后执行
+                mqSender.send(PayOrderDivisionMQ.build(payOrder.getPayOrderId(), CS.YES,null), 60); //1分钟后执行
             }
 
         } catch (Exception e) {

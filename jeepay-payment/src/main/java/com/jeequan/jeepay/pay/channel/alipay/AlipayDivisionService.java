@@ -43,7 +43,7 @@ import java.util.List;
 * 分账接口： 支付宝官方
 *
 * @author terrfly
-* @site https://www.jeepay.vip
+* @site https://www.jeequan.com
 * @date 2021/8/22 09:05
 */
 @Slf4j
@@ -62,7 +62,6 @@ public class AlipayDivisionService implements IDivisionService {
 
     @Override
     public ChannelRetMsg bind(MchDivisionReceiver mchDivisionReceiver, MchAppConfigContext mchAppConfigContext) {
-
 
         try {
             AlipayTradeRoyaltyRelationBindRequest request = new AlipayTradeRoyaltyRelationBindRequest();
@@ -114,6 +113,10 @@ public class AlipayDivisionService implements IDivisionService {
 
         try {
 
+            if(recordList.isEmpty()){ // 当无分账用户时， 支付宝不允许发起分账请求， 支付宝没有完结接口，直接响应成功即可。
+                return ChannelRetMsg.confirmSuccess(null);
+            }
+
             AlipayTradeOrderSettleRequest request = new AlipayTradeOrderSettleRequest();
             AlipayTradeOrderSettleModel model = new AlipayTradeOrderSettleModel();
             request.setBizModel(model);
@@ -150,7 +153,7 @@ public class AlipayDivisionService implements IDivisionService {
 
             }
 
-            if(reqReceiverList.isEmpty()){ // 当无分账用户时， 支付宝不允许发起分账请求， 支付宝没有完结解决，直接响应成功即可。
+            if(reqReceiverList.isEmpty()){ // 当无分账用户时， 支付宝不允许发起分账请求， 支付宝没有完结接口，直接响应成功即可。
                 return ChannelRetMsg.confirmSuccess(null);
             }
 
