@@ -83,7 +83,8 @@ public class WxpayRefundService extends AbstractRefundService {
                     channelRetMsg.setChannelOrderId(result.getRefundId());
                 }else{
                     channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-                    channelRetMsg.setChannelErrMsg(result.getReturnMsg());
+                    channelRetMsg.setChannelErrCode(result.getErrCode());
+                    channelRetMsg.setChannelErrMsg(WxpayKit.appendErrMsg(result.getReturnMsg(), result.getErrCodeDes()));
                 }
             }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) {   //V3
                 // 微信统一下单请求对象
@@ -122,7 +123,10 @@ public class WxpayRefundService extends AbstractRefundService {
             }
             return channelRetMsg;
         } catch (WxPayException e) {
-            return ChannelRetMsg.sysError(e.getReturnMsg());
+            ChannelRetMsg channelRetMsg = ChannelRetMsg.confirmFail();
+            WxpayKit.commonSetErrInfo(channelRetMsg, e);
+            return channelRetMsg;
+
         } catch (Exception e) {
             return ChannelRetMsg.sysError(e.getMessage());
         }
