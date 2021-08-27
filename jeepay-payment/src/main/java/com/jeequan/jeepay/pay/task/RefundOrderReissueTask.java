@@ -48,11 +48,8 @@ public class RefundOrderReissueTask {
     @Scheduled(cron="0 0/1 * * * ?") // 每分钟执行一次
     public void start() {
 
-        //当前时间 减去10分钟。
-        Date offsetDate = DateUtil.offsetMinute(new Date(), -10);
-
-        //查询条件： 支付中的订单 & （ 订单创建时间 + 10分钟 >= 当前时间 ）
-        LambdaQueryWrapper<RefundOrder> lambdaQueryWrapper = RefundOrder.gw().eq(RefundOrder::getState, RefundOrder.STATE_ING).le(RefundOrder::getCreatedAt, offsetDate);
+        //查询条件： 退款中的订单
+        LambdaQueryWrapper<RefundOrder> lambdaQueryWrapper = RefundOrder.gw().eq(RefundOrder::getState, RefundOrder.STATE_ING);
 
         int currentPageIndex = 1; //当前页码
         while(true){
