@@ -1,5 +1,5 @@
 <p align="center">
-	<a href="https://www.jeepay.vip"><img src="https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_logo.svg"></a>
+	<a href="https://www.jeequan.com"><img src="https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_logo.svg"></a>
 </p>
 <p align="center">
 	<strong>适合互联网企业使用的开源支付系统</strong>
@@ -50,7 +50,7 @@ Jeepay = Jee + pay，是由原XxPay支付系统作者带领团队开发，“Jee
 
 - Jeepay支付流程体验：[https://www.jeequan.com/demo/jeepay_cashier.html](https://www.jeequan.com/demo/jeepay_cashier.html "Jeepay支付体验")
 - Jeepay运营平台和商户系统演体验：[https://www.jeequan.com/doc/detail_84.html](https://www.jeequan.com/doc/detail_84.html "Jeepay支付系统体验")
-- Jeepay项目文档：[https://www.jeepay.vip](https://www.jeepay.vip "Jeepay项目文档")
+- Jeepay项目文档：[https://docs.jeequan.com/docs/jeepay](https://docs.jeequan.com/docs/jeepay "Jeepay项目文档")
 
 ### 🍎 项目特点
 
@@ -111,7 +111,7 @@ jeepay
 
 - 系统开发：[https://docs.jeequan.com/docs/jeepay/dev_serv](https://docs.jeequan.com/docs/jeepay/dev_serv)
 - 通道对接：[https://docs.jeequan.com/docs/jeepay/dev_channel](https://docs.jeequan.com/docs/jeepay/dev_channel)
-- 线上部署：[https://docs.jeequan.com/docs/jeepay/deploy](https://www.jeepay.vip/#/develop/deploy)
+- 线上部署：[https://docs.jeequan.com/docs/jeepay/deploy](https://docs.jeequan.com/docs/jeepay/deploy)
 - 接口文档：[https://docs.jeequan.com/docs/jeepay/payment_api](https://docs.jeequan.com/docs/jeepay/payment_api)
 
 ## 🍿 功能模块
