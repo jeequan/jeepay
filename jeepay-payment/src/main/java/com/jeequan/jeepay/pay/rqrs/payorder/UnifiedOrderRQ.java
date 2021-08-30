@@ -153,5 +153,10 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
         return this;
     }
 
+    /** 获取渠道用户ID **/
+    public String getChannelUserId(){
+        return this.channelUser;
+    }
+
 
 }

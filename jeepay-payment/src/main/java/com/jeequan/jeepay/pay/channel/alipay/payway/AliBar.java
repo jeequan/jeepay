@@ -84,6 +84,7 @@ public class AliBar extends AlipayPaymentService {
         //放置 响应数据
         channelRetMsg.setChannelAttach(alipayResp.getBody());
         channelRetMsg.setChannelOrderId(alipayResp.getTradeNo());
+        channelRetMsg.setChannelUserId(alipayResp.getBuyerUserId()); //渠道用户标识
 
         // ↓↓↓↓↓↓ 调起接口成功后业务判断务必谨慎！！ 避免因代码编写bug，导致不能正确返回订单状态信息  ↓↓↓↓↓↓
 

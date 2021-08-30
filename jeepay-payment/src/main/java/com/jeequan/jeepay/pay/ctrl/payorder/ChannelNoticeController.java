@@ -225,7 +225,7 @@ public class ChannelNoticeController extends AbstractCtrl {
                     //明确失败
                 }else if(ChannelRetMsg.ChannelState.CONFIRM_FAIL == notifyResult.getChannelState()) {
 
-                    updateOrderSuccess = payOrderService.updateIng2Fail(payOrderId, notifyResult.getChannelOrderId(), notifyResult.getChannelErrCode(), notifyResult.getChannelErrMsg());
+                    updateOrderSuccess = payOrderService.updateIng2Fail(payOrderId, notifyResult.getChannelOrderId(), notifyResult.getChannelUserId(), notifyResult.getChannelErrCode(), notifyResult.getChannelErrMsg());
                 }
             }
 

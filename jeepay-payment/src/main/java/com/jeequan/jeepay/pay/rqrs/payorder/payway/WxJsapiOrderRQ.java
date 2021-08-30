@@ -40,4 +40,8 @@ public class WxJsapiOrderRQ extends UnifiedOrderRQ {
         this.setWayCode(CS.PAY_WAY_CODE.WX_JSAPI);
     }
 
+    @Override
+    public String getChannelUserId() {
+        return this.openid;
+    }
 }

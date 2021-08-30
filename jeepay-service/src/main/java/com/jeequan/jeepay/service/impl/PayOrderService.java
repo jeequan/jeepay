@@ -64,14 +64,10 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         updateRecord.setWayCode(payOrder.getWayCode());
         updateRecord.setMchFeeRate(payOrder.getMchFeeRate());
         updateRecord.setMchFeeAmount(payOrder.getMchFeeAmount());
+        updateRecord.setChannelUser(payOrder.getChannelUser());
 
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
                 .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_INIT));
-    }
-
-    /** 更新订单状态  【支付中】 --》 【支付成功】 **/
-    public boolean updateIng2Success(String payOrderId, String channelOrderNo){
-        return updateIng2Success(payOrderId, channelOrderNo, null);
     }
 
     /** 更新订单状态  【支付中】 --》 【支付成功】 **/
@@ -89,13 +85,14 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
 
 
     /** 更新订单状态  【支付中】 --》 【支付失败】 **/
-    public boolean updateIng2Fail(String payOrderId, String channelOrderNo, String channelErrCode, String channelErrMsg){
+    public boolean updateIng2Fail(String payOrderId, String channelOrderNo, String channelUserId, String channelErrCode, String channelErrMsg){
 
         PayOrder updateRecord = new PayOrder();
         updateRecord.setState(PayOrder.STATE_FAIL);
         updateRecord.setErrCode(channelErrCode);
         updateRecord.setErrMsg(channelErrMsg);
         updateRecord.setChannelOrderNo(channelOrderNo);
+        updateRecord.setChannelUser(channelUserId);
 
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
                 .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_ING));
@@ -103,14 +100,14 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
 
 
     /** 更新订单状态  【支付中】 --》 【支付成功/支付失败】 **/
-    public boolean updateIng2SuccessOrFail(String payOrderId, Byte updateState, String channelOrderNo, String channelErrCode, String channelErrMsg){
+    public boolean updateIng2SuccessOrFail(String payOrderId, Byte updateState, String channelOrderNo, String channelUserId, String channelErrCode, String channelErrMsg){
 
         if(updateState == PayOrder.STATE_ING){
             return true;
         }else if(updateState == PayOrder.STATE_SUCCESS){
-            return updateIng2Success(payOrderId, channelOrderNo);
+            return updateIng2Success(payOrderId, channelOrderNo, channelUserId);
         }else if(updateState == PayOrder.STATE_FAIL){
-            return updateIng2Fail(payOrderId, channelOrderNo, channelErrCode, channelErrMsg);
+            return updateIng2Fail(payOrderId, channelOrderNo, channelUserId, channelErrCode, channelErrMsg);
         }
         return false;
     }

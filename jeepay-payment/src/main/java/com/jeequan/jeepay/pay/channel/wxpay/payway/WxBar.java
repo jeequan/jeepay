@@ -91,6 +91,7 @@ public class WxBar extends WxpayPaymentService {
             WxPayMicropayResult wxPayMicropayResult = wxPayService.micropay(request);
 
             channelRetMsg.setChannelOrderId(wxPayMicropayResult.getTransactionId());
+            channelRetMsg.setChannelUserId(wxPayMicropayResult.getOpenid());
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
 
         } catch (WxPayException e) {

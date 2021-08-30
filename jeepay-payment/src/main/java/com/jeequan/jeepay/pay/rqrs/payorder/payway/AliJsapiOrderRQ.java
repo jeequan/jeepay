@@ -40,4 +40,9 @@ public class AliJsapiOrderRQ extends UnifiedOrderRQ {
         this.setWayCode(CS.PAY_WAY_CODE.ALI_JSAPI);
     }
 
+    @Override
+    public String getChannelUserId(){
+        return this.buyerUserId;
+    }
+
 }

@@ -93,6 +93,7 @@ public abstract class AbstractPayOrderController extends ApiController {
                 }
 
                 payOrder.setWayCode(wayCode); // 需要将订单更新 支付方式
+                payOrder.setChannelUser(bizRQ.getChannelUserId()); //更新渠道用户信息
                 bizRQ.setMchNo(payOrder.getMchNo());
                 bizRQ.setAppId(payOrder.getAppId());
                 bizRQ.setMchOrderNo(payOrder.getMchOrderNo());
@@ -362,6 +363,12 @@ public abstract class AbstractPayOrderController extends ApiController {
         payOrder.setErrCode(channelRetMsg.getChannelErrCode());
         payOrder.setErrMsg(channelRetMsg.getChannelErrMsg());
 
+        // 聚合码场景 订单对象存在会员信息， 不可全部以上游为准。
+        if(StringUtils.isNotEmpty(channelRetMsg.getChannelUserId())){
+            payOrder.setChannelUser(channelRetMsg.getChannelUserId());
+        }
+
+
 
         boolean isSuccess = payOrderService.updateInit2Ing(payOrder.getPayOrderId(), payOrder);
         if(!isSuccess){
@@ -369,7 +376,7 @@ public abstract class AbstractPayOrderController extends ApiController {
         }
 
         isSuccess = payOrderService.updateIng2SuccessOrFail(payOrder.getPayOrderId(), payOrder.getState(),
-                                    channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrCode(), channelRetMsg.getChannelErrMsg());
+                channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelUserId(), channelRetMsg.getChannelErrCode(), channelRetMsg.getChannelErrMsg());
         if(!isSuccess){
             throw new BizException("更新订单异常!");
         }
