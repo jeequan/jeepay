@@ -16,6 +16,7 @@
 package com.jeequan.jeepay.core.utils;
 
 import cn.hutool.core.net.url.UrlBuilder;
+import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,6 +46,36 @@ public class StringKit {
 		if(StringUtils.isEmpty(url) || map == null || map.isEmpty()){
 			return url;
 		}
+
+		StringBuilder sb = new StringBuilder(url);
+		if(url.indexOf("?") < 0){
+			sb.append("?");
+		}
+
+		//是否包含query条件
+		boolean isHasCondition = url.indexOf("=") >= 0;
+
+		for (String k : map.keySet()) {
+			if(k != null && map.get(k) != null){
+				if(isHasCondition){
+					sb.append("&"); //包含了查询条件， 那么应当拼接&符号
+				}else{
+					isHasCondition = true; //变更为： 已存在query条件
+				}
+				sb.append(k).append("=").append(URLUtil.encodeQuery(map.get(k).toString()));
+			}
+		}
+		return sb.toString();
+	}
+
+
+	/** 拼接url参数: 旧版采用Hutool方式（当回调地址是 http://abc.com/#/abc 时存在位置问题） **/
+	@Deprecated
+	public static String appendUrlQueryWithHutool(String url, Map<String, Object> map){
+
+		if(StringUtils.isEmpty(url) || map == null || map.isEmpty()){
+			return url;
+		}
 		UrlBuilder result = UrlBuilder.of(url);
 		map.forEach((k, v) -> {
 			if(k != null && v != null){
@@ -54,7 +85,6 @@ public class StringKit {
 
 		return result.build();
 	}
-
 
 	/** 是否 http 或 https连接 **/
 	public static boolean isAvailableUrl(String url){
