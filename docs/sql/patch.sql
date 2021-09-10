@@ -214,3 +214,9 @@ insert into t_sys_entitlement values('ENT_DIVISION_RECORD_VIEW', '按钮：详�
 
 ## -- ++++ ++++
 
+## -- ++++ [v1.7.0] ===> [v1.7.1] ++++
+-- 添加商户系统的退款功能权限配置项
+insert into t_sys_entitlement values('ENT_PAY_ORDER_REFUND', '按钮：订单退款', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER', '0', 'MCH', now(), now());
+
+## -- ++++ ++++
+
