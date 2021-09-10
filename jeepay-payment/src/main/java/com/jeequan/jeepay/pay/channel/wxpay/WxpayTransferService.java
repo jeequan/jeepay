@@ -59,6 +59,16 @@ public class WxpayTransferService implements ITransferService {
 
     @Override
     public String preCheck(TransferOrderRQ bizRQ, TransferOrder refundOrder) {
+
+        /**
+         * 微信企业付款到零钱 产品：不支持服务商模式，参考如下链接：
+         * https://developers.weixin.qq.com/community/develop/doc/0004888f8603b042a45c632355a400?highLine=%25E4%25BB%2598%25E6%25AC%25BE%25E5%2588%25B0%25E9%259B%25B6%25E9%2592%25B1%2520%2520%25E6%259C%258D%25E5%258A%25A1%25E5%2595%2586
+         * 微信官方解答： 目前企业付款到零钱，是不支持服务商模式的哈，如果特约商户需要使用该功能，请自行登录商户平台申请使用。
+         **/
+        if(refundOrder.getMchType() == CS.MCH_TYPE_ISVSUB){
+            return "微信子商户暂不支持转账业务";
+        }
+
         return null;
     }
 
