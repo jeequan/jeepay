@@ -15,10 +15,12 @@
  */
 package com.jeequan.jeepay.pay.channel.ysfpay.payway;
 
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.utils.DateKit;
 import com.jeequan.jeepay.pay.channel.ysfpay.YsfpayPaymentService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
@@ -29,6 +31,8 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliJsapiOrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /*
  * 云闪付 支付宝 jsapi
@@ -85,8 +89,10 @@ public class AliJsapi extends YsfpayPaymentService {
                     tradeNo = payDataJSON.getString("tradeNo");
                 }else{
                     String prepayId = payDataJSON.getString("prepayId");
-                    if(prepayId != null && prepayId.length() > 2){
+                    if(prepayId != null && prepayId.length() > 2 && !prepayId.startsWith(DateUtil.format(new Date(), "yyyy"))){
                         tradeNo = prepayId.substring(2);
+                    }else{
+                        tradeNo = prepayId;
                     }
                 }
                 res.setAlipayTradeNo(tradeNo);

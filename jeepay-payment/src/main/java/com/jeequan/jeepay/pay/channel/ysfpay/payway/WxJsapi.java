@@ -16,8 +16,10 @@
 package com.jeequan.jeepay.pay.channel.ysfpay.payway;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
 import com.jeequan.jeepay.pay.channel.ysfpay.YsfpayPaymentService;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
@@ -66,6 +68,10 @@ public class WxJsapi extends YsfpayPaymentService {
 
         //客户端IP
         reqParams.put("customerIp", StringUtils.defaultIfEmpty(payOrder.getClientIp(), "127.0.0.1"));
+
+        // 获取微信官方配置 的appId
+        WxpayIsvParams wxpayIsvParams = mchAppConfigContext.getIsvConfigContext().getIsvParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvParams.class);
+        reqParams.put("subAppId", wxpayIsvParams.getAppId()); //用户ID
 
         // 发送请求并返回订单状态
         JSONObject resJSON = packageParamAndReq("/gateway/api/pay/unifiedorder", reqParams, logPrefix, mchAppConfigContext.getIsvConfigContext(), mchAppConfigContext);
