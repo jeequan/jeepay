@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
+import com.jeequan.jeepay.core.model.params.xxpay.XxpayNormalMchParams;
 
 /*
  * 抽象类 普通商户参数定义
@@ -35,6 +36,8 @@ public abstract class NormalMchParams {
             return JSONObject.parseObject(paramsStr, WxpayNormalMchParams.class);
         }else if(CS.IF_CODE.ALIPAY.equals(ifCode)){
             return JSONObject.parseObject(paramsStr, AlipayNormalMchParams.class);
+        }else if(CS.IF_CODE.XXPAY.equals(ifCode)){
+            return JSONObject.parseObject(paramsStr, XxpayNormalMchParams.class);
         }
         return null;
     }

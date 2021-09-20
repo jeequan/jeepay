@@ -137,10 +137,10 @@ public class CS {
     //接口类型
     public interface IF_CODE{
 
-        String ALIPAY = "alipay";  //支付宝官方支付
-        String WXPAY = "wxpay";  //微信官方支付
-        String YSFPAY = "ysfpay";  //云闪付开放平台
-
+        String ALIPAY = "alipay";   // 支付宝官方支付
+        String WXPAY = "wxpay";     // 微信官方支付
+        String YSFPAY = "ysfpay";   // 云闪付开放平台
+        String XXPAY = "xxpay";     // 小新支付
     }
 
 
