@@ -23,8 +23,8 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliBarOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliBarOrderRS;
+import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxBarOrderRQ;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -34,35 +34,33 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /*
- * 小新支付 支付宝条码支付
+ * 小新支付 微信条码支付
  *
  * @author jmdhappy
  * @site https://www.jeequan.com
- * @date 2021/9/20 10:09
+ * @date 2021/9/22 20:09
  */
-@Service("xxpayPaymentByAliBarService") //Service Name需保持全局唯一性
+@Service("xxpayPaymentByWxBarService") //Service Name需保持全局唯一性
 @Slf4j
-public class AliBar extends XxpayPaymentService {
+public class WxBar extends XxpayPaymentService {
 
     @Override
     public String preCheck(UnifiedOrderRQ rq, PayOrder payOrder) {
-
-        AliBarOrderRQ bizRQ = (AliBarOrderRQ) rq;
+        WxBarOrderRQ bizRQ = (WxBarOrderRQ) rq;
         if(StringUtils.isEmpty(bizRQ.getAuthCode())){
             throw new BizException("用户支付条码[authCode]不可为空");
         }
-
         return null;
     }
 
     @Override
     public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
-        AliBarOrderRQ bizRQ = (AliBarOrderRQ) rq;
+        WxBarOrderRQ bizRQ = (WxBarOrderRQ) rq;
         XxpayNormalMchParams params = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), XxpayNormalMchParams.class);
         // 构造支付请求参数
         Map<String,Object> paramMap = new TreeMap();
         paramMap.put("mchId", params.getMchId());
-        paramMap.put("productId", "8021"); // 支付宝条码
+        paramMap.put("productId", "8020"); // 微信条码
         paramMap.put("mchOrderNo", payOrder.getPayOrderId());
         paramMap.put("amount", payOrder.getAmount() + "");
         paramMap.put("currency", "cny");

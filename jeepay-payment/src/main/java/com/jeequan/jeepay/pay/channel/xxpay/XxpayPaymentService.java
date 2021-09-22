@@ -15,14 +15,23 @@
  */
 package com.jeequan.jeepay.pay.channel.xxpay;
 
+import cn.hutool.http.HttpUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.core.model.params.xxpay.XxpayNormalMchParams;
+import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.pay.channel.AbstractPaymentService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
+import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.util.PaywayUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 /*
 * 支付接口： 小新支付
@@ -33,6 +42,7 @@ import org.springframework.stereotype.Service;
 * @date 2021/9/20 20:00
 */
 @Service
+@Slf4j
 public class XxpayPaymentService extends AbstractPaymentService {
 
     @Override
@@ -53,6 +63,62 @@ public class XxpayPaymentService extends AbstractPaymentService {
     @Override
     public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
         return PaywayUtil.getRealPaywayService(this, payOrder.getWayCode()).pay(rq, payOrder, mchAppConfigContext);
+    }
+
+    /**
+     * 统一支付处理
+     * @param payOrder
+     * @param params
+     * @param paramMap
+     * @param channelRetMsg
+     * @return
+     */
+    protected JSONObject doPay(PayOrder payOrder, XxpayNormalMchParams params, Map paramMap, ChannelRetMsg channelRetMsg) {
+        // 生成签名
+        String sign = XxpayKit.getSign(paramMap, params.getKey());
+        paramMap.put("sign", sign);
+        // 支付下单地址
+        String payUrl = XxpayKit.getPaymentUrl(params.getPayUrl());
+        String resStr = "";
+        try {
+            resStr = HttpUtil.createPost(payUrl + "?" + JeepayKit.genUrlParams(paramMap)).timeout(60 * 1000).execute().body();
+        } catch (Exception e) {
+            log.error("http error", e);
+        }
+
+        if(StringUtils.isEmpty(resStr)) {
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+            channelRetMsg.setChannelErrCode("");
+            channelRetMsg.setChannelErrMsg("请求"+getIfCode()+"接口异常");
+            return null;
+        }
+
+        JSONObject resObj = JSONObject.parseObject(resStr);
+        if(!"0".equals(resObj.getString("retCode"))){
+            String retMsg = resObj.getString("retMsg");
+            log.error("请求"+getIfCode()+"返回结果异常， resObj={}", resObj.toJSONString());
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+            channelRetMsg.setChannelErrCode("");
+            channelRetMsg.setChannelErrMsg(retMsg);
+            return null;
+        }
+
+        // 验证响应数据签名
+        String checkSign = resObj.getString("sign");
+        resObj.remove("sign");
+        if(!checkSign.equals(XxpayKit.getSign(resObj, params.getKey()))) {
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+            return null;
+        }
+
+        // 订单状态-2:订单已关闭,0-订单生成,1-支付中,2-支付成功,3-业务处理完成,4-已退款
+        String orderStatus = resObj.getString("orderStatus");
+        if("2".equals(orderStatus) || "3".equals(orderStatus)) {
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+        }else {
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
+        }
+        return resObj;
     }
 
 }
