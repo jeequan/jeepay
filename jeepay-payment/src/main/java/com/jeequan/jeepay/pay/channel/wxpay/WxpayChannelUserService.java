@@ -17,6 +17,7 @@ package com.jeequan.jeepay.pay.channel.wxpay;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
 import com.jeequan.jeepay.pay.channel.IChannelUserService;
@@ -52,11 +53,17 @@ public class WxpayChannelUserService implements IChannelUserService {
         String oauth2Url = "";
         if(mchAppConfigContext.isIsvsubMch()){
             WxpayIsvParams wxpayIsvParams = mchAppConfigContext.getIsvConfigContext().getIsvParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvParams.class);
+            if(wxpayIsvParams == null) {
+                throw new BizException("服务商微信支付接口没有配置！");
+            }
             appId = wxpayIsvParams.getAppId();
             oauth2Url = wxpayIsvParams.getOauth2Url();
         }else{
             //获取商户配置信息
             WxpayNormalMchParams normalMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayNormalMchParams.class);
+            if(normalMchParams == null) {
+                throw new BizException("商户微信支付接口没有配置！");
+            }
             appId = normalMchParams.getAppId();
             oauth2Url = normalMchParams.getOauth2Url();
         }
@@ -64,8 +71,9 @@ public class WxpayChannelUserService implements IChannelUserService {
         if(StringUtils.isBlank(oauth2Url)){
             oauth2Url = DEFAULT_OAUTH_URL;
         }
-
-        return String.format(oauth2Url + "?appid=%s&scope=snsapi_base&state=&redirect_uri=%s&response_type=code#wechat_redirect", appId, callbackUrlEncode);
+        String wxUserRedirectUrl = String.format(oauth2Url + "?appid=%s&scope=snsapi_base&state=&redirect_uri=%s&response_type=code#wechat_redirect", appId, callbackUrlEncode);
+        log.info("wxUserRedirectUrl={}", wxUserRedirectUrl);
+        return wxUserRedirectUrl;
     }
 
     @Override

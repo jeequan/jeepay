@@ -78,10 +78,12 @@ public class XxpayPaymentService extends AbstractPaymentService {
         String sign = XxpayKit.getSign(paramMap, params.getKey());
         paramMap.put("sign", sign);
         // 支付下单地址
-        String payUrl = XxpayKit.getPaymentUrl(params.getPayUrl());
+        String payUrl = XxpayKit.getPaymentUrl(params.getPayUrl())+ "?" + JeepayKit.genUrlParams(paramMap);
         String resStr = "";
         try {
-            resStr = HttpUtil.createPost(payUrl + "?" + JeepayKit.genUrlParams(paramMap)).timeout(60 * 1000).execute().body();
+            log.info("请求{}参数：{}", getIfCode(), payUrl);
+            resStr = HttpUtil.createPost(payUrl).timeout(60 * 1000).execute().body();
+            log.info("请求{}结果：{}", getIfCode(), resStr);
         } catch (Exception e) {
             log.error("http error", e);
         }
@@ -96,7 +98,6 @@ public class XxpayPaymentService extends AbstractPaymentService {
         JSONObject resObj = JSONObject.parseObject(resStr);
         if(!"0".equals(resObj.getString("retCode"))){
             String retMsg = resObj.getString("retMsg");
-            log.error("请求"+getIfCode()+"返回结果异常， resObj={}", resObj.toJSONString());
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
             channelRetMsg.setChannelErrCode("");
             channelRetMsg.setChannelErrMsg(retMsg);

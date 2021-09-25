@@ -23,7 +23,7 @@ spring:
     # yml填写url连接串， 无需将&符号进行转义
     url: jdbc:mysql://127.0.0.1:3306/jeepaydb?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password:
+    password: 123
     druid:
       # 连接池配置项
       initial-size: 5 #初始化时建立物理连接的个数
