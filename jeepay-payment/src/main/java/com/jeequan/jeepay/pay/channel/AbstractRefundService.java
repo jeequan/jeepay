@@ -36,8 +36,8 @@ public abstract class AbstractRefundService implements IRefundService{
         return sysConfigService.getDBApplicationConfig().getPaySiteUrl() + "/api/refund/notify/" + getIfCode();
     }
 
-    protected String getNotifyUrl(String payOrderId){
-        return sysConfigService.getDBApplicationConfig().getPaySiteUrl() + "/api/refund/notify/" + getIfCode() + "/" + payOrderId;
+    protected String getNotifyUrl(String refundOrderId){
+        return sysConfigService.getDBApplicationConfig().getPaySiteUrl() + "/api/refund/notify/" + getIfCode() + "/" + refundOrderId;
     }
 
 }

@@ -17,10 +17,10 @@ package com.jeequan.jeepay.pay.channel.xxpay;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.exception.ResponseException;
 import com.jeequan.jeepay.core.model.params.xxpay.XxpayNormalMchParams;
-import com.jeequan.jeepay.pay.channel.AbstractChannelNoticeService;
+import com.jeequan.jeepay.pay.channel.AbstractChannelRefundNoticeService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 
 /*
-* 小新支付 支付回调接口实现类
+* 小新支付 退款回调接口实现类
 *
 * @author jmdhappy
 * @site https://www.jeequan.com
@@ -39,8 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 */
 @Service
 @Slf4j
-public class XxpayChannelNoticeService extends AbstractChannelNoticeService {
-
+public class XxpayChannelRefundNoticeService extends AbstractChannelRefundNoticeService {
 
     @Override
     public String getIfCode() {
@@ -53,8 +52,8 @@ public class XxpayChannelNoticeService extends AbstractChannelNoticeService {
         try {
 
             JSONObject params = getReqParamJSON();
-            String payOrderId = params.getString("mchOrderNo");
-            return MutablePair.of(payOrderId, params);
+            String refundOrderId = params.getString("mchRefundNo");
+            return MutablePair.of(refundOrderId, params);
 
         } catch (Exception e) {
             log.error("error", e);
@@ -65,7 +64,7 @@ public class XxpayChannelNoticeService extends AbstractChannelNoticeService {
 
 
     @Override
-    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
+    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, RefundOrder refundOrder, MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
         try {
             XxpayNormalMchParams xxpayParams = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), XxpayNormalMchParams.class);
 

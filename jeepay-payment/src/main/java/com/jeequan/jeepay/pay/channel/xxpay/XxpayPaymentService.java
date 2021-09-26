@@ -81,9 +81,9 @@ public class XxpayPaymentService extends AbstractPaymentService {
         String payUrl = XxpayKit.getPaymentUrl(params.getPayUrl())+ "?" + JeepayKit.genUrlParams(paramMap);
         String resStr = "";
         try {
-            log.info("请求{}参数：{}", getIfCode(), payUrl);
+            log.info("发起支付[{}]参数：{}", getIfCode(), payUrl);
             resStr = HttpUtil.createPost(payUrl).timeout(60 * 1000).execute().body();
-            log.info("请求{}结果：{}", getIfCode(), resStr);
+            log.info("发起支付[{}]结果：{}", getIfCode(), resStr);
         } catch (Exception e) {
             log.error("http error", e);
         }

@@ -46,6 +46,7 @@ public class ChannelOrderReissueService {
     @Autowired private RefundOrderService refundOrderService;
     @Autowired private PayOrderProcessService payOrderProcessService;
     @Autowired private PayMchNotifyService payMchNotifyService;
+    @Autowired private RefundOrderProcessService refundOrderProcessService;
 
 
     /** 处理订单 **/
@@ -124,28 +125,8 @@ public class ChannelOrderReissueService {
             }
 
             log.info("退款补单：[{}]查询结果为：{}", refundOrderId, channelRetMsg);
-
-            // 查询成功
-            if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
-                if (refundOrderService.updateIng2Success(refundOrderId, channelRetMsg.getChannelOrderId())) {
-
-                    // 通知商户系统
-                    if(StringUtils.isNotEmpty(refundOrder.getNotifyUrl())){
-                        payMchNotifyService.refundOrderNotify(refundOrderService.getById(refundOrderId));
-                    }
-
-                }
-            }else if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_FAIL){  //确认失败
-
-                //1. 更新支付订单表为失败状态
-                refundOrderService.updateIng2Fail(refundOrderId, channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrCode(), channelRetMsg.getChannelErrMsg());
-
-                // 通知商户系统
-                if(StringUtils.isNotEmpty(refundOrder.getNotifyUrl())){
-                    payMchNotifyService.refundOrderNotify(refundOrderService.getById(refundOrderId));
-                }
-
-            }
+            // 根据渠道返回结果，处理退款订单
+            refundOrderProcessService.handleRefundOrder4Channel(channelRetMsg, refundOrder);
 
             return channelRetMsg;
 
