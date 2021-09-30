@@ -67,7 +67,7 @@ public class YsfSignUtils {
         try {
 
             //0. 将请求参数 转换成key1=value1&key2=value2的形式
-            String stringSign = convertSignString(params);
+            String stringSign = convertSignStringIncludeEmpty(params);
 
             //1. 通过SHA256进行摘要并转16进制
             byte[] signDigest = sha256X16(stringSign, "UTF-8");
@@ -99,7 +99,7 @@ public class YsfSignUtils {
         String signature = params.getString("signature");
 
         // 将请求参数信息转换成key1=value1&key2=value2的形式
-        String stringData = convertSignString(params);
+        String stringData = convertSignStringIncludeEmpty(params);
         try {
 
             //1. 通过SHA256进行摘要并转16进制
@@ -203,6 +203,33 @@ public class YsfSignUtils {
         //3. 去掉最后一个&
         return stringBuffer.substring(0, stringBuffer.length() - 1);
     }
+
+
+    /**  进件回调  将JSON中的数据转换成key1=value1&key2=value2的形式，忽略null内容【空串也参与签名】 和 signature字段* */
+    private static String convertSignStringIncludeEmpty(JSONObject params) {
+        TreeMap<String, Object> tree = new TreeMap<>();
+
+        //1. 所有参数进行排序
+        params.keySet().stream().forEach( key -> tree.put(key, params.get(key)));
+
+        //2. 拼接为 key=value&形式
+        StringBuffer stringBuffer = new StringBuffer();
+        tree.keySet().stream().forEach( key -> {
+
+            if (tree.get(key) == null) {
+                return ;
+            }
+            if("signature".equals(key)){ //签名串， 不参与签名
+                return ;
+            }
+
+            stringBuffer.append(key).append("=").append(tree.get(key).toString()).append("&");
+        });
+
+        //3. 去掉最后一个&
+        return stringBuffer.substring(0, stringBuffer.length() - 1);
+    }
+
 
     /** 通过SHA256进行摘要并转16进制  **/
     private static byte[] sha256X16(String data, String encoding) throws Exception {
