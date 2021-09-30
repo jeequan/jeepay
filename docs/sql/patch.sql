@@ -218,5 +218,6 @@ insert into t_sys_entitlement values('ENT_DIVISION_RECORD_VIEW', '按钮：详�
 -- 添加商户系统的退款功能权限配置项
 insert into t_sys_entitlement values('ENT_PAY_ORDER_REFUND', '按钮：订单退款', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER', '0', 'MCH', now(), now());
 
-## -- ++++ ++++
-
+## -- ++++ [v1.8.0] ===> [v1.9.0] ++++
+-- 增加小新支付通道
+INSERT INTO jeepaydb.t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark, created_at, updated_at) VALUES ('xxpay', '小新支付', 1, 0, 1, null, null, '[{"name":"mchId","desc":"商户号","type":"text","verify":"required"},{"name":"key","desc":"私钥","type":"text","verify":"required","star":"1"},{"name":"payUrl","desc":"支付网关地址","type":"text","verify":"required"}]', '[{"wayCode": "ALI_BAR"}, {"wayCode": "ALI_JSAPI"}, {"wayCode": "WX_BAR"}, {"wayCode": "WX_JSAPI"}]', 'http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/xxpay.png', '#2E4360', 1, null, '2021-09-20 15:21:04', '2021-09-30 14:55:32.907325');

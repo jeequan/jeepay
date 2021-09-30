@@ -61,8 +61,6 @@ public class XxpayChannelRefundNoticeService extends AbstractChannelRefundNotice
         }
     }
 
-
-
     @Override
     public ChannelRetMsg doNotice(HttpServletRequest request, Object params, RefundOrder refundOrder, MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
         try {
