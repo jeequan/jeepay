@@ -123,11 +123,13 @@ public class WxpayRefundService extends AbstractRefundService {
             }
             return channelRetMsg;
         } catch (WxPayException e) {
+            log.error("微信退款WxPayException异常: ", e);
             ChannelRetMsg channelRetMsg = ChannelRetMsg.confirmFail();
             WxpayKit.commonSetErrInfo(channelRetMsg, e);
             return channelRetMsg;
 
         } catch (Exception e) {
+            log.error("微信退款Exception异常: ", e);
             return ChannelRetMsg.sysError(e.getMessage());
         }
     }
@@ -177,8 +179,10 @@ public class WxpayRefundService extends AbstractRefundService {
             }
             return channelRetMsg;
         } catch (WxPayException e) {
+            log.error("微信退款查询WxPayException异常: ", e);
             return ChannelRetMsg.sysError(e.getReturnMsg());
         } catch (Exception e) {
+            log.error("微信退款查询Exception异常: ", e);
             return ChannelRetMsg.sysError(e.getMessage());
         }
     }
