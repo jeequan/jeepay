@@ -56,7 +56,8 @@ public class AliyunOssService implements IOssService{
 
         try {
 
-            this.ossClient.putObject(aliyunOssYmlConfig.getPublicBucketName(), saveDirAndFileName, multipartFile.getInputStream());
+            this.ossClient.putObject(ossSavePlaceEnum == OssSavePlaceEnum.PUBLIC ? aliyunOssYmlConfig.getPublicBucketName() : aliyunOssYmlConfig.getPrivateBucketName()
+                    , saveDirAndFileName, multipartFile.getInputStream());
 
             if(ossSavePlaceEnum == OssSavePlaceEnum.PUBLIC){
                 // 文档：https://www.alibabacloud.com/help/zh/doc-detail/39607.htm  example: https://BucketName.Endpoint/ObjectName
