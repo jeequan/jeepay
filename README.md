@@ -51,6 +51,7 @@ Jeepay = Jee + pay，是由原XxPay支付系统作者带领团队开发，“Jee
 - Jeepay支付流程体验：[https://www.jeequan.com/demo/jeepay_cashier.html](https://www.jeequan.com/demo/jeepay_cashier.html "Jeepay支付体验")
 - Jeepay运营平台和商户系统演体验：[https://www.jeequan.com/doc/detail_84.html](https://www.jeequan.com/doc/detail_84.html "Jeepay支付系统体验")
 - Jeepay项目文档：[https://docs.jeequan.com/docs/jeepay](https://docs.jeequan.com/docs/jeepay "Jeepay项目文档")
+- Jeepay快速使用：[https://docs.jeequan.com/docs/jeepay/jeepay-1dbdn8bqgo270](https://docs.jeequan.com/docs/jeepay/jeepay-1dbdn8bqgo270 "Jeepay快速使用")
 
 ### 🍎 项目特点
 
@@ -74,6 +75,11 @@ Jeepay = Jee + pay，是由原XxPay支付系统作者带领团队开发，“Jee
 > Jeepay计全支付系统架构图
 
 ![Jeepay系统架构图](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_framework.png "Jeepay系统架构图")
+
+> Jeepay计全支付聚合码支付流程图
+
+![Jeepay计全支付聚合码支付流程图](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_qr.png "Jeepay计全支付聚合码支付流程图")
+
 
 > 核心技术栈
 
@@ -99,6 +105,9 @@ jeepay
 └── docs -- 存放项目相关文档说明
      ├── script -- 项目启动shell脚本
      └── sql -- 初始化sql文件
+└── jeepay-components -- 公共组件目录
+     ├── jeepay-components-mq -- mq组件
+     └── jeepay-components-oss -- oss组件
 ├── jeepay-core -- 核心依赖包
 ├── jeepay-manager -- 运营平台服务端[9217]
 ├── jeepay-merchant -- 商户系统服务端[9218]
@@ -113,6 +122,8 @@ jeepay
 - 通道对接：[https://docs.jeequan.com/docs/jeepay/dev_channel](https://docs.jeequan.com/docs/jeepay/dev_channel)
 - 线上部署：[https://docs.jeequan.com/docs/jeepay/deploy](https://docs.jeequan.com/docs/jeepay/deploy)
 - 接口文档：[https://docs.jeequan.com/docs/jeepay/payment_api](https://docs.jeequan.com/docs/jeepay/payment_api)
+- 常见问题：[https://docs.jeequan.com/docs/jeepay/jeepay-1d99ciatu11h5](https://docs.jeequan.com/docs/jeepay/jeepay-1d99ciatu11h5)
+
 
 ## 🍿 功能模块
 
@@ -154,11 +165,8 @@ jeepay
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/022.png "Jeepay演示界面")
 
-## 赞助商：驰骋工作流、表单引擎、驰骋低代码快速开发平台.
-- 驰骋工作流、表单、低代码平台100%开源，java.net双版本.
-- 下载地址： https://ccfast.cc/?Frm=jeepay
-- 纯国产工作流，支持10多种数据库，支持saas,单组织，集团模式。
-- 容易集成，可配置程度高，提高95%的开发效率，完善的视频教程.
+## 🍟 合作伙伴
+- 驰骋工作流： https://ccfast.cc/?Frm=jeepay
 
 ## 🥪 关于我们
 ***
