@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -133,13 +134,20 @@ public class JeepayKit {
         Set<String> keySet = paraMap.keySet();
         int i = 0;
         for(String key:keySet) {
-            urlParam.append(key).append("=").append( paraMap.get(key) == null ? "" : paraMap.get(key) );
+            urlParam.append(key).append("=").append( paraMap.get(key) == null ? "" : doEncode(paraMap.get(key).toString()) );
             if(++i == keySet.size()) {
                 break;
             }
             urlParam.append("&");
         }
         return urlParam.toString();
+    }
+
+    static String doEncode(String str) {
+        if(str.contains("+")) {
+            return URLEncoder.encode(str);
+        }
+        return str;
     }
 
     /** 校验微信/支付宝二维码是否符合规范， 并根据支付类型返回对应的支付方式  **/

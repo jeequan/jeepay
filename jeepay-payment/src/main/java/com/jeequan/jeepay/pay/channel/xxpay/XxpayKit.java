@@ -1,5 +1,6 @@
 package com.jeequan.jeepay.pay.channel.xxpay;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -16,6 +17,7 @@ import java.util.Map;
  * @site https://www.jeequan.com
  * @date 2021/9/20 10:09
  */
+@Slf4j
 public class XxpayKit {
 	
 	private static String encodingCharset = "UTF-8";
@@ -42,6 +44,7 @@ public class XxpayKit {
 		}
 		String result = sb.toString();
 		result += "key=" + key;
+		log.info("signStr:{}", result);
 		result = md5(result, encodingCharset).toUpperCase();
 		return result;
 	}
