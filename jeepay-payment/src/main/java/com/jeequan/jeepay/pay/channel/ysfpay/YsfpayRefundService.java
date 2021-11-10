@@ -56,7 +56,7 @@ public class YsfpayRefundService extends AbstractRefundService {
     public ChannelRetMsg refund(RefundOrderRQ bizRQ, RefundOrder refundOrder, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
         JSONObject reqParams = new JSONObject();
-        String orderType = YsfHttpUtil.getOrderTypeByBar(payOrder.getWayCode());
+        String orderType = YsfHttpUtil.getOrderTypeByCommon(payOrder.getWayCode());
         String logPrefix = "【云闪付("+orderType+")退款】";
         try {
             reqParams.put("origOrderNo", payOrder.getPayOrderId()); // 原交易订单号
@@ -94,7 +94,7 @@ public class YsfpayRefundService extends AbstractRefundService {
     public ChannelRetMsg query(RefundOrder refundOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
         JSONObject reqParams = new JSONObject();
-        String orderType = YsfHttpUtil.getOrderTypeByBar(refundOrder.getWayCode());
+        String orderType = YsfHttpUtil.getOrderTypeByCommon(refundOrder.getWayCode());
         String logPrefix = "【云闪付("+orderType+")退款查询】";
         try {
             reqParams.put("orderNo", refundOrder.getRefundOrderId()); // 退款订单号
