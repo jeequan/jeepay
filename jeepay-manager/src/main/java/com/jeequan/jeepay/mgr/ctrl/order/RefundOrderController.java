@@ -23,7 +23,6 @@ import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.RefundOrderService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,43 +55,7 @@ public class RefundOrderController extends CommonCtrl {
         RefundOrder refundOrder = getObject(RefundOrder.class);
         JSONObject paramJSON = getReqParamJSON();
         LambdaQueryWrapper<RefundOrder> wrapper = RefundOrder.gw();
-        if (StringUtils.isNotEmpty(refundOrder.getRefundOrderId())) {
-            wrapper.eq(RefundOrder::getRefundOrderId, refundOrder.getRefundOrderId());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getPayOrderId())) {
-            wrapper.eq(RefundOrder::getPayOrderId, refundOrder.getPayOrderId());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getChannelPayOrderNo())) {
-            wrapper.eq(RefundOrder::getChannelPayOrderNo, refundOrder.getChannelPayOrderNo());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getMchNo())) {
-            wrapper.eq(RefundOrder::getMchNo, refundOrder.getMchNo());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getIsvNo())) {
-            wrapper.eq(RefundOrder::getIsvNo, refundOrder.getIsvNo());
-        }
-        if (refundOrder.getMchType() != null) {
-            wrapper.eq(RefundOrder::getMchType, refundOrder.getMchType());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getMchRefundNo())) {
-            wrapper.eq(RefundOrder::getMchRefundNo, refundOrder.getMchRefundNo());
-        }
-        if (refundOrder.getState() != null) {
-            wrapper.eq(RefundOrder::getState, refundOrder.getState());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getAppId())) {
-            wrapper.eq(RefundOrder::getAppId, refundOrder.getAppId());
-        }
-        if (paramJSON != null) {
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) {
-                wrapper.ge(RefundOrder::getCreatedAt, paramJSON.getString("createdStart"));
-            }
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) {
-                wrapper.le(RefundOrder::getCreatedAt, paramJSON.getString("createdEnd"));
-            }
-        }
-        wrapper.orderByDesc(RefundOrder::getCreatedAt);
-        IPage<RefundOrder> pages = refundOrderService.page(getIPage(), wrapper);
+        IPage<RefundOrder> pages = refundOrderService.pageList(getIPage(), wrapper, refundOrder, paramJSON);
 
         return ApiRes.page(pages);
     }

@@ -23,7 +23,6 @@ import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.TransferOrderService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,37 +49,10 @@ public class TransferOrderController extends CommonCtrl {
     @RequestMapping(value="", method = RequestMethod.GET)
     public ApiRes list() {
 
-        TransferOrder refundOrder = getObject(TransferOrder.class);
+        TransferOrder transferOrder = getObject(TransferOrder.class);
         JSONObject paramJSON = getReqParamJSON();
         LambdaQueryWrapper<TransferOrder> wrapper = TransferOrder.gw();
-        if (StringUtils.isNotEmpty(refundOrder.getTransferId())) {
-            wrapper.eq(TransferOrder::getTransferId, refundOrder.getTransferId());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getMchOrderNo())) {
-            wrapper.eq(TransferOrder::getMchOrderNo, refundOrder.getMchOrderNo());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getChannelOrderNo())) {
-            wrapper.eq(TransferOrder::getChannelOrderNo, refundOrder.getChannelOrderNo());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getMchNo())) {
-            wrapper.eq(TransferOrder::getMchNo, refundOrder.getMchNo());
-        }
-        if (refundOrder.getState() != null) {
-            wrapper.eq(TransferOrder::getState, refundOrder.getState());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getAppId())) {
-            wrapper.eq(TransferOrder::getAppId, refundOrder.getAppId());
-        }
-        if (paramJSON != null) {
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) {
-                wrapper.ge(TransferOrder::getCreatedAt, paramJSON.getString("createdStart"));
-            }
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) {
-                wrapper.le(TransferOrder::getCreatedAt, paramJSON.getString("createdEnd"));
-            }
-        }
-        wrapper.orderByDesc(TransferOrder::getCreatedAt);
-        IPage<TransferOrder> pages = transferOrderService.page(getIPage(), wrapper);
+        IPage<TransferOrder> pages = transferOrderService.pageList(getIPage(), wrapper, transferOrder, paramJSON);
 
         return ApiRes.page(pages);
     }

@@ -73,46 +73,8 @@ public class PayOrderController extends CommonCtrl {
         PayOrder payOrder = getObject(PayOrder.class);
         JSONObject paramJSON = getReqParamJSON();
         LambdaQueryWrapper<PayOrder> wrapper = PayOrder.gw();
-        if (StringUtils.isNotEmpty(payOrder.getPayOrderId())) {
-            wrapper.eq(PayOrder::getPayOrderId, payOrder.getPayOrderId());
-        }
-        if (StringUtils.isNotEmpty(payOrder.getMchNo())) {
-            wrapper.eq(PayOrder::getMchNo, payOrder.getMchNo());
-        }
-        if (StringUtils.isNotEmpty(payOrder.getIsvNo())) {
-            wrapper.eq(PayOrder::getIsvNo, payOrder.getIsvNo());
-        }
-        if (payOrder.getMchType() != null) {
-            wrapper.eq(PayOrder::getMchType, payOrder.getMchType());
-        }
-        if (StringUtils.isNotEmpty(payOrder.getWayCode())) {
-            wrapper.eq(PayOrder::getWayCode, payOrder.getWayCode());
-        }
-        if (StringUtils.isNotEmpty(payOrder.getMchOrderNo())) {
-            wrapper.eq(PayOrder::getMchOrderNo, payOrder.getMchOrderNo());
-        }
-        if (payOrder.getState() != null) {
-            wrapper.eq(PayOrder::getState, payOrder.getState());
-        }
-        if (payOrder.getNotifyState() != null) {
-            wrapper.eq(PayOrder::getNotifyState, payOrder.getNotifyState());
-        }
-        if (StringUtils.isNotEmpty(payOrder.getAppId())) {
-            wrapper.eq(PayOrder::getAppId, payOrder.getAppId());
-        }
-        if (payOrder.getDivisionState() != null) {
-            wrapper.eq(PayOrder::getDivisionState, payOrder.getDivisionState());
-        }
-        if (paramJSON != null) {
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) {
-                wrapper.ge(PayOrder::getCreatedAt, paramJSON.getString("createdStart"));
-            }
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) {
-                wrapper.le(PayOrder::getCreatedAt, paramJSON.getString("createdEnd"));
-            }
-        }
-        wrapper.orderByDesc(PayOrder::getCreatedAt);
-        IPage<PayOrder> pages = payOrderService.page(getIPage(), wrapper);
+
+        IPage<PayOrder> pages = payOrderService.listByPage(getIPage(), payOrder, paramJSON, wrapper);
         // 得到所有支付方式
         Map<String, String> payWayNameMap = new HashMap<>();
         List<PayWay> payWayList = payWayService.list();

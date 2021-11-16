@@ -57,34 +57,7 @@ public class RefundOrderController extends CommonCtrl {
         JSONObject paramJSON = getReqParamJSON();
         LambdaQueryWrapper<RefundOrder> wrapper = RefundOrder.gw();
         wrapper.eq(RefundOrder::getMchNo, getCurrentMchNo());
-        if (StringUtils.isNotEmpty(refundOrder.getRefundOrderId())) {
-            wrapper.eq(RefundOrder::getRefundOrderId, refundOrder.getRefundOrderId());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getPayOrderId())) {
-            wrapper.eq(RefundOrder::getPayOrderId, refundOrder.getPayOrderId());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getMchRefundNo())) {
-            wrapper.eq(RefundOrder::getMchRefundNo, refundOrder.getMchRefundNo());
-        }
-        if (refundOrder.getState() != null) {
-            wrapper.eq(RefundOrder::getState, refundOrder.getState());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getChannelPayOrderNo())) {
-            wrapper.eq(RefundOrder::getChannelPayOrderNo, refundOrder.getChannelPayOrderNo());
-        }
-        if (StringUtils.isNotEmpty(refundOrder.getAppId())) {
-            wrapper.eq(RefundOrder::getAppId, refundOrder.getAppId());
-        }
-        if (paramJSON != null) {
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) {
-                wrapper.ge(RefundOrder::getCreatedAt, paramJSON.getString("createdStart"));
-            }
-            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) {
-                wrapper.le(RefundOrder::getCreatedAt, paramJSON.getString("createdEnd"));
-            }
-        }
-        wrapper.orderByDesc(RefundOrder::getCreatedAt);
-        IPage<RefundOrder> pages = refundOrderService.page(getIPage(), wrapper);
+        IPage<RefundOrder> pages = refundOrderService.pageList(getIPage(), wrapper, refundOrder, paramJSON);
 
         return ApiRes.page(pages);
     }

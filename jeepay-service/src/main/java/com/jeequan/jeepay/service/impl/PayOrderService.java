@@ -20,14 +20,15 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.IsvInfo;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayWay;
-import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.service.mapper.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -374,5 +375,64 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
 
     }
 
+    /**
+     * 通用列表查询条件
+     * @param iPage
+     * @param payOrder
+     * @param paramJSON
+     * @param wrapper
+     * @return
+     */
+    public IPage<PayOrder> listByPage(IPage iPage, PayOrder payOrder, JSONObject paramJSON, LambdaQueryWrapper<PayOrder> wrapper) {
+        if (StringUtils.isNotEmpty(payOrder.getPayOrderId())) {
+            wrapper.eq(PayOrder::getPayOrderId, payOrder.getPayOrderId());
+        }
+        if (StringUtils.isNotEmpty(payOrder.getMchNo())) {
+            wrapper.eq(PayOrder::getMchNo, payOrder.getMchNo());
+        }
+        if (StringUtils.isNotEmpty(payOrder.getIsvNo())) {
+            wrapper.eq(PayOrder::getIsvNo, payOrder.getIsvNo());
+        }
+        if (payOrder.getMchType() != null) {
+            wrapper.eq(PayOrder::getMchType, payOrder.getMchType());
+        }
+        if (StringUtils.isNotEmpty(payOrder.getWayCode())) {
+            wrapper.eq(PayOrder::getWayCode, payOrder.getWayCode());
+        }
+        if (StringUtils.isNotEmpty(payOrder.getMchOrderNo())) {
+            wrapper.eq(PayOrder::getMchOrderNo, payOrder.getMchOrderNo());
+        }
+        if (payOrder.getState() != null) {
+            wrapper.eq(PayOrder::getState, payOrder.getState());
+        }
+        if (payOrder.getNotifyState() != null) {
+            wrapper.eq(PayOrder::getNotifyState, payOrder.getNotifyState());
+        }
+        if (StringUtils.isNotEmpty(payOrder.getAppId())) {
+            wrapper.eq(PayOrder::getAppId, payOrder.getAppId());
+        }
+        if (payOrder.getDivisionState() != null) {
+            wrapper.eq(PayOrder::getDivisionState, payOrder.getDivisionState());
+        }
+        if (paramJSON != null) {
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) {
+                wrapper.ge(PayOrder::getCreatedAt, paramJSON.getString("createdStart"));
+            }
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) {
+                wrapper.le(PayOrder::getCreatedAt, paramJSON.getString("createdEnd"));
+            }
+        }
+        // 三合一订单
+        if (paramJSON != null && StringUtils.isNotEmpty(paramJSON.getString("unionOrderId"))) {
+            wrapper.and(wr -> {
+                wr.eq(PayOrder::getPayOrderId, paramJSON.getString("unionOrderId"))
+                        .or().eq(PayOrder::getMchOrderNo, paramJSON.getString("unionOrderId"))
+                        .or().eq(PayOrder::getChannelOrderNo, paramJSON.getString("unionOrderId"));
+            });
+        }
 
+        wrapper.orderByDesc(PayOrder::getCreatedAt);
+
+        return page(iPage, wrapper);
+    }
 }

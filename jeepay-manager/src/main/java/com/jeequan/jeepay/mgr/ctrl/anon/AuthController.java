@@ -81,11 +81,12 @@ public class AuthController extends CommonCtrl {
 
         //redis
 		String vercodeToken = UUID.fastUUID().toString();
-        RedisUtil.setString(CS.getCacheKeyImgCode(vercodeToken), lineCaptcha.getCode(), 60 ); //图片验证码缓存时间: 1分钟
+        RedisUtil.setString(CS.getCacheKeyImgCode(vercodeToken), lineCaptcha.getCode(), CS.VERCODE_CACHE_TIME ); //图片验证码缓存时间: 1分钟
 
         JSONObject result = new JSONObject();
         result.put("imageBase64Data", lineCaptcha.getImageBase64Data());
         result.put("vercodeToken", vercodeToken);
+		result.put("expireTime", CS.VERCODE_CACHE_TIME);
 
 		return ApiRes.ok(result);
 	}

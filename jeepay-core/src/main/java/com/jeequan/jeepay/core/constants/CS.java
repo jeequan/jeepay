@@ -27,6 +27,9 @@ import java.util.Set;
  **/
 public class CS {
 
+    //登录图形验证码缓存时间，单位：s
+    public static final int VERCODE_CACHE_TIME = 60;
+
     /** 系统类型定义 **/
     public interface SYS_TYPE{
         String MCH = "MCH";

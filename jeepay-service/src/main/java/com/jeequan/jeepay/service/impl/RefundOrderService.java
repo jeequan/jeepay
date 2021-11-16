@@ -15,7 +15,10 @@
  */
 package com.jeequan.jeepay.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.exception.BizException;
@@ -136,4 +139,53 @@ public class RefundOrderService extends ServiceImpl<RefundOrderMapper, RefundOrd
     }
 
 
+    public IPage<RefundOrder> pageList(IPage iPage, LambdaQueryWrapper<RefundOrder> wrapper, RefundOrder refundOrder, JSONObject paramJSON) {
+        if (StringUtils.isNotEmpty(refundOrder.getRefundOrderId())) {
+            wrapper.eq(RefundOrder::getRefundOrderId, refundOrder.getRefundOrderId());
+        }
+        if (StringUtils.isNotEmpty(refundOrder.getPayOrderId())) {
+            wrapper.eq(RefundOrder::getPayOrderId, refundOrder.getPayOrderId());
+        }
+        if (StringUtils.isNotEmpty(refundOrder.getChannelPayOrderNo())) {
+            wrapper.eq(RefundOrder::getChannelPayOrderNo, refundOrder.getChannelPayOrderNo());
+        }
+        if (StringUtils.isNotEmpty(refundOrder.getMchNo())) {
+            wrapper.eq(RefundOrder::getMchNo, refundOrder.getMchNo());
+        }
+        if (StringUtils.isNotEmpty(refundOrder.getIsvNo())) {
+            wrapper.eq(RefundOrder::getIsvNo, refundOrder.getIsvNo());
+        }
+        if (refundOrder.getMchType() != null) {
+            wrapper.eq(RefundOrder::getMchType, refundOrder.getMchType());
+        }
+        if (StringUtils.isNotEmpty(refundOrder.getMchRefundNo())) {
+            wrapper.eq(RefundOrder::getMchRefundNo, refundOrder.getMchRefundNo());
+        }
+        if (refundOrder.getState() != null) {
+            wrapper.eq(RefundOrder::getState, refundOrder.getState());
+        }
+        if (StringUtils.isNotEmpty(refundOrder.getAppId())) {
+            wrapper.eq(RefundOrder::getAppId, refundOrder.getAppId());
+        }
+        if (paramJSON != null) {
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) {
+                wrapper.ge(RefundOrder::getCreatedAt, paramJSON.getString("createdStart"));
+            }
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) {
+                wrapper.le(RefundOrder::getCreatedAt, paramJSON.getString("createdEnd"));
+            }
+        }
+        // 三合一订单
+        if (paramJSON != null && StringUtils.isNotEmpty(paramJSON.getString("unionOrderId"))) {
+            wrapper.and(wr -> {
+                wr.eq(RefundOrder::getPayOrderId, paramJSON.getString("unionOrderId"))
+                        .or().eq(RefundOrder::getRefundOrderId, paramJSON.getString("unionOrderId"))
+                        .or().eq(RefundOrder::getChannelPayOrderNo, paramJSON.getString("unionOrderId"))
+                        .or().eq(RefundOrder::getMchRefundNo, paramJSON.getString("unionOrderId"));
+            });
+        }
+        wrapper.orderByDesc(RefundOrder::getCreatedAt);
+
+        return page(iPage, wrapper);
+    }
 }

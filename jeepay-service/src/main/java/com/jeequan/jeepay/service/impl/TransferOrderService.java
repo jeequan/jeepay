@@ -15,7 +15,10 @@
  */
 package com.jeequan.jeepay.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.service.mapper.TransferOrderMapper;
@@ -112,6 +115,43 @@ public class TransferOrderService extends ServiceImpl<TransferOrderMapper, Trans
     }
 
 
+    public IPage<TransferOrder> pageList(IPage iPage, LambdaQueryWrapper<TransferOrder> wrapper, TransferOrder transferOrder, JSONObject paramJSON) {
+        if (StringUtils.isNotEmpty(transferOrder.getTransferId())) {
+            wrapper.eq(TransferOrder::getTransferId, transferOrder.getTransferId());
+        }
+        if (StringUtils.isNotEmpty(transferOrder.getMchOrderNo())) {
+            wrapper.eq(TransferOrder::getMchOrderNo, transferOrder.getMchOrderNo());
+        }
+        if (StringUtils.isNotEmpty(transferOrder.getChannelOrderNo())) {
+            wrapper.eq(TransferOrder::getChannelOrderNo, transferOrder.getChannelOrderNo());
+        }
+        if (StringUtils.isNotEmpty(transferOrder.getMchNo())) {
+            wrapper.eq(TransferOrder::getMchNo, transferOrder.getMchNo());
+        }
+        if (transferOrder.getState() != null) {
+            wrapper.eq(TransferOrder::getState, transferOrder.getState());
+        }
+        if (StringUtils.isNotEmpty(transferOrder.getAppId())) {
+            wrapper.eq(TransferOrder::getAppId, transferOrder.getAppId());
+        }
+        if (paramJSON != null) {
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdStart"))) {
+                wrapper.ge(TransferOrder::getCreatedAt, paramJSON.getString("createdStart"));
+            }
+            if (StringUtils.isNotEmpty(paramJSON.getString("createdEnd"))) {
+                wrapper.le(TransferOrder::getCreatedAt, paramJSON.getString("createdEnd"));
+            }
+        }
+        // 三合一订单
+        if (paramJSON != null && StringUtils.isNotEmpty(paramJSON.getString("unionOrderId"))) {
+            wrapper.and(wr -> {
+                wr.eq(TransferOrder::getTransferId, paramJSON.getString("unionOrderId"))
+                        .or().eq(TransferOrder::getMchOrderNo, paramJSON.getString("unionOrderId"))
+                        .or().eq(TransferOrder::getChannelOrderNo, paramJSON.getString("unionOrderId"));
+            });
+        }
+        wrapper.orderByDesc(TransferOrder::getCreatedAt);
 
-
+        return page(iPage, wrapper);
+    }
 }
