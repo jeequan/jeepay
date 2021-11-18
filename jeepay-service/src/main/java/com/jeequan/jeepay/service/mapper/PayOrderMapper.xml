@@ -91,6 +91,7 @@
         update t_pay_order
             set refund_times = refund_times + 1, <!-- 退款次数 +1 -->
             refund_state = CASE WHEN refund_amount + #{currentRefundAmount} >= amount THEN 2 ELSE 1 END,  <!-- 更新是否已全额退款。 此更新需在refund_amount更新之前，否则需要去掉累加逻辑 -->
+            `state` = CASE WHEN refund_amount + #{currentRefundAmount} >= amount THEN 5 ELSE 2 END,  <!-- 更新订单状态 -->
             refund_amount = refund_amount + #{currentRefundAmount}   <!-- 退款金额累加 -->
         where
             pay_order_id = #{payOrderId} and `state` = 2 <!-- 订单号 & 成功状态的可退款 -->
