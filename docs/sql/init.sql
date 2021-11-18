@@ -355,7 +355,7 @@ CREATE TABLE `t_refund_order` (
           `refund_reason` VARCHAR(256) NOT NULL COMMENT '退款原因',
           `channel_order_no` VARCHAR(32) DEFAULT NULL COMMENT '渠道订单号',
           `err_code` VARCHAR(128) DEFAULT NULL COMMENT '渠道错误码',
-          `err_msg` VARCHAR(256) DEFAULT NULL COMMENT '渠道错误描述',
+          `err_msg` VARCHAR(2048) DEFAULT NULL COMMENT '渠道错误描述',
           `channel_extra` VARCHAR(512) DEFAULT NULL COMMENT '特定渠道发起时额外参数',
           `notify_url` VARCHAR(128) DEFAULT NULL COMMENT '通知地址',
           `ext_param` VARCHAR(64) DEFAULT NULL COMMENT '扩展参数',
