@@ -44,7 +44,7 @@
 
     <!--交易统计-->
     <select id="payCount" resultType="java.util.Map" parameterType="java.util.Map" >
-        SELECT ROUND(IFNULL(SUM(amount), 0)/100, 2) AS payAmount, IFNULL(COUNT(1), 0) AS payCount
+        SELECT ROUND(IFNULL(SUM(amount) - SUM(refund_amount), 0)/100, 2) AS payAmount, IFNULL(COUNT(1), 0) AS payCount
         FROM t_pay_order
         WHERE 1=1
         <if test="state != null"> AND state = #{state} </if>
@@ -57,7 +57,7 @@
 
     <!--支付方式统计-->
     <select id="payTypeCount" resultType="java.util.Map" parameterType="java.util.Map" >
-        SELECT COUNT(1) AS typeCount, ROUND(IFNULL(SUM(amount), 0)/100, 2) AS typeAmount, way_code as wayCode
+        SELECT COUNT(1) AS typeCount, ROUND(IFNULL(SUM(amount) - SUM(refund_amount), 0)/100, 2) AS typeAmount, way_code as wayCode
         FROM t_pay_order
         WHERE 1=1
         <if test="state != null"> AND state = #{state} </if>
@@ -70,14 +70,11 @@
 
     <!--成功、退款订单统计-->
     <select id="selectOrderCount" resultType="java.util.Map" parameterType="java.util.Map" >
-        SELECT DATE_FORMAT(FLOOR(created_at),'%m-%d') groupDate, ROUND(IFNULL(SUM(amount), 0)/100, 2) AS payAmount,
+        SELECT DATE_FORMAT(FLOOR(created_at),'%m-%d') groupDate, ROUND(IFNULL(SUM(amount) - SUM(refund_amount), 0)/100, 2) AS payAmount,
         ROUND(IFNULL(SUM(refund_amount), 0)/100, 2) AS refundAmount
         FROM t_pay_order
         WHERE  1=1
-        <if test="state != null"> AND state = #{state} </if>
-        <if test="refundState == 0"> AND refund_state = #{refundState} </if>
-        <if test="refundState == 1"> AND refund_state = #{refundState} </if>
-        <if test="refundState == 2"> AND refund_state != 0 </if>
+        AND state in (2,5)
         <if test="mchNo != null"> AND mch_no = #{mchNo} </if>
         <if test="createTimeStart != null"> AND created_at &gt;= #{createTimeStart} </if>
         <if test="createTimeEnd != null"> AND created_at &lt;= #{createTimeEnd} </if>

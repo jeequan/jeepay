@@ -265,11 +265,8 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         param.put("createTimeStart", createdStart);
         param.put("createTimeEnd", createdEnd);
         // 查询收款的记录
-        param.put("state", PayOrder.STATE_SUCCESS);
-        param.put("refundState", null);
         List<Map> payOrderList = payOrderMapper.selectOrderCount(param);
         // 查询退款的记录
-        param.put("refundState", PayOrder.STATE_REFUND);
         List<Map> refundOrderList = payOrderMapper.selectOrderCount(param);
         // 生成前端返回参数类型
         List<Map> returnList = getReturnList(daySpace, createdEnd, payOrderList, refundOrderList);
