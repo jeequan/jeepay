@@ -84,7 +84,7 @@ public class RefundOrderService extends ServiceImpl<RefundOrderMapper, RefundOrd
             return false;
         }
 
-        //2. 更新订单表数据
+        //2. 更新订单表数据（更新退款次数,退款状态,如全额退款更新支付状态为已退款）
         RefundOrder refundOrder = getOne(RefundOrder.gw().select(RefundOrder::getPayOrderId, RefundOrder::getRefundAmount).eq(RefundOrder::getRefundOrderId, refundOrderId));
         int updateCount = payOrderMapper.updateRefundAmountAndCount(refundOrder.getPayOrderId(), refundOrder.getRefundAmount());
         if(updateCount <= 0){
