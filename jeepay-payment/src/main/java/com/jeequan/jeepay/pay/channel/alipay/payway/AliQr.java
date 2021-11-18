@@ -65,7 +65,7 @@ public class AliQr extends AlipayPaymentService {
         AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
 
         //调起支付宝 （如果异常， 将直接跑出   ChannelException ）
-        AlipayTradePrecreateResponse alipayResp = mchAppConfigContext.getAlipayClientWrapper().execute(req);
+        AlipayTradePrecreateResponse alipayResp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(req);
 
         // 构造函数响应数据
         AliQrOrderRS res = ApiResBuilder.buildSuccess(AliQrOrderRS.class);

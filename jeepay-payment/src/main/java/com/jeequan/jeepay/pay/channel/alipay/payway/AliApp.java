@@ -66,7 +66,7 @@ public class AliApp extends AlipayPaymentService {
 
         // sdk方式需自行拦截接口异常信息
         try {
-            payData = mchAppConfigContext.getAlipayClientWrapper().getAlipayClient().sdkExecute(req).getBody();
+            payData = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).getAlipayClient().sdkExecute(req).getBody();
         } catch (AlipayApiException e) {
             throw ChannelException.sysError(e.getMessage());
         }

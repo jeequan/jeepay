@@ -73,9 +73,9 @@ public class AliPc extends AlipayPaymentService {
 
         try {
             if(CS.PAY_DATA_TYPE.FORM.equals(bizRQ.getPayDataType())){
-                res.setFormContent(mchAppConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req).getBody());
+                res.setFormContent(configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).getAlipayClient().pageExecute(req).getBody());
             }else{
-                res.setPayUrl(mchAppConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req, "GET").getBody());
+                res.setPayUrl(configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).getAlipayClient().pageExecute(req, "GET").getBody());
             }
         }catch (AlipayApiException e) {
             throw ChannelException.sysError(e.getMessage());

@@ -25,6 +25,7 @@ import com.jeequan.jeepay.pay.channel.wxpay.WxpayPaymentService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayV3Util;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
@@ -53,7 +54,9 @@ public class WxNative extends WxpayPaymentService {
 
         WxNativeOrderRQ bizRQ = (WxNativeOrderRQ) rq;
 
-        WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+        WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+
+        WxPayService wxPayService = wxServiceWrapper.getWxPayService();
 
         // 构造请求数据
         JSONObject reqJSON = buildV3OrderRequest(payOrder, mchAppConfigContext);

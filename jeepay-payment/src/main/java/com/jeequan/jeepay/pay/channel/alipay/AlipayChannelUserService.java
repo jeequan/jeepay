@@ -25,9 +25,10 @@ import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
 import com.jeequan.jeepay.pay.channel.IChannelUserService;
 import com.jeequan.jeepay.pay.exception.ChannelException;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindException;
 
 /*
 * 支付宝： 获取用户ID实现类
@@ -40,6 +41,7 @@ import org.springframework.validation.BindException;
 @Slf4j
 public class AlipayChannelUserService implements IChannelUserService {
 
+    @Autowired private ConfigContextQueryService configContextQueryService;
 
     @Override
     public String getIfCode() {
@@ -53,14 +55,14 @@ public class AlipayChannelUserService implements IChannelUserService {
         String appId = null;
 
         if(mchAppConfigContext.isIsvsubMch()){
-            AlipayIsvParams isvParams = mchAppConfigContext.getIsvConfigContext().getIsvParamsByIfCode(getIfCode(), AlipayIsvParams.class);
+            AlipayIsvParams isvParams = (AlipayIsvParams) configContextQueryService.queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), getIfCode());
             if(isvParams == null) {
                 throw new BizException("服务商支付宝接口没有配置！");
             }
             appId = isvParams.getAppId();
         }else{
             //获取商户配置信息
-            AlipayNormalMchParams normalMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), AlipayNormalMchParams.class);
+            AlipayNormalMchParams normalMchParams = (AlipayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
             if(normalMchParams == null) {
                 throw new BizException("商户支付宝接口没有配置！");
             }
@@ -83,7 +85,7 @@ public class AlipayChannelUserService implements IChannelUserService {
         AlipaySystemOauthTokenRequest request = new AlipaySystemOauthTokenRequest();
         request.setCode(authCode); request.setGrantType("authorization_code");
         try {
-            return mchAppConfigContext.getAlipayClientWrapper().execute(request).getUserId();
+            return configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request).getUserId();
         } catch (ChannelException e) {
             e.printStackTrace();
             return null;

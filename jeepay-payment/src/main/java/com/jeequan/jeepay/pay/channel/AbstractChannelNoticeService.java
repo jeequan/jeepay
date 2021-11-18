@@ -17,6 +17,7 @@ package com.jeequan.jeepay.pay.channel;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.beans.RequestKitBean;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.util.ChannelCertConfigKitBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -38,6 +39,7 @@ public abstract class AbstractChannelNoticeService implements IChannelNoticeServ
 
     @Autowired private RequestKitBean requestKitBean;
     @Autowired private ChannelCertConfigKitBean channelCertConfigKitBean;
+    @Autowired protected ConfigContextQueryService configContextQueryService;
 
     @Override
     public ResponseEntity doNotifyOrderNotExists(HttpServletRequest request) {

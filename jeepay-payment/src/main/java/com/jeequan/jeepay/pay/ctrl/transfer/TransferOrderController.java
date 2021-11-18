@@ -30,6 +30,7 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.transfer.TransferOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.transfer.TransferOrderRS;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.pay.service.PayMchNotifyService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
@@ -53,7 +54,7 @@ import java.util.Date;
 @RestController
 public class TransferOrderController extends ApiController {
 
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private TransferOrderService transferOrderService;
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
     @Autowired private PayMchNotifyService payMchNotifyService;
@@ -86,7 +87,7 @@ public class TransferOrderController extends ApiController {
             }
 
             // 商户配置信息
-            MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(mchNo, appId);
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchNo, appId);
             if(mchAppConfigContext == null){
                 throw new BizException("获取商户应用信息失败");
             }
@@ -142,7 +143,7 @@ public class TransferOrderController extends ApiController {
             }
 
             TransferOrderRS bizRes = TransferOrderRS.buildByRecord(transferOrder);
-            return ApiRes.okWithSign(bizRes, configContextService.getMchAppConfigContext(bizRQ.getMchNo(), bizRQ.getAppId()).getMchApp().getAppSecret());
+            return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(bizRQ.getMchNo(), bizRQ.getAppId()).getAppSecret());
 
         } catch (Exception e) {
             log.error("系统异常：{}", e);

@@ -29,6 +29,7 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.division.PayOrderDivisionExecRQ;
 import com.jeequan.jeepay.pay.rqrs.division.PayOrderDivisionExecRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.pay.service.PayOrderDivisionProcessService;
 import com.jeequan.jeepay.service.impl.MchDivisionReceiverGroupService;
@@ -56,7 +57,7 @@ import java.util.Set;
 @RestController
 public class PayOrderDivisionExecController extends ApiController {
 
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private PayOrderService payOrderService;
     @Autowired private MchDivisionReceiverService mchDivisionReceiverService;
     @Autowired private MchDivisionReceiverGroupService mchDivisionReceiverGroupService;
@@ -95,7 +96,7 @@ public class PayOrderDivisionExecController extends ApiController {
             this.checkReceiverList(receiverList, payOrder.getIfCode(), bizRQ.getMchNo(), bizRQ.getAppId());
 
             // 商户配置信息
-            MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(bizRQ.getMchNo(), bizRQ.getAppId());
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(bizRQ.getMchNo(), bizRQ.getAppId());
             if(mchAppConfigContext == null){
                 throw new BizException("获取商户应用信息失败");
             }

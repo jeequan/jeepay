@@ -23,9 +23,7 @@ import com.jeequan.jeepay.pay.channel.IRefundService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.service.impl.PayOrderService;
-import com.jeequan.jeepay.service.impl.RefundOrderService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,11 +39,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ChannelOrderReissueService {
 
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private PayOrderService payOrderService;
-    @Autowired private RefundOrderService refundOrderService;
     @Autowired private PayOrderProcessService payOrderProcessService;
-    @Autowired private PayMchNotifyService payMchNotifyService;
     @Autowired private RefundOrderProcessService refundOrderProcessService;
 
 
@@ -66,7 +62,7 @@ public class ChannelOrderReissueService {
             }
 
             //查询出商户应用的配置信息
-            MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(payOrder.getMchNo(), payOrder.getAppId());
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
 
             ChannelRetMsg channelRetMsg = queryService.query(payOrder, mchAppConfigContext);
             if(channelRetMsg == null){
@@ -116,7 +112,7 @@ public class ChannelOrderReissueService {
             }
 
             //查询出商户应用的配置信息
-            MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(refundOrder.getMchNo(), refundOrder.getAppId());
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(refundOrder.getMchNo(), refundOrder.getAppId());
 
             ChannelRetMsg channelRetMsg = queryService.query(refundOrder, mchAppConfigContext);
             if(channelRetMsg == null){

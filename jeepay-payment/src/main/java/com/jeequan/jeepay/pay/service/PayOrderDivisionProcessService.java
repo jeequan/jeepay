@@ -61,7 +61,7 @@ public class PayOrderDivisionProcessService {
     @Autowired
     private PayOrderDivisionRecordService payOrderDivisionRecordService;
     @Autowired
-    private ConfigContextService configContextService;
+    private ConfigContextQueryService configContextQueryService;
 
     /***
     * 处理分账，
@@ -147,7 +147,7 @@ public class PayOrderDivisionProcessService {
                 throw new BizException("通道无此分账接口");
             }
 
-            channelRetMsg = divisionService.singleDivision(payOrder, recordList, configContextService.getMchAppConfigContext(payOrder.getMchNo(), payOrder.getAppId()));
+            channelRetMsg = divisionService.singleDivision(payOrder, recordList, configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId()));
 
             // 确认分账成功
             if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {

@@ -23,6 +23,8 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.channel.IPayOrderQueryService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /*
@@ -34,6 +36,8 @@ import org.springframework.stereotype.Service;
 */
 @Service
 public class AlipayPayOrderQueryService implements IPayOrderQueryService {
+
+    @Autowired private ConfigContextQueryService configContextQueryService;
 
     @Override
     public String getIfCode() {
@@ -53,7 +57,7 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
         //通用字段
         AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
 
-        AlipayTradeQueryResponse resp = mchAppConfigContext.getAlipayClientWrapper().execute(req);
+        AlipayTradeQueryResponse resp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(req);
         String result = resp.getTradeStatus();
 
         if("TRADE_SUCCESS".equals(result)) {

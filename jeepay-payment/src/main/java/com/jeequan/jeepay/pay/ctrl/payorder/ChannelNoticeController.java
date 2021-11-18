@@ -23,6 +23,7 @@ import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.pay.channel.IChannelNoticeService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.pay.service.PayMchNotifyService;
 import com.jeequan.jeepay.pay.service.PayOrderProcessService;
@@ -51,7 +52,7 @@ import javax.servlet.http.HttpServletRequest;
 public class ChannelNoticeController extends AbstractCtrl {
 
     @Autowired private PayOrderService payOrderService;
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private PayMchNotifyService payMchNotifyService;
     @Autowired private PayOrderProcessService payOrderProcessService;
 
@@ -105,7 +106,7 @@ public class ChannelNoticeController extends AbstractCtrl {
             }
 
             //查询出商户应用的配置信息
-            MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(payOrder.getMchNo(), payOrder.getAppId());
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
 
             //调起接口的回调判断
             ChannelRetMsg notifyResult = payNotifyService.doNotice(request, mutablePair.getRight(), payOrder, mchAppConfigContext, IChannelNoticeService.NoticeTypeEnum.DO_RETURN);
@@ -202,7 +203,8 @@ public class ChannelNoticeController extends AbstractCtrl {
             }
 
             //查询出商户应用的配置信息
-            MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(payOrder.getMchNo(), payOrder.getAppId());
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
+
 
             //调起接口的回调判断
             ChannelRetMsg notifyResult = payNotifyService.doNotice(request, mutablePair.getRight(), payOrder, mchAppConfigContext, IChannelNoticeService.NoticeTypeEnum.DO_NOTIFY);

@@ -24,6 +24,7 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.channel.wxpay.WxpayPaymentService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
+import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxNativeOrderRQ;
@@ -65,7 +66,8 @@ public class WxNative extends WxpayPaymentService {
         // 调起上游接口：
         // 1. 如果抛异常，则订单状态为： 生成状态，此时没有查单处理操作。 订单将超时关闭
         // 2. 接口调用成功， 后续异常需进行捕捉， 如果 逻辑代码出现异常则需要走完正常流程，此时订单状态为： 支付中， 需要查单处理。
-        WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+        WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+        WxPayService wxPayService = wxServiceWrapper.getWxPayService();
         try {
             WxPayNativeOrderResult wxPayNativeOrderResult = wxPayService.createOrder(req);
 

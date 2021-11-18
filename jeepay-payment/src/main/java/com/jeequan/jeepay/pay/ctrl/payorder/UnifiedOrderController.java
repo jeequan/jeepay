@@ -24,7 +24,7 @@ import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.AutoBarOrderRQ;
-import com.jeequan.jeepay.pay.service.ConfigContextService;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.service.impl.PayWayService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UnifiedOrderController extends AbstractPayOrderController {
 
     @Autowired private PayWayService payWayService;
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
 
     /**
      * 统一下单接口
@@ -75,7 +75,7 @@ public class UnifiedOrderController extends AbstractPayOrderController {
             res.setPayData(bizRes.buildPayData());
         }
 
-        return ApiRes.okWithSign(res, configContextService.getMchAppConfigContext(rq.getMchNo(), rq.getAppId()).getMchApp().getAppSecret());
+        return ApiRes.okWithSign(res, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
     }
 
 

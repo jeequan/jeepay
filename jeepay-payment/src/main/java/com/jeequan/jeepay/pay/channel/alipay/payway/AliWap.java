@@ -72,15 +72,15 @@ public class AliWap extends AlipayPaymentService {
 
         try {
             if(CS.PAY_DATA_TYPE.FORM.equals(bizRQ.getPayDataType())){ //表单方式
-                res.setFormContent(mchAppConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req).getBody());
+                res.setFormContent(configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).getAlipayClient().pageExecute(req).getBody());
 
             }else if (CS.PAY_DATA_TYPE.CODE_IMG_URL.equals(bizRQ.getPayDataType())){ //二维码图片地址
 
-                String payUrl = mchAppConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req, "GET").getBody();
+                String payUrl = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).getAlipayClient().pageExecute(req, "GET").getBody();
                 res.setCodeImgUrl(sysConfigService.getDBApplicationConfig().genScanImgUrl(payUrl));
             }else{ // 默认都为 payUrl方式
 
-                res.setPayUrl(mchAppConfigContext.getAlipayClientWrapper().getAlipayClient().pageExecute(req, "GET").getBody());
+                res.setPayUrl(configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).getAlipayClient().pageExecute(req, "GET").getBody());
             }
         }catch (AlipayApiException e) {
             throw ChannelException.sysError(e.getMessage());

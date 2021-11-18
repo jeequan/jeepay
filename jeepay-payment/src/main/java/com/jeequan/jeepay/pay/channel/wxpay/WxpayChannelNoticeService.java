@@ -33,8 +33,9 @@ import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.exception.ResponseException;
 import com.jeequan.jeepay.pay.channel.AbstractChannelNoticeService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
-import com.jeequan.jeepay.pay.service.ConfigContextService;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -60,7 +61,7 @@ import java.security.PrivateKey;
 @Slf4j
 public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
 
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
 
     @Autowired private PayOrderService payOrderService;
 
@@ -82,7 +83,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                 }
 
                 //获取支付参数 (缓存数据) 和 商户信息
-                MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(payOrder.getMchNo(), payOrder.getAppId());
+                MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
                 if(mchAppConfigContext == null){
                     throw new BizException("获取商户信息失败");
                 }
@@ -114,11 +115,13 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
             ChannelRetMsg channelResult = new ChannelRetMsg();
             channelResult.setChannelState(ChannelRetMsg.ChannelState.WAITING); // 默认支付中
 
-            if (CS.PAY_IF_VERSION.WX_V2.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) { // V2
+            WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+
+            if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) { // V2
                 // 获取回调参数
                 WxPayOrderNotifyResult result = (WxPayOrderNotifyResult) params;
 
-                WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+                WxPayService wxPayService = wxServiceWrapper.getWxPayService();
 
                 // 验证参数
                 verifyWxPayParams(wxPayService, result, payOrder);
@@ -128,7 +131,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                 channelResult.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
                 channelResult.setResponseEntity(textResp(WxPayNotifyResponse.successResp("OK")));
 
-            }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) { // V3
+            }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) { // V3
                 // 获取回调参数
                 WxPayOrderNotifyV3Result.DecryptNotifyResult result = (WxPayOrderNotifyV3Result.DecryptNotifyResult) params;
 
@@ -208,7 +211,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
 
         log.info("\n【请求头信息】：{}\n【加密数据】：{}", header.toString(), params);
 
-        WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+        WxPayService wxPayService = configContextQueryService.getWxServiceWrapper(mchAppConfigContext).getWxPayService();
         WxPayConfig wxPayConfig = wxPayService.getConfig();
         // 自动获取微信平台证书
         PrivateKey privateKey = PemUtils.loadPrivateKey(new FileInputStream(wxPayConfig.getPrivateKeyPath()));

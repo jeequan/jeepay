@@ -15,10 +15,21 @@
  */
 package com.jeequan.jeepay.pay.model;
 
+import com.github.binarywang.wxpay.config.WxPayConfig;
+import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.service.WxPayService;
+import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
+import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
+import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
+import com.jeequan.jeepay.core.utils.SpringBeansUtil;
+import com.jeequan.jeepay.pay.util.ChannelCertConfigKitBean;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
+import me.chanjar.weixin.mp.config.impl.WxMpDefaultConfigImpl;
+import org.apache.commons.lang3.StringUtils;
 
 /*
 * wxService 包装类
@@ -39,5 +50,62 @@ public class WxServiceWrapper {
 
     /** 缓存 wxJavaService 对象 **/
     private WxMpService wxMpService;
+
+
+    public static WxServiceWrapper buildWxServiceWrapper(String mchId, String appId, String appSecret, String mchKey, String apiVersion, String apiV3Key,
+                                                   String serialNo, String cert, String apiClientKey){
+
+        WxPayConfig wxPayConfig = new WxPayConfig();
+        wxPayConfig.setMchId(mchId);
+        wxPayConfig.setAppId(appId);
+        wxPayConfig.setMchKey(mchKey);
+
+        if (CS.PAY_IF_VERSION.WX_V2.equals(apiVersion)) { // 微信API  V2
+            wxPayConfig.setSignType(WxPayConstants.SignType.MD5);
+
+            ChannelCertConfigKitBean channelCertConfigKitBean = SpringBeansUtil.getBean(ChannelCertConfigKitBean.class);
+
+            // api证书。
+            if(StringUtils.isNotBlank(cert)){
+                wxPayConfig.setKeyPath(channelCertConfigKitBean.getCertFilePath(cert));
+            }
+        } else if (CS.PAY_IF_VERSION.WX_V3.equals(apiVersion)) { // 微信API  V3
+
+            ChannelCertConfigKitBean channelCertConfigKitBean = SpringBeansUtil.getBean(ChannelCertConfigKitBean.class);
+
+            wxPayConfig.setApiV3Key(apiV3Key);
+            wxPayConfig.setCertSerialNo(serialNo);
+            wxPayConfig.setPrivateCertPath(channelCertConfigKitBean.getCertFilePath(cert));
+            wxPayConfig.setPrivateKeyPath(channelCertConfigKitBean.getCertFilePath(apiClientKey));
+        }
+
+        WxPayService wxPayService = new WxPayServiceImpl();
+        wxPayService.setConfig(wxPayConfig); //微信配置信息
+
+        WxMpDefaultConfigImpl wxMpConfigStorage = new WxMpDefaultConfigImpl();
+        wxMpConfigStorage.setAppId(appId);
+        wxMpConfigStorage.setSecret(appSecret);
+
+        WxMpService wxMpService = new WxMpServiceImpl();
+        wxMpService.setWxMpConfigStorage(wxMpConfigStorage); //微信配置信息
+
+        return new WxServiceWrapper(apiVersion, wxPayService, wxMpService);
+    }
+
+
+    public static WxServiceWrapper buildWxServiceWrapper(WxpayIsvParams wxpayParams){
+        //放置 wxJavaService
+        return buildWxServiceWrapper(wxpayParams.getMchId(), wxpayParams.getAppId(),
+                wxpayParams.getAppSecret(), wxpayParams.getKey(), wxpayParams.getApiVersion(), wxpayParams.getApiV3Key(),
+                wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientKey());
+    }
+
+    public static WxServiceWrapper buildWxServiceWrapper(WxpayNormalMchParams wxpayParams){
+        //放置 wxJavaService
+        return buildWxServiceWrapper(wxpayParams.getMchId(), wxpayParams.getAppId(),
+                wxpayParams.getAppSecret(), wxpayParams.getKey(), wxpayParams.getApiVersion(), wxpayParams.getApiV3Key(),
+                wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientKey());
+    }
+
 
 }

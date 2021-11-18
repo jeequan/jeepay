@@ -19,8 +19,10 @@ import com.github.binarywang.wxpay.bean.request.BaseWxPayRequest;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvsubMchParams;
+import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import org.apache.commons.lang3.StringUtils;
 
 /*
@@ -40,7 +42,11 @@ public class WxpayKit {
             return ;
         }
 
-        WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvsubMchParams.class);
+        ConfigContextQueryService configContextQueryService = SpringBeansUtil.getBean(ConfigContextQueryService.class);
+
+        WxpayIsvsubMchParams isvsubMchParams =
+                (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
+
         req.setSubMchId(isvsubMchParams.getSubMchId());
         req.setSubAppId(isvsubMchParams.getSubMchAppId());
     }

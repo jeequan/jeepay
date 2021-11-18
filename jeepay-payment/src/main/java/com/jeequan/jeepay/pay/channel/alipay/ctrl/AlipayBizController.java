@@ -31,8 +31,8 @@ import com.jeequan.jeepay.core.model.params.alipay.AlipayConfig;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.pay.channel.alipay.AlipayKit;
 import com.jeequan.jeepay.pay.model.AlipayClientWrapper;
-import com.jeequan.jeepay.pay.model.IsvConfigContext;
-import com.jeequan.jeepay.pay.service.ConfigContextService;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
@@ -58,7 +58,7 @@ import java.math.BigDecimal;
 @RequestMapping("/api/channelbiz/alipay")
 public class AlipayBizController extends AbstractCtrl {
 
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private SysConfigService sysConfigService;
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
     @Autowired private MchAppService mchAppService;
@@ -73,8 +73,7 @@ public class AlipayBizController extends AbstractCtrl {
 
         String isvNo = isvAndMchAppId.split("_")[0];
 
-        IsvConfigContext isvConfigContext = configContextService.getIsvConfigContext(isvNo);
-        AlipayIsvParams alipayIsvParams = isvConfigContext.getIsvParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayIsvParams.class);
+        AlipayIsvParams alipayIsvParams = (AlipayIsvParams) configContextQueryService.queryIsvParams(isvNo, CS.IF_CODE.ALIPAY);
         alipayIsvParams.getSandbox();
 
         String oauthUrl = AlipayConfig.PROD_APP_TO_APP_AUTH_URL;
@@ -102,7 +101,11 @@ public class AlipayBizController extends AbstractCtrl {
                 isAlipaySysAuth = false;
                 String isvNo = isvAndMchAppId.split("_")[0];
                 String mchAppId = isvAndMchAppId.split("_")[1];
-                AlipayClientWrapper alipayClientWrapper = configContextService.getIsvConfigContext(isvNo).getAlipayClientWrapper();
+
+                MchApp mchApp = mchAppService.getById(mchAppId);
+
+                MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchApp.getMchNo(), mchAppId);
+                AlipayClientWrapper alipayClientWrapper = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext);
 
                 AlipayOpenAuthTokenAppRequest request = new AlipayOpenAuthTokenAppRequest();
                 AlipayOpenAuthTokenAppModel model = new AlipayOpenAuthTokenAppModel();
@@ -140,8 +143,6 @@ public class AlipayBizController extends AbstractCtrl {
                     dbRecord.setCreatedUid(0L);
                     payInterfaceConfigService.save(dbRecord);
                 }
-
-                MchApp mchApp = mchAppService.getById(mchAppId);
 
                 // 更新应用配置信息
                 mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, mchApp.getMchNo(), mchApp.getAppId()));

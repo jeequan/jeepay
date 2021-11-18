@@ -27,8 +27,11 @@ import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.pay.channel.IDivisionService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -44,6 +47,8 @@ import java.util.List;
 @Slf4j
 @Service
 public class WxpayDivisionService implements IDivisionService {
+
+    @Autowired private ConfigContextQueryService configContextQueryService;
 
     @Override
     public String getIfCode() {
@@ -75,8 +80,10 @@ public class WxpayDivisionService implements IDivisionService {
             receiverJSON.put("custom_relation", mchDivisionReceiver.getRelationTypeName());
             request.setReceiver(receiverJSON.toJSONString());
 
+            WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+
             ProfitSharingReceiverResult profitSharingReceiverResult =
-                    mchAppConfigContext.getWxServiceWrapper().getWxPayService().getProfitSharingService().addReceiver(request);
+                    wxServiceWrapper.getWxPayService().getProfitSharingService().addReceiver(request);
 
             // 明确成功
             return ChannelRetMsg.confirmSuccess(null);
@@ -137,7 +144,9 @@ public class WxpayDivisionService implements IDivisionService {
 
             request.setReceivers(receiverJSONArray.toJSONString());
 
-            ProfitSharingResult profitSharingResult = mchAppConfigContext.getWxServiceWrapper().getWxPayService().getProfitSharingService().profitSharing(request);
+            WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+
+            ProfitSharingResult profitSharingResult = wxServiceWrapper.getWxPayService().getProfitSharingService().profitSharing(request);
             return ChannelRetMsg.confirmSuccess(profitSharingResult.getOrderId());
 
         } catch (WxPayException wxPayException) {
@@ -168,7 +177,9 @@ public class WxpayDivisionService implements IDivisionService {
         request.setTransactionId(payOrder.getChannelOrderNo());
         request.setOutOrderNo(SeqKit.genDivisionBatchId());
         request.setDescription("完结分账");
-        return mchAppConfigContext.getWxServiceWrapper().getWxPayService().getProfitSharingService().profitSharingFinish(request).getOrderId();
+
+        WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+        return wxServiceWrapper.getWxPayService().getProfitSharingService().profitSharingFinish(request).getOrderId();
     }
 
 }

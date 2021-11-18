@@ -74,7 +74,7 @@ public class AliBar extends AlipayPaymentService {
         AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
 
         //调起支付宝 （如果异常， 将直接跑出   ChannelException ）
-        AlipayTradePayResponse alipayResp = mchAppConfigContext.getAlipayClientWrapper().execute(req);
+        AlipayTradePayResponse alipayResp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(req);
 
         // 构造函数响应数据
         AliBarOrderRS res = ApiResBuilder.buildSuccess(AliBarOrderRS.class);

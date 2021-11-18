@@ -78,7 +78,7 @@ public class AlipayChannelNoticeService extends AbstractChannelNoticeService {
             if(mchAppConfigContext.isIsvsubMch()){
 
                 // 获取支付参数
-                AlipayIsvParams alipayParams = mchAppConfigContext.getIsvConfigContext().getIsvParamsByIfCode(getIfCode(), AlipayIsvParams.class);
+                AlipayIsvParams alipayParams = (AlipayIsvParams)configContextQueryService.queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), getIfCode());
                 useCert = alipayParams.getUseCert();
                 alipaySignType = alipayParams.getSignType();
                 alipayPublicCert = alipayParams.getAlipayPublicCert();
@@ -87,7 +87,8 @@ public class AlipayChannelNoticeService extends AbstractChannelNoticeService {
             }else{
 
                 // 获取支付参数
-                AlipayNormalMchParams alipayParams = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), AlipayNormalMchParams.class);
+                AlipayNormalMchParams alipayParams = (AlipayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
+
                 useCert = alipayParams.getUseCert();
                 alipaySignType = alipayParams.getSignType();
                 alipayPublicCert = alipayParams.getAlipayPublicCert();

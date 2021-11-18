@@ -18,16 +18,20 @@ package com.jeequan.jeepay.pay.channel.wxpay;
 import com.github.binarywang.wxpay.bean.entpay.EntPayRequest;
 import com.github.binarywang.wxpay.bean.entpay.EntPayResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
+import com.github.binarywang.wxpay.service.WxPayService;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
 import com.jeequan.jeepay.pay.channel.ITransferService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.transfer.TransferOrderRQ;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,6 +44,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class WxpayTransferService implements ITransferService {
+
+    @Autowired private ConfigContextQueryService configContextQueryService;
 
     @Override
     public String getIfCode() {
@@ -78,8 +84,11 @@ public class WxpayTransferService implements ITransferService {
         try {
 
             EntPayRequest request = new EntPayRequest();
-            request.setMchAppid(mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig().getAppId());  // 商户账号appid
-            request.setMchId(mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig().getMchId());  //商户号
+
+            WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+
+            request.setMchAppid(wxServiceWrapper.getWxPayService().getConfig().getAppId());  // 商户账号appid
+            request.setMchId(wxServiceWrapper.getWxPayService().getConfig().getMchId());  //商户号
 
             request.setPartnerTradeNo(transferOrder.getTransferId()); //商户订单号
             request.setOpenid(transferOrder.getAccountNo()); //openid
@@ -93,7 +102,7 @@ public class WxpayTransferService implements ITransferService {
                 request.setCheckName("NO_CHECK");
             }
 
-            EntPayResult entPayResult = mchAppConfigContext.getWxServiceWrapper().getWxPayService().getEntPayService().entPay(request);
+            EntPayResult entPayResult = wxServiceWrapper.getWxPayService().getEntPayService().entPay(request);
 
             // SUCCESS/FAIL，注意：当状态为FAIL时，存在业务结果未明确的情况。如果状态为FAIL，请务必关注错误代码（err_code字段），通过查询接口确认此次付款的结果。
             if("SUCCESS".equalsIgnoreCase(entPayResult.getResultCode())){

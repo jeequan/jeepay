@@ -32,7 +32,9 @@ import com.jeequan.jeepay.pay.channel.IDivisionService;
 import com.jeequan.jeepay.pay.exception.ChannelException;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -49,6 +51,8 @@ import java.util.List;
 @Slf4j
 @Service
 public class AlipayDivisionService implements IDivisionService {
+
+    @Autowired private ConfigContextQueryService configContextQueryService;
 
     @Override
     public String getIfCode() {
@@ -83,7 +87,7 @@ public class AlipayDivisionService implements IDivisionService {
             royaltyEntity.setMemo(mchDivisionReceiver.getRelationTypeName()); //分账关系描述
             model.setReceiverList(Arrays.asList(royaltyEntity));
 
-            AlipayTradeRoyaltyRelationBindResponse alipayResp = mchAppConfigContext.getAlipayClientWrapper().execute(request);
+            AlipayTradeRoyaltyRelationBindResponse alipayResp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
 
             if(alipayResp.isSuccess()){
                 return ChannelRetMsg.confirmSuccess(null);
@@ -174,7 +178,7 @@ public class AlipayDivisionService implements IDivisionService {
             if(log.isInfoEnabled()){
                 log.info("订单：[{}], 支付宝分账请求：{}", payOrder.getPayOrderId(), JSON.toJSONString(model));
             }
-            AlipayTradeOrderSettleResponse alipayResp = mchAppConfigContext.getAlipayClientWrapper().execute(request);
+            AlipayTradeOrderSettleResponse alipayResp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
             log.info("订单：[{}], 支付宝分账响应：{}", payOrder.getPayOrderId(), alipayResp.getBody());
             if(alipayResp.isSuccess()){
                 return ChannelRetMsg.confirmSuccess(alipayResp.getTradeNo());

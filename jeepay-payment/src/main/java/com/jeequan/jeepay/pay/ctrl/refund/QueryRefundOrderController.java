@@ -21,6 +21,7 @@ import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.rqrs.refund.QueryRefundOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.refund.QueryRefundOrderRS;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.service.impl.RefundOrderService;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class QueryRefundOrderController extends ApiController {
 
     @Autowired private RefundOrderService refundOrderService;
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
 
     /**
      * 查单接口
@@ -62,6 +63,6 @@ public class QueryRefundOrderController extends ApiController {
         }
 
         QueryRefundOrderRS bizRes = QueryRefundOrderRS.buildByRefundOrder(refundOrder);
-        return ApiRes.okWithSign(bizRes, configContextService.getMchAppConfigContext(rq.getMchNo(), rq.getAppId()).getMchApp().getAppSecret());
+        return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
     }
 }

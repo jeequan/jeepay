@@ -64,7 +64,7 @@ public class XxpayChannelRefundNoticeService extends AbstractChannelRefundNotice
     @Override
     public ChannelRetMsg doNotice(HttpServletRequest request, Object params, RefundOrder refundOrder, MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
         try {
-            XxpayNormalMchParams xxpayParams = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), XxpayNormalMchParams.class);
+            XxpayNormalMchParams xxpayParams = (XxpayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
 
             // 获取请求参数
             JSONObject jsonParams = (JSONObject) params;

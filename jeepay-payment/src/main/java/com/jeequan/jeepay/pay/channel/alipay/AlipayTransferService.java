@@ -26,8 +26,10 @@ import com.jeequan.jeepay.pay.channel.ITransferService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.transfer.TransferOrderRQ;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,6 +42,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class AlipayTransferService implements ITransferService {
+
+    @Autowired private ConfigContextQueryService configContextQueryService;
 
     @Override
     public String getIfCode() {
@@ -79,7 +83,7 @@ public class AlipayTransferService implements ITransferService {
         AlipayKit.putApiIsvInfo(mchAppConfigContext, request, model);
 
         // 调起支付宝接口
-        AlipayFundTransToaccountTransferResponse response = mchAppConfigContext.getAlipayClientWrapper().execute(request);
+        AlipayFundTransToaccountTransferResponse response = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
 
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
         channelRetMsg.setChannelAttach(response.getBody());

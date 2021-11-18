@@ -45,7 +45,7 @@ import org.springframework.stereotype.Service;
 public class PayMchNotifyService {
 
     @Autowired private MchNotifyRecordService mchNotifyRecordService;
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private IMQSender mqSender;
 
 
@@ -68,7 +68,7 @@ public class PayMchNotifyService {
             }
 
             //商户app私钥
-            String appSecret = configContextService.getMchAppConfigContext(dbPayOrder.getMchNo(), dbPayOrder.getAppId()).getMchApp().getAppSecret();
+            String appSecret = configContextQueryService.queryMchApp(dbPayOrder.getMchNo(), dbPayOrder.getAppId()).getAppSecret();
 
             // 封装通知url
             String notifyUrl = createNotifyUrl(dbPayOrder, appSecret);
@@ -119,7 +119,7 @@ public class PayMchNotifyService {
             }
 
             //商户app私钥
-            String appSecret = configContextService.getMchAppConfigContext(dbRefundOrder.getMchNo(), dbRefundOrder.getAppId()).getMchApp().getAppSecret();
+            String appSecret = configContextQueryService.queryMchApp(dbRefundOrder.getMchNo(), dbRefundOrder.getAppId()).getAppSecret();
 
             // 封装通知url
             String notifyUrl = createNotifyUrl(dbRefundOrder, appSecret);
@@ -170,7 +170,7 @@ public class PayMchNotifyService {
             }
 
             //商户app私钥
-            String appSecret = configContextService.getMchAppConfigContext(dbTransferOrder.getMchNo(), dbTransferOrder.getAppId()).getMchApp().getAppSecret();
+            String appSecret = configContextQueryService.queryMchApp(dbTransferOrder.getMchNo(), dbTransferOrder.getAppId()).getAppSecret();
 
             // 封装通知url
             String notifyUrl = createNotifyUrl(dbTransferOrder, appSecret);

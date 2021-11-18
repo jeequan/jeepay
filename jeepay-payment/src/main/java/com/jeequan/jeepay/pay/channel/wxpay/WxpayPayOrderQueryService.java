@@ -27,7 +27,10 @@ import com.jeequan.jeepay.pay.channel.IPayOrderQueryService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayV3Util;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /*
@@ -40,6 +43,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class WxpayPayOrderQueryService implements IPayOrderQueryService {
 
+    @Autowired private ConfigContextQueryService configContextQueryService;
+
     @Override
     public String getIfCode() {
         return CS.IF_CODE.WXPAY;
@@ -50,7 +55,9 @@ public class WxpayPayOrderQueryService implements IPayOrderQueryService {
 
         try {
 
-            if (CS.PAY_IF_VERSION.WX_V2.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) {  //V2
+            WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+
+            if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
 
                 WxPayOrderQueryRequest req = new WxPayOrderQueryRequest();
 
@@ -59,7 +66,7 @@ public class WxpayPayOrderQueryService implements IPayOrderQueryService {
 
                 req.setOutTradeNo(payOrder.getPayOrderId());
 
-                WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+                WxPayService wxPayService = wxServiceWrapper.getWxPayService();
 
                 WxPayOrderQueryResult result = wxPayService.queryOrder(req);
 
@@ -75,19 +82,19 @@ public class WxpayPayOrderQueryService implements IPayOrderQueryService {
                     return ChannelRetMsg.unknown();
                 }
 
-            }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) {   //V3
+            }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {   //V3
 
                 String reqUrl;
                 String query;
                 if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
-                    WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvsubMchParams.class);
+                    WxpayIsvsubMchParams isvsubMchParams = (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
                     reqUrl = String.format("/v3/pay/partner/transactions/out-trade-no/%s", payOrder.getPayOrderId());
-                    query = String.format("?sp_mchid=%s&sub_mchid=%s", mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig().getMchId(), isvsubMchParams.getSubMchId());
+                    query = String.format("?sp_mchid=%s&sub_mchid=%s", wxServiceWrapper.getWxPayService().getConfig().getMchId(), isvsubMchParams.getSubMchId());
                 }else {
                     reqUrl = String.format("/v3/pay/transactions/out-trade-no/%s", payOrder.getPayOrderId());
-                    query = String.format("?mchid=%s", mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig().getMchId());
+                    query = String.format("?mchid=%s", wxServiceWrapper.getWxPayService().getConfig().getMchId());
                 }
-                JSONObject resultJSON = WxpayV3Util.queryOrderV3(reqUrl + query, mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig());
+                JSONObject resultJSON = WxpayV3Util.queryOrderV3(reqUrl + query, wxServiceWrapper.getWxPayService().getConfig());
 
                 String channelState = resultJSON.getString("trade_state");
                 if ("SUCCESS".equals(channelState)) {

@@ -66,8 +66,7 @@ public class AlipayRefundService extends AbstractRefundService {
         //统一放置 isv接口必传信息
         AlipayKit.putApiIsvInfo(mchAppConfigContext, request, model);
 
-        AlipayTradeRefundResponse response = mchAppConfigContext.getAlipayClientWrapper().execute(request);
-
+        AlipayTradeRefundResponse response = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
 
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
         channelRetMsg.setChannelAttach(response.getBody());
@@ -97,7 +96,7 @@ public class AlipayRefundService extends AbstractRefundService {
         //统一放置 isv接口必传信息
         AlipayKit.putApiIsvInfo(mchAppConfigContext, request, model);
 
-        AlipayTradeFastpayRefundQueryResponse response = mchAppConfigContext.getAlipayClientWrapper().execute(request);
+        AlipayTradeFastpayRefundQueryResponse response = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
 
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
         channelRetMsg.setChannelAttach(response.getBody());

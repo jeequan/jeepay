@@ -16,8 +16,6 @@
 package com.jeequan.jeepay.pay.ctrl.payorder;
 
 import cn.hutool.core.date.DateUtil;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.jeequan.jeepay.components.mq.model.PayOrderDivisionMQ;
 import com.jeequan.jeepay.components.mq.model.PayOrderReissueMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.constants.CS;
@@ -31,15 +29,13 @@ import com.jeequan.jeepay.core.utils.*;
 import com.jeequan.jeepay.pay.channel.IPaymentService;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.exception.ChannelException;
-import com.jeequan.jeepay.pay.model.IsvConfigContext;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.QrCashierOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.QrCashierOrderRS;
-import com.jeequan.jeepay.pay.service.ConfigContextService;
-import com.jeequan.jeepay.pay.service.PayMchNotifyService;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.PayOrderProcessService;
 import com.jeequan.jeepay.service.impl.MchPayPassageService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
@@ -64,7 +60,7 @@ public abstract class AbstractPayOrderController extends ApiController {
 
     @Autowired private MchPayPassageService mchPayPassageService;
     @Autowired private PayOrderService payOrderService;
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private PayOrderProcessService payOrderProcessService;
     @Autowired private SysConfigService sysConfigService;
     @Autowired private IMQSender mqSender;
@@ -126,7 +122,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             }
 
             //获取支付参数 (缓存数据) 和 商户信息
-            MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(mchNo, appId);
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchNo, appId);
             if(mchAppConfigContext == null){
                 throw new BizException("获取商户应用信息失败");
             }
@@ -283,20 +279,16 @@ public abstract class AbstractPayOrderController extends ApiController {
 
         if(mchAppConfigContext.getMchType() == MchInfo.TYPE_NORMAL){ //普通商户
 
-            if(mchAppConfigContext.getNormalMchParamsByIfCode(ifCode) == null){
+            if(configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), ifCode) == null){
                 throw new BizException("商户应用参数未配置");
             }
         }else if(mchAppConfigContext.getMchType() == MchInfo.TYPE_ISVSUB){ //特约商户
 
-            mchAppConfigContext = configContextService.getMchAppConfigContext(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId());
-
-            if(mchAppConfigContext == null || mchAppConfigContext.getIsvsubMchParamsByIfCode(ifCode) == null){
+            if(configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), ifCode) == null){
                 throw new BizException("特约商户参数未配置");
             }
 
-            IsvConfigContext isvConfigContext = configContextService.getIsvConfigContext(mchAppConfigContext.getMchInfo().getIsvNo());
-
-            if(isvConfigContext == null || isvConfigContext.getIsvParamsByIfCode(ifCode) == null){
+            if(configContextQueryService.queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), ifCode) == null){
                 throw new BizException("服务商参数未配置");
             }
         }
@@ -396,7 +388,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             bizRS.setErrMsg(bizRS.getChannelRetMsg() != null ? bizRS.getChannelRetMsg().getChannelErrMsg() : null);
         }
 
-        return ApiRes.okWithSign(bizRS, configContextService.getMchAppConfigContext(bizRQ.getMchNo(), bizRQ.getAppId()).getMchApp().getAppSecret());
+        return ApiRes.okWithSign(bizRS, configContextQueryService.queryMchApp(bizRQ.getMchNo(), bizRQ.getAppId()).getAppSecret());
     }
 
 

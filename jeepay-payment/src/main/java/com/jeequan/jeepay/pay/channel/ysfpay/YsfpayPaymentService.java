@@ -81,7 +81,7 @@ public class YsfpayPaymentService extends AbstractPaymentService {
         }
 
         reqParams.put("serProvId", isvParams.getSerProvId()); //云闪付服务商标识
-        YsfpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), YsfpayIsvsubMchParams.class);
+        YsfpayIsvsubMchParams isvsubMchParams = (YsfpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
         reqParams.put("merId", isvsubMchParams.getMerId()); // 商户号
 
         //签名

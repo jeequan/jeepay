@@ -15,14 +15,6 @@
  */
 package com.jeequan.jeepay.pay.service;
 
-import com.alipay.api.AlipayApiException;
-import com.alipay.api.AlipayClient;
-import com.alipay.api.CertAlipayRequest;
-import com.alipay.api.DefaultAlipayClient;
-import com.github.binarywang.wxpay.config.WxPayConfig;
-import com.github.binarywang.wxpay.constant.WxPayConstants;
-import com.github.binarywang.wxpay.service.WxPayService;
-import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.IsvInfo;
 import com.jeequan.jeepay.core.entity.MchApp;
@@ -31,22 +23,16 @@ import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.model.params.IsvParams;
 import com.jeequan.jeepay.core.model.params.IsvsubMchParams;
 import com.jeequan.jeepay.core.model.params.NormalMchParams;
-import com.jeequan.jeepay.core.model.params.alipay.AlipayConfig;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
 import com.jeequan.jeepay.pay.model.*;
-import com.jeequan.jeepay.pay.util.ChannelCertConfigKitBean;
 import com.jeequan.jeepay.service.impl.IsvInfoService;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
-import me.chanjar.weixin.mp.config.impl.WxMpDefaultConfigImpl;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -79,7 +65,6 @@ public class ConfigContextService {
     @Autowired private MchAppService mchAppService;
     @Autowired private IsvInfoService isvInfoService;
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private ChannelCertConfigKitBean channelCertConfigKitBean;
 
 
     /** 获取 [商户配置信息] **/
@@ -224,22 +209,13 @@ public class ConfigContextService {
 
             AlipayNormalMchParams alipayParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayNormalMchParams.class);
             if(alipayParams != null){
-
-                mchAppConfigContext.setAlipayClientWrapper(buildAlipayClientWrapper(
-                        alipayParams.getUseCert(), alipayParams.getSandbox(), alipayParams.getAppId(), alipayParams.getPrivateKey(),
-                        alipayParams.getAlipayPublicKey(), alipayParams.getSignType(), alipayParams.getAppPublicCert(),
-                        alipayParams.getAlipayPublicCert(), alipayParams.getAlipayRootCert()
-                        )
-                );
-
+                mchAppConfigContext.setAlipayClientWrapper(AlipayClientWrapper.buildAlipayClientWrapper(alipayParams));
             }
 
             //放置 wxJavaService
             WxpayNormalMchParams wxpayParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayNormalMchParams.class);
             if(wxpayParams != null){
-                mchAppConfigContext.setWxServiceWrapper(buildWxServiceWrapper(wxpayParams.getMchId(), wxpayParams.getAppId(),
-                        wxpayParams.getAppSecret(), wxpayParams.getKey(), wxpayParams.getApiVersion(), wxpayParams.getApiV3Key(),
-                        wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientKey()));
+                mchAppConfigContext.setWxServiceWrapper(WxServiceWrapper.buildWxServiceWrapper(wxpayParams));
             }
 
 
@@ -311,20 +287,13 @@ public class ConfigContextService {
         //放置alipay client
         AlipayIsvParams alipayParams = isvConfigContext.getIsvParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayIsvParams.class);
         if(alipayParams != null){
-            isvConfigContext.setAlipayClientWrapper(buildAlipayClientWrapper(
-                    alipayParams.getUseCert(), alipayParams.getSandbox(), alipayParams.getAppId(), alipayParams.getPrivateKey(),
-                    alipayParams.getAlipayPublicKey(), alipayParams.getSignType(), alipayParams.getAppPublicCert(),
-                    alipayParams.getAlipayPublicCert(), alipayParams.getAlipayRootCert()
-                    )
-            );
+            isvConfigContext.setAlipayClientWrapper(AlipayClientWrapper.buildAlipayClientWrapper(alipayParams));
         }
 
         //放置 wxJavaService
         WxpayIsvParams wxpayParams = isvConfigContext.getIsvParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvParams.class);
         if(wxpayParams != null){
-            isvConfigContext.setWxServiceWrapper(buildWxServiceWrapper(wxpayParams.getMchId(), wxpayParams.getAppId(),
-                    wxpayParams.getAppSecret(), wxpayParams.getKey(), wxpayParams.getApiVersion(), wxpayParams.getApiV3Key(),
-                    wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientKey()));
+            isvConfigContext.setWxServiceWrapper(WxServiceWrapper.buildWxServiceWrapper(wxpayParams));
         }
 
         isvConfigContextMap.put(isvNo, isvConfigContext);
@@ -340,81 +309,8 @@ public class ConfigContextService {
     }
 
 
-    /*
-    * 构建支付宝client 包装类
-    *
-    * @author terrfly
-    * @site https://www.jeequan.com
-    * @date 2021/6/8 17:46
-    */
-    private AlipayClientWrapper buildAlipayClientWrapper(Byte useCert, Byte sandbox, String appId, String privateKey, String alipayPublicKey, String signType, String appCert,
-                                                         String alipayPublicCert, String alipayRootCert){
 
-        //避免空值
-        sandbox = sandbox == null ? CS.NO : sandbox;
 
-        AlipayClient alipayClient = null;
-        if(useCert != null && useCert == CS.YES){ //证书的方式
 
-            CertAlipayRequest certAlipayRequest = new CertAlipayRequest();
-            certAlipayRequest.setServerUrl(sandbox == CS.YES ? AlipayConfig.SANDBOX_SERVER_URL : AlipayConfig.PROD_SERVER_URL);
-            certAlipayRequest.setAppId(appId);
-            certAlipayRequest.setPrivateKey(privateKey);
-            certAlipayRequest.setFormat(AlipayConfig.FORMAT);
-            certAlipayRequest.setCharset(AlipayConfig.CHARSET);
-            certAlipayRequest.setSignType(signType);
-
-            certAlipayRequest.setCertPath(channelCertConfigKitBean.getCertFilePath(appCert));
-            certAlipayRequest.setAlipayPublicCertPath(channelCertConfigKitBean.getCertFilePath(alipayPublicCert));
-            certAlipayRequest.setRootCertPath(channelCertConfigKitBean.getCertFilePath(alipayRootCert));
-            try {
-                alipayClient = new DefaultAlipayClient(certAlipayRequest);
-            } catch (AlipayApiException e) {
-                log.error("error" ,e);
-                alipayClient = null;
-            }
-        }else{
-            alipayClient = new DefaultAlipayClient(sandbox == CS.YES ? AlipayConfig.SANDBOX_SERVER_URL : AlipayConfig.PROD_SERVER_URL
-                    , appId, privateKey, AlipayConfig.FORMAT, AlipayConfig.CHARSET,
-                    alipayPublicKey, signType);
-        }
-
-        return new AlipayClientWrapper(useCert, alipayClient);
-    }
-
-    private WxServiceWrapper buildWxServiceWrapper(String mchId, String appId, String appSecret, String mchKey, String apiVersion, String apiV3Key,
-                                                            String serialNo, String cert, String apiClientKey){
-
-        WxPayConfig wxPayConfig = new WxPayConfig();
-        wxPayConfig.setMchId(mchId);
-        wxPayConfig.setAppId(appId);
-        wxPayConfig.setMchKey(mchKey);
-
-        if (CS.PAY_IF_VERSION.WX_V2.equals(apiVersion)) { // 微信API  V2
-            wxPayConfig.setSignType(WxPayConstants.SignType.MD5);
-
-            // api证书。
-            if(StringUtils.isNotBlank(cert)){
-                wxPayConfig.setKeyPath(channelCertConfigKitBean.getCertFilePath(cert));
-            }
-        } else if (CS.PAY_IF_VERSION.WX_V3.equals(apiVersion)) { // 微信API  V3
-            wxPayConfig.setApiV3Key(apiV3Key);
-            wxPayConfig.setCertSerialNo(serialNo);
-            wxPayConfig.setPrivateCertPath(channelCertConfigKitBean.getCertFilePath(cert));
-            wxPayConfig.setPrivateKeyPath(channelCertConfigKitBean.getCertFilePath(apiClientKey));
-        }
-
-        WxPayService wxPayService = new WxPayServiceImpl();
-        wxPayService.setConfig(wxPayConfig); //微信配置信息
-
-        WxMpDefaultConfigImpl wxMpConfigStorage = new WxMpDefaultConfigImpl();
-        wxMpConfigStorage.setAppId(appId);
-        wxMpConfigStorage.setSecret(appSecret);
-
-        WxMpService wxMpService = new WxMpServiceImpl();
-        wxMpService.setWxMpConfigStorage(wxMpConfigStorage); //微信配置信息
-
-        return new WxServiceWrapper(apiVersion, wxPayService, wxMpService);
-    }
 
 }

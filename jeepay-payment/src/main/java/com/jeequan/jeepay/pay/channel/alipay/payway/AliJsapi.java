@@ -73,7 +73,7 @@ public class AliJsapi extends AlipayPaymentService {
         AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
 
         //调起支付宝 （如果异常， 将直接跑出   ChannelException ）
-        AlipayTradeCreateResponse alipayResp = mchAppConfigContext.getAlipayClientWrapper().execute(req);
+        AlipayTradeCreateResponse alipayResp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(req);
 
         // 构造函数响应数据
         AliJsapiOrderRS res = ApiResBuilder.buildSuccess(AliJsapiOrderRS.class);

@@ -32,6 +32,7 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRS;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.pay.service.PayMchNotifyService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
@@ -57,8 +58,9 @@ public class RefundOrderController extends ApiController {
 
     @Autowired private PayOrderService payOrderService;
     @Autowired private RefundOrderService refundOrderService;
-    @Autowired private ConfigContextService configContextService;
     @Autowired private PayMchNotifyService payMchNotifyService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
+
 
     /** 申请退款 **/
     @PostMapping("/api/refund/refundOrder")
@@ -120,7 +122,7 @@ public class RefundOrderController extends ApiController {
             }
 
             //获取支付参数 (缓存数据) 和 商户信息
-            MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(mchNo, appId);
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchNo, appId);
             if(mchAppConfigContext == null){
                 throw new BizException("获取商户应用信息失败");
             }
@@ -148,7 +150,7 @@ public class RefundOrderController extends ApiController {
             this.processChannelMsg(channelRetMsg, refundOrder);
 
             RefundOrderRS bizRes = RefundOrderRS.buildByRefundOrder(refundOrder);
-            return ApiRes.okWithSign(bizRes, configContextService.getMchAppConfigContext(rq.getMchNo(), rq.getAppId()).getMchApp().getAppSecret());
+            return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
 
 
         } catch (BizException e) {
@@ -164,7 +166,7 @@ public class RefundOrderController extends ApiController {
             }
 
             RefundOrderRS bizRes = RefundOrderRS.buildByRefundOrder(refundOrder);
-            return ApiRes.okWithSign(bizRes, configContextService.getMchAppConfigContext(rq.getMchNo(), rq.getAppId()).getMchApp().getAppSecret());
+            return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
 
 
         } catch (Exception e) {

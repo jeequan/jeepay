@@ -26,6 +26,7 @@ import com.jeequan.jeepay.pay.channel.IChannelUserService;
 import com.jeequan.jeepay.pay.ctrl.payorder.AbstractPayOrderController;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.ChannelUserIdRQ;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/channelUserId")
 public class ChannelUserIdController extends AbstractPayOrderController {
 
-    @Autowired private ConfigContextService configContextService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private SysConfigService sysConfigService;
 
     /**  重定向到微信地址  **/
@@ -79,7 +80,7 @@ public class ChannelUserIdController extends AbstractPayOrderController {
         String callbackUrl = sysConfigService.getDBApplicationConfig().genMchChannelUserIdApiOauth2RedirectUrlEncode(jsonObject);
 
         //获取商户配置信息
-        MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(rq.getMchNo(), rq.getAppId());
+        MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(rq.getMchNo(), rq.getAppId());
         String redirectUrl = channelUserService.buildUserRedirectUrl(callbackUrl, mchAppConfigContext);
         response.sendRedirect(redirectUrl);
 
@@ -106,7 +107,7 @@ public class ChannelUserIdController extends AbstractPayOrderController {
         }
 
         //获取商户配置信息
-        MchAppConfigContext mchAppConfigContext = configContextService.getMchAppConfigContext(mchNo, appId);
+        MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchNo, appId);
 
         //获取渠道用户ID
         String channelUserId = channelUserService.getChannelUserId(getReqParamJSON(), mchAppConfigContext);

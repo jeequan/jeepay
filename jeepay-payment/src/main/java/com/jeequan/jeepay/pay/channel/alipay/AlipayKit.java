@@ -23,7 +23,9 @@ import com.alipay.api.request.*;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvsubMchParams;
+import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import org.apache.commons.lang3.StringUtils;
 
 /*
@@ -44,9 +46,11 @@ public class AlipayKit {
             return ;
         }
 
+        ConfigContextQueryService configContextQueryService = SpringBeansUtil.getBean(ConfigContextQueryService.class);
+
         // 获取支付参数
-        AlipayIsvParams isvParams = mchAppConfigContext.getIsvConfigContext().getIsvParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayIsvParams.class);
-        AlipayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayIsvsubMchParams.class);
+        AlipayIsvParams isvParams = (AlipayIsvParams)configContextQueryService.queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), CS.IF_CODE.ALIPAY);
+        AlipayIsvsubMchParams isvsubMchParams = (AlipayIsvsubMchParams)configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.ALIPAY);
 
         // 子商户信息
         if(req instanceof AlipayTradePayRequest) {

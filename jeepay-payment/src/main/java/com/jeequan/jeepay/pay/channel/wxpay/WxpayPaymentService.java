@@ -23,6 +23,7 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvsubMchParams;
 import com.jeequan.jeepay.pay.channel.AbstractPaymentService;
+import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.util.PaywayUtil;
@@ -60,7 +61,10 @@ public class WxpayPaymentService extends AbstractPaymentService {
     public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
 
         // 微信API版本
-        String apiVersion = mchAppConfigContext.getWxServiceWrapper().getApiVersion();
+
+        WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+
+        String apiVersion = wxServiceWrapper.getApiVersion();
         if (CS.PAY_IF_VERSION.WX_V2.equals(apiVersion)) {
             return PaywayUtil.getRealPaywayService(this, payOrder.getWayCode()).pay(rq, payOrder, mchAppConfigContext);
         } else if (CS.PAY_IF_VERSION.WX_V3.equals(apiVersion)) {
@@ -97,7 +101,7 @@ public class WxpayPaymentService extends AbstractPaymentService {
 
         // 特约商户
         if(mchAppConfigContext.isIsvsubMch()){
-            WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
+            WxpayIsvsubMchParams isvsubMchParams = (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
             request.setSubMchId(isvsubMchParams.getSubMchId());
             if (StringUtils.isNotBlank(isvsubMchParams.getSubMchAppId())) {
                 request.setSubAppId(isvsubMchParams.getSubMchAppId());
@@ -137,9 +141,10 @@ public class WxpayPaymentService extends AbstractPaymentService {
            reqJSON.put("settle_info", settleInfo);
         }
 
-        WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+        WxPayService wxPayService = configContextQueryService.getWxServiceWrapper(mchAppConfigContext).getWxPayService();
         if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
-            WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
+
+            WxpayIsvsubMchParams isvsubMchParams = (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
             reqJSON.put("sp_appid", wxPayService.getConfig().getAppId());
             reqJSON.put("sp_mchid", wxPayService.getConfig().getMchId());
             reqJSON.put("sub_mchid", isvsubMchParams.getSubMchId());
