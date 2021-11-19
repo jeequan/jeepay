@@ -79,9 +79,6 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
     /** 特定渠道发起额外参数 **/
     private String channelExtra;
 
-    /** 渠道用户标识,如微信openId,支付宝账号 **/
-    private String channelUser;
-
     /** 商户扩展参数 **/
     private String extParam;
 
@@ -155,8 +152,7 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
 
     /** 获取渠道用户ID **/
     public String getChannelUserId(){
-        return this.channelUser;
+        return null;
     }
-
 
 }

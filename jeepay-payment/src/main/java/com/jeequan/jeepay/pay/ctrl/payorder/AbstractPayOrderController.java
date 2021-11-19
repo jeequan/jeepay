@@ -102,7 +102,6 @@ public abstract class AbstractPayOrderController extends ApiController {
                 bizRQ.setNotifyUrl(payOrder.getNotifyUrl());
                 bizRQ.setReturnUrl(payOrder.getReturnUrl());
                 bizRQ.setChannelExtra(payOrder.getChannelExtra());
-                bizRQ.setChannelUser(payOrder.getChannelUser());
                 bizRQ.setExtParam(payOrder.getExtParam());
                 bizRQ.setDivisionMode(payOrder.getDivisionMode());
             }
@@ -245,7 +244,7 @@ public abstract class AbstractPayOrderController extends ApiController {
         payOrder.setSubject(rq.getSubject()); //商品标题
         payOrder.setBody(rq.getBody()); //商品描述信息
 //        payOrder.setChannelExtra(rq.getChannelExtra()); //特殊渠道发起的附件额外参数,  是否应该删除该字段了？？ 比如authCode不应该记录， 只是在传输阶段存在的吧？  之前的为了在payOrder对象需要传参。
-        payOrder.setChannelUser(rq.getChannelUser()); //渠道用户标志
+        payOrder.setChannelUser(rq.getChannelUserId()); //渠道用户标志
         payOrder.setExtParam(rq.getExtParam()); //商户扩展参数
         payOrder.setNotifyUrl(rq.getNotifyUrl()); //异步通知地址
         payOrder.setReturnUrl(rq.getReturnUrl()); //页面跳转地址
