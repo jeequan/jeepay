@@ -226,4 +226,4 @@ INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, 
 alter table t_refund_order modify err_msg varchar(2048) null comment '渠道错误描述';
 
 -- 增加角色权限字段长度
-alter table `t_sys_role_ent_rela` MODIFY `ent_id` VARCHAR(128) NOT NULL COMMENT '权限ID' after `role_id`;
+alter table `t_sys_role_ent_rela` MODIFY `ent_id` VARCHAR(64) NOT NULL COMMENT '权限ID' after `role_id`;

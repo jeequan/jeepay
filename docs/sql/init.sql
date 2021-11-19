@@ -36,7 +36,7 @@ CREATE TABLE `t_sys_role` (
 DROP TABLE IF EXISTS `t_sys_role_ent_rela`;
 CREATE TABLE `t_sys_role_ent_rela` (
   `role_id` VARCHAR(32) NOT NULL COMMENT '角色ID',
-  `ent_id` VARCHAR(128) NOT NULL COMMENT '权限ID' ,
+  `ent_id` VARCHAR(64) NOT NULL COMMENT '权限ID' ,
   PRIMARY KEY (`role_id`, `ent_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统角色权限关联表';
 
