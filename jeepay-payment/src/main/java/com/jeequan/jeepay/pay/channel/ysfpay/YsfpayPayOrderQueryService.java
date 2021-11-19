@@ -56,7 +56,7 @@ public class YsfpayPayOrderQueryService implements IPayOrderQueryService {
             reqParams.put("orderType", orderType); //订单类型
 
             //封装公共参数 & 签名 & 调起http请求 & 返回响应数据并包装为json格式。
-            JSONObject resJSON = ysfpayPaymentService.packageParamAndReq("/gateway/api/pay/queryOrder", reqParams, logPrefix, mchAppConfigContext.getIsvConfigContext(), mchAppConfigContext);
+            JSONObject resJSON = ysfpayPaymentService.packageParamAndReq("/gateway/api/pay/queryOrder", reqParams, logPrefix, mchAppConfigContext);
             log.info("查询订单 payorderId:{}, 返回结果:{}", payOrder.getPayOrderId(), resJSON);
             if(resJSON == null){
                 return ChannelRetMsg.waiting(); //支付中

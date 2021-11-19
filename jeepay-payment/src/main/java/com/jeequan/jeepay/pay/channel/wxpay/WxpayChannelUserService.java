@@ -57,7 +57,7 @@ public class WxpayChannelUserService implements IChannelUserService {
         String appId = null;
         String oauth2Url = "";
         if(mchAppConfigContext.isIsvsubMch()){
-            WxpayIsvParams wxpayIsvParams = mchAppConfigContext.getIsvConfigContext().getIsvParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvParams.class);
+            WxpayIsvParams wxpayIsvParams = (WxpayIsvParams)configContextQueryService.queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), CS.IF_CODE.WXPAY);
             if(wxpayIsvParams == null) {
                 throw new BizException("服务商微信支付接口没有配置！");
             }
@@ -65,7 +65,7 @@ public class WxpayChannelUserService implements IChannelUserService {
             oauth2Url = wxpayIsvParams.getOauth2Url();
         }else{
             //获取商户配置信息
-            WxpayNormalMchParams normalMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayNormalMchParams.class);
+            WxpayNormalMchParams normalMchParams = (WxpayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
             if(normalMchParams == null) {
                 throw new BizException("商户微信支付接口没有配置！");
             }

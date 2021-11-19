@@ -70,11 +70,11 @@ public class WxJsapi extends YsfpayPaymentService {
         reqParams.put("customerIp", StringUtils.defaultIfEmpty(payOrder.getClientIp(), "127.0.0.1"));
 
         // 获取微信官方配置 的appId
-        WxpayIsvParams wxpayIsvParams = mchAppConfigContext.getIsvConfigContext().getIsvParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvParams.class);
+        WxpayIsvParams wxpayIsvParams = (WxpayIsvParams)configContextQueryService.queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), CS.IF_CODE.WXPAY);
         reqParams.put("subAppId", wxpayIsvParams.getAppId()); //用户ID
 
         // 发送请求并返回订单状态
-        JSONObject resJSON = packageParamAndReq("/gateway/api/pay/unifiedorder", reqParams, logPrefix, mchAppConfigContext.getIsvConfigContext(), mchAppConfigContext);
+        JSONObject resJSON = packageParamAndReq("/gateway/api/pay/unifiedorder", reqParams, logPrefix, mchAppConfigContext);
         //请求 & 响应成功， 判断业务逻辑
         String respCode = resJSON.getString("respCode"); //应答码
         String respMsg = resJSON.getString("respMsg"); //应答信息

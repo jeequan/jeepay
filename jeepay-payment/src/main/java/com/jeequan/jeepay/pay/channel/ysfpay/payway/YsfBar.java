@@ -69,7 +69,7 @@ public class YsfBar extends YsfpayPaymentService {
         reqParams.put("termInfo", "{\"ip\": \""+StringUtils.defaultIfEmpty(payOrder.getClientIp(), "127.0.0.1")+"\"}"); //终端信息
 
         // 发送请求
-        JSONObject resJSON = packageParamAndReq("/gateway/api/pay/micropay", reqParams, logPrefix, mchAppConfigContext.getIsvConfigContext(), mchAppConfigContext);
+        JSONObject resJSON = packageParamAndReq("/gateway/api/pay/micropay", reqParams, logPrefix, mchAppConfigContext);
         //请求 & 响应成功， 判断业务逻辑
         String respCode = resJSON.getString("respCode"); //应答码
         String respMsg = resJSON.getString("respMsg"); //应答信息

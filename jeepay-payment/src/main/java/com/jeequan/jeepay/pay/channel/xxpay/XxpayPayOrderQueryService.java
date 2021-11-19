@@ -24,8 +24,10 @@ import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.pay.channel.IPayOrderQueryService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -42,6 +44,8 @@ import java.util.TreeMap;
 @Slf4j
 public class XxpayPayOrderQueryService implements IPayOrderQueryService {
 
+    @Autowired private ConfigContextQueryService configContextQueryService;
+
     @Override
     public String getIfCode() {
         return CS.IF_CODE.XXPAY;
@@ -49,7 +53,7 @@ public class XxpayPayOrderQueryService implements IPayOrderQueryService {
 
     @Override
     public ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
-        XxpayNormalMchParams xxpayParams = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), XxpayNormalMchParams.class);
+        XxpayNormalMchParams xxpayParams = (XxpayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
         Map<String,Object> paramMap = new TreeMap();
         // 接口类型
         paramMap.put("mchId", xxpayParams.getMchId());

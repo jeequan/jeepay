@@ -57,7 +57,7 @@ public class XxpayRefundService extends AbstractRefundService {
     @Override
     public ChannelRetMsg refund(RefundOrderRQ bizRQ, RefundOrder refundOrder, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
 
-        XxpayNormalMchParams params = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), XxpayNormalMchParams.class);
+        XxpayNormalMchParams params = (XxpayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
 
         // 构造支付请求参数
         Map<String,Object> paramMap = new TreeMap();
@@ -130,7 +130,7 @@ public class XxpayRefundService extends AbstractRefundService {
     @Override
     public ChannelRetMsg query(RefundOrder refundOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
 
-        XxpayNormalMchParams params = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), XxpayNormalMchParams.class);
+        XxpayNormalMchParams params = (XxpayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
 
         // 构造支付请求参数
         Map<String,Object> paramMap = new TreeMap();

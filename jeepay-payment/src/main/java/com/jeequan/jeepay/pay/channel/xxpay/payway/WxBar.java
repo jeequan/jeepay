@@ -56,7 +56,7 @@ public class WxBar extends XxpayPaymentService {
     @Override
     public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
         WxBarOrderRQ bizRQ = (WxBarOrderRQ) rq;
-        XxpayNormalMchParams params = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), XxpayNormalMchParams.class);
+        XxpayNormalMchParams params = (XxpayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
         // 构造支付请求参数
         Map<String,Object> paramMap = new TreeMap();
         paramMap.put("mchId", params.getMchId());

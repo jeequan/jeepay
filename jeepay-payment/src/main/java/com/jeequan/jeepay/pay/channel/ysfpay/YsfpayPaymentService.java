@@ -71,9 +71,9 @@ public class YsfpayPaymentService extends AbstractPaymentService {
 
 
     /** 封装参数 & 统一请求 **/
-    public JSONObject packageParamAndReq(String apiUri, JSONObject reqParams, String logPrefix, IsvConfigContext isvConfigContext, MchAppConfigContext mchAppConfigContext) throws Exception {
+    public JSONObject packageParamAndReq(String apiUri, JSONObject reqParams, String logPrefix, MchAppConfigContext mchAppConfigContext) throws Exception {
 
-        YsfpayIsvParams isvParams = isvConfigContext.getIsvParamsByIfCode(getIfCode(), YsfpayIsvParams.class);
+        YsfpayIsvParams isvParams = (YsfpayIsvParams)configContextQueryService.queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), getIfCode());
 
         if (isvParams.getSerProvId() == null) {
             log.error("服务商配置为空：isvParams：{}", isvParams);

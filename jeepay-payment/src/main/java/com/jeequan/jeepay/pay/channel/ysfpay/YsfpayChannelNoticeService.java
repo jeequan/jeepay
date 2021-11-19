@@ -77,7 +77,7 @@ public class YsfpayChannelNoticeService extends AbstractChannelNoticeService {
             log.info("{} 回调参数, jsonParams：{}", logPrefix, jsonParams);
 
             // 校验支付回调
-            boolean verifyResult = verifyParams(jsonParams, payOrder, mchAppConfigContext.getIsvConfigContext());
+            boolean verifyResult = verifyParams(jsonParams, payOrder, mchAppConfigContext);
             // 验证参数失败
             if(!verifyResult){
                 throw ResponseException.buildText("ERROR");
@@ -100,7 +100,7 @@ public class YsfpayChannelNoticeService extends AbstractChannelNoticeService {
      * 验证云闪付支付通知参数
      * @return
      */
-    public boolean verifyParams(JSONObject jsonParams, PayOrder payOrder, IsvConfigContext isvConfigContext) {
+    public boolean verifyParams(JSONObject jsonParams, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
 
         String orderNo = jsonParams.getString("orderNo");		// 商户订单号
         String txnAmt = jsonParams.getString("txnAmt"); 		// 支付金额
@@ -113,7 +113,8 @@ public class YsfpayChannelNoticeService extends AbstractChannelNoticeService {
             return false;
         }
 
-        YsfpayIsvParams isvParams = isvConfigContext.getIsvParamsByIfCode(getIfCode(), YsfpayIsvParams.class);
+        YsfpayIsvParams isvParams = (YsfpayIsvParams)configContextQueryService.queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), getIfCode());
+
         //验签
         String ysfpayPublicKey = isvParams.getYsfpayPublicKey();
 
