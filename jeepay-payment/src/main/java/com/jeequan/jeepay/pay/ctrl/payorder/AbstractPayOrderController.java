@@ -171,6 +171,10 @@ public abstract class AbstractPayOrderController extends ApiController {
                 payOrder = genPayOrder(bizRQ, mchInfo, mchApp, ifCode, mchPayPassage);
             }else{
                 payOrder.setIfCode(ifCode);
+
+                // 查询支付方式的费率，并 在更新ing时更新费率信息
+                payOrder.setMchFeeRate(mchPayPassage.getRate());
+                payOrder.setMchFeeAmount(AmountUtil.calPercentageFee(payOrder.getAmount(), payOrder.getMchFeeRate())); //商户手续费,单位分
             }
 
             //预先校验
