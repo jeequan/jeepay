@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.MediaType;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -80,7 +81,8 @@ public class BizExceptionResolver implements HandlerExceptionResolver {
 
 
 	public void outPutJson(HttpServletResponse res, String jsonStr) throws IOException {
-		res.setContentType("text/json;charset=utf-8");
+
+		res.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
 		res.getWriter().write(jsonStr);
 		res.getWriter().flush();
 		res.getWriter().close();
