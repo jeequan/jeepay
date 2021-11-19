@@ -37,7 +37,7 @@ public class ChannelCertConfigKitBean {
         // 以下为 文件不存在的处理方式
 
         // 是否本地存储
-        boolean isLocalSave = OssServiceTypeEnum.LOCAL.equals(ossYmlConfig.getOss().getServiceType());
+        boolean isLocalSave = OssServiceTypeEnum.LOCAL.getServiceName().equals(ossYmlConfig.getOss().getServiceType());
 
         // 本地存储 & 文件不存在
         if(isLocalSave){

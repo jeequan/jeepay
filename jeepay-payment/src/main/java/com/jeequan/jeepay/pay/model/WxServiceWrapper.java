@@ -75,6 +75,7 @@ public class WxServiceWrapper {
 
             wxPayConfig.setApiV3Key(apiV3Key);
             wxPayConfig.setCertSerialNo(serialNo);
+            wxPayConfig.setKeyPath(channelCertConfigKitBean.getCertFilePath(cert));
             wxPayConfig.setPrivateCertPath(channelCertConfigKitBean.getCertFilePath(cert));
             wxPayConfig.setPrivateKeyPath(channelCertConfigKitBean.getCertFilePath(apiClientKey));
         }
