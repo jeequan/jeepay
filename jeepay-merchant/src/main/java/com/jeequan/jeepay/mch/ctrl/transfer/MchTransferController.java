@@ -24,6 +24,7 @@ import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.model.DBApplicationConfig;
 import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.exception.JeepayException;
@@ -105,10 +106,13 @@ public class MchTransferController extends CommonCtrl {
         param.put("reqTime", System.currentTimeMillis() + "");
         param.put("version", "1.0");
         param.put("signType", "MD5");
-        param.put("redirectUrl", sysConfigService.getDBApplicationConfig().getMchSiteUrl() + "/api/anon/channelUserIdCallback");
+
+        DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
+
+        param.put("redirectUrl", dbApplicationConfig.getMchSiteUrl() + "/api/anon/channelUserIdCallback");
 
         param.put("sign", JeepayKit.getSign(param, mchApp.getAppSecret()));
-        String url = StringKit.appendUrlQuery(sysConfigService.getDBApplicationConfig().getPaySiteUrl() + "/api/channelUserId/jump", param);
+        String url = StringKit.appendUrlQuery(dbApplicationConfig.getPaySiteUrl() + "/api/channelUserId/jump", param);
 
         return ApiRes.ok(url);
     }

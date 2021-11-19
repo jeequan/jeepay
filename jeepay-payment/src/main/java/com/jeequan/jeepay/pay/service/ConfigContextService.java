@@ -28,10 +28,7 @@ import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
 import com.jeequan.jeepay.pay.model.*;
-import com.jeequan.jeepay.service.impl.IsvInfoService;
-import com.jeequan.jeepay.service.impl.MchAppService;
-import com.jeequan.jeepay.service.impl.MchInfoService;
-import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
+import com.jeequan.jeepay.service.impl.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -110,6 +107,10 @@ public class ConfigContextService {
     /** 初始化 [商户配置信息] **/
     public synchronized void initMchInfoConfigContext(String mchNo){
 
+        if(!isCache()){ // 当前系统不进行缓存
+            return ;
+        }
+
         //商户主体信息
         MchInfo mchInfo = mchInfoService.getById(mchNo);
         if(mchInfo == null){ // 查询不到商户主体， 可能已经删除
@@ -150,6 +151,10 @@ public class ConfigContextService {
 
     /** 初始化 [商户应用支付参数配置信息] **/
     public synchronized void initMchAppConfigContext(String mchNo, String appId){
+
+        if(!isCache()){ // 当前系统不进行缓存
+            return ;
+        }
 
         // 获取商户的配置信息
         MchInfoConfigContext mchInfoConfigContext = getMchInfoConfigContext(mchNo);
@@ -239,6 +244,10 @@ public class ConfigContextService {
     /** 初始化 [ISV支付参数配置信息]  **/
     public synchronized void initIsvConfigContext(String isvNo){
 
+        if(!isCache()){ // 当前系统不进行缓存
+            return ;
+        }
+
         //查询出所有商户的配置信息并更新
         List<String> mchNoList = new ArrayList<>();
         mchInfoService.list(MchInfo.gw().select(MchInfo::getMchNo).eq(MchInfo::getIsvNo, isvNo)).forEach(r -> mchNoList.add(r.getMchNo()));
@@ -309,8 +318,8 @@ public class ConfigContextService {
     }
 
 
-
-
-
+    private boolean isCache(){
+        return SysConfigService.IS_USE_CACHE;
+    }
 
 }

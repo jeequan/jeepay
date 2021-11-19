@@ -26,6 +26,7 @@ import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.model.DBApplicationConfig;
 import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
@@ -168,8 +169,9 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
 
         MchApp mchApp = mchAppService.getById(mchAppId);
         MchInfo mchInfo = mchInfoService.getById(mchApp.getMchNo());
-        String authUrl = sysConfigService.getDBApplicationConfig().genAlipayIsvsubMchAuthUrl(mchInfo.getIsvNo(), mchAppId);
-        String authQrImgUrl = sysConfigService.getDBApplicationConfig().genScanImgUrl(authUrl);
+        DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
+        String authUrl = dbApplicationConfig.genAlipayIsvsubMchAuthUrl(mchInfo.getIsvNo(), mchAppId);
+        String authQrImgUrl = dbApplicationConfig.genScanImgUrl(authUrl);
 
         JSONObject result = new JSONObject();
         result.put("authUrl", authUrl);

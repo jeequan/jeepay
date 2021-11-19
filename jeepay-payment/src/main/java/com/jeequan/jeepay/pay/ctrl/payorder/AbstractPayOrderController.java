@@ -25,6 +25,7 @@ import com.jeequan.jeepay.core.entity.MchPayPassage;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.model.DBApplicationConfig;
 import com.jeequan.jeepay.core.utils.*;
 import com.jeequan.jeepay.pay.channel.IPaymentService;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
@@ -142,9 +143,11 @@ public abstract class AbstractPayOrderController extends ApiController {
                 QrCashierOrderRS qrCashierOrderRS = new QrCashierOrderRS();
                 QrCashierOrderRQ qrCashierOrderRQ = (QrCashierOrderRQ)bizRQ;
 
-                String payUrl = sysConfigService.getDBApplicationConfig().genUniJsapiPayUrl(payOrderId);
+                DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
+
+                String payUrl = dbApplicationConfig.genUniJsapiPayUrl(payOrderId);
                 if(CS.PAY_DATA_TYPE.CODE_IMG_URL.equals(qrCashierOrderRQ.getPayDataType())){ //二维码地址
-                    qrCashierOrderRS.setCodeImgUrl(sysConfigService.getDBApplicationConfig().genScanImgUrl(payUrl));
+                    qrCashierOrderRS.setCodeImgUrl(dbApplicationConfig.genScanImgUrl(payUrl));
 
                 }else{ //默认都为跳转地址方式
                     qrCashierOrderRS.setPayUrl(payUrl);

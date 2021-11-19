@@ -39,6 +39,12 @@ import java.util.Set;
 @Service
 public class SysConfigService extends ServiceImpl<SysConfigMapper, SysConfig> implements ISysConfigService {
 
+    /** 是否启用缓存
+     * true: 表示将使用内存缓存， 将部分系统配置项 或 商户应用/服务商信息进行缓存并读取
+     * false: 直接查询DB
+     * **/
+    public static boolean IS_USE_CACHE = false;
+
     @Autowired
     private SysConfigService sysConfigService;
 
@@ -46,6 +52,11 @@ public class SysConfigService extends ServiceImpl<SysConfigMapper, SysConfig> im
     private static MutablePair<String, DBApplicationConfig> APPLICATION_CONFIG = new MutablePair<>("applicationConfig", null);
 
     public synchronized void initDBConfig(String groupKey) {
+
+        // 若当前系统不缓存，则直接返回
+        if(!IS_USE_CACHE){
+            return;
+        }
 
         if(APPLICATION_CONFIG.getLeft().equalsIgnoreCase(groupKey)){
             APPLICATION_CONFIG.right = this.selectByGroupKey(groupKey).toJavaObject(DBApplicationConfig.class);
@@ -56,6 +67,12 @@ public class SysConfigService extends ServiceImpl<SysConfigMapper, SysConfig> im
     @Override
     public DBApplicationConfig getDBApplicationConfig() {
 
+        // 查询DB
+        if(!IS_USE_CACHE){
+            return this.selectByGroupKey(APPLICATION_CONFIG.getLeft()).toJavaObject(DBApplicationConfig.class);
+        }
+
+        // 缓存数据
         if(APPLICATION_CONFIG.getRight() == null ){
             initDBConfig(APPLICATION_CONFIG.getLeft());
         }

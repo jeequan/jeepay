@@ -22,6 +22,7 @@ import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchPayPassage;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.model.DBApplicationConfig;
 import com.jeequan.jeepay.exception.JeepayException;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.model.PayOrderCreateReqModel;
@@ -111,7 +112,10 @@ public class PaytestController extends CommonCtrl {
         model.setClientIp(getClientIp());
         model.setSubject(orderTitle + "[" + getCurrentMchNo() + "商户联调]");
         model.setBody(orderTitle + "[" + getCurrentMchNo() + "商户联调]");
-        model.setNotifyUrl(sysConfigService.getDBApplicationConfig().getMchSiteUrl() + "/api/anon/paytestNotify/payOrder"); //回调地址
+
+        DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
+
+        model.setNotifyUrl(dbApplicationConfig.getMchSiteUrl() + "/api/anon/paytestNotify/payOrder"); //回调地址
         model.setDivisionMode(divisionMode); //分账模式
 
         //设置扩展参数
@@ -124,7 +128,7 @@ public class PaytestController extends CommonCtrl {
         }
         model.setChannelExtra(extParams.toString());
 
-        JeepayClient jeepayClient = new JeepayClient(sysConfigService.getDBApplicationConfig().getPaySiteUrl(), mchApp.getAppSecret());
+        JeepayClient jeepayClient = new JeepayClient(dbApplicationConfig.getPaySiteUrl(), mchApp.getAppSecret());
 
         try {
             PayOrderCreateResponse response = jeepayClient.execute(request);
