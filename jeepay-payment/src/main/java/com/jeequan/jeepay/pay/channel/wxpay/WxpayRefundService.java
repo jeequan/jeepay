@@ -32,6 +32,7 @@ import com.jeequan.jeepay.pay.channel.AbstractRefundService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayV3Util;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRQ;
 import lombok.extern.slf4j.Slf4j;
@@ -62,8 +63,12 @@ public class WxpayRefundService extends AbstractRefundService {
     @Override
     public ChannelRetMsg refund(RefundOrderRQ bizRQ, RefundOrder refundOrder, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
         try {
+
             ChannelRetMsg channelRetMsg = new ChannelRetMsg();
-            if (CS.PAY_IF_VERSION.WX_V2.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) {  //V2
+
+            WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+
+            if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
 
                 WxPayRefundRequest req = new WxPayRefundRequest();
 
@@ -74,7 +79,7 @@ public class WxpayRefundService extends AbstractRefundService {
                 req.setOutRefundNo(refundOrder.getRefundOrderId()); // 退款单号
                 req.setTotalFee(payOrder.getAmount().intValue());   // 订单总金额
                 req.setRefundFee(refundOrder.getRefundAmount().intValue()); // 退款金额
-                WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+                WxPayService wxPayService = wxServiceWrapper.getWxPayService();
                 setCretPath(mchAppConfigContext, wxPayService); // 证书路径
 
                 WxPayRefundResult result = wxPayService.refundV2(req);
@@ -86,7 +91,7 @@ public class WxpayRefundService extends AbstractRefundService {
                     channelRetMsg.setChannelErrCode(result.getErrCode());
                     channelRetMsg.setChannelErrMsg(WxpayKit.appendErrMsg(result.getReturnMsg(), result.getErrCodeDes()));
                 }
-            }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) {   //V3
+            }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {   //V3
                 // 微信统一下单请求对象
                 JSONObject reqJSON = new JSONObject();
                 reqJSON.put("out_trade_no", refundOrder.getPayOrderId());   // 订单号
@@ -97,15 +102,15 @@ public class WxpayRefundService extends AbstractRefundService {
                 amountJson.put("total", payOrder.getAmount());// 订单总金额
                 amountJson.put("currency", "CNY");// 币种
                 reqJSON.put("amount", amountJson);
-                WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+                WxPayService wxPayService = wxServiceWrapper.getWxPayService();
                 setCretPath(mchAppConfigContext, wxPayService); // 证书路径
 
                 if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
-                    WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
+                    WxpayIsvsubMchParams isvsubMchParams = (WxpayIsvsubMchParams)configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
                     reqJSON.put("sub_mchid", isvsubMchParams.getSubMchId());
                 }
 
-                JSONObject resultJSON = WxpayV3Util.refundV3(reqJSON, mchAppConfigContext.getWxServiceWrapper().getWxPayService().getConfig());
+                JSONObject resultJSON = WxpayV3Util.refundV3(reqJSON, wxServiceWrapper.getWxPayService().getConfig());
                 String status = resultJSON.getString("status");
                 if("SUCCESS".equals(status)){ // 退款成功
                     String refundId = resultJSON.getString("refund_id");
@@ -139,7 +144,11 @@ public class WxpayRefundService extends AbstractRefundService {
     public ChannelRetMsg query(RefundOrder refundOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
         try {
             ChannelRetMsg channelRetMsg = new ChannelRetMsg();
-            if (CS.PAY_IF_VERSION.WX_V2.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) {  //V2
+
+            WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+
+
+            if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
 
                 WxPayRefundQueryRequest req = new WxPayRefundQueryRequest();
 
@@ -147,7 +156,7 @@ public class WxpayRefundService extends AbstractRefundService {
                 WxpayKit.putApiIsvInfo(mchAppConfigContext, req);
 
                 req.setOutRefundNo(refundOrder.getRefundOrderId()); // 退款单号
-                WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+                WxPayService wxPayService = wxServiceWrapper.getWxPayService();
                 setCretPath(mchAppConfigContext, wxPayService); // 证书路径
 
                 WxPayRefundQueryResult result = wxPayService.refundQueryV2(req);
@@ -158,12 +167,12 @@ public class WxpayRefundService extends AbstractRefundService {
                     channelRetMsg.setChannelErrMsg(result.getReturnMsg());
                 }
 
-            }else if (CS.PAY_IF_VERSION.WX_V3.equals(mchAppConfigContext.getWxServiceWrapper().getApiVersion())) {   //V3
-                WxPayService wxPayService = mchAppConfigContext.getWxServiceWrapper().getWxPayService();
+            }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {   //V3
+                WxPayService wxPayService = wxServiceWrapper.getWxPayService();
                 setCretPath(mchAppConfigContext, wxPayService); // 证书路径
                 JSONObject resultJSON = null;
                 if (mchAppConfigContext.isIsvsubMch()) {
-                    WxpayIsvsubMchParams isvsubMchParams = mchAppConfigContext.getIsvsubMchParamsByIfCode(getIfCode(), WxpayIsvsubMchParams.class);
+                    WxpayIsvsubMchParams isvsubMchParams = (WxpayIsvsubMchParams)configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
                     wxPayService.getConfig().setSubMchId(isvsubMchParams.getSubMchId());
                     resultJSON = WxpayV3Util.refundQueryV3Isv(refundOrder.getRefundOrderId(), wxPayService.getConfig());
                 }else {
@@ -190,11 +199,11 @@ public class WxpayRefundService extends AbstractRefundService {
     private void setCretPath(MchAppConfigContext mchAppConfigContext, WxPayService wxPayService) {
         if(mchAppConfigContext.isIsvsubMch()){
             // 获取服务商配置信息
-            WxpayIsvParams wxpayIsvParams = mchAppConfigContext.getIsvConfigContext().getIsvParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvParams.class);
+            WxpayIsvParams wxpayIsvParams = (WxpayIsvParams)configContextQueryService.queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), CS.IF_CODE.WXPAY);
             wxPayService.getConfig().setKeyPath(channelCertConfigKitBean.getCertFilePath(wxpayIsvParams.getCert()));
         }else{
             // 获取商户配置信息
-            WxpayNormalMchParams normalMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayNormalMchParams.class);
+            WxpayNormalMchParams normalMchParams = (WxpayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
             wxPayService.getConfig().setKeyPath(channelCertConfigKitBean.getCertFilePath(normalMchParams.getCert()));
         }
     }
