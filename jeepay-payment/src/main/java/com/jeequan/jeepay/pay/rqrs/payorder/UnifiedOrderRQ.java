@@ -16,6 +16,7 @@
 package com.jeequan.jeepay.pay.rqrs.payorder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.*;
@@ -151,6 +152,7 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
     }
 
     /** 获取渠道用户ID **/
+    @JSONField(serialize = false)
     public String getChannelUserId(){
         return null;
     }
