@@ -23,11 +23,13 @@ import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.SysConfig;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -87,8 +89,15 @@ public class SysConfigController extends CommonCtrl {
             return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "更新失败");
         }
 
-		mqSender.send(ResetAppConfigMQ.build(groupKey));
+		// 异步更新到MQ
+		SpringBeansUtil.getBean(SysConfigController.class).updateSysConfigMQ(groupKey);
+
 		return ApiRes.ok();
+	}
+
+	@Async
+	public void updateSysConfigMQ(String groupKey){
+		mqSender.send(ResetAppConfigMQ.build(groupKey));
 	}
 
 
