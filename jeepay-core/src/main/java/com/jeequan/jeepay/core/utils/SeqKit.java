@@ -17,6 +17,10 @@ package com.jeequan.jeepay.core.utils;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,8 +47,14 @@ public class SeqKit {
 	private static final String TRANSFER_ID_SEQ_PREFIX = "T";
 	private static final String DIVISION_BATCH_ID_SEQ_PREFIX = "D";
 
+	/** 是否使用MybatisPlus生成分布式ID **/
+	private static final boolean IS_USE_MP_ID = true;
+
 	/** 生成支付订单号 **/
 	public static String genPayOrderId() {
+		if(IS_USE_MP_ID) {
+			return PAY_ORDER_SEQ_PREFIX + IdWorker.getIdStr();
+		}
 		return String.format("%s%s%04d",PAY_ORDER_SEQ_PREFIX,
 				DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
 				(int) PAY_ORDER_SEQ.getAndIncrement() % 10000);
@@ -52,6 +62,9 @@ public class SeqKit {
 
 	/** 生成退款订单号 **/
 	public static String genRefundOrderId() {
+		if(IS_USE_MP_ID) {
+			return REFUND_ORDER_SEQ_PREFIX + IdWorker.getIdStr();
+		}
 		return String.format("%s%s%04d",REFUND_ORDER_SEQ_PREFIX,
 				DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
 				(int) REFUND_ORDER_SEQ.getAndIncrement() % 10000);
@@ -60,6 +73,9 @@ public class SeqKit {
 
 	/** 模拟生成商户订单号 **/
 	public static String genMhoOrderId() {
+		if(IS_USE_MP_ID) {
+			return MHO_ORDER_SEQ_PREFIX + IdWorker.getIdStr();
+		}
 		return String.format("%s%s%04d", MHO_ORDER_SEQ_PREFIX,
 				DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
 				(int) MHO_ORDER_SEQ.getAndIncrement() % 10000);
@@ -67,6 +83,9 @@ public class SeqKit {
 
 	/** 模拟生成商户订单号 **/
 	public static String genTransferId() {
+		if(IS_USE_MP_ID) {
+			return TRANSFER_ID_SEQ_PREFIX + IdWorker.getIdStr();
+		}
 		return String.format("%s%s%04d", TRANSFER_ID_SEQ_PREFIX,
 				DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
 				(int) TRANSFER_ID_SEQ.getAndIncrement() % 10000);
@@ -74,9 +93,23 @@ public class SeqKit {
 
 	/** 模拟生成分账批次号 **/
 	public static String genDivisionBatchId() {
+		if(IS_USE_MP_ID) {
+			return DIVISION_BATCH_ID_SEQ_PREFIX + IdWorker.getIdStr();
+		}
 		return String.format("%s%s%04d", DIVISION_BATCH_ID_SEQ_PREFIX,
 				DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
 				(int) DIVISION_BATCH_ID_SEQ.getAndIncrement() % 10000);
 	}
 
+	public static void main(String[] args) throws Exception {
+		System.out.println(genTransferId());
+		System.out.println(genRefundOrderId());
+		Thread.sleep(1000);
+		System.out.println(genMhoOrderId());
+		System.out.println(genTransferId());
+		Thread.sleep(1000);
+		System.out.println(genDivisionBatchId());
+	}
+
 }
+
