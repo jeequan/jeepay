@@ -50,6 +50,11 @@ public class ApiResBodyAdviceKit {
             return ((OriginalRes) body).getData();
         }
 
+        // 返回String 避免 StringHttpMessageConverter
+        if(body instanceof String){
+            return body;
+        }
+
         //返回文件流不处理
         if(body instanceof InputStreamResource){
             return body;
