@@ -81,7 +81,7 @@ public class ChannelNoticeController extends AbstractCtrl {
             }
 
             // 解析订单号 和 请求参数
-            MutablePair<String, Object> mutablePair = payNotifyService.parseParams(request, urlOrderId, IChannelNoticeService.NoticeTypeEnum.DO_NOTIFY);
+            MutablePair<String, Object> mutablePair = payNotifyService.parseParams(request, urlOrderId, IChannelNoticeService.NoticeTypeEnum.DO_RETURN);
             if(mutablePair == null){ // 解析数据失败， 响应已处理
                 log.error("{}, mutablePair is null ", logPrefix);
                 throw new BizException("解析数据异常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此异常。
