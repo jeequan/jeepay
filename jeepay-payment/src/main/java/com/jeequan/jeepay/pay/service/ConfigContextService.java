@@ -25,10 +25,13 @@ import com.jeequan.jeepay.core.model.params.IsvsubMchParams;
 import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
+import com.jeequan.jeepay.core.model.params.pppay.PpPayNormalMchParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
 import com.jeequan.jeepay.pay.model.*;
 import com.jeequan.jeepay.service.impl.*;
+import com.paypal.core.PayPalEnvironment;
+import com.paypal.core.PayPalHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -223,6 +226,12 @@ public class ConfigContextService {
                 mchAppConfigContext.setWxServiceWrapper(WxServiceWrapper.buildWxServiceWrapper(wxpayParams));
             }
 
+            //放置 paypal client
+            PpPayNormalMchParams ppPayMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.PPPAY, PpPayNormalMchParams.class);
+            if (ppPayMchParams != null) {
+                mchAppConfigContext.setPaypalWrapper(buildPaypalWrapper(ppPayMchParams.getSandbox(), ppPayMchParams.getSecret(), ppPayMchParams.getClientId(), ppPayMchParams.getNotifyWebhook(), ppPayMchParams.getRefundWebhook()));
+            }
+
 
         }else{ //服务商模式商户
             for (PayInterfaceConfig payInterfaceConfig : allConfigList) {
@@ -317,6 +326,28 @@ public class ConfigContextService {
         }
     }
 
+    private PaypalWrapper buildPaypalWrapper(
+            Byte sandbox,
+            String secret,
+            String clientId,
+            String notifyHook,
+            String refundHook
+    ) {
+        PaypalWrapper paypalWrapper = new PaypalWrapper();
+
+        PayPalEnvironment environment = new PayPalEnvironment.Live(clientId, secret);
+
+        if (sandbox == 1) {
+            environment = new PayPalEnvironment.Sandbox(clientId, secret);
+        }
+
+        paypalWrapper.setEnvironment(environment);
+        paypalWrapper.setClient(new PayPalHttpClient(environment));
+        paypalWrapper.setNotifyWebhook(notifyHook);
+        paypalWrapper.setRefundWebhook(refundHook);
+
+        return paypalWrapper;
+    }
 
     private boolean isCache(){
         return SysConfigService.IS_USE_CACHE;

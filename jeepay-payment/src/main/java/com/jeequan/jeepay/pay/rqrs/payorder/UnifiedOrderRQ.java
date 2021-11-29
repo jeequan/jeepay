@@ -146,6 +146,10 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
             AliQrOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AliQrOrderRQ.class);
             BeanUtils.copyProperties(this, bizRQ);
             return bizRQ;
+        }else if (CS.PAY_WAY_CODE.PP_PC.equals(wayCode)){
+            PPPcOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), PPPcOrderRQ.class);
+            BeanUtils.copyProperties(this, bizRQ);
+            return bizRQ;
         }
 
         return this;

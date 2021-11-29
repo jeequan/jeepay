@@ -50,6 +50,8 @@ public class MchAppConfigContext {
     /** 放置所属服务商的信息 **/
     private IsvConfigContext isvConfigContext;
 
+    /** 缓存 Paypal 对象 **/
+    private PaypalWrapper paypalWrapper;
 
     /** 缓存支付宝client 对象 **/
     private AlipayClientWrapper alipayClientWrapper;
