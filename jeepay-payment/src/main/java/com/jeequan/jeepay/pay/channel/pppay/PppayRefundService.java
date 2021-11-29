@@ -41,6 +41,7 @@ public class PppayRefundService extends AbstractRefundService {
 
         PaypalWrapper paypalWrapper = mchAppConfigContext.getPaypalWrapper();
 
+        // 因为退款需要商户 Token 而同步支付回调不会保存订单信息
         String ppOrderId = paypalWrapper.processOrder(payOrder.getChannelOrderNo()).get(0);
         String ppCatptId = paypalWrapper.processOrder(payOrder.getChannelOrderNo()).get(1);
 
@@ -50,6 +51,7 @@ public class PppayRefundService extends AbstractRefundService {
 
         PayPalHttpClient client = paypalWrapper.getClient();
 
+        // 处理金额
         long amount = (bizRQ.getRefundAmount() / 100);
         String amountStr = Long.toString(amount, 10);
         String currency = bizRQ.getCurrency().toUpperCase();

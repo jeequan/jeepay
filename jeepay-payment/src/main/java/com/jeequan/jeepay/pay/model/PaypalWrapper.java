@@ -40,16 +40,15 @@ public class PaypalWrapper {
     private String notifyWebhook;
     private String refundWebhook;
 
-
     public ChannelRetMsg processOrder(String token, PayOrder payOrder) throws IOException {
         return processOrder(token, payOrder, false);
     }
-
 
     public List<String> processOrder(String order) {
         return processOrder(order, "null");
     }
 
+    // 解析拼接 ID
     public List<String> processOrder(String order, String afterOrderId) {
         String ppOrderId = "null";
         String ppCatptId = "null";
@@ -76,7 +75,18 @@ public class PaypalWrapper {
         return Arrays.asList(ppOrderId, ppCatptId);
     }
 
+    /**
+     * 处理并捕获订单
+     * 由于 Paypal 创建订单后需要进行一次 Capture(捕获) 才可以正确获取到订单的支付状态
+     *
+     * @param token
+     * @param payOrder
+     * @param isCapture
+     * @return
+     * @throws IOException
+     */
     public ChannelRetMsg processOrder(String token, PayOrder payOrder, boolean isCapture) throws IOException {
+        // Paypal 创建订单存在一个 Token，当订单捕获之后会有一个 捕获的ID ，退款需要用到
         String ppOrderId = this.processOrder(payOrder.getChannelOrderNo(), token).get(0);
         String ppCatptId = this.processOrder(payOrder.getChannelOrderNo()).get(1);
 
@@ -99,6 +109,7 @@ public class PaypalWrapper {
                 OrdersCaptureRequest ordersCaptureRequest = new OrdersCaptureRequest(ppOrderId);
                 ordersCaptureRequest.requestBody(orderRequest);
 
+                // 捕获订单
                 HttpResponse<Order> response = this.getClient().execute(ordersCaptureRequest);
 
                 if (response.statusCode() != 201) {
@@ -143,24 +154,31 @@ public class PaypalWrapper {
             result.setChannelAttach(orderJsonStr); // Capture 响应数据
             result.setResponseEntity(textResp("SUCCESS")); // 响应数据
             result.setChannelState(ChannelRetMsg.ChannelState.WAITING); // 默认支付中
-
-            if (status.equalsIgnoreCase("COMPLETED")) {
-                result.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
-            } else if (status.equalsIgnoreCase("VOIDED")) {
-                result.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-            }
-
+            result = dispatchCode(status, result); // 处理状态码
             return result;
         }
     }
 
+    /**
+     * 处理 Paypal 状态码
+     *
+     * @param status        状态码
+     * @param channelRetMsg 通知信息
+     * @return 通知信息
+     */
     public ChannelRetMsg dispatchCode(String status, ChannelRetMsg channelRetMsg) {
-        if (status.equalsIgnoreCase("CANCELLED")) {
-            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-        } else if (status.equalsIgnoreCase("PENDING")) {
+        if (status.equalsIgnoreCase("SAVED")) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
+        } else if (status.equalsIgnoreCase("APPROVED")) {
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
+        } else if (status.equalsIgnoreCase("VOIDED")) {
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
         } else if (status.equalsIgnoreCase("COMPLETED")) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+        } else if (status.equalsIgnoreCase("PAYER_ACTION_REQUIRED")) {
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
+        } else if (status.equalsIgnoreCase("CREATED")) {
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
         } else {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.UNKNOWN);
         }

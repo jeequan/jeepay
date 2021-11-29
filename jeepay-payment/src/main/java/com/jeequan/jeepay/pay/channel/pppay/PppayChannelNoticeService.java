@@ -32,6 +32,8 @@ public class PppayChannelNoticeService extends AbstractChannelNoticeService {
 
     @Override
     public MutablePair<String, Object> parseParams(HttpServletRequest request, String urlOrderId, NoticeTypeEnum noticeTypeEnum) {
+        // 同步和异步需要不同的解析方案
+        // 异步需要从 webhook 中读取，所有这里读取方式不太一样
         if (noticeTypeEnum == NoticeTypeEnum.DO_NOTIFY) {
             JSONObject params = JSONUtil.parseObj(getReqParamJSON().toJSONString());
             String orderId = params.getByPath("resource.purchase_units[0].invoice_id", String.class);
@@ -65,13 +67,17 @@ public class PppayChannelNoticeService extends AbstractChannelNoticeService {
 
     public ChannelRetMsg doReturn(HttpServletRequest request, Object params, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws IOException {
         JSONObject object = (JSONObject) params;
+        // 获取 Paypal 订单 ID
         String ppOrderId = object.getStr("token");
+        // 统一处理订单
         return mchAppConfigContext.getPaypalWrapper().processOrder(ppOrderId, payOrder);
     }
 
     public ChannelRetMsg doNotify(HttpServletRequest request, Object params, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws IOException {
         JSONObject object = (JSONObject) params;
+        // 获取 Paypal 订单 ID
         String ppOrderId = object.getByPath("resource.id", String.class);
+        // 统一处理订单
         return mchAppConfigContext.getPaypalWrapper().processOrder(ppOrderId, payOrder, true);
     }
 }

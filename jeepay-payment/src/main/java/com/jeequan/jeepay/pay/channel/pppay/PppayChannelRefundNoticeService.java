@@ -38,6 +38,7 @@ public class PppayChannelRefundNoticeService extends AbstractChannelRefundNotice
     @Override
     public MutablePair<String, Object> parseParams(HttpServletRequest request, String urlOrderId, NoticeTypeEnum noticeTypeEnum) {
         JSONObject params = JSONUtil.parseObj(getReqParamJSON().toJSONString());
+        // 获取退款订单 Paypal ID
         String orderId = params.getByPath("resource.invoice_id", String.class);
         return MutablePair.of(orderId, params);
     }
@@ -51,6 +52,7 @@ public class PppayChannelRefundNoticeService extends AbstractChannelRefundNotice
             PaypalWrapper wrapper = mchAppConfigContext.getPaypalWrapper();
             PayPalHttpClient client = wrapper.getClient();
 
+            // 查询退款详情以及状态
             RefundsGetRequest refundRequest = new RefundsGetRequest(orderId);
             HttpResponse<Refund> response = client.execute(refundRequest);
 

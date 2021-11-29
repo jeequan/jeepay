@@ -46,6 +46,7 @@ public class PpPc extends PppayPaymentService {
 
         OrderRequest orderRequest = new OrderRequest();
 
+        // 配置 Paypal ApplicationContext 也就是支付页面信息
         ApplicationContext applicationContext = new ApplicationContext()
                 .brandName(mchAppConfigContext.getMchApp().getAppName())
                 .landingPage("NO_PREFERENCE")
@@ -59,11 +60,14 @@ public class PpPc extends PppayPaymentService {
 
         List<PurchaseUnitRequest> purchaseUnitRequests = new ArrayList<>();
 
+        // 金额换算
         long amount = (payOrder.getAmount() / 100);
         String amountStr = Long.toString(amount, 10);
         String currency = payOrder.getCurrency().toUpperCase();
 
+        // 由于 Paypal 是支持订单多商品的，这里值添加一个
         PurchaseUnitRequest purchaseUnitRequest = new PurchaseUnitRequest()
+                // 绑定 订单 ID 否则回调和异步较难处理
                 .customId(payOrder.getPayOrderId())
                 .invoiceId(payOrder.getPayOrderId())
                 .amountWithBreakdown(new AmountWithBreakdown()
@@ -89,6 +93,7 @@ public class PpPc extends PppayPaymentService {
         purchaseUnitRequests.add(purchaseUnitRequest);
         orderRequest.purchaseUnits(purchaseUnitRequests);
 
+        // 从缓存获取 Paypal 操作工具
         PaypalWrapper palApiConfig = mchAppConfigContext.getPaypalWrapper();
 
         OrdersCreateRequest request = new OrdersCreateRequest();
@@ -99,11 +104,13 @@ public class PpPc extends PppayPaymentService {
         PPPcOrderRS res = new PPPcOrderRS();
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
 
+        // 标准返回 HttpPost 需要为 201
         if (response.statusCode() == 201) {
             Order order = response.result();
             String status = response.result().status();
             String tradeNo = response.result().id();
 
+            // 从返回数据里读取出支付链接
             LinkDescription paypalLink = order.links().stream().reduce(null, (result, curr) -> {
                 if (curr.rel().equalsIgnoreCase("approve") && curr.method().equalsIgnoreCase("get")) {
                     result = curr;
@@ -111,23 +118,12 @@ public class PpPc extends PppayPaymentService {
                 return result;
             });
 
+            // 设置返回实体
             channelRetMsg.setChannelAttach(JSONUtil.toJsonStr(new Json().serialize(order)));
-            channelRetMsg.setChannelOrderId(tradeNo + "," + "null");
+            channelRetMsg.setChannelOrderId(tradeNo + "," + "null"); // 拼接订单ID
+            channelRetMsg = palApiConfig.dispatchCode(status, channelRetMsg); // 处理状态码
 
-            if (status.equalsIgnoreCase("SAVED")) {
-                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
-            } else if (status.equalsIgnoreCase("APPROVED")) {
-                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
-            } else if (status.equalsIgnoreCase("VOIDED")) {
-                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-            } else if (status.equalsIgnoreCase("COMPLETED")) {
-                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
-            } else if (status.equalsIgnoreCase("PAYER_ACTION_REQUIRED")) {
-                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
-            } else if (status.equalsIgnoreCase("CREATED")) {
-                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
-            }
-
+            // 设置支付链接
             res.setPayUrl(paypalLink.href());
         } else {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
