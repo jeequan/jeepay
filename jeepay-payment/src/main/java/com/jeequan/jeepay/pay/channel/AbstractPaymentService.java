@@ -58,4 +58,8 @@ public abstract class AbstractPaymentService implements IPaymentService{
         return sysConfigService.getDBApplicationConfig().getPaySiteUrl() + "/api/pay/return/" + getIfCode();
     }
 
+    protected String getReturnUrl(String payOrderId){
+        return sysConfigService.getDBApplicationConfig().getPaySiteUrl() + "/api/pay/return/" + getIfCode() + "/" + payOrderId;
+    }
+
 }

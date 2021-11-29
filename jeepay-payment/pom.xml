@@ -105,6 +105,13 @@
             <artifactId>alipay-sdk-java</artifactId>
         </dependency>
 
+        <!-- paypal 支付 -->
+        <dependency>
+            <groupId>com.paypal.sdk</groupId>
+            <artifactId>checkout-sdk</artifactId>
+            <version>1.0.5</version>
+        </dependency>
+
     </dependencies>
 
 
