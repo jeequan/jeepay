@@ -61,14 +61,14 @@ public class PaypalWrapper {
                 }
             }
         }
-        if (afterOrderId != null && !afterOrderId.equalsIgnoreCase("null")) {
+        if (afterOrderId != null && !"null".equalsIgnoreCase(afterOrderId)) {
             ppOrderId = afterOrderId;
         }
 
-        if (ppCatptId.equalsIgnoreCase("null")) {
+        if ("null".equalsIgnoreCase(ppCatptId)) {
             ppCatptId = null;
         }
-        if (ppOrderId.equalsIgnoreCase("null")) {
+        if ("null".equalsIgnoreCase(ppOrderId)) {
             ppOrderId = null;
         }
 
@@ -167,17 +167,17 @@ public class PaypalWrapper {
      * @return 通知信息
      */
     public ChannelRetMsg dispatchCode(String status, ChannelRetMsg channelRetMsg) {
-        if (status.equalsIgnoreCase("SAVED")) {
+        if ("SAVED".equalsIgnoreCase(status)) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
-        } else if (status.equalsIgnoreCase("APPROVED")) {
+        } else if ("APPROVED".equalsIgnoreCase(status)) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
-        } else if (status.equalsIgnoreCase("VOIDED")) {
+        } else if ("VOIDED".equalsIgnoreCase(status)) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-        } else if (status.equalsIgnoreCase("COMPLETED")) {
+        } else if ("COMPLETED".equalsIgnoreCase(status)) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
-        } else if (status.equalsIgnoreCase("PAYER_ACTION_REQUIRED")) {
+        } else if ("PAYER_ACTION_REQUIRED".equalsIgnoreCase(status)) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
-        } else if (status.equalsIgnoreCase("CREATED")) {
+        } else if ("CREATED".equalsIgnoreCase(status)) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
         } else {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.UNKNOWN);

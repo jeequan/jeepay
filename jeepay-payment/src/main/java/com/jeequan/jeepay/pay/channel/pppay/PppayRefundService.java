@@ -34,7 +34,8 @@ public class PppayRefundService extends AbstractRefundService {
     }
 
     @Override
-    public ChannelRetMsg refund(RefundOrderRQ bizRQ, RefundOrder refundOrder, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
+    public ChannelRetMsg refund(RefundOrderRQ bizRQ, RefundOrder refundOrder, PayOrder payOrder,
+                                MchAppConfigContext mchAppConfigContext) throws Exception {
         if (payOrder.getChannelOrderNo() == null) {
             return ChannelRetMsg.confirmFail();
         }

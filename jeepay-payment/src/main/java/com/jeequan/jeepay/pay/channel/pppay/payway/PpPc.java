@@ -41,7 +41,8 @@ public class PpPc extends PppayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws
+            Exception {
         PPPcOrderRQ bizRQ = (PPPcOrderRQ) rq;
 
         OrderRequest orderRequest = new OrderRequest();

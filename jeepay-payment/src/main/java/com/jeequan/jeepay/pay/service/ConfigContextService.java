@@ -326,13 +326,19 @@ public class ConfigContextService {
         }
     }
 
-    private PaypalWrapper buildPaypalWrapper(Byte sandbox, String secret, String clientID, String notifyHook, String refundHook) {
+    private PaypalWrapper buildPaypalWrapper(
+            Byte sandbox,
+            String secret,
+            String clientId,
+            String notifyHook,
+            String refundHook
+    ) {
         PaypalWrapper paypalWrapper = new PaypalWrapper();
 
-        PayPalEnvironment environment = new PayPalEnvironment.Live(clientID, secret);
+        PayPalEnvironment environment = new PayPalEnvironment.Live(clientId, secret);
 
         if (sandbox == 1) {
-            environment = new PayPalEnvironment.Sandbox(clientID, secret);
+            environment = new PayPalEnvironment.Sandbox(clientId, secret);
         }
 
         paypalWrapper.setEnvironment(environment);

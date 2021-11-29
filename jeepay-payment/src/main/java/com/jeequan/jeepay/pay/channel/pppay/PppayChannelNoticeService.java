@@ -31,7 +31,8 @@ public class PppayChannelNoticeService extends AbstractChannelNoticeService {
     }
 
     @Override
-    public MutablePair<String, Object> parseParams(HttpServletRequest request, String urlOrderId, NoticeTypeEnum noticeTypeEnum) {
+    public MutablePair<String, Object> parseParams(HttpServletRequest request, String urlOrderId,
+                                                   NoticeTypeEnum noticeTypeEnum) {
         // 同步和异步需要不同的解析方案
         // 异步需要从 webhook 中读取，所有这里读取方式不太一样
         if (noticeTypeEnum == NoticeTypeEnum.DO_NOTIFY) {
@@ -53,7 +54,8 @@ public class PppayChannelNoticeService extends AbstractChannelNoticeService {
     }
 
     @Override
-    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
+    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, PayOrder payOrder,
+                                  MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
         try {
             if (noticeTypeEnum == NoticeTypeEnum.DO_RETURN) {
                 return doReturn(request, params, payOrder, mchAppConfigContext);
@@ -65,7 +67,8 @@ public class PppayChannelNoticeService extends AbstractChannelNoticeService {
         }
     }
 
-    public ChannelRetMsg doReturn(HttpServletRequest request, Object params, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws IOException {
+    public ChannelRetMsg doReturn(HttpServletRequest request, Object params, PayOrder payOrder,
+                                  MchAppConfigContext mchAppConfigContext) throws IOException {
         JSONObject object = (JSONObject) params;
         // 获取 Paypal 订单 ID
         String ppOrderId = object.getStr("token");
@@ -73,7 +76,8 @@ public class PppayChannelNoticeService extends AbstractChannelNoticeService {
         return mchAppConfigContext.getPaypalWrapper().processOrder(ppOrderId, payOrder);
     }
 
-    public ChannelRetMsg doNotify(HttpServletRequest request, Object params, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws IOException {
+    public ChannelRetMsg doNotify(HttpServletRequest request, Object params, PayOrder payOrder,
+                                  MchAppConfigContext mchAppConfigContext) throws IOException {
         JSONObject object = (JSONObject) params;
         // 获取 Paypal 订单 ID
         String ppOrderId = object.getByPath("resource.id", String.class);

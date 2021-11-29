@@ -36,7 +36,8 @@ public class PppayChannelRefundNoticeService extends AbstractChannelRefundNotice
     }
 
     @Override
-    public MutablePair<String, Object> parseParams(HttpServletRequest request, String urlOrderId, NoticeTypeEnum noticeTypeEnum) {
+    public MutablePair<String, Object> parseParams(HttpServletRequest request, String urlOrderId,
+                                                   NoticeTypeEnum noticeTypeEnum) {
         JSONObject params = JSONUtil.parseObj(getReqParamJSON().toJSONString());
         // 获取退款订单 Paypal ID
         String orderId = params.getByPath("resource.invoice_id", String.class);
@@ -44,7 +45,8 @@ public class PppayChannelRefundNoticeService extends AbstractChannelRefundNotice
     }
 
     @Override
-    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, RefundOrder refundOrder, MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
+    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, RefundOrder refundOrder,
+                                  MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
         try {
             JSONObject object = (JSONObject) params;
             String orderId = object.getByPath("resource.id", String.class);
