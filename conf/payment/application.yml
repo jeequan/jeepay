@@ -86,6 +86,14 @@ spring:
 #  producer:
 #    group: JEEPAY-GROUP
 
+## 阿里云rocketmq配置 ( 注意：aliyun-rocketmq配置项请放置到根目录， 不是spring的二级配置！  )
+#aliyun-rocketmq:
+#  namesrvAddr: 127.0.0.1:9876
+#  accessKey: accessKey
+#  secretKey: secretKey
+#  consumerId: JEEPAY-GROUP
+#  producerId: JEEPAY-GROUP
+
   #日志配置参数。
   # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
   # 不存在logback-spring.xml 文件时， 使用springboot的配置， 同样可用。
@@ -122,5 +130,5 @@ isys:
       access-key-secret: SECRET_SECRET_SECRET  #AccessKeySecret
 
   mq:
-    vender: activeMQ #  切换MQ厂商， 支持：【 activeMQ  rabbitMQ  rocketMQ 】， 需正确配置 【对应的yml参数】 和 【jeepay-components-mq项目下pom.xml中的依赖包】。
+    vender: activeMQ  #  切换MQ厂商， 支持：【 activeMQ  rabbitMQ  rocketMQ  aliYunRocketMQ 】， 需正确配置 【对应的yml参数】 和 【jeepay-components-mq项目下pom.xml中的依赖包】。
 
