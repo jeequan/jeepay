@@ -91,7 +91,8 @@ spring:
 #  namesrvAddr: 127.0.0.1:9876
 #  accessKey: accessKey
 #  secretKey: secretKey
-#  consumerId: JEEPAY-GROUP
+#  consumerId: JEEPAY-GROUP-MGR
+#  broadcastConsumerId: JEEPAY-GROUP-MGR-BROADCAST # 广播模式消费者ID
 #  producerId: JEEPAY-GROUP
 
   #日志配置参数。

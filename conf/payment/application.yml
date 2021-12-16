@@ -91,8 +91,10 @@ spring:
 #  namesrvAddr: 127.0.0.1:9876
 #  accessKey: accessKey
 #  secretKey: secretKey
-#  consumerId: JEEPAY-GROUP
+#  consumerId: JEEPAY-GROUP-PAY
+#  broadcastConsumerId: JEEPAY-GROUP-PAY-BROADCAST # 广播模式消费者ID
 #  producerId: JEEPAY-GROUP
+
 
   #日志配置参数。
   # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
