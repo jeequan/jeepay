@@ -76,12 +76,12 @@ spring:
 #  producer:
 #    group: JEEPAY-GROUP
 
-## 阿里云rocketmq配置 ( 注意：aliyun-rocketmq配置项请放置到根目录， 不是spring的二级配置！  )
+## 阿里云rocketmq配置 ( 注意：aliyun-rocketmq配置项请放置到根目录， 不是spring的二级配置！需要阿里云开通rocketMQ产品，创建Group和Topic  )
 #aliyun-rocketmq:
-#  namesrvAddr: 127.0.0.1:9876
-#  accessKey: accessKey
-#  secretKey: secretKey
-#  producerId: JEEPAY-GROUP
+#  namesrvAddr: xxx
+#  accessKey: xxx
+#  secretKey: xxx
+#  groupId: GID_JEEPAY_T
 
   #日志配置参数。
   # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
@@ -98,7 +98,7 @@ isys:
   allow-cors: true
 
   #是否内存缓存配置信息: true表示开启如支付网关地址/商户应用配置/服务商配置等， 开启后需检查MQ的广播模式是否正常； false表示直接查询DB.
-  cache-config: false
+  cache-config: true
 
   oss:
     file-root-path: /home/jeepay/upload #存储根路径 ( 无需以‘/’结尾 )

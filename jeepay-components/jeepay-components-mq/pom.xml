@@ -51,7 +51,6 @@
 <!--      <scope>provided</scope>-->
     </dependency>
 
-
     <!-- RabbitMQ  -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

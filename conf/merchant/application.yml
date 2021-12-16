@@ -86,14 +86,12 @@ spring:
 #  producer:
 #    group: JEEPAY-GROUP
 
-## 阿里云rocketmq配置 ( 注意：aliyun-rocketmq配置项请放置到根目录， 不是spring的二级配置！  )
+## 阿里云rocketmq配置 ( 注意：aliyun-rocketmq配置项请放置到根目录， 不是spring的二级配置！需要阿里云开通rocketMQ产品，创建Group和Topic  )
 #aliyun-rocketmq:
-#  namesrvAddr: 127.0.0.1:9876
-#  accessKey: accessKey
-#  secretKey: secretKey
-#  consumerId: JEEPAY-GROUP-MCH
-#  broadcastConsumerId: JEEPAY-GROUP-MCH-BROADCAST # 广播模式消费者ID
-#  producerId: JEEPAY-GROUP
+#  namesrvAddr: xxx
+#  accessKey: xxx
+#  secretKey: xxx
+#  groupId: GID_JEEPAY_T
 
   #日志配置参数。
   # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
