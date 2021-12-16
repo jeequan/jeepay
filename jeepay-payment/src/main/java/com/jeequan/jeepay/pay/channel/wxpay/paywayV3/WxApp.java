@@ -30,6 +30,7 @@ import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxAppOrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /*
@@ -56,6 +57,14 @@ public class WxApp extends WxpayPaymentService {
 
         // 构造请求数据
         JSONObject reqJSON = buildV3OrderRequest(payOrder, mchAppConfigContext);
+
+        // wxPayConfig 添加子商户参数
+        if(mchAppConfigContext.isIsvsubMch()){
+            wxPayService.getConfig().setSubMchId(reqJSON.getString("sub_mchid"));
+            if (StringUtils.isNotBlank(reqJSON.getString("sub_appid"))) {
+                wxPayService.getConfig().setSubAppId(reqJSON.getString("sub_appid"));
+            }
+        }
 
         String reqUrl;  // 请求地址
         if(mchAppConfigContext.isIsvsubMch()){ // 特约商户

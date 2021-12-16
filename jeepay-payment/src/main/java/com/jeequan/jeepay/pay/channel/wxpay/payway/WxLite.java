@@ -34,6 +34,7 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxJsapiOrderRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +46,7 @@ import org.springframework.stereotype.Service;
  * @date 2021/6/8 18:08
  */
 @Service("wxpayPaymentByLiteService") //Service Name需保持全局唯一性
+@Slf4j
 public class WxLite extends WxpayPaymentService {
 
     @Override
@@ -65,7 +67,11 @@ public class WxLite extends WxpayPaymentService {
 
         WxPayUnifiedOrderRequest req = buildUnifiedOrderRequest(payOrder, mchAppConfigContext);
         req.setTradeType(WxPayConstants.TradeType.JSAPI);
-        req.setOpenid(bizRQ.getOpenid());
+        if(mchAppConfigContext.isIsvsubMch() && StringUtils.isBlank(req.getSubAppId())){ // 特约商户 && 传了子商户appId
+            req.setSubOpenid(bizRQ.getOpenid()); // 用户在子商户appid下的唯一标识
+        }else {
+            req.setOpenid(bizRQ.getOpenid());
+        }
 
         // 构造函数响应数据
         WxJsapiOrderRS res = ApiResBuilder.buildSuccess(WxJsapiOrderRS.class);
@@ -88,6 +94,7 @@ public class WxLite extends WxpayPaymentService {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
 
         } catch (WxPayException e) {
+            log.error("WxPayException:", e);
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
             WxpayKit.commonSetErrInfo(channelRetMsg, e);
         }

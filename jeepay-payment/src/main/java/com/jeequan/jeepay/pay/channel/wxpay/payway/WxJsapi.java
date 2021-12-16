@@ -67,7 +67,11 @@ public class WxJsapi extends WxpayPaymentService {
 
         WxPayUnifiedOrderRequest req = buildUnifiedOrderRequest(payOrder, mchAppConfigContext);
         req.setTradeType(WxPayConstants.TradeType.JSAPI);
-        req.setOpenid(bizRQ.getOpenid());
+        if(mchAppConfigContext.isIsvsubMch() && StringUtils.isBlank(req.getSubAppId())){ // 特约商户 && 传了子商户appId
+            req.setSubOpenid(bizRQ.getOpenid()); // 用户在子商户appid下的唯一标识
+        }else {
+            req.setOpenid(bizRQ.getOpenid());
+        }
 
         // 构造函数响应数据
         WxJsapiOrderRS res = ApiResBuilder.buildSuccess(WxJsapiOrderRS.class);
