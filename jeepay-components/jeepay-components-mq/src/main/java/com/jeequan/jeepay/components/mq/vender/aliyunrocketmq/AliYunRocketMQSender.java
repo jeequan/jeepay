@@ -39,29 +39,10 @@ import java.util.TreeMap;
 @ConditionalOnProperty(name = MQVenderCS.YML_VENDER_KEY, havingValue = MQVenderCS.ALIYUN_ROCKET_MQ)
 public class AliYunRocketMQSender implements IMQSender {
 
-    private static final List<Integer> DELAY_TIME_LEVEL = new ArrayList<>();
-
-    static {
-        // 预设值的延迟时间间隔为：1s、 5s、 10s、 30s、 1m、 2m、 3m、 4m、 5m、 6m、 7m、 8m、 9m、 10m、 20m、 30m、 1h、 2h
-        DELAY_TIME_LEVEL.add(1);
-        DELAY_TIME_LEVEL.add(5);
-        DELAY_TIME_LEVEL.add(10);
-        DELAY_TIME_LEVEL.add(30);
-        DELAY_TIME_LEVEL.add(60 * 1);
-        DELAY_TIME_LEVEL.add(60 * 2);
-        DELAY_TIME_LEVEL.add(60 * 3);
-        DELAY_TIME_LEVEL.add(60 * 4);
-        DELAY_TIME_LEVEL.add(60 * 5);
-        DELAY_TIME_LEVEL.add(60 * 6);
-        DELAY_TIME_LEVEL.add(60 * 7);
-        DELAY_TIME_LEVEL.add(60 * 8);
-        DELAY_TIME_LEVEL.add(60 * 9);
-        DELAY_TIME_LEVEL.add(60 * 10);
-        DELAY_TIME_LEVEL.add(60 * 20);
-        DELAY_TIME_LEVEL.add(60 * 30);
-        DELAY_TIME_LEVEL.add(60 * 60 * 1);
-        DELAY_TIME_LEVEL.add(60 * 60 * 2);
-    }
+    /** 最大延迟24小时 */
+    private static final int MAX_DELAY_TIME = 60 * 60 * 24;
+    /** 最小延迟1秒 */
+    private static final int MIN_DELAY_TIME = 1;
 
     @Autowired
     private AliYunRocketMQFactory aliYunRocketMQFactory;
@@ -77,7 +58,7 @@ public class AliYunRocketMQSender implements IMQSender {
     public void send(AbstractMQ mqModel, int delaySeconds) {
         Message message = new Message(mqModel.getMQName(), AliYunRocketMQFactory.defaultTag, mqModel.toMessage().getBytes());
         if (delaySeconds > 0) {
-            long delayTime = System.currentTimeMillis() + getNearDelayLevel(delaySeconds) * 1000;
+            long delayTime = System.currentTimeMillis() + delayTimeCorrector(delaySeconds) * 1000;
             // 设置消息需要被投递的时间。
             message.setStartDeliverTime(delayTime);
         }
@@ -94,17 +75,16 @@ public class AliYunRocketMQSender implements IMQSender {
     }
 
     /**
-     * 获取最接近的节点值
+     * 检查延迟时间的有效性并返回校正后的延迟时间
      **/
-    private int getNearDelayLevel(int delay) {
-        // 如果包含则直接返回
-        if (DELAY_TIME_LEVEL.contains(delay)) {
-            return DELAY_TIME_LEVEL.indexOf(delay) + 1;
+    private int delayTimeCorrector(int delay) {
+        if (delay < MIN_DELAY_TIME) {
+            return MIN_DELAY_TIME;
         }
-        //两个时间的绝对值 - 位置
-        TreeMap<Integer, Integer> resultMap = new TreeMap<>();
-        DELAY_TIME_LEVEL.stream().forEach(time -> resultMap.put(Math.abs(delay - time), DELAY_TIME_LEVEL.indexOf(time) + 1));
-        return resultMap.firstEntry().getValue();
+        if (delay > MAX_DELAY_TIME) {
+            return MAX_DELAY_TIME;
+        }
+        return delay;
     }
 
 

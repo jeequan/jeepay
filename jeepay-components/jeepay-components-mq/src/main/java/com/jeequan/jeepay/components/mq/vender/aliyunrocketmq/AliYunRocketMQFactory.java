@@ -24,6 +24,8 @@ public class AliYunRocketMQFactory {
     private String secretKey;
     @Value("${aliyun-rocketmq.consumerId}")
     private String consumerId;
+    @Value("${aliyun-rocketmq.broadcastConsumerId}")
+    private String broadcastConsumerId;
     @Value("${aliyun-rocketmq.producerId}")
     private String producerId;
 
@@ -33,7 +35,7 @@ public class AliYunRocketMQFactory {
         properties.put(PropertyKeyConst.ProducerId, producerId);
         properties.put(PropertyKeyConst.AccessKey, accessKey);
         properties.put(PropertyKeyConst.SecretKey, secretKey);
-        // 判断是否为空（生产环境走k8s集群公共配置，不获取本地配置文件的值）
+        // 判断是否为空（生产环境走k8s集群环境变量自动注入，不获取本地配置文件的值）
         if (StringUtils.isNotEmpty(namesrvAddr)) {
             properties.put(PropertyKeyConst.NAMESRV_ADDR, namesrvAddr);
         }
@@ -46,7 +48,7 @@ public class AliYunRocketMQFactory {
         properties.put(PropertyKeyConst.ConsumerId, consumerId);
         properties.put(PropertyKeyConst.AccessKey, accessKey);
         properties.put(PropertyKeyConst.SecretKey, secretKey);
-        // 判断是否为空（生产环境走k8s集群公共配置，不获取本地配置文件的值）
+        // 判断是否为空（生产环境走k8s集群环境变量自动注入，不获取本地配置文件的值）
         if (StringUtils.isNotEmpty(namesrvAddr)) {
             properties.put(PropertyKeyConst.NAMESRV_ADDR, namesrvAddr);
         }
@@ -56,7 +58,7 @@ public class AliYunRocketMQFactory {
     @Bean(name = "broadcastConsumerClient")
     public Consumer broadcastConsumerClient() {
         Properties properties = new Properties();
-        properties.put(PropertyKeyConst.ConsumerId, consumerId);
+        properties.put(PropertyKeyConst.ConsumerId, broadcastConsumerId);
         properties.put(PropertyKeyConst.AccessKey, accessKey);
         properties.put(PropertyKeyConst.SecretKey, secretKey);
         // 广播订阅方式设置
