@@ -36,7 +36,8 @@ import org.springframework.stereotype.Component;
 @ConditionalOnBean(PayOrderMchNotifyMQ.IMQReceiver.class)
 public class PayOrderMchNotifyAliYunRocketMQReceiver extends AbstractAliYunRocketMQReceiver {
 
-    private static final String cusumerName = "支付订单商户消息";
+    private static final String CONSUMER_NAME = "支付订单商户消息";
+
     @Autowired
     private PayOrderMchNotifyMQ.IMQReceiver mqReceiver;
 
@@ -65,8 +66,8 @@ public class PayOrderMchNotifyAliYunRocketMQReceiver extends AbstractAliYunRocke
      * @return
      */
     @Override
-    public String getCusumerName() {
-        return cusumerName;
+    public String getConsumerName() {
+        return CONSUMER_NAME;
     }
 
 }

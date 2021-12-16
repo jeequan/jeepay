@@ -36,7 +36,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CleanMchLoginAuthCacheAliYunRocketMQReceiver extends AbstractAliYunRocketMQReceiver {
 
-    private static final String cusumerName = "清除商户登录消息";
+    private static final String CONSUMER_NAME = "清除商户登录消息";
+
     @Autowired
     private CleanMchLoginAuthCacheMQ.IMQReceiver mqReceiver;
 
@@ -65,8 +66,8 @@ public class CleanMchLoginAuthCacheAliYunRocketMQReceiver extends AbstractAliYun
      * @return
      */
     @Override
-    public String getCusumerName() {
-        return cusumerName;
+    public String getConsumerName() {
+        return CONSUMER_NAME;
     }
 
 }

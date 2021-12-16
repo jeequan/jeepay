@@ -35,7 +35,8 @@ import org.springframework.stereotype.Component;
 @ConditionalOnBean(ResetAppConfigMQ.IMQReceiver.class)
 public class ResetAppConfigAliYunRocketMQReceiver extends AbstractAliYunRocketMQReceiver {
 
-    private static final String cusumerName = "更新系统配置参数消息";
+    private static final String CONSUMER_NAME = "更新系统配置参数消息";
+
     @Autowired
     private ResetAppConfigMQ.IMQReceiver mqReceiver;
 
@@ -70,8 +71,8 @@ public class ResetAppConfigAliYunRocketMQReceiver extends AbstractAliYunRocketMQ
      * @return
      */
     @Override
-    public String getCusumerName() {
-        return cusumerName;
+    public String getConsumerName() {
+        return CONSUMER_NAME;
     }
 
     /**

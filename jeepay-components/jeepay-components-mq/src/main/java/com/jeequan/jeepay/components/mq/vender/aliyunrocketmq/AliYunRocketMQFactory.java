@@ -1,14 +1,17 @@
 package com.jeequan.jeepay.components.mq.vender.aliyunrocketmq;
 
 import com.aliyun.openservices.ons.api.*;
+import com.jeequan.jeepay.components.mq.constant.MQVenderCS;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.Properties;
 
 @Service
+@ConditionalOnProperty(name = MQVenderCS.YML_VENDER_KEY, havingValue = MQVenderCS.ALIYUN_ROCKET_MQ)
 public class AliYunRocketMQFactory {
 
     public static final String defaultTag = "Default";

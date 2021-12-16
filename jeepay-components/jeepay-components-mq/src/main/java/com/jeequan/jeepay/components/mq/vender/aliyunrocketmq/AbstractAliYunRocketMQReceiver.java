@@ -25,7 +25,7 @@ public abstract class AbstractAliYunRocketMQReceiver implements IMQMsgReceiver, 
      *
      * @return
      */
-    public abstract String getCusumerName();
+    public abstract String getConsumerName();
 
     /**
      * 发送类型
@@ -48,16 +48,16 @@ public abstract class AbstractAliYunRocketMQReceiver implements IMQMsgReceiver, 
             public Action consume(Message message, ConsumeContext context) {
                 try {
                     receiveMsg(new String(message.getBody()));
-                    log.info("【{}】MQ消息消费成功topic:{}, messageId:{}", getCusumerName(), message.getTopic(), message.getMsgID());
+                    log.info("【{}】MQ消息消费成功topic:{}, messageId:{}", getConsumerName(), message.getTopic(), message.getMsgID());
                     return Action.CommitMessage;
                 } catch (Exception e) {
-                    log.error("【{}】MQ消息消费失败topic:{}, messageId:{}", getCusumerName(), message.getTopic(), message.getMsgID(), e);
+                    log.error("【{}】MQ消息消费失败topic:{}, messageId:{}", getConsumerName(), message.getTopic(), message.getMsgID(), e);
                 }
                 return Action.ReconsumeLater;
             }
         });
         consumerClient.start();
-        log.info("初始化[{}]消费者topic: {},tag: {}成功", getCusumerName(), this.getMQName(), AliYunRocketMQFactory.defaultTag);
+        log.info("初始化[{}]消费者topic: {},tag: {}成功", getConsumerName(), this.getMQName(), AliYunRocketMQFactory.defaultTag);
     }
 
 }
