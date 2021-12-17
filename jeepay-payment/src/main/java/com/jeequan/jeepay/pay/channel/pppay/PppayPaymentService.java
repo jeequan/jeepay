@@ -6,7 +6,9 @@ import com.jeequan.jeepay.pay.channel.AbstractPaymentService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.util.PaywayUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,6 +20,10 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class PppayPaymentService extends AbstractPaymentService {
+
+    @Autowired
+    public ConfigContextQueryService configContextQueryService;
+
     @Override
     public String getIfCode() {
         return CS.IF_CODE.PPPAY;

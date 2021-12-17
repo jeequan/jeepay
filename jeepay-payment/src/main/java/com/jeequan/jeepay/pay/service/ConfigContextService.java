@@ -229,7 +229,7 @@ public class ConfigContextService {
             //放置 paypal client
             PpPayNormalMchParams ppPayMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.PPPAY, PpPayNormalMchParams.class);
             if (ppPayMchParams != null) {
-                mchAppConfigContext.setPaypalWrapper(buildPaypalWrapper(ppPayMchParams.getSandbox(), ppPayMchParams.getSecret(), ppPayMchParams.getClientId(), ppPayMchParams.getNotifyWebhook(), ppPayMchParams.getRefundWebhook()));
+                mchAppConfigContext.setPaypalWrapper(PaypalWrapper.buildPaypalWrapper(ppPayMchParams));
             }
 
 
@@ -324,29 +324,6 @@ public class ConfigContextService {
                 mchAppConfigContext.setIsvConfigContext(isvConfigContext);
             }
         }
-    }
-
-    private PaypalWrapper buildPaypalWrapper(
-            Byte sandbox,
-            String secret,
-            String clientId,
-            String notifyHook,
-            String refundHook
-    ) {
-        PaypalWrapper paypalWrapper = new PaypalWrapper();
-
-        PayPalEnvironment environment = new PayPalEnvironment.Live(clientId, secret);
-
-        if (sandbox == 1) {
-            environment = new PayPalEnvironment.Sandbox(clientId, secret);
-        }
-
-        paypalWrapper.setEnvironment(environment);
-        paypalWrapper.setClient(new PayPalHttpClient(environment));
-        paypalWrapper.setNotifyWebhook(notifyHook);
-        paypalWrapper.setRefundWebhook(refundHook);
-
-        return paypalWrapper;
     }
 
     private boolean isCache(){

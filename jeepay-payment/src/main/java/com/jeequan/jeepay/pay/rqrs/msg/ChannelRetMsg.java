@@ -84,6 +84,11 @@ public class ChannelRetMsg implements Serializable {
     }
 
     /** 明确失败 **/
+    public static ChannelRetMsg confirmFail(String channelErrCode, String channelErrMsg){
+        return new ChannelRetMsg(ChannelState.CONFIRM_FAIL, null, channelErrCode, channelErrMsg);
+    }
+
+    /** 明确失败 **/
     public static ChannelRetMsg confirmFail(String channelOrderId, String channelErrCode, String channelErrMsg){
         return new ChannelRetMsg(ChannelState.CONFIRM_FAIL, channelOrderId, channelErrCode, channelErrMsg);
     }

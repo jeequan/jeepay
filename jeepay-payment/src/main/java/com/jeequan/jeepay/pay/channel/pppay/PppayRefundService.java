@@ -1,8 +1,11 @@
 package com.jeequan.jeepay.pay.channel.pppay;
 
+import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.RefundOrder;
+import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.pay.channel.AbstractRefundService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.model.PaypalWrapper;
@@ -10,6 +13,7 @@ import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRQ;
 import com.paypal.core.PayPalHttpClient;
 import com.paypal.http.HttpResponse;
+import com.paypal.http.exceptions.HttpException;
 import com.paypal.http.serializer.Json;
 import com.paypal.payments.*;
 import org.springframework.stereotype.Service;
@@ -53,9 +57,8 @@ public class PppayRefundService extends AbstractRefundService {
         PayPalHttpClient client = paypalWrapper.getClient();
 
         // 处理金额
-        long amount = (bizRQ.getRefundAmount() / 100);
-        String amountStr = Long.toString(amount, 10);
-        String currency = bizRQ.getCurrency().toUpperCase();
+        String amountStr = AmountUtil.convertCent2Dollar(refundOrder.getRefundAmount().toString());
+        String currency = payOrder.getCurrency().toUpperCase();
 
         RefundRequest refundRequest = new RefundRequest();
         Money money = new Money();
@@ -69,10 +72,19 @@ public class PppayRefundService extends AbstractRefundService {
         CapturesRefundRequest request = new CapturesRefundRequest(ppCatptId);
         request.prefer("return=representation");
         request.requestBody(refundRequest);
-        HttpResponse<Refund> response = client.execute(request);
 
         ChannelRetMsg channelRetMsg = ChannelRetMsg.waiting();
         channelRetMsg.setResponseEntity(paypalWrapper.textResp("ERROR"));
+        HttpResponse<Refund> response;
+        try{
+            response = client.execute(request);
+        }catch (HttpException e) {
+            String message = e.getMessage();
+            cn.hutool.json.JSONObject messageObj = JSONUtil.parseObj(message);
+            String issue = messageObj.getByPath("details[0].issue", String.class);
+            String description = messageObj.getByPath("details[0].description", String.class);
+            return ChannelRetMsg.confirmFail(issue, description);
+        }
 
         if (response.statusCode() == 201) {
             String responseJson = new Json().serialize(response.result());
@@ -81,9 +93,7 @@ public class PppayRefundService extends AbstractRefundService {
             channelRetMsg.setChannelOrderId(response.result().id());
             channelRetMsg.setResponseEntity(paypalWrapper.textResp("SUCCESS"));
         } else {
-            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-            channelRetMsg.setChannelErrCode("201");
-            channelRetMsg.setChannelErrMsg("请求退款失败，Paypal 响应非 201");
+            return ChannelRetMsg.confirmFail("201", "请求退款失败，Paypal 响应非 201");
         }
 
         return channelRetMsg;

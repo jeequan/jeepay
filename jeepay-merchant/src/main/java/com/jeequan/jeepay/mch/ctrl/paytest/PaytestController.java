@@ -108,7 +108,12 @@ public class PaytestController extends CommonCtrl {
         model.setMchOrderNo(mchOrderNo);
         model.setWayCode(wayCode);
         model.setAmount(amount);
-        model.setCurrency("CNY");
+        // paypal通道使用USD类型货币
+        if(wayCode.equalsIgnoreCase("pp_pc")) {
+            model.setCurrency("USD");
+        }else {
+            model.setCurrency("CNY");
+        }
         model.setClientIp(getClientIp());
         model.setSubject(orderTitle + "[" + getCurrentMchNo() + "商户联调]");
         model.setBody(orderTitle + "[" + getCurrentMchNo() + "商户联调]");

@@ -24,12 +24,10 @@ import com.jeequan.jeepay.core.model.params.IsvsubMchParams;
 import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
+import com.jeequan.jeepay.core.model.params.pppay.PpPayNormalMchParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
-import com.jeequan.jeepay.pay.model.AlipayClientWrapper;
-import com.jeequan.jeepay.pay.model.IsvConfigContext;
-import com.jeequan.jeepay.pay.model.MchAppConfigContext;
-import com.jeequan.jeepay.pay.model.WxServiceWrapper;
+import com.jeequan.jeepay.pay.model.*;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
@@ -198,6 +196,16 @@ public class ConfigContextQueryService {
             WxpayNormalMchParams wxParams = (WxpayNormalMchParams)queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
             return WxServiceWrapper.buildWxServiceWrapper(wxParams);
         }
+
+    }
+
+    public PaypalWrapper getPaypalWrapper(MchAppConfigContext mchAppConfigContext){
+        if(isCache()){
+            return
+                    configContextService.getMchAppConfigContext(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId()).getPaypalWrapper();
+        }
+        PpPayNormalMchParams ppPayNormalMchParams = (PpPayNormalMchParams) queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.PPPAY);;
+        return PaypalWrapper.buildPaypalWrapper(ppPayNormalMchParams);
 
     }
 

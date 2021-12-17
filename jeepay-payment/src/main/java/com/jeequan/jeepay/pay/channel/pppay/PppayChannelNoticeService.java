@@ -34,7 +34,7 @@ public class PppayChannelNoticeService extends AbstractChannelNoticeService {
     public MutablePair<String, Object> parseParams(HttpServletRequest request, String urlOrderId,
                                                    NoticeTypeEnum noticeTypeEnum) {
         // 同步和异步需要不同的解析方案
-        // 异步需要从 webhook 中读取，所有这里读取方式不太一样
+        // 异步需要从 webhook 中读取，所以这里读取方式不太一样
         if (noticeTypeEnum == NoticeTypeEnum.DO_NOTIFY) {
             JSONObject params = JSONUtil.parseObj(getReqParamJSON().toJSONString());
             String orderId = params.getByPath("resource.purchase_units[0].invoice_id", String.class);

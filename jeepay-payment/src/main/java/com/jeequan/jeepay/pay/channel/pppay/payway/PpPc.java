@@ -2,7 +2,7 @@ package com.jeequan.jeepay.pay.channel.pppay.payway;
 
 import cn.hutool.json.JSONUtil;
 import com.jeequan.jeepay.core.entity.PayOrder;
-import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.pay.channel.pppay.PppayPaymentService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.model.PaypalWrapper;
@@ -11,7 +11,9 @@ import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.PPPcOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.PPPcOrderRS;
+import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import com.paypal.http.HttpResponse;
+import com.paypal.http.exceptions.HttpException;
 import com.paypal.http.serializer.Json;
 import com.paypal.orders.*;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +35,6 @@ import java.util.List;
 public class PpPc extends PppayPaymentService {
     @Override
     public String preCheck(UnifiedOrderRQ bizRQ, PayOrder payOrder) {
-        PPPcOrderRQ rq = (PPPcOrderRQ) bizRQ;
-        if (StringUtils.isEmpty(rq.getCancelUrl())) {
-            throw new BizException("用户取消支付回调[cancelUrl]不可为空");
-        }
         return null;
     }
 
@@ -51,10 +49,13 @@ public class PpPc extends PppayPaymentService {
         ApplicationContext applicationContext = new ApplicationContext()
                 .brandName(mchAppConfigContext.getMchApp().getAppName())
                 .landingPage("NO_PREFERENCE")
-                .cancelUrl(bizRQ.getCancelUrl())
                 .returnUrl(getReturnUrl(payOrder.getPayOrderId()))
                 .userAction("PAY_NOW")
                 .shippingPreference("NO_SHIPPING");
+
+        if(StringUtils.isNotBlank(bizRQ.getCancelUrl())) {
+            applicationContext.cancelUrl(bizRQ.getCancelUrl());
+        }
 
         orderRequest.applicationContext(applicationContext);
         orderRequest.checkoutPaymentIntent("CAPTURE");
@@ -62,8 +63,7 @@ public class PpPc extends PppayPaymentService {
         List<PurchaseUnitRequest> purchaseUnitRequests = new ArrayList<>();
 
         // 金额换算
-        long amount = (payOrder.getAmount() / 100);
-        String amountStr = Long.toString(amount, 10);
+        String amountStr = AmountUtil.convertCent2Dollar(payOrder.getAmount().toString());
         String currency = payOrder.getCurrency().toUpperCase();
 
         // 由于 Paypal 是支持订单多商品的，这里值添加一个
@@ -95,15 +95,30 @@ public class PpPc extends PppayPaymentService {
         orderRequest.purchaseUnits(purchaseUnitRequests);
 
         // 从缓存获取 Paypal 操作工具
-        PaypalWrapper palApiConfig = mchAppConfigContext.getPaypalWrapper();
+        PaypalWrapper paypalWrapper = configContextQueryService.getPaypalWrapper(mchAppConfigContext);
 
         OrdersCreateRequest request = new OrdersCreateRequest();
         request.header("prefer", "return=representation");
         request.requestBody(orderRequest);
-        HttpResponse<Order> response = palApiConfig.getClient().execute(request);
 
-        PPPcOrderRS res = new PPPcOrderRS();
+        // 构造函数响应数据
+        PPPcOrderRS res = ApiResBuilder.buildSuccess(PPPcOrderRS.class);
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
+
+        HttpResponse<Order> response;
+        try{
+            response = paypalWrapper.getClient().execute(request);
+        }catch (HttpException e) {
+            String message = e.getMessage();
+            cn.hutool.json.JSONObject messageObj = JSONUtil.parseObj(message);
+            String issue = messageObj.getByPath("details[0].issue", String.class);
+            String description = messageObj.getByPath("details[0].description", String.class);
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+            channelRetMsg.setChannelErrCode(issue);
+            channelRetMsg.setChannelErrMsg(description);
+            res.setChannelRetMsg(channelRetMsg);
+            return res;
+        }
 
         // 标准返回 HttpPost 需要为 201
         if (response.statusCode() == 201) {
@@ -122,7 +137,7 @@ public class PpPc extends PppayPaymentService {
             // 设置返回实体
             channelRetMsg.setChannelAttach(JSONUtil.toJsonStr(new Json().serialize(order)));
             channelRetMsg.setChannelOrderId(tradeNo + "," + "null"); // 拼接订单ID
-            channelRetMsg = palApiConfig.dispatchCode(status, channelRetMsg); // 处理状态码
+            channelRetMsg = paypalWrapper.dispatchCode(status, channelRetMsg); // 处理状态码
 
             // 设置支付链接
             res.setPayUrl(paypalLink.href());
