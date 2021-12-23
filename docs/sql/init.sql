@@ -707,7 +707,7 @@ INSERT INTO t_pay_way (way_code, way_name) VALUES ('ALI_APP', '支付宝APP');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('ALI_WAP', '支付宝WAP');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('ALI_PC', '支付宝PC网站');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('ALI_QR', '支付宝二维码');
-INSERT INTO t_pay_way (way_code, way_name) VALUES ('ALI_LITE', '支付小程序');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('ALI_LITE', '支付宝小程序');
 
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('WX_BAR', '微信条码');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('WX_JSAPI', '微信公众号');

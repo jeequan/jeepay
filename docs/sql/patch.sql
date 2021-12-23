@@ -228,8 +228,8 @@ alter table t_refund_order modify err_msg varchar(2048) null comment '渠道错�
 -- 增加角色权限字段长度
 alter table `t_sys_role_ent_rela` MODIFY `ent_id` VARCHAR(64) NOT NULL COMMENT '权限ID' after `role_id`;
 
-## -- ++++ [v1.10.0] ===> [v1.xx.0] 待发布 ++++
-INSERT INTO t_pay_way (way_code, way_name) VALUES ('ALI_LITE', '支付小程序');
+## -- ++++ [v1.10.0] ===> [v1.11.0] 待发布 ++++
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('ALI_LITE', '支付宝小程序');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('PP_PC', 'PayPal支付');
 INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
 VALUES ('pppay', 'PayPal支付', 1, 0, 1,
