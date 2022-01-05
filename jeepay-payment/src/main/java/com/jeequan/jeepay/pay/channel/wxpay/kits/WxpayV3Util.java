@@ -283,7 +283,7 @@ public class WxpayV3Util {
         }
     }
 
-    public static String processIsvPayer(String subAppId, String openId) {
+    public static JSONObject processIsvPayer(String subAppId, String openId) {
         JSONObject payer = new JSONObject();
         // 子商户subAppId不为空
         if (StringUtils.isNotBlank(subAppId)) {
@@ -291,7 +291,7 @@ public class WxpayV3Util {
         }else {
             payer.put("sp_openid", openId); // 用户在服务商appid下的唯一标识
         }
-        return payer.toJSONString();
+        return payer;
     }
 
 }
