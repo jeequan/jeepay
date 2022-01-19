@@ -15,10 +15,10 @@
  */
 package com.jeequan.jeepay.pay.channel.alipay;
 
-import com.alipay.api.domain.AlipayFundTransToaccountTransferModel;
-import com.alipay.api.request.AlipayFundTransToaccountTransferRequest;
-import com.alipay.api.response.AlipayFundTransToaccountTransferResponse;
-import com.alipay.api.response.AlipayTradeRefundResponse;
+import com.alipay.api.domain.AlipayFundTransUniTransferModel;
+import com.alipay.api.domain.Participant;
+import com.alipay.api.request.AlipayFundTransUniTransferRequest;
+import com.alipay.api.response.AlipayFundTransUniTransferResponse;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.core.utils.AmountUtil;
@@ -69,21 +69,25 @@ public class AlipayTransferService implements ITransferService {
     @Override
     public ChannelRetMsg transfer(TransferOrderRQ bizRQ, TransferOrder transferOrder, MchAppConfigContext mchAppConfigContext){
 
-        AlipayFundTransToaccountTransferRequest request = new AlipayFundTransToaccountTransferRequest();
-        AlipayFundTransToaccountTransferModel model = new AlipayFundTransToaccountTransferModel();
-        model.setAmount(AmountUtil.convertCent2Dollar(transferOrder.getAmount())); //转账金额，单位：元。
+        AlipayFundTransUniTransferRequest request = new AlipayFundTransUniTransferRequest();
+        AlipayFundTransUniTransferModel model = new AlipayFundTransUniTransferModel();
+        model.setTransAmount(AmountUtil.convertCent2Dollar(transferOrder.getAmount())); //转账金额，单位：元。
         model.setOutBizNo(transferOrder.getTransferId()); //商户转账唯一订单号
-        model.setPayeeType("ALIPAY_LOGONID");  //ALIPAY_USERID： 支付宝用户ID      ALIPAY_LOGONID:支付宝登录账号
-        model.setPayeeAccount(transferOrder.getAccountNo()); //收款方账户
-        model.setPayeeRealName(StringUtils.defaultString(transferOrder.getAccountName(), null)); //收款方真实姓名
         model.setRemark(transferOrder.getTransferDesc()); //转账备注
+
+        Participant accPayeeInfo = new Participant();
+        accPayeeInfo.setName(StringUtils.defaultString(transferOrder.getAccountName(), null)); //收款方真实姓名
+        accPayeeInfo.setIdentityType("ALIPAY_LOGONID");    //ALIPAY_USERID： 支付宝用户ID      ALIPAY_LOGONID:支付宝登录账号
+        accPayeeInfo.setIdentity(transferOrder.getAccountNo()); //收款方账户
+        model.setPayeeInfo(accPayeeInfo);
+
         request.setBizModel(model);
 
         //统一放置 isv接口必传信息
         AlipayKit.putApiIsvInfo(mchAppConfigContext, request, model);
 
         // 调起支付宝接口
-        AlipayFundTransToaccountTransferResponse response = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
+        AlipayFundTransUniTransferResponse response = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
 
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
         channelRetMsg.setChannelAttach(response.getBody());

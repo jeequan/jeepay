@@ -151,7 +151,7 @@
         <dependency>
             <groupId>com.alipay.sdk</groupId>
             <artifactId>alipay-sdk-java</artifactId>
-            <version>4.16.11.ALL</version>
+            <version>4.22.22.ALL</version>
         </dependency>
 
         <!-- 阿里云oss组件  -->
