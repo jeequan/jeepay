@@ -74,6 +74,7 @@ public class AlipayTransferService implements ITransferService {
         model.setTransAmount(AmountUtil.convertCent2Dollar(transferOrder.getAmount())); //转账金额，单位：元。
         model.setOutBizNo(transferOrder.getTransferId()); //商户转账唯一订单号
         model.setRemark(transferOrder.getTransferDesc()); //转账备注
+        model.setProductCode("TRANS_ACCOUNT_NO_PWD");   // 销售产品码。单笔无密转账固定为 TRANS_ACCOUNT_NO_PWD
 
         Participant accPayeeInfo = new Participant();
         accPayeeInfo.setName(StringUtils.defaultString(transferOrder.getAccountName(), null)); //收款方真实姓名
