@@ -75,6 +75,9 @@ public class AlipayTransferService implements ITransferService {
         model.setOutBizNo(transferOrder.getTransferId()); //商户转账唯一订单号
         model.setRemark(transferOrder.getTransferDesc()); //转账备注
         model.setProductCode("TRANS_ACCOUNT_NO_PWD");   // 销售产品码。单笔无密转账固定为 TRANS_ACCOUNT_NO_PWD
+        model.setBizScene("DIRECT_TRANSFER");           // 业务场景 单笔无密转账固定为 DIRECT_TRANSFER。
+        model.setOrderTitle("转账");                     // 转账业务的标题，用于在支付宝用户的账单里显示。
+        model.setBusinessParams(transferOrder.getChannelExtra());   // 转账业务请求的扩展参数 {\"payer_show_name_use_alias\":\"xx公司\"}
 
         Participant accPayeeInfo = new Participant();
         accPayeeInfo.setName(StringUtils.defaultString(transferOrder.getAccountName(), null)); //收款方真实姓名
