@@ -81,7 +81,7 @@ public class AlipayTransferService implements ITransferService {
 
         Participant accPayeeInfo = new Participant();
         accPayeeInfo.setName(StringUtils.defaultString(transferOrder.getAccountName(), null)); //收款方真实姓名
-        accPayeeInfo.setIdentityType("ALIPAY_LOGONID");    //ALIPAY_USERID： 支付宝用户ID      ALIPAY_LOGONID:支付宝登录账号
+        accPayeeInfo.setIdentityType("ALIPAY_LOGON_ID");    //ALIPAY_USERID： 支付宝用户ID      ALIPAY_LOGONID:支付宝登录账号
         accPayeeInfo.setIdentity(transferOrder.getAccountNo()); //收款方账户
         model.setPayeeInfo(accPayeeInfo);
 
