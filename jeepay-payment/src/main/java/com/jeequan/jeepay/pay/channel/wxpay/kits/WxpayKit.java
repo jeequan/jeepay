@@ -68,6 +68,11 @@ public class WxpayKit {
         channelRetMsg.setChannelErrCode(appendErrCode( wxPayException.getReturnCode(), wxPayException.getErrCode() ));
         channelRetMsg.setChannelErrMsg(appendErrMsg( "OK".equalsIgnoreCase(wxPayException.getReturnMsg()) ? null : wxPayException.getReturnMsg(), wxPayException.getErrCodeDes() ));
 
+        // 如果仍然为空
+        if(StringUtils.isEmpty(channelRetMsg.getChannelErrMsg())){
+            channelRetMsg.setChannelErrMsg(StringUtils.defaultIfEmpty(wxPayException.getCustomErrorMsg(), wxPayException.getMessage()));
+        }
+
     }
 
 }
