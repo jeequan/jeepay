@@ -661,6 +661,8 @@ insert into t_sys_entitlement values('ENT_DIVISION', '分账管理', 'apartment'
     insert into t_sys_entitlement values('ENT_DIVISION_RECORD', '分账记录', 'unordered-list', '/divisionRecord', 'DivisionRecordPage', 'ML', 0, 1,  'ENT_DIVISION', '30', 'MCH', now(), now());
         insert into t_sys_entitlement values('ENT_DIVISION_RECORD_LIST', '页面：数据列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECORD', '0', 'MCH', now(), now());
         insert into t_sys_entitlement values('ENT_DIVISION_RECORD_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECORD', '0', 'MCH', now(), now());
+        insert into t_sys_entitlement values('ENT_DIVISION_RECORD_RESEND', '按钮：重试', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECORD', '0', 'MCH', now(), now());
+
 
 -- 【商户系统】 系统管理
 insert into t_sys_entitlement values('ENT_SYS_CONFIG', '系统管理', 'setting', '', 'RouteView', 'ML', 0, 1,  'ROOT', '200', 'MCH', now(), now());
