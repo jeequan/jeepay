@@ -79,6 +79,7 @@ public class WxpayRefundService extends AbstractRefundService {
                 req.setOutRefundNo(refundOrder.getRefundOrderId()); // 退款单号
                 req.setTotalFee(payOrder.getAmount().intValue());   // 订单总金额
                 req.setRefundFee(refundOrder.getRefundAmount().intValue()); // 退款金额
+                req.setNotifyUrl(getNotifyUrl(refundOrder.getRefundOrderId()));   // 回调url
                 WxPayService wxPayService = wxServiceWrapper.getWxPayService();
                 setCretPath(mchAppConfigContext, wxPayService); // 证书路径
 
@@ -96,6 +97,7 @@ public class WxpayRefundService extends AbstractRefundService {
                 JSONObject reqJSON = new JSONObject();
                 reqJSON.put("out_trade_no", refundOrder.getPayOrderId());   // 订单号
                 reqJSON.put("out_refund_no", refundOrder.getRefundOrderId()); // 退款订单号
+                reqJSON.put("notify_url", getNotifyUrl(refundOrder.getRefundOrderId())); // 回调地址
 
                 JSONObject amountJson = new JSONObject();
                 amountJson.put("refund", refundOrder.getRefundAmount());// 退款金额

@@ -66,6 +66,7 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         updateRecord.setMchFeeRate(payOrder.getMchFeeRate());
         updateRecord.setMchFeeAmount(payOrder.getMchFeeAmount());
         updateRecord.setChannelUser(payOrder.getChannelUser());
+        updateRecord.setChannelOrderNo(payOrder.getChannelOrderNo());
 
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
                 .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_INIT));
@@ -78,6 +79,17 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         updateRecord.setState(PayOrder.STATE_SUCCESS);
         updateRecord.setChannelOrderNo(channelOrderNo);
         updateRecord.setChannelUser(channelUserId);
+        updateRecord.setSuccessTime(new Date());
+
+        return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
+                .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_ING));
+    }
+
+    /** 更新订单状态  【支付中】 --》 【订单关闭】 **/
+    public boolean updateIng2Close(String payOrderId){
+
+        PayOrder updateRecord = new PayOrder();
+        updateRecord.setState(PayOrder.STATE_CLOSED);
         updateRecord.setSuccessTime(new Date());
 
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()

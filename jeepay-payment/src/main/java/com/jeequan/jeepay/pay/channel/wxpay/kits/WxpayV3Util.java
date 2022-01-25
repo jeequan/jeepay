@@ -83,6 +83,11 @@ public class WxpayV3Util {
         return JSON.parseObject(response);
     }
 
+    public static JSONObject closeOrderV3(String url, JSONObject reqJSON, WxPayConfig wxPayConfig) throws WxPayException {
+        String response = postV3(PAY_BASE_URL + url, reqJSON.toJSONString(), wxPayConfig);
+        return JSON.parseObject(response);
+    }
+
     public static JSONObject refundV3(JSONObject reqJSON, WxPayConfig wxPayConfig) throws WxPayException {
         String url = String.format("%s/v3/refund/domestic/refunds", PAY_BASE_URL);
         String response = postV3(url, reqJSON.toJSONString(), wxPayConfig);

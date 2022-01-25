@@ -261,7 +261,7 @@ public class RefundOrderController extends ApiController {
         refundOrder.setErrMsg(channelRetMsg.getChannelErrMsg());
 
 
-        boolean isSuccess = refundOrderService.updateInit2Ing(refundOrder.getRefundOrderId());
+        boolean isSuccess = refundOrderService.updateInit2Ing(refundOrder.getRefundOrderId(), channelRetMsg.getChannelOrderId());
         if(!isSuccess){
             throw new BizException("更新退款单异常!");
         }

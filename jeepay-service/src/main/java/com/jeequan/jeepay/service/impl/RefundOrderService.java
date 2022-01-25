@@ -59,10 +59,11 @@ public class RefundOrderService extends ServiceImpl<RefundOrderMapper, RefundOrd
 
 
     /** 更新退款单状态  【退款单生成】 --》 【退款中】 **/
-    public boolean updateInit2Ing(String refundOrderId){
+    public boolean updateInit2Ing(String refundOrderId, String channelOrderNo){
 
         RefundOrder updateRecord = new RefundOrder();
         updateRecord.setState(RefundOrder.STATE_ING);
+        updateRecord.setChannelOrderNo(channelOrderNo);
 
         return update(updateRecord, new LambdaUpdateWrapper<RefundOrder>()
                 .eq(RefundOrder::getRefundOrderId, refundOrderId).eq(RefundOrder::getState, RefundOrder.STATE_INIT));
