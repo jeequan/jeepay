@@ -39,7 +39,7 @@ public class PayOrderDivisionMQReceiver implements PayOrderDivisionMQ.IMQReceive
 
         try {
             log.info("接收订单分账通知MQ, msg={}", payload.toString());
-            payOrderDivisionProcessService.processPayOrderDivision(payload.getPayOrderId(), payload.getUseSysAutoDivisionReceivers(), payload.getReceiverList());
+            payOrderDivisionProcessService.processPayOrderDivision(payload.getPayOrderId(), payload.getUseSysAutoDivisionReceivers(), payload.getReceiverList(), payload.getIsResend());
 
         }catch (Exception e) {
             log.error(e.getMessage(), e);

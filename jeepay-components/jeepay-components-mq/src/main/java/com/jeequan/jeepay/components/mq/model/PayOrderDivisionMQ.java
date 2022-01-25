@@ -64,6 +64,9 @@ public class PayOrderDivisionMQ extends AbstractMQ {
          * **/
         private List<CustomerDivisionReceiver> receiverList;
 
+        /** 是否重新发送 ( 如分账失败，重新请求分账接口 ) ， 空表示false **/
+        private Boolean isResend;
+
     }
 
     @Override
@@ -84,7 +87,12 @@ public class PayOrderDivisionMQ extends AbstractMQ {
 
     /**  【！重要配置项！】 构造MQModel , 一般用于发送MQ时 **/
     public static PayOrderDivisionMQ build(String payOrderId, Byte useSysAutoDivisionReceivers, List<CustomerDivisionReceiver> receiverList){
-        return new PayOrderDivisionMQ(new MsgPayload(payOrderId, useSysAutoDivisionReceivers, receiverList));
+        return new PayOrderDivisionMQ(new MsgPayload(payOrderId, useSysAutoDivisionReceivers, receiverList, false));
+    }
+
+    /**  【！重要配置项！】 构造MQModel , 一般用于发送MQ时 **/
+    public static PayOrderDivisionMQ build(String payOrderId, Byte useSysAutoDivisionReceivers, List<CustomerDivisionReceiver> receiverList, Boolean isResend){
+        return new PayOrderDivisionMQ(new MsgPayload(payOrderId, useSysAutoDivisionReceivers, receiverList, isResend));
     }
 
     /** 解析MQ消息， 一般用于接收MQ消息时 **/

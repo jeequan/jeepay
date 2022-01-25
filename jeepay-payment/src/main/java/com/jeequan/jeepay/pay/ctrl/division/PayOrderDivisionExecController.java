@@ -102,7 +102,7 @@ public class PayOrderDivisionExecController extends ApiController {
             }
 
             //处理分账请求
-            ChannelRetMsg channelRetMsg = payOrderDivisionProcessService.processPayOrderDivision(bizRQ.getPayOrderId(), bizRQ.getUseSysAutoDivisionReceivers(), receiverList);
+            ChannelRetMsg channelRetMsg = payOrderDivisionProcessService.processPayOrderDivision(bizRQ.getPayOrderId(), bizRQ.getUseSysAutoDivisionReceivers(), receiverList, false);
 
             PayOrderDivisionExecRS bizRS = new PayOrderDivisionExecRS();
             bizRS.setState(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS ? PayOrderDivisionRecord.STATE_SUCCESS : PayOrderDivisionRecord.STATE_FAIL);

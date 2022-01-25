@@ -18,6 +18,8 @@ package com.jeequan.jeepay.mch.ctrl.division;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.jeequan.jeepay.components.mq.model.PayOrderDivisionMQ;
+import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayOrderDivisionRecord;
@@ -45,6 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PayOrderDivisionRecordController extends CommonCtrl {
 
 	@Autowired private PayOrderDivisionRecordService payOrderDivisionRecordService;
+	@Autowired private IMQSender mqSender;
 
 
 	/** list */
@@ -111,5 +114,33 @@ public class PayOrderDivisionRecordController extends CommonCtrl {
         }
 		return ApiRes.ok(record);
 	}
+
+
+
+	/** 分账接口重试 */
+	@PreAuthorize("hasAuthority( 'ENT_DIVISION_RECORD_RESEND' )")
+	@RequestMapping(value="/resend/{recordId}", method = RequestMethod.POST)
+	public ApiRes resend(@PathVariable("recordId") Long recordId) {
+		PayOrderDivisionRecord record = payOrderDivisionRecordService
+				.getOne(PayOrderDivisionRecord.gw()
+						.eq(PayOrderDivisionRecord::getMchNo, getCurrentMchNo())
+						.eq(PayOrderDivisionRecord::getRecordId, recordId));
+		if (record == null) {
+			throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+		}
+
+		if(record.getState() != PayOrderDivisionRecord.STATE_FAIL){
+			throw new BizException("请选择失败的分账记录");
+		}
+
+		// 更新订单状态 & 记录状态
+		payOrderDivisionRecordService.updateResendState(record.getPayOrderId());
+
+		// 重发到MQ
+		mqSender.send(PayOrderDivisionMQ.build(record.getPayOrderId(), null, null, true));
+
+		return ApiRes.ok(record);
+	}
+
 
 }

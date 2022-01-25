@@ -72,7 +72,13 @@ public class PayOrderDivisionProcessService {
     * @site https://www.jeequan.com
     * @date 2021/8/27 9:44
     */
-    public ChannelRetMsg processPayOrderDivision(String payOrderId, Byte useSysAutoDivisionReceivers, List<PayOrderDivisionMQ.CustomerDivisionReceiver> receiverList) {
+    public ChannelRetMsg processPayOrderDivision(String payOrderId, Byte useSysAutoDivisionReceivers, List<PayOrderDivisionMQ.CustomerDivisionReceiver> receiverList, Boolean isResend) {
+
+        // 是否重发分账接口（ 当分账失败， 列表允许再次发送请求 ）
+        if(isResend == null){
+            isResend = false;
+        }
+
 
         String logPrefix = "订单["+payOrderId+"]执行分账";
 
@@ -104,38 +110,49 @@ public class PayOrderDivisionProcessService {
             throw new BizException("更新支付订单为分账处理中异常");
         }
 
-        // 查询&过滤 所有的分账接收对象
-        List<MchDivisionReceiver> allReceiver = this.queryReceiver(useSysAutoDivisionReceivers, payOrder, receiverList);
 
-        //得到全部分账比例 (所有待分账账号的分账比例总和)
-        BigDecimal allDivisionProfit = BigDecimal.ZERO;
-        for (MchDivisionReceiver receiver : allReceiver) {
-            allDivisionProfit = allDivisionProfit.add(receiver.getDivisionProfit());
+        // 所有的分账列表
+        List<PayOrderDivisionRecord> recordList = null;
+
+        // 重发通知，可直接查库
+        if(isResend){
+            recordList = payOrderDivisionRecordService.list(PayOrderDivisionRecord.gw().eq(PayOrderDivisionRecord::getPayOrderId, payOrderId));
+        }else{
+
+            // 查询&过滤 所有的分账接收对象
+            List<MchDivisionReceiver> allReceiver = this.queryReceiver(useSysAutoDivisionReceivers, payOrder, receiverList);
+
+            //得到全部分账比例 (所有待分账账号的分账比例总和)
+            BigDecimal allDivisionProfit = BigDecimal.ZERO;
+            for (MchDivisionReceiver receiver : allReceiver) {
+                allDivisionProfit = allDivisionProfit.add(receiver.getDivisionProfit());
+            }
+
+            //计算分账金额 = 商家实际入账金额
+            Long payOrderDivisionAmount = payOrderService.calMchIncomeAmount(payOrder);
+
+            //剩余待分账金额 (用作最后一个分账账号的 计算， 避免出现分账金额超出最大) [结果向下取整 ， 避免出现金额溢出的情况。 ]
+            Long subDivisionAmount = AmountUtil.calPercentageFee(payOrderDivisionAmount, allDivisionProfit, BigDecimal.ROUND_FLOOR);
+
+            recordList = new ArrayList<>();
+
+            //计算订单分账金额, 并插入到记录表
+
+            String batchOrderId = SeqKit.genDivisionBatchId();
+
+            for (MchDivisionReceiver receiver : allReceiver) {
+
+                PayOrderDivisionRecord record = genRecord(batchOrderId, payOrder, receiver, payOrderDivisionAmount, subDivisionAmount);
+
+                //剩余金额
+                subDivisionAmount = subDivisionAmount - record.getCalDivisionAmount();
+
+                //入库保存
+                payOrderDivisionRecordService.save(record);
+                recordList.add(record);
+            }
         }
 
-        //计算分账金额 = 商家实际入账金额
-        Long payOrderDivisionAmount = payOrderService.calMchIncomeAmount(payOrder);
-
-        //剩余待分账金额 (用作最后一个分账账号的 计算， 避免出现分账金额超出最大) [结果向下取整 ， 避免出现金额溢出的情况。 ]
-        Long subDivisionAmount = AmountUtil.calPercentageFee(payOrderDivisionAmount, allDivisionProfit, BigDecimal.ROUND_FLOOR);
-
-        List<PayOrderDivisionRecord> recordList = new ArrayList<>();
-
-        //计算订单分账金额, 并插入到记录表
-
-        String batchOrderId = SeqKit.genDivisionBatchId();
-
-        for (MchDivisionReceiver receiver : allReceiver) {
-
-            PayOrderDivisionRecord record = genRecord(batchOrderId, payOrder, receiver, payOrderDivisionAmount, subDivisionAmount);
-
-            //剩余金额
-            subDivisionAmount = subDivisionAmount - record.getCalDivisionAmount();
-
-            //入库保存
-            payOrderDivisionRecordService.save(record);
-            recordList.add(record);
-        }
 
         ChannelRetMsg channelRetMsg = null;
 
