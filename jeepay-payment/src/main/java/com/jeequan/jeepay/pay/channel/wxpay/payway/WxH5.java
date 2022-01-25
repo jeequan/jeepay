@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.pay.channel.wxpay.payway;
 
+import cn.hutool.core.codec.Base64;
 import com.github.binarywang.wxpay.bean.order.WxPayMwebOrderResult;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
@@ -33,6 +34,8 @@ import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.springframework.stereotype.Service;
+
+import java.nio.charset.StandardCharsets;
 
 /*
  * 微信 H5 支付
@@ -72,14 +75,13 @@ public class WxH5 extends WxpayPaymentService {
             WxPayMwebOrderResult wxPayMwebOrderResult = wxPayService.createOrder(req);
 
             String payUrl = wxPayMwebOrderResult.getMwebUrl();
+            payUrl = sysConfigService.getDBApplicationConfig().getPaySiteUrl() + "/api/common/payUrl/" + Base64.encode(payUrl);
+
             if(CS.PAY_DATA_TYPE.FORM.equals(bizRQ.getPayDataType())){ //表单方式
                 res.setFormContent(payUrl);
-
             }else if (CS.PAY_DATA_TYPE.CODE_IMG_URL.equals(bizRQ.getPayDataType())){ //二维码图片地址
-
                 res.setCodeImgUrl(sysConfigService.getDBApplicationConfig().genScanImgUrl(payUrl));
             }else{ // 默认都为 payUrl方式
-
                 res.setPayUrl(payUrl);
             }
 

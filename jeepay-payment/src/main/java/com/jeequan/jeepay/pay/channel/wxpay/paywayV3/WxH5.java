@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.pay.channel.wxpay.paywayV3;
 
+import cn.hutool.core.codec.Base64;
 import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
@@ -88,11 +89,10 @@ public class WxH5 extends WxpayPaymentService {
             JSONObject resJSON = WxpayV3Util.unifiedOrderV3(reqUrl, reqJSON, wxPayService.getConfig());
 
             String payUrl = resJSON.getString("h5_url");
+            payUrl = sysConfigService.getDBApplicationConfig().getPaySiteUrl() + "/api/common/payUrl/" + Base64.encode(payUrl);
             if (CS.PAY_DATA_TYPE.CODE_IMG_URL.equals(bizRQ.getPayDataType())){ //二维码图片地址
-
                 res.setCodeImgUrl(sysConfigService.getDBApplicationConfig().genScanImgUrl(payUrl));
             }else{ // 默认都为 payUrl方式
-
                 res.setPayUrl(payUrl);
             }
 
