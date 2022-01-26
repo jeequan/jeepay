@@ -84,11 +84,11 @@ public class WxpayPayOrderCloseService implements IPayOrderCloseService {
                 JSONObject reqJson = new JSONObject();
                 if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
                     WxpayIsvsubMchParams isvsubMchParams = (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
-                    reqUrl = String.format("/v3/pay/partner/transactions/out-trade-no/%s/close", payOrder.getMchOrderNo());
+                    reqUrl = String.format("/v3/pay/partner/transactions/out-trade-no/%s/close", payOrder.getPayOrderId());
                     reqJson.put("sp_mchid", wxServiceWrapper.getWxPayService().getConfig().getMchId());
                     reqJson.put("sub_mchid", isvsubMchParams.getSubMchId());
                 }else {
-                    reqUrl = String.format("/v3/pay/transactions/out-trade-no/%s/close", payOrder.getMchOrderNo());
+                    reqUrl = String.format("/v3/pay/transactions/out-trade-no/%s/close", payOrder.getPayOrderId());
                     reqJson.put("mchid", wxServiceWrapper.getWxPayService().getConfig().getMchId());
                 }
 
