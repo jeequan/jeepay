@@ -210,8 +210,6 @@ insert into t_sys_entitlement values('ENT_DIVISION_RECORD', '分账记录', 'uno
 insert into t_sys_entitlement values('ENT_DIVISION_RECORD_LIST', '页面：数据列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECORD', '0', 'MCH', now(), now());
 insert into t_sys_entitlement values('ENT_DIVISION_RECORD_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECORD', '0', 'MCH', now(), now());
 
-
-
 ## -- ++++ ++++
 
 ## -- ++++ [v1.7.0] ===> [v1.8.0] ++++
@@ -228,7 +226,7 @@ alter table t_refund_order modify err_msg varchar(2048) null comment '渠道错�
 -- 增加角色权限字段长度
 alter table `t_sys_role_ent_rela` MODIFY `ent_id` VARCHAR(64) NOT NULL COMMENT '权限ID' after `role_id`;
 
-## -- ++++ [v1.10.0] ===> [v1.11.0] 待发布 ++++
+## -- ++++ [v1.10.0] ===> [v1.11.0] ++++
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('ALI_LITE', '支付宝小程序');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('PP_PC', 'PayPal支付');
 INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
@@ -239,6 +237,6 @@ VALUES ('pppay', 'PayPal支付', 1, 0, 1,
         '[{"wayCode": "PP_PC"}]',
         'http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/paypal.png', '#005ea6', 1, 'PayPal官方通道');
 
-
-## 分账重试
+## -- ++++ [v1.11.0] ===> [v1.12.0] ++++
+-- 分账重试
 insert into t_sys_entitlement values('ENT_DIVISION_RECORD_RESEND', '按钮：重试', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECORD', '0', 'MCH', now(), now());
