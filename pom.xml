@@ -52,6 +52,8 @@
     <rocketmq.spring.boot.starter.version>2.2.0</rocketmq.spring.boot.starter.version>
     <aliyun-openservices-ons-client.version>1.8.8.1.Final</aliyun-openservices-ons-client.version>
 
+    <mysql.version>8.0.28</mysql.version> <!-- 覆写 spring-boot-dependencies 的依赖版本号 -->
+
   </properties>
 
 
