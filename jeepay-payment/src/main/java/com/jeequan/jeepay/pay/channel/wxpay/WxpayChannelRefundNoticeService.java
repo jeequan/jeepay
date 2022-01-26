@@ -33,7 +33,6 @@ import com.jeequan.jeepay.core.exception.ResponseException;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
 import com.jeequan.jeepay.pay.channel.AbstractChannelRefundNoticeService;
-import com.jeequan.jeepay.pay.model.IsvConfigContext;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
@@ -84,15 +83,17 @@ public class WxpayChannelRefundNoticeService extends AbstractChannelRefundNotice
             if(mchAppConfigContext == null){
                 throw new BizException("获取商户信息失败");
             }
-            String apiVersion = "";
+            String apiVersion = ""; // 接口类型
+            String wxKey = "";  // 微信私钥
             Byte mchType = mchAppConfigContext.getMchType();
             if (CS.MCH_TYPE_NORMAL == mchType) {
-                WxpayNormalMchParams normalMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), WxpayNormalMchParams.class);
+                WxpayNormalMchParams normalMchParams = (WxpayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
                 apiVersion = normalMchParams.getApiVersion();
+                wxKey = CS.PAY_IF_VERSION.WX_V2.equals(apiVersion)?normalMchParams.getKey():normalMchParams.getApiV3Key();
             }else if (CS.MCH_TYPE_ISVSUB == mchType) {
-                IsvConfigContext configContext = mchAppConfigContext.getIsvConfigContext();
-                WxpayIsvParams wxpayIsvParams = configContext.getIsvParamsByIfCode(getIfCode(), WxpayIsvParams.class);
+                WxpayIsvParams wxpayIsvParams = (WxpayIsvParams) configContextQueryService.queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), getIfCode());
                 apiVersion = wxpayIsvParams.getApiVersion();
+                wxKey = CS.PAY_IF_VERSION.WX_V2.equals(apiVersion)?wxpayIsvParams.getKey():wxpayIsvParams.getApiV3Key();
             }else {
                 throw new BizException("商户类型错误");
             }
@@ -107,8 +108,7 @@ public class WxpayChannelRefundNoticeService extends AbstractChannelRefundNotice
                 if(StringUtils.isEmpty(xmlResult)) {
                     return null;
                 }
-                WxpayNormalMchParams normalMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(getIfCode(), WxpayNormalMchParams.class);
-                WxPayRefundNotifyResult result = WxPayRefundNotifyResult.fromXML(xmlResult, normalMchParams.getKey());
+                WxPayRefundNotifyResult result = WxPayRefundNotifyResult.fromXML(xmlResult, wxKey);
                 return MutablePair.of(urlOrderId, result.getReqInfo());
             }
             return null;
