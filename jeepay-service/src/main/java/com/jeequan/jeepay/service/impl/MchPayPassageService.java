@@ -20,8 +20,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchPayPassage;
+import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.service.mapper.MchPayPassageMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -41,6 +43,8 @@ import java.util.Map;
  */
 @Service
 public class MchPayPassageService extends ServiceImpl<MchPayPassageMapper, MchPayPassage> {
+
+    @Autowired private PayInterfaceDefineService payInterfaceDefineService;
 
     /**
      * @Author: ZhuXiao
@@ -108,7 +112,21 @@ public class MchPayPassageService extends ServiceImpl<MchPayPassageMapper, MchPa
                                     .eq(MchPayPassage::getWayCode, wayCode)
         );
 
-        return list.isEmpty() ? null : list.get(0);
+        if (list.isEmpty()) {
+            return null;
+        }else { // 校验当前通道是否可用
+            for (MchPayPassage mchPayPassage:list) {
+                // 接口状态判断
+                PayInterfaceDefine interfaceDefine = payInterfaceDefineService
+                        .getOne(PayInterfaceDefine.gw()
+                                .select(PayInterfaceDefine::getState)
+                                .eq(PayInterfaceDefine::getIfCode, mchPayPassage.getIfCode()));
+                if (interfaceDefine.getState() == CS.YES) {
+                    return mchPayPassage;
+                }
+            }
+        }
+        return null;
     }
 
 
