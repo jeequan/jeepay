@@ -90,14 +90,10 @@ public class PayOrderDivisionProcessService {
             throw new BizException("订单不存在");
         }
 
-        // 订单不是成功状态 || 分账状态不正确
-        if(payOrder.getState() != PayOrder.STATE_SUCCESS ||
-                (
-                    payOrder.getDivisionState() != PayOrder.DIVISION_STATE_WAIT_TASK
-                 && payOrder.getDivisionState() != PayOrder.DIVISION_STATE_UNHAPPEN
-                )){
-            log.error("{}, 订单状态或分账状态不正确", logPrefix);
-            throw new BizException("订单状态或分账状态不正确");
+        // 分账状态不正确
+        if(payOrder.getDivisionState() != PayOrder.DIVISION_STATE_WAIT_TASK && payOrder.getDivisionState() != PayOrder.DIVISION_STATE_UNHAPPEN){
+            log.error("{}, 分账状态不正确", logPrefix);
+            throw new BizException("分账状态不正确");
         }
 
         //更新订单为： 分账任务处理中
