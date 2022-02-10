@@ -114,16 +114,22 @@ public class MchPayPassageService extends ServiceImpl<MchPayPassageMapper, MchPa
 
         if (list.isEmpty()) {
             return null;
-        }else { // 校验当前通道是否可用
+        }else { // 返回一个可用通道
+
+            HashMap<String, MchPayPassage> mchPayPassageMap = new HashMap<>();
+
             for (MchPayPassage mchPayPassage:list) {
-                // 接口状态判断
-                PayInterfaceDefine interfaceDefine = payInterfaceDefineService
-                        .getOne(PayInterfaceDefine.gw()
-                                .select(PayInterfaceDefine::getState)
-                                .eq(PayInterfaceDefine::getIfCode, mchPayPassage.getIfCode()));
-                if (interfaceDefine.getState() == CS.YES) {
-                    return mchPayPassage;
-                }
+                mchPayPassageMap.put(mchPayPassage.getIfCode(), mchPayPassage);
+            }
+            // 查询ifCode所有接口
+            PayInterfaceDefine interfaceDefine = payInterfaceDefineService
+                    .getOne(PayInterfaceDefine.gw()
+                            .select(PayInterfaceDefine::getIfCode, PayInterfaceDefine::getState)
+                            .eq(PayInterfaceDefine::getState, CS.YES)
+                            .in(PayInterfaceDefine::getIfCode, mchPayPassageMap.keySet()), false);
+
+            if (interfaceDefine != null) {
+                return mchPayPassageMap.get(interfaceDefine.getIfCode());
             }
         }
         return null;
