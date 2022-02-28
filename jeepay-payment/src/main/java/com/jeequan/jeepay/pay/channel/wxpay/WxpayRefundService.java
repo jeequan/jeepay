@@ -84,8 +84,8 @@ public class WxpayRefundService extends AbstractRefundService {
                 setCretPath(mchAppConfigContext, wxPayService); // 证书路径
 
                 WxPayRefundResult result = wxPayService.refundV2(req);
-                if("SUCCESS".equals(result.getResultCode())){ //支付成功
-                    channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+                if("SUCCESS".equals(result.getResultCode())){ // 退款发起成功,结果主动查询
+                    channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
                     channelRetMsg.setChannelOrderId(result.getRefundId());
                 }else{
                     channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
