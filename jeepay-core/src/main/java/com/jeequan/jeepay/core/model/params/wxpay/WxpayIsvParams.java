@@ -62,6 +62,9 @@ public class WxpayIsvParams extends IsvParams {
     /** API证书(.p12格式)**/
     private String cert;
 
+    /** 证书文件(.pem格式) **/
+    private String apiClientCert;
+
     /** 私钥文件(.pem格式) **/
     private String apiClientKey;
 

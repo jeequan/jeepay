@@ -53,7 +53,7 @@ public class WxServiceWrapper {
 
 
     public static WxServiceWrapper buildWxServiceWrapper(String mchId, String appId, String appSecret, String mchKey, String apiVersion, String apiV3Key,
-                                                   String serialNo, String cert, String apiClientKey){
+                                                   String serialNo, String cert, String apiClientCert, String apiClientKey){
 
         WxPayConfig wxPayConfig = new WxPayConfig();
         wxPayConfig.setMchId(mchId);
@@ -62,21 +62,23 @@ public class WxServiceWrapper {
 
         if (CS.PAY_IF_VERSION.WX_V2.equals(apiVersion)) { // 微信API  V2
             wxPayConfig.setSignType(WxPayConstants.SignType.MD5);
+        }
 
-            ChannelCertConfigKitBean channelCertConfigKitBean = SpringBeansUtil.getBean(ChannelCertConfigKitBean.class);
+        ChannelCertConfigKitBean channelCertConfigKitBean = SpringBeansUtil.getBean(ChannelCertConfigKitBean.class);
 
-            // api证书。
-            if(StringUtils.isNotBlank(cert)){
-                wxPayConfig.setKeyPath(channelCertConfigKitBean.getCertFilePath(cert));
-            }
-        } else if (CS.PAY_IF_VERSION.WX_V3.equals(apiVersion)) { // 微信API  V3
-
-            ChannelCertConfigKitBean channelCertConfigKitBean = SpringBeansUtil.getBean(ChannelCertConfigKitBean.class);
-
+        if(StringUtils.isNotBlank(apiV3Key)) {
             wxPayConfig.setApiV3Key(apiV3Key);
+        }
+        if(StringUtils.isNotBlank(serialNo)) {
             wxPayConfig.setCertSerialNo(serialNo);
+        }
+        if(StringUtils.isNotBlank(cert)){
             wxPayConfig.setKeyPath(channelCertConfigKitBean.getCertFilePath(cert));
-            wxPayConfig.setPrivateCertPath(channelCertConfigKitBean.getCertFilePath(cert));
+        }
+        if(StringUtils.isNotBlank(apiClientCert)){
+            wxPayConfig.setPrivateCertPath(channelCertConfigKitBean.getCertFilePath(apiClientCert));
+        }
+        if(StringUtils.isNotBlank(apiClientKey)) {
             wxPayConfig.setPrivateKeyPath(channelCertConfigKitBean.getCertFilePath(apiClientKey));
         }
 
@@ -98,14 +100,14 @@ public class WxServiceWrapper {
         //放置 wxJavaService
         return buildWxServiceWrapper(wxpayParams.getMchId(), wxpayParams.getAppId(),
                 wxpayParams.getAppSecret(), wxpayParams.getKey(), wxpayParams.getApiVersion(), wxpayParams.getApiV3Key(),
-                wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientKey());
+                wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientCert(), wxpayParams.getApiClientKey());
     }
 
     public static WxServiceWrapper buildWxServiceWrapper(WxpayNormalMchParams wxpayParams){
         //放置 wxJavaService
         return buildWxServiceWrapper(wxpayParams.getMchId(), wxpayParams.getAppId(),
                 wxpayParams.getAppSecret(), wxpayParams.getKey(), wxpayParams.getApiVersion(), wxpayParams.getApiV3Key(),
-                wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientKey());
+                wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientCert(), wxpayParams.getApiClientKey());
     }
 
 
