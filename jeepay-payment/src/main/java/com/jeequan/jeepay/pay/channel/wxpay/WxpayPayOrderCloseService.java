@@ -92,7 +92,7 @@ public class WxpayPayOrderCloseService implements IPayOrderCloseService {
                     reqJson.put("mchid", wxServiceWrapper.getWxPayService().getConfig().getMchId());
                 }
 
-                WxpayV3Util.closeOrderV3(reqUrl, reqJson, wxServiceWrapper.getWxPayService().getConfig());
+                WxpayV3Util.closeOrderV3(reqUrl, reqJson, wxServiceWrapper.getWxPayService());
                 return ChannelRetMsg.confirmSuccess(null);
             }
             return ChannelRetMsg.confirmFail();

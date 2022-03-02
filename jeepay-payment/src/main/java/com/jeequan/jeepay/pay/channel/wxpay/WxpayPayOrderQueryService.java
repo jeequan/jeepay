@@ -94,7 +94,7 @@ public class WxpayPayOrderQueryService implements IPayOrderQueryService {
                     reqUrl = String.format("/v3/pay/transactions/out-trade-no/%s", payOrder.getPayOrderId());
                     query = String.format("?mchid=%s", wxServiceWrapper.getWxPayService().getConfig().getMchId());
                 }
-                JSONObject resultJSON = WxpayV3Util.queryOrderV3(reqUrl + query, wxServiceWrapper.getWxPayService().getConfig());
+                JSONObject resultJSON = WxpayV3Util.queryOrderV3(reqUrl + query, wxServiceWrapper.getWxPayService());
 
                 String channelState = resultJSON.getString("trade_state");
                 if ("SUCCESS".equals(channelState)) {

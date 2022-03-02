@@ -21,30 +21,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
-import com.github.binarywang.wxpay.v3.WxPayV3HttpClientBuilder;
-import com.github.binarywang.wxpay.v3.auth.AutoUpdateCertificatesVerifier;
-import com.github.binarywang.wxpay.v3.auth.PrivateKeySigner;
-import com.github.binarywang.wxpay.v3.auth.WxPayCredentials;
-import com.github.binarywang.wxpay.v3.auth.WxPayValidator;
+import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.v3.util.PemUtils;
 import com.github.binarywang.wxpay.v3.util.SignUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,154 +56,39 @@ public class WxpayV3Util {
         ISV_URL_MAP.put(WxPayConstants.TradeType.MWEB, "/v3/pay/partner/transactions/h5");
     }
 
-    public static JSONObject unifiedOrderV3(String reqUrl, JSONObject reqJSON, WxPayConfig wxPayConfig) throws WxPayException {
-        String response = postV3(PAY_BASE_URL + reqUrl, reqJSON.toJSONString(), wxPayConfig);
-        return JSONObject.parseObject(getPayInfo(response, wxPayConfig));
+    public static JSONObject unifiedOrderV3(String reqUrl, JSONObject reqJSON, WxPayService wxPayService) throws WxPayException {
+        String response = wxPayService.postV3(PAY_BASE_URL + reqUrl, reqJSON.toJSONString());
+        return JSONObject.parseObject(getPayInfo(response, wxPayService.getConfig()));
     }
 
-    public static JSONObject queryOrderV3(String url, WxPayConfig wxPayConfig) throws WxPayException {
-        String response = getV3(PAY_BASE_URL + url, wxPayConfig);
+    public static JSONObject queryOrderV3(String url, WxPayService wxPayService) throws WxPayException {
+        String response = wxPayService.getV3(PAY_BASE_URL + url);
         return JSON.parseObject(response);
     }
 
-    public static JSONObject closeOrderV3(String url, JSONObject reqJSON, WxPayConfig wxPayConfig) throws WxPayException {
-        String response = postV3(PAY_BASE_URL + url, reqJSON.toJSONString(), wxPayConfig);
+    public static JSONObject closeOrderV3(String url, JSONObject reqJSON, WxPayService wxPayService) throws WxPayException {
+        String response = wxPayService.postV3(PAY_BASE_URL + url, reqJSON.toJSONString());
         return JSON.parseObject(response);
     }
 
-    public static JSONObject refundV3(JSONObject reqJSON, WxPayConfig wxPayConfig) throws WxPayException {
+    public static JSONObject refundV3(JSONObject reqJSON, WxPayService wxPayService) throws WxPayException {
         String url = String.format("%s/v3/refund/domestic/refunds", PAY_BASE_URL);
-        String response = postV3(url, reqJSON.toJSONString(), wxPayConfig);
+        String response = wxPayService.postV3(url, reqJSON.toJSONString());
         return JSON.parseObject(response);
     }
 
-    public static JSONObject refundQueryV3(String refundOrderId, WxPayConfig wxPayConfig) throws WxPayException {
+    public static JSONObject refundQueryV3(String refundOrderId, WxPayService wxPayService) throws WxPayException {
         String url = String.format("%s/v3/refund/domestic/refunds/%s", PAY_BASE_URL, refundOrderId);
-        String response = getV3(url, wxPayConfig);
+        String response = wxPayService.getV3(url);
         return JSON.parseObject(response);
     }
 
-    public static JSONObject refundQueryV3Isv(String refundOrderId, WxPayConfig wxPayConfig) throws WxPayException {
-        String url = String.format("%s/v3/refund/domestic/refunds/%s?sub_mchid=%s", PAY_BASE_URL, refundOrderId, wxPayConfig.getSubMchId());
-        String response = getV3(url, wxPayConfig);
+    public static JSONObject refundQueryV3Isv(String refundOrderId, WxPayService wxPayService) throws WxPayException {
+        String url = String.format("%s/v3/refund/domestic/refunds/%s?sub_mchid=%s", PAY_BASE_URL, refundOrderId, wxPayService.getConfig().getSubMchId());
+        String response = wxPayService.getV3(url);
         return JSON.parseObject(response);
     }
 
-    public static String postV3(String url, String requestStr, WxPayConfig wxPayConfig) throws WxPayException {
-        CloseableHttpClient httpClient = createApiV3HttpClient(wxPayConfig);
-        HttpPost httpPost = createHttpPost(url, requestStr);
-        httpPost.addHeader("Accept", "application/json");
-        httpPost.addHeader("Content-Type", "application/json");
-        try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-            //v3已经改为通过状态码判断200 204 成功
-            int statusCode = response.getStatusLine().getStatusCode();
-            //post方法有可能会没有返回值的情况
-            String responseString;
-            if (response.getEntity() == null) {
-                responseString = null;
-            } else {
-                responseString = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-            }
-            log.info("\n【请求地址】：{}\n【请求数据】：{}\n【响应数据】：{}", url, requestStr, responseString);
-
-            if (HttpStatus.SC_OK == statusCode || HttpStatus.SC_NO_CONTENT == statusCode) {
-                return responseString;
-            } else {
-                //有错误提示信息返回
-                JSONObject jsonObject = JSON.parseObject(responseString);
-                WxPayException wxPayException = new WxPayException(jsonObject.getString("message"));
-                wxPayException.setErrCode(jsonObject.getString("code"));
-                wxPayException.setErrCodeDes(jsonObject.getString("message"));
-                throw wxPayException;
-            }
-        } catch (Exception e) {
-            log.error("\n【异常信息】：{}", e.getMessage());
-            throw (e instanceof WxPayException) ? (WxPayException) e : new WxPayException(e.getMessage(), e);
-        } finally {
-            httpPost.releaseConnection();
-        }
-
-    }
-
-    public static String getV3(String url, WxPayConfig wxPayConfig) throws WxPayException {
-        HttpGet httpGet = new HttpGet(url);
-        httpGet.addHeader("Accept", "application/json");
-        httpGet.addHeader("Content-Type", "application/json");
-
-        httpGet.setConfig(RequestConfig.custom()
-                .setConnectionRequestTimeout(5000)
-                .setConnectTimeout(5000)
-                .setSocketTimeout(10000)
-                .build());
-
-        CloseableHttpClient httpClient = createApiV3HttpClient(wxPayConfig);
-        try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-            //v3已经改为通过状态码判断200 204 成功
-            int statusCode = response.getStatusLine().getStatusCode();
-            //post方法有可能会没有返回值的情况
-            String responseString;
-            if (response.getEntity() == null) {
-                responseString = null;
-            } else {
-                responseString = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-            }
-            if (HttpStatus.SC_OK == statusCode || HttpStatus.SC_NO_CONTENT == statusCode) {
-                log.info("\n【请求地址】：{}\n【响应数据】：{}", url, responseString);
-                return responseString;
-            } else {
-                //有错误提示信息返回
-                JSONObject jsonObject = JSON.parseObject(responseString);
-                WxPayException wxPayException = new WxPayException(jsonObject.getString("message"));
-                wxPayException.setErrCode(jsonObject.getString("code"));
-                wxPayException.setErrCodeDes(jsonObject.getString("message"));
-                throw wxPayException;
-            }
-        } catch (Exception e) {
-            log.error("\n【异常信息】：{}，e={}", url, e.getMessage());
-            throw (e instanceof WxPayException) ? (WxPayException) e : new WxPayException(e.getMessage(), e);
-        } finally {
-            httpGet.releaseConnection();
-        }
-    }
-
-    private static CloseableHttpClient createApiV3HttpClient(WxPayConfig wxPayConfig) throws WxPayException {
-
-        try {
-            // 自动获取微信平台证书
-            PrivateKey privateKey = PemUtils.loadPrivateKey(new FileInputStream(wxPayConfig.getPrivateKeyPath()));
-            AutoUpdateCertificatesVerifier verifier = new AutoUpdateCertificatesVerifier(
-                    new WxPayCredentials(wxPayConfig.getMchId(), new PrivateKeySigner(wxPayConfig.getCertSerialNo(), privateKey)),
-                    wxPayConfig.getApiV3Key().getBytes("utf-8"));
-
-            WxPayV3HttpClientBuilder builder = WxPayV3HttpClientBuilder.create()
-                    .withMerchant(wxPayConfig.getMchId(), wxPayConfig.getCertSerialNo(), privateKey)
-                    .withValidator(new WxPayValidator(verifier));
-
-            CloseableHttpClient apiV3HttpClient = builder.build();
-            return apiV3HttpClient;
-        } catch (FileNotFoundException | UnsupportedEncodingException e) {
-            log.error("", e);
-        }
-
-        CloseableHttpClient apiV3HttpClient = wxPayConfig.getApiV3HttpClient();
-        if (null == apiV3HttpClient) {
-            return wxPayConfig.initApiV3HttpClient();
-        }
-        return null;
-    }
-
-    private static HttpPost createHttpPost(String url, String requestStr) {
-        HttpPost httpPost = new HttpPost(url);
-        httpPost.setEntity(new StringEntity(requestStr, ContentType.create("application/json", "utf-8")));
-
-        httpPost.setConfig(RequestConfig.custom()
-                .setConnectionRequestTimeout(5000)
-                .setConnectTimeout(5000)
-                .setSocketTimeout(10000)
-                .build());
-
-        return httpPost;
-    }
 
     public static String getPayInfo(String response, WxPayConfig wxPayConfig)  throws WxPayException {
 
