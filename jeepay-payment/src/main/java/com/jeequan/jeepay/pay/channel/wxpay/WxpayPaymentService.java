@@ -15,6 +15,8 @@
  */
 package com.jeequan.jeepay.pay.channel.wxpay;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.service.WxPayService;
@@ -93,6 +95,7 @@ public class WxpayPaymentService extends AbstractPaymentService {
         request.setSpbillCreateIp(payOrder.getClientIp());
         request.setNotifyUrl(getNotifyUrl());
         request.setProductId(System.currentTimeMillis()+"");
+        request.setTimeExpire(DateUtil.format(payOrder.getExpiredTime(), DatePattern.NORM_DATE_FORMAT));
 
         //订单分账， 将冻结商户资金。
         if(isDivisionOrder(payOrder)){
@@ -123,6 +126,9 @@ public class WxpayPaymentService extends AbstractPaymentService {
         JSONObject reqJSON = new JSONObject();
         reqJSON.put("out_trade_no", payOrderId);
         reqJSON.put("description", payOrder.getSubject());
+        // 订单失效时间，遵循rfc3339标准格式，格式为yyyy-MM-DDTHH:mm:ss+TIMEZONE,示例值：2018-06-08T10:34:56+08:00
+        reqJSON.put("time_expire", String.format("%sT%s+08:00", DateUtil.format(payOrder.getExpiredTime(), DatePattern.NORM_DATE_FORMAT), DateUtil.format(payOrder.getExpiredTime(), DatePattern.NORM_TIME_FORMAT)));
+
         reqJSON.put("notify_url", getNotifyUrl(payOrderId));
 
         JSONObject amount = new JSONObject();

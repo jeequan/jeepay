@@ -15,6 +15,8 @@
  */
 package com.jeequan.jeepay.pay.channel.alipay.payway;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.domain.AlipayTradePagePayModel;
 import com.alipay.api.request.AlipayTradePagePayRequest;
@@ -59,6 +61,7 @@ public class AliPc extends AlipayPaymentService {
         model.setSubject(payOrder.getSubject()); //订单标题
         model.setBody(payOrder.getBody()); //订单描述信息
         model.setTotalAmount(AmountUtil.convertCent2Dollar(payOrder.getAmount().toString()));  //支付金额
+        model.setTimeoutExpress(DateUtil.format(payOrder.getExpiredTime(), DatePattern.NORM_DATETIME_FORMAT));  // 订单超时时间
         model.setProductCode("FAST_INSTANT_TRADE_PAY");
         model.setQrPayMode("2"); //订单码-跳转模式
         req.setNotifyUrl(getNotifyUrl()); // 设置异步通知地址
