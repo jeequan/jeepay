@@ -22,8 +22,6 @@ import com.jeequan.jeepay.pay.util.ChannelCertConfigKitBean;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.jws.Oneway;
-
 /*
 * 支付接口抽象类
 *
