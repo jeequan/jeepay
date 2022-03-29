@@ -67,7 +67,7 @@ public class AliJsapi extends AlipayPaymentService {
         model.setSubject(payOrder.getSubject()); //订单标题
         model.setBody(payOrder.getBody()); //订单描述信息
         model.setTotalAmount(AmountUtil.convertCent2Dollar(payOrder.getAmount().toString()));  //支付金额
-        model.setTimeoutExpress(DateUtil.format(payOrder.getExpiredTime(), DatePattern.NORM_DATETIME_FORMAT));  // 订单超时时间
+        model.setTimeExpire(DateUtil.format(payOrder.getExpiredTime(), DatePattern.NORM_DATETIME_FORMAT));  // 订单超时时间
         model.setBuyerId(bizRQ.getBuyerUserId());
         req.setNotifyUrl(getNotifyUrl()); // 设置异步通知地址
         req.setBizModel(model);
