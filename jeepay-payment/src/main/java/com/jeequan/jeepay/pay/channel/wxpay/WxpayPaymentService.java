@@ -95,7 +95,7 @@ public class WxpayPaymentService extends AbstractPaymentService {
         request.setSpbillCreateIp(payOrder.getClientIp());
         request.setNotifyUrl(getNotifyUrl());
         request.setProductId(System.currentTimeMillis()+"");
-        request.setTimeExpire(DateUtil.format(payOrder.getExpiredTime(), DatePattern.NORM_DATE_FORMAT));
+        request.setTimeExpire(DateUtil.format(payOrder.getExpiredTime(), DatePattern.PURE_DATETIME_PATTERN));
 
         //订单分账， 将冻结商户资金。
         if(isDivisionOrder(payOrder)){
