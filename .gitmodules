@@ -1,0 +1,3 @@
+[submodule "jeepay-ui"]
+	path = jeepay-ui
+	url = https://gitee.com/jeequan/jeepay-ui.git
