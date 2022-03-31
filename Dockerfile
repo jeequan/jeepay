@@ -11,6 +11,9 @@ WORKDIR /workspace
 
 COPY . /workspace
 
+RUN mkdir -p /root/.m2
+COPY ./docs/settings.xml /root/.m2/settings.xml
+
 RUN mvn clean package -Dmaven.test.skip=true -Ptest
 
 
