@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /*
 * 基于spring的 req 工具类
@@ -83,11 +84,7 @@ public class RequestKitBean {
 
             String body = "";
             try {
-                String str;
-                while((str = request.getReader().readLine()) != null){
-                    body += str;
-                }
-
+                body=request.getReader().lines().collect(Collectors.joining(""));
                 if(StringUtils.isEmpty(body)) {
                     return returnObject;
                 }
