@@ -129,6 +129,11 @@
                 <artifactId>maven-resources-plugin</artifactId>
             </plugin>
 
+            <plugin>
+                <groupId>org.eclipse.jkube</groupId>
+                <artifactId>kubernetes-maven-plugin</artifactId>
+            </plugin>
+
         </plugins>
     </build>
 
