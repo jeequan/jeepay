@@ -129,6 +129,18 @@
                 <artifactId>maven-resources-plugin</artifactId>
             </plugin>
 
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <configuration>
+                    <container>
+                        <entrypoint>
+                            sh,-c,java $JVM_OPTS -cp $( cat /app/jib-classpath-file ) $( cat /app/jib-main-class-file ) $JAVA_ARGS
+                        </entrypoint>
+                    </container>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 

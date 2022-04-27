@@ -202,7 +202,11 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!--引入插件-->
+                <plugin>
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>3.2.1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
