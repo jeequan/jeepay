@@ -58,9 +58,10 @@ public class CloseOrderController extends ApiController {
         //获取参数 & 验签
         ClosePayOrderRQ rq = getRQByWithMchSign(ClosePayOrderRQ.class);
 
-        if(StringUtils.isEmpty(rq.getPayOrderId())){
-            throw new BizException("payOrderId不能为空");
+        if(StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())){
+            throw new BizException("mchOrderNo 和 payOrderId不能同时为空");
         }
+
 
         PayOrder payOrder = payOrderService.queryMchOrder(rq.getMchNo(), rq.getPayOrderId(), rq.getMchOrderNo());
         if(payOrder == null){
