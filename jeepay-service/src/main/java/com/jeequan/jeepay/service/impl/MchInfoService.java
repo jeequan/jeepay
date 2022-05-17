@@ -17,8 +17,7 @@ package com.jeequan.jeepay.service.impl;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
@@ -31,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -137,10 +135,12 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
             // 3.删除当前商户支付接口配置参数
             List<String> appIdList = new LinkedList<>();
             mchAppService.list(MchApp.gw().eq(MchApp::getMchNo, mchNo)).forEach(item -> appIdList.add(item.getAppId()));
-            payInterfaceConfigService.remove(PayInterfaceConfig.gw()
-                    .in(PayInterfaceConfig::getInfoId, appIdList)
-                    .eq(PayInterfaceConfig::getInfoType, CS.INFO_TYPE_MCH_APP)
-            );
+            if (CollectionUtils.isNotEmpty(appIdList)) {
+                payInterfaceConfigService.remove(PayInterfaceConfig.gw()
+                        .in(PayInterfaceConfig::getInfoId, appIdList)
+                        .eq(PayInterfaceConfig::getInfoType, CS.INFO_TYPE_MCH_APP)
+                );
+            }
 
             List<SysUser> userList = sysUserService.list(SysUser.gw()
                     .eq(SysUser::getBelongInfoId, mchNo)
@@ -148,11 +148,13 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
             );
 
             // 4.删除当前商户应用信息
-            mchAppService.removeByIds(appIdList);
+            if (CollectionUtils.isNotEmpty(appIdList)) {
+                mchAppService.removeByIds(appIdList);
+            }
 
             // 返回的用户id
             List<Long> userIdList = new ArrayList<>();
-            if (userList.size() > 0) {
+            if (CollectionUtils.isNotEmpty(userList)) {
                 for (SysUser user:userList) {
                     userIdList.add(user.getSysUserId());
                 }
