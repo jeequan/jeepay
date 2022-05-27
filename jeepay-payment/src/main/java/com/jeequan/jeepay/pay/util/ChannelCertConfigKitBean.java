@@ -49,6 +49,11 @@ public class ChannelCertConfigKitBean {
             return certFile;
         }
 
+        // 当文件夹不存在时， 需要创建。
+        if(!certFile.getParentFile().exists()){
+            certFile.getParentFile().mkdirs();
+        }
+
         // 请求下载并返回 新File
         return downloadFile(certFilePath, certFile);
     }
