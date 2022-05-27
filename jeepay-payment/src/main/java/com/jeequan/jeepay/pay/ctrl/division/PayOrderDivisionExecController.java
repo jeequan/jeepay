@@ -30,7 +30,6 @@ import com.jeequan.jeepay.pay.rqrs.division.PayOrderDivisionExecRQ;
 import com.jeequan.jeepay.pay.rqrs.division.PayOrderDivisionExecRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
-import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.pay.service.PayOrderDivisionProcessService;
 import com.jeequan.jeepay.service.impl.MchDivisionReceiverGroupService;
 import com.jeequan.jeepay.service.impl.MchDivisionReceiverService;
@@ -102,7 +101,7 @@ public class PayOrderDivisionExecController extends ApiController {
             }
 
             //处理分账请求
-            ChannelRetMsg channelRetMsg = payOrderDivisionProcessService.processPayOrderDivision(bizRQ.getPayOrderId(), bizRQ.getUseSysAutoDivisionReceivers(), receiverList, false);
+            ChannelRetMsg channelRetMsg = payOrderDivisionProcessService.processPayOrderDivision(payOrder.getPayOrderId(), bizRQ.getUseSysAutoDivisionReceivers(), receiverList, false);
 
             PayOrderDivisionExecRS bizRS = new PayOrderDivisionExecRS();
             bizRS.setState(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS ? PayOrderDivisionRecord.STATE_SUCCESS : PayOrderDivisionRecord.STATE_FAIL);
@@ -148,13 +147,13 @@ public class PayOrderDivisionExecController extends ApiController {
             if(receiver.getDivisionProfit() != null){
 
                 if(receiver.getDivisionProfit().compareTo(BigDecimal.ZERO) < 0){
-                    throw new BizException("分账用户receiverId=["+receiver.getReceiverId() == null ? "": receiver.getReceiverId()+"]," +
-                            "receiverGroupId=["+receiver.getReceiverGroupId() == null ? "": receiver.getReceiverGroupId()+"] 分账比例不得小于0%");
+                    throw new BizException("分账用户receiverId=["+ ( receiver.getReceiverId() == null ? "": receiver.getReceiverId() ) +"]," +
+                            "receiverGroupId=["+ (receiver.getReceiverGroupId() == null ? "": receiver.getReceiverGroupId() ) +"] 分账比例不得小于0%");
                 }
 
                 if(receiver.getDivisionProfit().compareTo(BigDecimal.ONE) > 0){
-                    throw new BizException("分账用户receiverId=["+receiver.getReceiverId() == null ? "": receiver.getReceiverId()+"]," +
-                            "receiverGroupId=["+receiver.getReceiverGroupId() == null ? "": receiver.getReceiverGroupId()+"] 分账比例不得高于100%");
+                    throw new BizException("分账用户receiverId=["+ ( receiver.getReceiverId() == null ? "": receiver.getReceiverId() ) +"]," +
+                            "receiverGroupId=["+ (receiver.getReceiverGroupId() == null ? "": receiver.getReceiverGroupId() ) +"] 分账比例不得高于100%");
                 }
             }
         }
