@@ -110,8 +110,8 @@ CREATE TABLE `t_sys_log` (
   `method_name` varchar(128) NOT NULL DEFAULT '' COMMENT '方法名',
   `method_remark` varchar(128) NOT NULL DEFAULT '' COMMENT '方法描述',
   `req_url` varchar(256) NOT NULL DEFAULT '' COMMENT '请求地址',
-  `opt_req_param` varchar(2048) NOT NULL DEFAULT '' COMMENT '操作请求参数',
-  `opt_res_info` varchar(2048) NOT NULL DEFAULT '' COMMENT '操作响应结果',
+  `opt_req_param` TEXT DEFAULT NULL COMMENT '操作请求参数',
+  `opt_res_info` TEXT DEFAULT NULL COMMENT '操作响应结果',
   `created_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
   PRIMARY KEY (`sys_log_id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '系统操作日志表';
