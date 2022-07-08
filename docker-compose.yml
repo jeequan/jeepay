@@ -17,9 +17,10 @@ services:
     hostname: mysql
     container_name: jeepay-mysql
     # amd64 平台
-    image: mysql/mysql-server:latest
-    #image: mysql:8
+    #image: mysql/mysql-server:latest
+    image: mysql:8
     environment:
+      LANG: C.UTF-8
       MYSQL_ROOT_PASSWORD: "rootroot"
       MYSQL_DATABASE: "jeepaydb"
       MYSQL_USER: "jeepay"
@@ -131,8 +132,8 @@ services:
       - mysql
       - redis
       - activemq
-      - rabbitmq
-      - rocketmq-broker
+      # - rabbitmq
+      # - rocketmq-broker
     networks:
       jeepay:
         ipv4_address: 172.20.0.21
@@ -155,8 +156,8 @@ services:
       - mysql
       - redis
       - activemq
-      - rabbitmq
-      - rocketmq-broker
+      # - rabbitmq
+      # - rocketmq-broker
     networks:
       jeepay:
         ipv4_address: 172.20.0.22
@@ -179,8 +180,8 @@ services:
       - mysql
       - redis
       - activemq
-      - rabbitmq
-      - rocketmq-broker
+      # - rabbitmq
+      # - rocketmq-broker
     networks:
       jeepay:
         ipv4_address: 172.20.0.23
@@ -189,7 +190,7 @@ services:
       - ./conf/merchant/application.yml:/workspace/application.yml
   ui-payment:
     build:
-      context: ./jeepay-ui
+      context: ${UI_BASE_DIR}/jeepay-ui
       dockerfile: Dockerfile
       args:
         PLATFORM: cashier
@@ -207,7 +208,7 @@ services:
         ipv4_address: 172.20.0.31
   ui-manager:
     build:
-      context: ./jeepay-ui
+      context: ${UI_BASE_DIR}/jeepay-ui
       dockerfile: Dockerfile
       args:
         PLATFORM: manager
@@ -225,7 +226,7 @@ services:
         ipv4_address: 172.20.0.32
   ui-merchant:
     build:
-      context: ./jeepay-ui
+      context: ${UI_BASE_DIR}/jeepay-ui
       dockerfile: Dockerfile
       args:
         PLATFORM: merchant

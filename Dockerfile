@@ -16,9 +16,10 @@ COPY ./docs/settings.xml /root/.m2/settings.xml
 
 RUN mvn clean package -Dmaven.test.skip=true -Ptest
 
-
-# 以下为运行容器 切换 JDK 请修改后面的 17 到对应版本
-FROM mcr.microsoft.com/java/jre:17-zulu-alpine
+# 以下为运行容器 切换 JDK 到对应版本
+# jdk8对应：mcr.microsoft.com/java/jre:8-zulu-alpine
+# jdk17对应：mcr.microsoft.com/java/jre:17-zulu-alpine
+FROM mcr.microsoft.com/java/jre:8-zulu-alpine
 
 ARG PLATFORM=$PLATFORM
 

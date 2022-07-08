@@ -251,7 +251,7 @@ VALUES ('wxpay', '微信支付官方', 1, 1, 2,
         '[{"wayCode": "WX_APP"}, {"wayCode": "WX_H5"}, {"wayCode": "WX_NATIVE"}, {"wayCode": "WX_JSAPI"}, {"wayCode": "WX_BAR"}, {"wayCode": "WX_LITE"}]',
         'http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/wxpay.png', '#04BE02', 1, '微信官方通道');
 
+## -- ++++ [v1.13.0] ===> [v1.14.0] ++++
 -- 日志请求参数、响应参数长度修改
 alter table t_sys_log modify `opt_req_param` TEXT DEFAULT NULL COMMENT '操作请求参数';
 alter table t_sys_log modify `opt_res_info` TEXT DEFAULT NULL COMMENT '操作响应结果';
-
