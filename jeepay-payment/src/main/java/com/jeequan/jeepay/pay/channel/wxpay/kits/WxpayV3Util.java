@@ -136,7 +136,7 @@ public class WxpayV3Util {
 
                     String packageValue = "Sign=WXPay";
                     // 此map用于客户端与微信服务器交互
-                    String beforeSign = String.format("%s\n%s\n%s\n%s\n", wxAppId, timestamp, nonceStr, "prepay_id=" + prepayId);
+                    String beforeSign = String.format("%s\n%s\n%s\n%s\n", wxAppId, timestamp, nonceStr, prepayId);
                     payInfo.put("sign", SignUtils.sign(beforeSign, PemUtils.loadPrivateKey(new FileInputStream(wxPayConfig.getPrivateKeyPath()))));
                     payInfo.put("prepayId", prepayId);
                     payInfo.put("partnerId", partnerId);
