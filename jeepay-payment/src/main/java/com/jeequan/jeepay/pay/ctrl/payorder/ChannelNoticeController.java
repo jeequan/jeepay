@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.pay.ctrl.payorder;
 
+import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 /*
 * 渠道侧的通知入口Controller 【分为同步跳转（doReturn）和异步回调(doNotify) 】
@@ -56,7 +58,11 @@ public class ChannelNoticeController extends AbstractCtrl {
     @Autowired private PayMchNotifyService payMchNotifyService;
     @Autowired private PayOrderProcessService payOrderProcessService;
 
-    /** 同步通知入口 **/
+    /**
+     * 同步通知入口
+     *
+     * payOrderId 前缀为 ONLYJUMP_，表示直接跳转
+     **/
     @RequestMapping(value= {"/api/pay/return/{ifCode}", "/api/pay/return/{ifCode}/{payOrderId}"})
     public String doReturn(HttpServletRequest request, @PathVariable("ifCode") String ifCode, @PathVariable(value = "payOrderId", required = false) String urlOrderId){
 
@@ -79,6 +85,9 @@ public class ChannelNoticeController extends AbstractCtrl {
                 log.error("{}, interface not exists ", logPrefix);
                 return this.toReturnPage("[" + ifCode + "] interface not exists");
             }
+
+            // 仅做跳转，直接跳转订单的returnUrl
+            onlyJump(urlOrderId, logPrefix);
 
             // 解析订单号 和 请求参数
             MutablePair<String, Object> mutablePair = payNotifyService.parseParams(request, urlOrderId, IChannelNoticeService.NoticeTypeEnum.DO_RETURN);
@@ -266,6 +275,31 @@ public class ChannelNoticeController extends AbstractCtrl {
 
 
         return "cashier/returnPage";
+    }
+
+    private void onlyJump(String urlOrderId, String logPrefix) throws IOException {
+
+        if (StringUtils.isNotBlank(urlOrderId) && urlOrderId.startsWith(CS.PAY_RETURNURL_FIX_ONLY_JUMP_PREFIX)) {
+
+            String payOrderId = urlOrderId.substring(CS.PAY_RETURNURL_FIX_ONLY_JUMP_PREFIX.length());
+
+            //获取订单号 和 订单数据
+            PayOrder payOrder = payOrderService.getById(payOrderId);
+
+            // 订单不存在
+            if(payOrder == null){
+                log.error("{}, 订单不存在. payOrderId={} ", logPrefix, payOrderId);
+                this.toReturnPage("支付订单不存在");
+            }
+
+            //查询出商户应用的配置信息
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
+
+            if (StringUtils.isBlank(payOrder.getReturnUrl())) {
+                this.toReturnPage(null);
+            }
+            response.sendRedirect(payMchNotifyService.createReturnUrl(payOrder, mchAppConfigContext.getMchApp().getAppSecret()));
+        }
     }
 
 }

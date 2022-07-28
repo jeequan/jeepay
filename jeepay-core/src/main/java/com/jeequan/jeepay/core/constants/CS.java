@@ -112,6 +112,8 @@ public class CS {
         return String.format(CACHE_KEY_IMG_CODE, imgToken);
     }
 
+    /** 回调URL的格前缀  */
+    public static final String PAY_RETURNURL_FIX_ONLY_JUMP_PREFIX = "ONLYJUMP_";
 
     /** 登录认证类型 **/
     public interface AUTH_TYPE{

@@ -16,6 +16,7 @@
 package com.jeequan.jeepay.pay.channel.wxpay.payway;
 
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.net.URLEncodeUtil;
 import com.github.binarywang.wxpay.bean.order.WxPayMwebOrderResult;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
@@ -74,8 +75,10 @@ public class WxH5 extends WxpayPaymentService {
         try {
             WxPayMwebOrderResult wxPayMwebOrderResult = wxPayService.createOrder(req);
 
-            String payUrl = wxPayMwebOrderResult.getMwebUrl();
-            payUrl = sysConfigService.getDBApplicationConfig().getPaySiteUrl() + "/api/common/payUrl/" + Base64.encode(payUrl);
+            // 拼接returnUrl
+            String payUrl = String.format("%s&redirect_url=%s", wxPayMwebOrderResult.getMwebUrl(), URLEncodeUtil.encode(getReturnUrlOnlyJump(payOrder.getPayOrderId())));
+
+            payUrl = String.format("%s/api/common/payUrl/%s", sysConfigService.getDBApplicationConfig().getPaySiteUrl(), Base64.encode(payUrl));
 
             if(CS.PAY_DATA_TYPE.FORM.equals(bizRQ.getPayDataType())){ //表单方式
                 res.setFormContent(payUrl);
