@@ -18,6 +18,7 @@ package com.jeequan.jeepay.core.model.params;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
+import com.jeequan.jeepay.core.model.params.jeepluspay.JeepluspayNormalMchParams;
 import com.jeequan.jeepay.core.model.params.pppay.PpPayNormalMchParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
 import com.jeequan.jeepay.core.model.params.xxpay.XxpayNormalMchParams;
@@ -41,6 +42,8 @@ public abstract class NormalMchParams {
             return JSONObject.parseObject(paramsStr, XxpayNormalMchParams.class);
         }else if (CS.IF_CODE.PPPAY.equals(ifCode)){
             return JSONObject.parseObject(paramsStr, PpPayNormalMchParams.class);
+        }else if (CS.IF_CODE.JEEPLUSPAY.equals(ifCode)){
+            return JSONObject.parseObject(paramsStr, JeepluspayNormalMchParams.class);
         }
         return null;
     }

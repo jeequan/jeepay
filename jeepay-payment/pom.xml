@@ -15,6 +15,12 @@
         <artifactId>jeepay</artifactId>
         <version>Final</version>
     </parent>
+
+    <!-- 项目属性 -->
+    <properties>
+        <projectRootDir>${basedir}/../</projectRootDir>
+    </properties>
+
     <!-- 项目依赖声明 -->
     <dependencies>
 
@@ -116,6 +122,15 @@
             <groupId>jakarta.activation</groupId>
             <artifactId>jakarta.activation-api</artifactId>
             <version>1.2.2</version>
+        </dependency>
+
+        <!-- 计全付本地依赖包 -->
+        <dependency>
+            <groupId>com.jeequan</groupId>
+            <artifactId>jeepay-sdk-java</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${projectRootDir}/libs/jeepay-sdk-java-pls-1.0.0.jar</systemPath>
         </dependency>
 
     </dependencies>

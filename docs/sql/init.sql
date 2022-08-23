@@ -755,3 +755,13 @@ VALUES ('pppay', 'PayPal支付', 1, 0, 1,
         '[{"name":"sandbox","desc":"环境配置","type":"radio","verify":"required","values":"1,0","titles":"沙箱环境, 生产环境"},{"name":"clientId","desc":"Client ID（客户端ID）","type":"text","verify":"required"},{"name":"secret","desc":"Secret（密钥）","type":"text","verify":"required","star":"1"},{"name":"refundWebhook","desc":"退款 Webhook id","type":"text","verify":"required"},{"name":"notifyWebhook","desc":"支付 Webhook id","type":"text","verify":"required"}]',
         '[{"wayCode": "PP_PC"}]',
         'http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/paypal.png', '#005ea6', 1, 'PayPal官方通道');
+
+-- 计全付支付通道
+INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
+VALUES ('jeepluspay', '计全付', 1, 0, 1,
+        NULL,
+        NULL,
+        '[{"name":"signType","desc":"签名方式","type":"radio","verify":"required","values":"MD5,RSA2","titles":"MD5,RSA2"},{"name":"merchantNo","desc":"计全付商户号","type":"text","verify":"required"},{"name":"appId","desc":"应用ID","type":"text","verify":"required"},{"name":"appSecret","desc":"md5秘钥","type":"textarea","verify":"required","star":"1"},{"name":"rsa2AppPrivateKey","desc":"RSA2: 应用私钥","type":"text","verify":"required","star":"1"},{"name":"rsa2PayPublicKey","desc":"RSA2: 支付网关公钥","type":"text","verify":"required","star":"1"}]',
+        '[{"wayCode": "ALI_APP"}, {"wayCode": "ALI_BAR"}, {"wayCode": "ALI_JSAPI"}, {"wayCode": "ALI_LITE"}, {"wayCode": "ALI_PC"}, {"wayCode": "ALI_QR"}, {"wayCode": "ALI_WAP"}, {"wayCode": "WX_APP"}, {"wayCode": "WX_BAR"}, {"wayCode": "WX_H5"}, {"wayCode": "WX_JSAPI"}, {"wayCode": "WX_LITE"}, {"wayCode": "WX_NATIVE"}]',
+        'http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepluspay.svg', '#0CACFF', 1, '计全付');
+

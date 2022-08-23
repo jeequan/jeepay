@@ -23,8 +23,8 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliBarOrderRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxBarOrderRQ;
+import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxBarOrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -72,7 +72,7 @@ public class WxBar extends XxpayPaymentService {
         paramMap.put("body", payOrder.getBody());
         paramMap.put("extra", bizRQ.getAuthCode());
         // 构造函数响应数据
-        AliBarOrderRS res = ApiResBuilder.buildSuccess(AliBarOrderRS.class);
+        WxBarOrderRS res = ApiResBuilder.buildSuccess(WxBarOrderRS.class);
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
         res.setChannelRetMsg(channelRetMsg);
         // 发起支付

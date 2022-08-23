@@ -98,12 +98,20 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
             AliJsapiOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AliJsapiOrderRQ.class);
             BeanUtils.copyProperties(this, bizRQ);
             return bizRQ;
+        }else if(CS.PAY_WAY_CODE.ALI_LITE.equals(wayCode)){
+            AliLiteOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AliLiteOrderRQ.class);
+            BeanUtils.copyProperties(this, bizRQ);
+            return bizRQ;
         }else if(CS.PAY_WAY_CODE.QR_CASHIER.equals(wayCode)){
             QrCashierOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), QrCashierOrderRQ.class);
             BeanUtils.copyProperties(this, bizRQ);
             return bizRQ;
         }else if(CS.PAY_WAY_CODE.WX_JSAPI.equals(wayCode) || CS.PAY_WAY_CODE.WX_LITE.equals(wayCode)){
             WxJsapiOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), WxJsapiOrderRQ.class);
+            BeanUtils.copyProperties(this, bizRQ);
+            return bizRQ;
+        }else if(CS.PAY_WAY_CODE.WX_LITE.equals(wayCode)){
+            WxLiteOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), WxLiteOrderRQ.class);
             BeanUtils.copyProperties(this, bizRQ);
             return bizRQ;
         }else if(CS.PAY_WAY_CODE.WX_BAR.equals(wayCode)){
