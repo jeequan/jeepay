@@ -63,23 +63,20 @@ public class JeepluspayPayOrderQueryService implements IPayOrderQueryService {
             request.setBizModel(model);
             // 发起请求
             PayOrderQueryResponse response = new PayOrderQueryResponse();
-            boolean checkSign = false;
-            boolean isSuccess = false;
-            if (normalMchParams.getSignType().equals(JeepluspayConfig.DEFAULT_SIGN_TYPE) || StringUtils.isEmpty(normalMchParams.getSignType())) {
+            if (StringUtils.isEmpty(normalMchParams.getSignType()) || normalMchParams.getSignType().equals(JeepluspayConfig.DEFAULT_SIGN_TYPE)) {
                 JeepayClient jeepayClient = JeepayClient.getInstance(normalMchParams.getAppId(), normalMchParams.getAppSecret(), Jeepay.getApiBase());
                 response = jeepayClient.execute(request);
-                checkSign = response.checkSign(normalMchParams.getAppSecret());
-                isSuccess = response.isSuccess(normalMchParams.getAppSecret());
 
             } else if (normalMchParams.getSignType().equals(JeepluspayConfig.SIGN_TYPE_RSA2)) {
                 JeepayClient jeepayClient = JeepayClient.getInstance(normalMchParams.getAppId(), normalMchParams.getRsa2AppPrivateKey(), Jeepay.getApiBase());
                 response = jeepayClient.executeByRSA2(request);
-                checkSign = response.checkSignByRsa2(normalMchParams.getRsa2PayPublicKey());
-                isSuccess = response.isSuccessByRsa2(normalMchParams.getRsa2PayPublicKey());
             }
 
+            // 下单返回状态
+            Boolean isSuccess = JeepluspayKit.checkPayResp(response, mchAppConfigContext);
+
             // 请求响应状态
-            if (isSuccess && checkSign) {
+            if (isSuccess) {
                 // 如果查询请求成功
                 if (JeepluspayConfig.PAY_STATE_SUCCESS.equals(String.valueOf(response.get().getState()))) {
                     return ChannelRetMsg.confirmSuccess(response.get().getPayOrderId());

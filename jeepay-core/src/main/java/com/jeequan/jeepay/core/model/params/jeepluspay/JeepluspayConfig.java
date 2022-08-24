@@ -36,12 +36,13 @@ public class JeepluspayConfig {
     public static String PAY_STATE_FAIL = "3";       // 3-支付失败
 
     /** 退款订单状态 */
-    public static String Refund_STATE_SUCCESS = "2";    // 2-退款成功
-    public static String Refund_STATE_FAIL = "3";       // 3-退款失败
+    public static String REFUND_STATE_SUCCESS = "2";    // 2-退款成功
+    public static String REFUND_STATE_FAIL = "3";       // 3-退款失败
 
     /** 支付方式 */
     public static String ALI_BAR = "ALI_BAR";               // 支付宝条码
     public static String ALI_JSAPI = "ALI_JSAPI";           // 支付宝生活号
+    public static String ALI_LITE = "ALI_LITE";             // 支付宝小程序
     public static String ALI_APP = "ALI_APP";               // 支付宝APP
     public static String ALI_WAP = "ALI_WAP";               // 支付宝WAP
     public static String ALI_PC = "ALI_PC";                 // 支付宝PC网站

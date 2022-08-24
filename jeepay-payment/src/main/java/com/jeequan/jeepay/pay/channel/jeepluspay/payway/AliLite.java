@@ -16,15 +16,12 @@
 package com.jeequan.jeepay.pay.channel.jeepluspay.payway;
 
 import com.alibaba.fastjson.JSONObject;
-import com.jeequan.jeepay.Jeepay;
-import com.jeequan.jeepay.JeepayClient;
-import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.params.jeepluspay.JeepluspayConfig;
-import com.jeequan.jeepay.core.model.params.jeepluspay.JeepluspayNormalMchParams;
 import com.jeequan.jeepay.exception.JeepayException;
 import com.jeequan.jeepay.model.PayOrderCreateReqModel;
+import com.jeequan.jeepay.pay.channel.jeepluspay.JeepluspayKit;
 import com.jeequan.jeepay.pay.channel.jeepluspay.JeepluspayPaymentService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
@@ -33,7 +30,6 @@ import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliLiteOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliLiteOrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
-import com.jeequan.jeepay.request.PayOrderCreateRequest;
 import com.jeequan.jeepay.response.PayOrderCreateResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -60,59 +56,38 @@ public class AliLite extends JeepluspayPaymentService {
     @Override
     public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
         AliLiteOrderRQ bizRQ = (AliLiteOrderRQ) rq;
-        JeepluspayNormalMchParams normalMchParams = (JeepluspayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.JEEPLUSPAY);
-        // 构建请求数据
-        PayOrderCreateRequest request = new PayOrderCreateRequest();
-        PayOrderCreateReqModel model = new PayOrderCreateReqModel();
-        model.setMchNo(normalMchParams.getMerchantNo());    // 商户号
-        model.setAppId(normalMchParams.getAppId());         // 应用ID
-        model.setMchOrderNo(payOrder.getPayOrderId());      // 商户订单号
-        model.setWayCode(JeepluspayConfig.WX_LITE);         // 支付方式
-        model.setAmount(payOrder.getAmount());              // 金额，单位分
-        model.setCurrency(payOrder.getCurrency());          // 币种，目前只支持cny
-        model.setClientIp(payOrder.getClientIp());          // 发起支付请求客户端的IP地址
-        model.setSubject(payOrder.getSubject());            // 商品标题
-        model.setBody(payOrder.getBody());                  // 商品描述
-        model.setNotifyUrl(getNotifyUrl());                 // 异步通知地址
-        JSONObject channelExtra = new JSONObject();
-        channelExtra.put("buyerUserId", bizRQ.getBuyerUserId());
-        model.setChannelExtra(channelExtra.toString());     // 支付宝用户ID
-        request.setBizModel(model);
         // 构造函数响应数据
         AliLiteOrderRS res = ApiResBuilder.buildSuccess(AliLiteOrderRS.class);
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
         res.setChannelRetMsg(channelRetMsg);
         try {
+            // 构建请求数据
+            PayOrderCreateReqModel model = new PayOrderCreateReqModel();
+            // 支付方式
+            model.setWayCode(JeepluspayConfig.ALI_LITE);
+            // 异步通知地址
+            model.setNotifyUrl(getNotifyUrl());
+            // 支付宝用户ID
+            JSONObject channelExtra = new JSONObject();
+            channelExtra.put("buyerUserId", bizRQ.getBuyerUserId());
+            model.setChannelExtra(channelExtra.toString());
+
             // 发起统一下单
-            PayOrderCreateResponse response = new PayOrderCreateResponse();
-            boolean checkSign = false;
-            boolean isSuccess = false;
-            if (normalMchParams.getSignType().equals(JeepluspayConfig.DEFAULT_SIGN_TYPE) || StringUtils.isEmpty(normalMchParams.getSignType())) {
-                JeepayClient jeepayClient = JeepayClient.getInstance(normalMchParams.getAppId(), normalMchParams.getAppSecret(), Jeepay.getApiBase());
-                response = jeepayClient.execute(request);
-                checkSign = response.checkSign(normalMchParams.getAppSecret());
-                isSuccess = response.isSuccess(normalMchParams.getAppSecret());
+            PayOrderCreateResponse response = JeepluspayKit.payRequest(payOrder, mchAppConfigContext, model);
+            // 下单返回状态
+            Boolean isSuccess = JeepluspayKit.checkPayResp(response, mchAppConfigContext);
 
-            } else if (normalMchParams.getSignType().equals(JeepluspayConfig.SIGN_TYPE_RSA2)) {
-                JeepayClient jeepayClient = JeepayClient.getInstance(normalMchParams.getAppId(), normalMchParams.getRsa2AppPrivateKey(), Jeepay.getApiBase());
-                response = jeepayClient.executeByRSA2(request);
-                checkSign = response.checkSignByRsa2(normalMchParams.getRsa2PayPublicKey());
-                isSuccess = response.isSuccessByRsa2(normalMchParams.getRsa2PayPublicKey());
-            }
-
-            if (checkSign) {
+            if (isSuccess) {
+                // 下单成功
+                JSONObject payData = response.getData().getJSONObject("payData");
+                res.setAlipayTradeNo(payData.getString("alipayTradeNo"));
+                res.setPayData(payData.toJSONString());
                 channelRetMsg.setChannelOrderId(response.get().getPayOrderId());
-                if (isSuccess) {
-                    // 下单成功
-                    JSONObject payData = response.getData().getJSONObject("payData");
-                    res.setAlipayTradeNo(payData.getString("alipayTradeNo"));
-                    res.setPayData(payData.toJSONString());
-                    channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
-                } else {
-                    channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-                    channelRetMsg.setChannelErrCode(response.get().getErrCode());
-                    channelRetMsg.setChannelErrMsg(response.get().getErrMsg());
-                }
+                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
+            } else {
+                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+                channelRetMsg.setChannelErrCode(response.get().getErrCode());
+                channelRetMsg.setChannelErrMsg(response.get().getErrMsg());
             }
         } catch (JeepayException e) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);

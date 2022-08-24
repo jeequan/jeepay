@@ -81,20 +81,11 @@ public class JeepluspayChannelRefundNoticeService extends AbstractChannelRefundN
             //验签成功后判断上游订单状态
             ResponseEntity okResponse = textResp("success");
 
-            // 退款状态 0-订单生成 1-退款中 2-退款成功 3-退款失败 4-退款关闭
-            String status = jsonParams.getString("state");
-
             ChannelRetMsg result = new ChannelRetMsg();
             result.setChannelOrderId(jsonParams.getString("refundOrderId")); //渠道订单号
             result.setResponseEntity(okResponse); //响应数据
+            result.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
 
-            result.setChannelState(ChannelRetMsg.ChannelState.WAITING); // 默认退款中
-
-            if (JeepluspayConfig.Refund_STATE_SUCCESS.equals(status)) {
-                result.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
-            }else if (JeepluspayConfig.Refund_STATE_FAIL.equals(status)) {
-                result.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-            }
             return result;
         } catch (Exception e) {
             log.error("error", e);
@@ -121,6 +112,12 @@ public class JeepluspayChannelRefundNoticeService extends AbstractChannelRefundN
             // 验签  异步时都是MD5
             if (!sign.equals(newSign)) {
                 log.info("验签失败！ 回调参数：parameter = {}", jsonParams);
+                return false;
+            }
+            // 退款状态 0-订单生成 1-退款中 2-退款成功 3-退款失败 4-退款关闭
+            String status = jsonParams.getString("state");
+            if (!JeepluspayConfig.REFUND_STATE_SUCCESS.equals(status)) {
+                log.info("订单状态错误！ state = {}", status);
                 return false;
             }
             return true;

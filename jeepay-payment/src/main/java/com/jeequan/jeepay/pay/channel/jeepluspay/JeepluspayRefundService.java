@@ -76,32 +76,30 @@ public class JeepluspayRefundService extends AbstractRefundService {
         try {
             // 发起退款
             RefundOrderCreateResponse response = new RefundOrderCreateResponse();
-            boolean checkSign = false;
-            boolean isSuccess = false;
             if (normalMchParams.getSignType().equals(JeepluspayConfig.DEFAULT_SIGN_TYPE) || StringUtils.isEmpty(normalMchParams.getSignType())) {
                 JeepayClient jeepayClient = JeepayClient.getInstance(normalMchParams.getAppId(), normalMchParams.getAppSecret(), Jeepay.getApiBase());
                 response = jeepayClient.execute(request);
-                checkSign = response.checkSign(normalMchParams.getAppSecret());
-                isSuccess = response.isSuccess(normalMchParams.getAppSecret());
 
             } else if (normalMchParams.getSignType().equals(JeepluspayConfig.SIGN_TYPE_RSA2)) {
                 JeepayClient jeepayClient = JeepayClient.getInstance(normalMchParams.getAppId(), normalMchParams.getRsa2AppPrivateKey(), Jeepay.getApiBase());
                 response = jeepayClient.executeByRSA2(request);
-                checkSign = response.checkSignByRsa2(normalMchParams.getRsa2PayPublicKey());
-                isSuccess = response.isSuccessByRsa2(normalMchParams.getRsa2PayPublicKey());
             }
 
-            if (checkSign) {
-                channelRetMsg.setChannelOrderId(response.get().getRefundOrderId());
-                // 退款发送成功
-                if (isSuccess) {
+            // 下单返回状态
+            Boolean isSuccess = JeepluspayKit.checkPayResp(response, mchAppConfigContext);
+
+            // 退款发送成功
+            if (isSuccess) {
+                if (JeepluspayConfig.REFUND_STATE_SUCCESS.equals(response.get().getState().toString())) {
                     channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
-                } else {
-                    channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-                    channelRetMsg.setChannelErrCode(response.getCode().toString());
-                    channelRetMsg.setChannelErrMsg(response.getMsg());
                 }
+                channelRetMsg.setChannelOrderId(response.get().getRefundOrderId());
+            } else {
+                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+                channelRetMsg.setChannelErrCode(response.getCode().toString());
+                channelRetMsg.setChannelErrMsg(response.getMsg());
             }
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
         } catch (JeepayException e) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
         }
@@ -120,22 +118,19 @@ public class JeepluspayRefundService extends AbstractRefundService {
             request.setBizModel(model);
             // 发起请求
             RefundOrderQueryResponse response = new RefundOrderQueryResponse();
-            boolean checkSign = false;
-            boolean isSuccess = false;
             if (normalMchParams.getSignType().equals(JeepluspayConfig.DEFAULT_SIGN_TYPE) || StringUtils.isEmpty(normalMchParams.getSignType())) {
                 JeepayClient jeepayClient = JeepayClient.getInstance(normalMchParams.getAppId(), normalMchParams.getAppSecret(), Jeepay.getApiBase());
                 response = jeepayClient.execute(request);
-                checkSign = response.checkSign(normalMchParams.getAppSecret());
-                isSuccess = response.isSuccessByRsa2(normalMchParams.getRsa2PayPublicKey());
             } else if (normalMchParams.getSignType().equals(JeepluspayConfig.SIGN_TYPE_RSA2)) {
                 JeepayClient jeepayClient = JeepayClient.getInstance(normalMchParams.getAppId(), normalMchParams.getRsa2AppPrivateKey(), Jeepay.getApiBase());
                 response = jeepayClient.executeByRSA2(request);
-                checkSign = response.checkSignByRsa2(normalMchParams.getRsa2PayPublicKey());
-                isSuccess = response.isSuccessByRsa2(normalMchParams.getRsa2PayPublicKey());
             }
 
+            // 下单返回状态
+            Boolean isSuccess = JeepluspayKit.checkPayResp(response, mchAppConfigContext);
+
             // 请求响应状态
-            if (isSuccess && checkSign) {
+            if (isSuccess) {
                 // 如果查询请求成功
                 if (JeepluspayConfig.PAY_STATE_SUCCESS.equals(response.get().getState().toString())) {
                     return ChannelRetMsg.confirmSuccess(response.get().getRefundOrderId());

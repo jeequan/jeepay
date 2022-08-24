@@ -42,7 +42,7 @@ public class JeepluspayNormalMchParams extends NormalMchParams {
     private String signType;
 
     /** md5秘钥 */
-    private String AppSecret;
+    private String appSecret;
 
     /** RSA2: 应用私钥 */
     private String rsa2AppPrivateKey;
@@ -55,8 +55,8 @@ public class JeepluspayNormalMchParams extends NormalMchParams {
     public String deSenData() {
 
         JeepluspayNormalMchParams mchParams = this;
-        if (StringUtils.isNotBlank(this.AppSecret)) {
-            mchParams.setAppSecret(StringKit.str2Star(this.AppSecret, 4, 4, 6));
+        if (StringUtils.isNotBlank(this.appSecret)) {
+            mchParams.setAppSecret(StringKit.str2Star(this.appSecret, 4, 4, 6));
         }
         return ((JSONObject) JSON.toJSON(mchParams)).toJSONString();
     }

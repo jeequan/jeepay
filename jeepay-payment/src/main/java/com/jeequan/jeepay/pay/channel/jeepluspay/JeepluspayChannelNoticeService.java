@@ -80,17 +80,10 @@ public class JeepluspayChannelNoticeService extends AbstractChannelNoticeService
             // 验签成功后判断上游订单状态
             ResponseEntity okResponse = textResp("success");
 
-            // 支付状态: 0-订单生成, 1-支付中, 2-支付成功, 3-支付失败, 4-已撤销, 5-已退款, 6-订单关闭
-            String status = paramsJson.getString("state");
             ChannelRetMsg result = new ChannelRetMsg();
             result.setResponseEntity(okResponse);
             result.setChannelOrderId(paramsJson.getString("payOrderId"));
-            result.setChannelState(ChannelRetMsg.ChannelState.WAITING); // 默认支付中
-            if (JeepluspayConfig.PAY_STATE_SUCCESS.equals(status)) {
-                result.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
-            } else if (JeepluspayConfig.PAY_STATE_FAIL.equals(status)) {
-                result.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-            }
+            result.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
             return result;
         } catch (Exception e) {
             log.error("error", e);
@@ -117,6 +110,12 @@ public class JeepluspayChannelNoticeService extends AbstractChannelNoticeService
             // 验签  异步时都是MD5
             if (!sign.equals(newSign)) {
                 log.info("验签失败！ 回调参数：parameter = {}", jsonParams);
+                return false;
+            }
+            // 支付状态: 0-订单生成, 1-支付中, 2-支付成功, 3-支付失败, 4-已撤销, 5-已退款, 6-订单关闭
+            String status = jsonParams.getString("state");
+            if (!JeepluspayConfig.PAY_STATE_SUCCESS.equals(status)) {
+                log.info("订单状态错误！ state = {}", status);
                 return false;
             }
             return true;
