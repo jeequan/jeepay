@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.core.model.params.jeepluspay;
+package com.jeequan.jeepay.core.model.params.plspay;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
  * @date 2022/8/11 14:32
  */
 @Data
-public class JeepluspayNormalMchParams extends NormalMchParams {
+public class PlspayNormalMchParams extends NormalMchParams {
 
     /** 商户号 */
     private String merchantNo;
@@ -54,7 +54,7 @@ public class JeepluspayNormalMchParams extends NormalMchParams {
     @Override
     public String deSenData() {
 
-        JeepluspayNormalMchParams mchParams = this;
+        PlspayNormalMchParams mchParams = this;
         if (StringUtils.isNotBlank(this.appSecret)) {
             mchParams.setAppSecret(StringKit.str2Star(this.appSecret, 4, 4, 6));
         }

@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.channel.jeepluspay;
+package com.jeequan.jeepay.pay.channel.plspay;
 
 import com.jeequan.jeepay.Jeepay;
 import com.jeequan.jeepay.JeepayClient;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.RefundOrder;
-import com.jeequan.jeepay.core.model.params.jeepluspay.JeepluspayConfig;
-import com.jeequan.jeepay.core.model.params.jeepluspay.JeepluspayNormalMchParams;
+import com.jeequan.jeepay.core.model.params.plspay.PlspayConfig;
+import com.jeequan.jeepay.core.model.params.plspay.PlspayNormalMchParams;
 import com.jeequan.jeepay.exception.JeepayException;
 import com.jeequan.jeepay.model.RefundOrderCreateReqModel;
 import com.jeequan.jeepay.model.RefundOrderQueryReqModel;
@@ -44,11 +44,11 @@ import org.springframework.stereotype.Service;
  * @date 2022/8/16 15:28
  */
 @Service
-public class JeepluspayRefundService extends AbstractRefundService {
+public class PlspayRefundService extends AbstractRefundService {
 
     @Override
     public String getIfCode() {
-        return CS.IF_CODE.JEEPLUSPAY;
+        return CS.IF_CODE.PLSPAY;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class JeepluspayRefundService extends AbstractRefundService {
 
     @Override
     public ChannelRetMsg refund(RefundOrderRQ bizRQ, RefundOrder refundOrder, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
-        JeepluspayNormalMchParams normalMchParams = (JeepluspayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.JEEPLUSPAY);
+        PlspayNormalMchParams normalMchParams = (PlspayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.PLSPAY);
         RefundOrderCreateRequest request = new RefundOrderCreateRequest();
         RefundOrderCreateReqModel model = new RefundOrderCreateReqModel();
         model.setMchNo(normalMchParams.getMerchantNo());            // 商户号
@@ -76,21 +76,21 @@ public class JeepluspayRefundService extends AbstractRefundService {
         try {
             // 发起退款
             RefundOrderCreateResponse response = new RefundOrderCreateResponse();
-            if (normalMchParams.getSignType().equals(JeepluspayConfig.DEFAULT_SIGN_TYPE) || StringUtils.isEmpty(normalMchParams.getSignType())) {
+            if (normalMchParams.getSignType().equals(PlspayConfig.DEFAULT_SIGN_TYPE) || StringUtils.isEmpty(normalMchParams.getSignType())) {
                 JeepayClient jeepayClient = JeepayClient.getInstance(normalMchParams.getAppId(), normalMchParams.getAppSecret(), Jeepay.getApiBase());
                 response = jeepayClient.execute(request);
 
-            } else if (normalMchParams.getSignType().equals(JeepluspayConfig.SIGN_TYPE_RSA2)) {
+            } else if (normalMchParams.getSignType().equals(PlspayConfig.SIGN_TYPE_RSA2)) {
                 JeepayClient jeepayClient = JeepayClient.getInstance(normalMchParams.getAppId(), normalMchParams.getRsa2AppPrivateKey(), Jeepay.getApiBase());
                 response = jeepayClient.executeByRSA2(request);
             }
 
             // 下单返回状态
-            Boolean isSuccess = JeepluspayKit.checkPayResp(response, mchAppConfigContext);
+            Boolean isSuccess = PlspayKit.checkPayResp(response, mchAppConfigContext);
 
             // 退款发送成功
             if (isSuccess) {
-                if (JeepluspayConfig.REFUND_STATE_SUCCESS.equals(response.get().getState().toString())) {
+                if (PlspayConfig.REFUND_STATE_SUCCESS.equals(response.get().getState().toString())) {
                     channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
                 }
                 channelRetMsg.setChannelOrderId(response.get().getRefundOrderId());
@@ -111,30 +111,30 @@ public class JeepluspayRefundService extends AbstractRefundService {
         RefundOrderQueryRequest request = new RefundOrderQueryRequest();
         RefundOrderQueryReqModel model = new RefundOrderQueryReqModel();
         try {
-            JeepluspayNormalMchParams normalMchParams = (JeepluspayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.JEEPLUSPAY);
+            PlspayNormalMchParams normalMchParams = (PlspayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.PLSPAY);
             model.setMchNo(normalMchParams.getMerchantNo());            // 商户号
             model.setAppId(normalMchParams.getAppId());                 // 应用ID
             model.setRefundOrderId(refundOrder.getRefundOrderId());     // 退款订单号
             request.setBizModel(model);
             // 发起请求
             RefundOrderQueryResponse response = new RefundOrderQueryResponse();
-            if (normalMchParams.getSignType().equals(JeepluspayConfig.DEFAULT_SIGN_TYPE) || StringUtils.isEmpty(normalMchParams.getSignType())) {
+            if (normalMchParams.getSignType().equals(PlspayConfig.DEFAULT_SIGN_TYPE) || StringUtils.isEmpty(normalMchParams.getSignType())) {
                 JeepayClient jeepayClient = JeepayClient.getInstance(normalMchParams.getAppId(), normalMchParams.getAppSecret(), Jeepay.getApiBase());
                 response = jeepayClient.execute(request);
-            } else if (normalMchParams.getSignType().equals(JeepluspayConfig.SIGN_TYPE_RSA2)) {
+            } else if (normalMchParams.getSignType().equals(PlspayConfig.SIGN_TYPE_RSA2)) {
                 JeepayClient jeepayClient = JeepayClient.getInstance(normalMchParams.getAppId(), normalMchParams.getRsa2AppPrivateKey(), Jeepay.getApiBase());
                 response = jeepayClient.executeByRSA2(request);
             }
 
             // 下单返回状态
-            Boolean isSuccess = JeepluspayKit.checkPayResp(response, mchAppConfigContext);
+            Boolean isSuccess = PlspayKit.checkPayResp(response, mchAppConfigContext);
 
             // 请求响应状态
             if (isSuccess) {
                 // 如果查询请求成功
-                if (JeepluspayConfig.PAY_STATE_SUCCESS.equals(response.get().getState().toString())) {
+                if (PlspayConfig.PAY_STATE_SUCCESS.equals(response.get().getState().toString())) {
                     return ChannelRetMsg.confirmSuccess(response.get().getRefundOrderId());
-                } else if (JeepluspayConfig.PAY_STATE_FAIL.equals(response.get().getState().toString())) {
+                } else if (PlspayConfig.PAY_STATE_FAIL.equals(response.get().getState().toString())) {
                     // 失败
                     return ChannelRetMsg.confirmFail();
                 }

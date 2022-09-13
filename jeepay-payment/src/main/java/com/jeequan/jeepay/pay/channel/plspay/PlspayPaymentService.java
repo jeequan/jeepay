@@ -1,4 +1,4 @@
-package com.jeequan.jeepay.pay.channel.jeepluspay;
+package com.jeequan.jeepay.pay.channel.plspay;
 
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
@@ -17,11 +17,11 @@ import org.springframework.stereotype.Service;
  * @date 2022/8/11 15:37
  */
 @Service
-public class JeepluspayPaymentService extends AbstractPaymentService {
+public class PlspayPaymentService extends AbstractPaymentService {
 
     @Override
     public String getIfCode() {
-        return CS.IF_CODE.JEEPLUSPAY;
+        return CS.IF_CODE.PLSPAY;
     }
 
     @Override

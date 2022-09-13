@@ -130,7 +130,7 @@
             <artifactId>jeepay-sdk-java</artifactId>
             <version>1.0.0</version>
             <scope>system</scope>
-            <systemPath>${projectRootDir}/libs/jeepay-sdk-java-pls-1.0.0.jar</systemPath>
+            <systemPath>${projectRootDir}/libs/jeepay-sdk-java-pls-1.2.0.jar</systemPath>
         </dependency>
 
     </dependencies>

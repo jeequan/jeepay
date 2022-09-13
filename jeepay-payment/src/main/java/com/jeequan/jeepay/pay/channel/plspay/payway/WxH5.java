@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.channel.jeepluspay.payway;
+package com.jeequan.jeepay.pay.channel.plspay.payway;
 
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
-import com.jeequan.jeepay.core.model.params.jeepluspay.JeepluspayConfig;
+import com.jeequan.jeepay.core.model.params.plspay.PlspayConfig;
 import com.jeequan.jeepay.exception.JeepayException;
 import com.jeequan.jeepay.model.PayOrderCreateReqModel;
-import com.jeequan.jeepay.pay.channel.jeepluspay.JeepluspayKit;
-import com.jeequan.jeepay.pay.channel.jeepluspay.JeepluspayPaymentService;
+import com.jeequan.jeepay.pay.channel.plspay.PlspayKit;
+import com.jeequan.jeepay.pay.channel.plspay.PlspayPaymentService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
@@ -38,8 +38,8 @@ import org.springframework.stereotype.Service;
  * @site https://www.jeequan.com
  * @date 2022/8/17 15:37
  */
-@Service("jeepluspayPaymentByWxH5Service") //Service Name需保持全局唯一性
-public class WxH5 extends JeepluspayPaymentService {
+@Service("plspayPaymentByWxH5Service") //Service Name需保持全局唯一性
+public class WxH5 extends PlspayPaymentService {
 
     @Override
     public String preCheck(UnifiedOrderRQ rq, PayOrder payOrder) {
@@ -56,14 +56,14 @@ public class WxH5 extends JeepluspayPaymentService {
             // 构建请求数据
             PayOrderCreateReqModel model = new PayOrderCreateReqModel();
             // 支付方式
-            model.setWayCode(JeepluspayConfig.WX_H5);
+            model.setWayCode(PlspayConfig.WX_H5);
             // 异步通知地址
             model.setNotifyUrl(getNotifyUrl());
 
             // 发起统一下单
-            PayOrderCreateResponse response = JeepluspayKit.payRequest(payOrder, mchAppConfigContext, model);
+            PayOrderCreateResponse response = PlspayKit.payRequest(payOrder, mchAppConfigContext, model);
             // 下单返回状态
-            Boolean isSuccess = JeepluspayKit.checkPayResp(response, mchAppConfigContext);
+            Boolean isSuccess = PlspayKit.checkPayResp(response, mchAppConfigContext);
 
             if (isSuccess) {
                 // 下单成功
@@ -84,8 +84,8 @@ public class WxH5 extends JeepluspayPaymentService {
                 channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
             } else {
                 channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-                channelRetMsg.setChannelErrCode(response.get().getErrCode());
-                channelRetMsg.setChannelErrMsg(response.get().getErrMsg());
+                channelRetMsg.setChannelErrCode(response.getCode()+"");
+                channelRetMsg.setChannelErrMsg(response.getMsg());
             }
         } catch (JeepayException e) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);

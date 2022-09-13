@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.core.model.params.jeepluspay;
+package com.jeequan.jeepay.core.model.params.plspay;
 
 import lombok.Data;
 
@@ -25,7 +25,7 @@ import lombok.Data;
  * @date 2022/8/11 14:32
  */
 @Data
-public class JeepluspayConfig {
+public class PlspayConfig {
 
     /** 签名类型 */
     public static final String DEFAULT_SIGN_TYPE = "MD5";

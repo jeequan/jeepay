@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jeequan.jeepay.pay.channel.jeepluspay;
+package com.jeequan.jeepay.pay.channel.plspay;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.exception.ResponseException;
-import com.jeequan.jeepay.core.model.params.jeepluspay.JeepluspayConfig;
-import com.jeequan.jeepay.core.model.params.jeepluspay.JeepluspayNormalMchParams;
+import com.jeequan.jeepay.core.model.params.plspay.PlspayConfig;
+import com.jeequan.jeepay.core.model.params.plspay.PlspayNormalMchParams;
 import com.jeequan.jeepay.pay.channel.AbstractChannelRefundNoticeService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
@@ -42,11 +42,11 @@ import javax.servlet.http.HttpServletRequest;
  */
 @Service
 @Slf4j
-public class JeepluspayChannelRefundNoticeService extends AbstractChannelRefundNoticeService {
+public class PlspayChannelRefundNoticeService extends AbstractChannelRefundNoticeService {
 
     @Override
     public String getIfCode() {
-        return CS.IF_CODE.JEEPLUSPAY;
+        return CS.IF_CODE.PLSPAY;
     }
 
     @Override
@@ -105,7 +105,7 @@ public class JeepluspayChannelRefundNoticeService extends AbstractChannelRefundN
                 log.info("验签参数为空 [sign] :{}", sign);
                 return false;
             }
-            JeepluspayNormalMchParams normalMchParams = (JeepluspayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.JEEPLUSPAY);
+            PlspayNormalMchParams normalMchParams = (PlspayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.PLSPAY);
             jsonParams.remove("sign");
             // 获取md5秘钥,生成签名
             String newSign = JeepayKit.getSign(jsonParams, normalMchParams.getAppSecret());
@@ -116,7 +116,7 @@ public class JeepluspayChannelRefundNoticeService extends AbstractChannelRefundN
             }
             // 退款状态 0-订单生成 1-退款中 2-退款成功 3-退款失败 4-退款关闭
             String status = jsonParams.getString("state");
-            if (!JeepluspayConfig.REFUND_STATE_SUCCESS.equals(status)) {
+            if (!PlspayConfig.REFUND_STATE_SUCCESS.equals(status)) {
                 log.info("订单状态错误！ state = {}", status);
                 return false;
             }
