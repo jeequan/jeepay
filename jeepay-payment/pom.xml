@@ -128,7 +128,7 @@
         <dependency>
             <groupId>com.jeequan</groupId>
             <artifactId>jeepay-sdk-java</artifactId>
-            <version>1.0.0</version>
+            <version>pls-1.2.0</version>
             <scope>system</scope>
             <systemPath>${projectRootDir}/libs/jeepay-sdk-java-pls-1.2.0.jar</systemPath>
         </dependency>
@@ -156,6 +156,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <includeSystemScope>true</includeSystemScope>
+                </configuration>
             </plugin>
 
             <plugin>
