@@ -60,6 +60,9 @@ public class AlipayChannelUserService implements IChannelUserService {
                 throw new BizException("服务商支付宝接口没有配置！");
             }
             appId = isvParams.getAppId();
+            if(isvParams.getSandbox() != null && isvParams.getSandbox() == CS.YES){
+                oauthUrl = AlipayConfig.SANDBOX_OAUTH_URL;
+            }
         }else{
             //获取商户配置信息
             AlipayNormalMchParams normalMchParams = (AlipayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
