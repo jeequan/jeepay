@@ -17,6 +17,8 @@ package com.jeequan.jeepay.pay.channel.wxpay;
 
 import com.github.binarywang.wxpay.bean.entpay.EntPayRequest;
 import com.github.binarywang.wxpay.bean.entpay.EntPayResult;
+import com.github.binarywang.wxpay.bean.transfer.TransferBatchesRequest;
+import com.github.binarywang.wxpay.bean.transfer.TransferBatchesResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.jeequan.jeepay.core.constants.CS;
@@ -33,6 +35,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
 * 转账接口： 微信官方
@@ -83,32 +88,57 @@ public class WxpayTransferService implements ITransferService {
 
         try {
 
-            EntPayRequest request = new EntPayRequest();
-
             WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
 
-            request.setMchAppid(wxServiceWrapper.getWxPayService().getConfig().getAppId());  // 商户账号appid
-            request.setMchId(wxServiceWrapper.getWxPayService().getConfig().getMchId());  //商户号
+            if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
 
-            request.setPartnerTradeNo(transferOrder.getTransferId()); //商户订单号
-            request.setOpenid(transferOrder.getAccountNo()); //openid
-            request.setAmount(transferOrder.getAmount().intValue()); //付款金额，单位为分
-            request.setSpbillCreateIp(transferOrder.getClientIp());
-            request.setDescription(transferOrder.getTransferDesc()); //付款备注
-            if(StringUtils.isNotEmpty(transferOrder.getAccountName())){
-                request.setReUserName(transferOrder.getAccountName());
-                request.setCheckName("FORCE_CHECK");
-            }else{
-                request.setCheckName("NO_CHECK");
-            }
+                EntPayRequest request = new EntPayRequest();
 
-            EntPayResult entPayResult = wxServiceWrapper.getWxPayService().getEntPayService().entPay(request);
+                request.setMchAppid(wxServiceWrapper.getWxPayService().getConfig().getAppId());  // 商户账号appid
+                request.setMchId(wxServiceWrapper.getWxPayService().getConfig().getMchId());  //商户号
 
-            // SUCCESS/FAIL，注意：当状态为FAIL时，存在业务结果未明确的情况。如果状态为FAIL，请务必关注错误代码（err_code字段），通过查询接口确认此次付款的结果。
-            if("SUCCESS".equalsIgnoreCase(entPayResult.getResultCode())){
-                return ChannelRetMsg.confirmSuccess(entPayResult.getPaymentNo());
-            }else{
-                return ChannelRetMsg.waiting();
+                request.setPartnerTradeNo(transferOrder.getTransferId()); //商户订单号
+                request.setOpenid(transferOrder.getAccountNo()); //openid
+                request.setAmount(transferOrder.getAmount().intValue()); //付款金额，单位为分
+                request.setSpbillCreateIp(transferOrder.getClientIp());
+                request.setDescription(transferOrder.getTransferDesc()); //付款备注
+                if(StringUtils.isNotEmpty(transferOrder.getAccountName())){
+                    request.setReUserName(transferOrder.getAccountName());
+                    request.setCheckName("FORCE_CHECK");
+                }else{
+                    request.setCheckName("NO_CHECK");
+                }
+
+                EntPayResult entPayResult = wxServiceWrapper.getWxPayService().getEntPayService().entPay(request);
+
+                // SUCCESS/FAIL，注意：当状态为FAIL时，存在业务结果未明确的情况。如果状态为FAIL，请务必关注错误代码（err_code字段），通过查询接口确认此次付款的结果。
+                if("SUCCESS".equalsIgnoreCase(entPayResult.getResultCode())){
+                    return ChannelRetMsg.confirmSuccess(entPayResult.getPaymentNo());
+                }else{
+                    return ChannelRetMsg.waiting();
+                }
+            } else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
+                TransferBatchesRequest request = new TransferBatchesRequest();
+                request.setAppid(wxServiceWrapper.getWxPayService().getConfig().getAppId());
+                request.setTotalAmount(transferOrder.getAmount().intValue());
+                request.setTotalNum(1);
+                request.setOutBatchNo(transferOrder.getTransferId());
+                request.setBatchName(transferOrder.getAccountName());
+                request.setBatchRemark(transferOrder.getTransferDesc());
+
+                List<TransferBatchesRequest.TransferDetail> list = new ArrayList<>();
+                TransferBatchesRequest.TransferDetail transferDetail = new TransferBatchesRequest.TransferDetail();
+                transferDetail.setOutDetailNo(transferOrder.getTransferId());
+                transferDetail.setOpenid(transferOrder.getAccountNo());
+                transferDetail.setTransferAmount(transferOrder.getAmount().intValue()); //付款金额，单位为分
+                transferDetail.setUserName(transferOrder.getAccountName());
+                transferDetail.setTransferRemark(transferOrder.getTransferDesc());
+                request.setTransferDetailList(list);
+
+                TransferBatchesResult transferBatchesResult = wxServiceWrapper.getWxPayService().getTransferService().transferBatches(request);
+                return ChannelRetMsg.confirmSuccess(transferBatchesResult.getBatchId());
+            } else {
+                return ChannelRetMsg.sysError("请选择微信V2或V3模式");
             }
 
         } catch (WxPayException e) {

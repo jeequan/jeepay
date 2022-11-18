@@ -48,7 +48,7 @@
     <hutool.util.version>5.7.16</hutool.util.version>  <!-- hutool -->
     <spring.security.version>5.4.7</spring.security.version> <!-- 用于core的scope依赖 -->
     <jjwt.version>0.9.1</jjwt.version>
-    <binarywang.weixin.java.version>4.1.0</binarywang.weixin.java.version>
+    <binarywang.weixin.java.version>4.3.9.B</binarywang.weixin.java.version>
     <rocketmq.spring.boot.starter.version>2.2.0</rocketmq.spring.boot.starter.version>
     <aliyun-openservices-ons-client.version>1.8.8.1.Final</aliyun-openservices-ons-client.version>
 
