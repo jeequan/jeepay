@@ -130,7 +130,7 @@ public class AliyunOssService implements IOssService {
             }
 
             String bucket = ossSavePlaceEnum == OssSavePlaceEnum.PRIVATE ? aliyunOssYmlConfig.getPrivateBucketName() : aliyunOssYmlConfig.getPublicBucketName();
-            this.ossClient.getObject(new GetObjectRequest(bucket, fullPath), downloadFile);
+            this.ossClient.getObject(new GetObjectRequest(bucket, source), downloadFile);
 
             return true;
         } catch (Exception e) {
