@@ -27,8 +27,8 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxJsapiOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxJsapiOrderRS;
+import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxLiteOrderRQ;
+import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxLiteOrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import com.jeequan.jeepay.response.PayOrderCreateResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +48,7 @@ public class WxLite extends PlspayPaymentService {
 
     @Override
     public String preCheck(UnifiedOrderRQ rq, PayOrder payOrder) {
-        WxJsapiOrderRQ bizRQ = (WxJsapiOrderRQ) rq;
+        WxLiteOrderRQ bizRQ = (WxLiteOrderRQ) rq;
         if (StringUtils.isEmpty(bizRQ.getOpenid())) {
             throw new BizException("[openid]不可为空");
         }
@@ -57,9 +57,9 @@ public class WxLite extends PlspayPaymentService {
 
     @Override
     public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
-        WxJsapiOrderRQ bizRQ = (WxJsapiOrderRQ) rq;
+        WxLiteOrderRQ bizRQ = (WxLiteOrderRQ) rq;
         // 构造函数响应数据
-        WxJsapiOrderRS res = ApiResBuilder.buildSuccess(WxJsapiOrderRS.class);
+        WxLiteOrderRS res = ApiResBuilder.buildSuccess(WxLiteOrderRS.class);
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
         res.setChannelRetMsg(channelRetMsg);
         try {

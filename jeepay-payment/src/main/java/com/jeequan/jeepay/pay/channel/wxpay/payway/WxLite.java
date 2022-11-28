@@ -26,14 +26,14 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.pay.channel.wxpay.WxpayPaymentService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
-import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxJsapiOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxJsapiOrderRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
+import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxLiteOrderRQ;
+import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxLiteOrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
-import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -52,7 +52,7 @@ public class WxLite extends WxpayPaymentService {
     @Override
     public String preCheck(UnifiedOrderRQ rq, PayOrder payOrder) {
 
-        WxJsapiOrderRQ bizRQ = (WxJsapiOrderRQ) rq;
+        WxLiteOrderRQ bizRQ = (WxLiteOrderRQ) rq;
         if(StringUtils.isEmpty(bizRQ.getOpenid())){
             throw new BizException("[openid]不可为空");
         }
@@ -63,7 +63,7 @@ public class WxLite extends WxpayPaymentService {
     @Override
     public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception{
 
-        WxJsapiOrderRQ bizRQ = (WxJsapiOrderRQ) rq;
+        WxLiteOrderRQ bizRQ = (WxLiteOrderRQ) rq;
 
         WxPayUnifiedOrderRequest req = buildUnifiedOrderRequest(payOrder, mchAppConfigContext);
         req.setTradeType(WxPayConstants.TradeType.JSAPI);
@@ -74,7 +74,7 @@ public class WxLite extends WxpayPaymentService {
         }
 
         // 构造函数响应数据
-        WxJsapiOrderRS res = ApiResBuilder.buildSuccess(WxJsapiOrderRS.class);
+        WxLiteOrderRS res = ApiResBuilder.buildSuccess(WxLiteOrderRS.class);
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
         res.setChannelRetMsg(channelRetMsg);
 
