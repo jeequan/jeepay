@@ -165,9 +165,6 @@ jeepay
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/022.png "Jeepay演示界面")
 
-## 🍟 合作伙伴
-- 驰骋工作流： https://ccfast.cc/?Frm=jeepay
-
 ## 🥪 关于我们
 ***
 微信扫描下面二维码，关注官方公众号：计全科技，获取更多精彩内容。
