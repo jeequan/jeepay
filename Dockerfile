@@ -21,6 +21,8 @@ RUN mvn clean package -Dmaven.test.skip=true -Ptest
 # jdk17对应：mcr.microsoft.com/java/jre:17-zulu-alpine
 FROM mcr.microsoft.com/java/jre:8-zulu-alpine
 
+RUN echo "Asia/Shanghai" > /etc/timezone
+
 ARG PLATFORM=$PLATFORM
 
 WORKDIR /workspace
