@@ -15,13 +15,8 @@
  */
 package com.jeequan.jeepay.core.model.params;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
-import com.jeequan.jeepay.core.model.params.plspay.PlspayNormalMchParams;
-import com.jeequan.jeepay.core.model.params.pppay.PpPayNormalMchParams;
-import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
-import com.jeequan.jeepay.core.model.params.xxpay.XxpayNormalMchParams;
 
 /*
  * 抽象类 普通商户参数定义
@@ -32,18 +27,12 @@ import com.jeequan.jeepay.core.model.params.xxpay.XxpayNormalMchParams;
  */
 public abstract class NormalMchParams {
 
-    public static NormalMchParams factory(String ifCode, String paramsStr){
+    public static NormalMchParams factory(String ifCode, String paramsStr) {
 
-        if(CS.IF_CODE.WXPAY.equals(ifCode)){
-            return JSONObject.parseObject(paramsStr, WxpayNormalMchParams.class);
-        }else if(CS.IF_CODE.ALIPAY.equals(ifCode)){
-            return JSONObject.parseObject(paramsStr, AlipayNormalMchParams.class);
-        }else if(CS.IF_CODE.XXPAY.equals(ifCode)){
-            return JSONObject.parseObject(paramsStr, XxpayNormalMchParams.class);
-        }else if (CS.IF_CODE.PPPAY.equals(ifCode)){
-            return JSONObject.parseObject(paramsStr, PpPayNormalMchParams.class);
-        }else if (CS.IF_CODE.PLSPAY.equals(ifCode)){
-            return JSONObject.parseObject(paramsStr, PlspayNormalMchParams.class);
+        try {
+            return (NormalMchParams)JSONObject.parseObject(paramsStr, Class.forName(NormalMchParams.class.getPackage().getName() +"."+ ifCode +"."+ StrUtil.upperFirst(ifCode) +"NormalMchParams"));
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
         return null;
     }

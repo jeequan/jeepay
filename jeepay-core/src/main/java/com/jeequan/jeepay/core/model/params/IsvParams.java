@@ -15,11 +15,8 @@
  */
 package com.jeequan.jeepay.core.model.params;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
-import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
-import com.jeequan.jeepay.core.model.params.ysf.YsfpayIsvParams;
 
 /**
  * 抽象类 isv参数定义
@@ -33,12 +30,10 @@ public abstract class IsvParams {
 
     public static IsvParams factory(String ifCode, String paramsStr){
 
-        if(CS.IF_CODE.WXPAY.equals(ifCode)){
-            return JSONObject.parseObject(paramsStr, WxpayIsvParams.class);
-        }else if(CS.IF_CODE.ALIPAY.equals(ifCode)){
-            return JSONObject.parseObject(paramsStr, AlipayIsvParams.class);
-        }else if(CS.IF_CODE.YSFPAY.equals(ifCode)){
-            return JSONObject.parseObject(paramsStr, YsfpayIsvParams.class);
+        try {
+            return (IsvParams)JSONObject.parseObject(paramsStr, Class.forName(IsvParams.class.getPackage().getName() +"."+ ifCode +"."+ StrUtil.upperFirst(ifCode) +"IsvParams"));
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
         return null;
     }
