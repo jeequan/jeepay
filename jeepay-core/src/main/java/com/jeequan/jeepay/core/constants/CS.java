@@ -175,6 +175,14 @@ public class CS {
         String WX_H5 = "WX_H5";  //微信H5支付
         String WX_NATIVE = "WX_NATIVE";  //微信扫码支付
 
+        String UP_APP = "UP_APP";     // 银联App支付
+        String UP_WAP = "UP_WAP";     // 银联手机网站支付
+        String UP_QR = "UP_QR";       // 银联二维码(主扫)
+        String UP_BAR = "UP_BAR";     // 银联二维码(被扫)
+        String UP_B2B = "UP_B2B";     // 银联企业网银支付
+        String UP_PC = "UP_PC";       // 银联网关支付
+        String UP_JSAPI = "UP_JSAPI"; // 银联JS支付
+
         String PP_PC = "PP_PC"; // Paypal 支付
     }
 

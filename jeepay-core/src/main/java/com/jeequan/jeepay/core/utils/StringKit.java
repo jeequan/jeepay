@@ -175,4 +175,49 @@ public class StringKit {
 		return originJSON.toJSONString();
 	}
 
+	/*
+	 * 功能描述: 数据自动脱敏
+	 * @param str
+	 * @Return: java.lang.String
+	 * @Author: terrfly
+	 * @Date: 2021/7/20 17:07
+	 */
+	public static String autoDesensitization(String str){
+
+		if(StringUtils.isEmpty(str)){
+			return str;
+		}
+
+		int len = str.length();
+		if(len == 1) return "*"; // 1位
+		if(len <= 3) return StringUtils.repeat("*", len - 1) + str.substring(len - 1); //小于等于三位 格式为：  **A
+
+		// 公式： 脱敏数据占据2/3 的范围。
+		// 假设： 采用6的倍数组进行循环（最少两组）  循环次数为：n, 原始位数为 x, 加密数据为原始数据的两倍即 2x ,
+		// 即： 6x·n = len， 缩小范围使得x=n，即： 7X=len
+		int x = (len >= 7 && len % 7 == 0 ) ? len / 7 : len / 7 + 1;
+
+		int startIndex = 0; //截取原始字符串的位置
+		String result = ""; //最终结果
+
+		while(startIndex < len){
+
+			for(int i = 1; i <= 3; i++){ // 三个一组
+
+				if(startIndex + x > len){ // 最后一组
+					int y = len - startIndex;
+					result += i == 1 ? str.substring(startIndex, startIndex + y) : StringUtils.repeat("*", y);
+					startIndex = startIndex + y;
+					break;
+				}
+
+				// 只有第一组是原始数据 ，其他全部为*代替
+				result += i == 1 ? str.substring(startIndex, startIndex + x) : StringUtils.repeat("*", x);
+				startIndex = startIndex + x;
+			}
+		}
+		return result;
+	}
+
+
 }

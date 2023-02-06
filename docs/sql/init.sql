@@ -723,6 +723,14 @@ INSERT INTO t_pay_way (way_code, way_name) VALUES ('YSF_JSAPI', '云闪付jsapi'
 
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('PP_PC', 'PayPal支付');
 
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_APP', '银联App支付');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_WAP', '银联手机网站支付');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_QR', '银联二维码(主扫)');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_BAR', '银联二维码(被扫)');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_B2B', '银联企业网银支付');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_PC', '银联网关支付');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_JSAPI', '银联Js支付');
+
 -- 初始化支付接口定义
 INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
 VALUES ('alipay', '支付宝官方', 1, 1, 2,
