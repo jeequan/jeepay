@@ -44,6 +44,9 @@ public class PayOrderProcessService {
     /** 明确成功的处理逻辑（除更新订单其他业务） **/
     public void confirmSuccess(PayOrder payOrder){
 
+        // 查询查询订单详情
+        payOrder = payOrderService.getById(payOrder.getPayOrderId());
+
         //设置订单状态
         payOrder.setState(PayOrder.STATE_SUCCESS);
 
