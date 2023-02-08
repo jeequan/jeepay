@@ -18,6 +18,8 @@ package com.jeequan.jeepay.pay.channel;
 
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.util.ChannelCertConfigKitBean;
 import com.jeequan.jeepay.service.impl.SysConfigService;
@@ -35,6 +37,11 @@ public abstract class AbstractPaymentService implements IPaymentService{
     @Autowired protected SysConfigService sysConfigService;
     @Autowired protected ChannelCertConfigKitBean channelCertConfigKitBean;
     @Autowired protected ConfigContextQueryService configContextQueryService;
+
+    @Override
+    public String customPayOrderId(UnifiedOrderRQ bizRQ, PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
+        return null; //使用系统默认支付订单号
+    }
 
     /** 订单分账（一般用作 如微信订单将在下单处做标记） */
     protected boolean isDivisionOrder(PayOrder payOrder){

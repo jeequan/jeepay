@@ -182,7 +182,13 @@ public abstract class AbstractPayOrderController extends ApiController {
                 throw new BizException(errMsg);
             }
 
+            String newPayOrderId = paymentService.customPayOrderId(bizRQ, payOrder, mchAppConfigContext);
+
+
             if(isNewOrder){
+                if(StringUtils.isNotBlank(newPayOrderId)){ // 自定义订单号
+                    payOrder.setPayOrderId(newPayOrderId);
+                }
                 //订单入库 订单状态： 生成状态  此时没有和任何上游渠道产生交互。
                 payOrderService.save(payOrder);
             }
