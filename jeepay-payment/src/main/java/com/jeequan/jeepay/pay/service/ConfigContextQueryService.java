@@ -65,6 +65,10 @@ public class ConfigContextQueryService {
         return mchAppService.getOneByMch(mchNo, mchAppId);
     }
 
+    public MchAppConfigContext queryMchInfoAndAppInfo(String mchAppId) {
+        return queryMchInfoAndAppInfo(mchAppService.getById(mchAppId).getMchNo(), mchAppId);
+    }
+
     public MchAppConfigContext queryMchInfoAndAppInfo(String mchNo, String mchAppId){
 
         if(isCache()){
