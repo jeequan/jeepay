@@ -15,8 +15,11 @@
  */
 package com.jeequan.jeepay.pay.channel.wxpay;
 
+import com.github.binarywang.wxpay.bean.entpay.EntPayQueryRequest;
+import com.github.binarywang.wxpay.bean.entpay.EntPayQueryResult;
 import com.github.binarywang.wxpay.bean.entpay.EntPayRequest;
 import com.github.binarywang.wxpay.bean.entpay.EntPayResult;
+import com.github.binarywang.wxpay.bean.transfer.TransferBatchDetailResult;
 import com.github.binarywang.wxpay.bean.transfer.TransferBatchesRequest;
 import com.github.binarywang.wxpay.bean.transfer.TransferBatchesResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
@@ -110,13 +113,8 @@ public class WxpayTransferService implements ITransferService {
                 }
 
                 EntPayResult entPayResult = wxServiceWrapper.getWxPayService().getEntPayService().entPay(request);
+                return ChannelRetMsg.waiting();
 
-                // SUCCESS/FAIL，注意：当状态为FAIL时，存在业务结果未明确的情况。如果状态为FAIL，请务必关注错误代码（err_code字段），通过查询接口确认此次付款的结果。
-                if("SUCCESS".equalsIgnoreCase(entPayResult.getResultCode())){
-                    return ChannelRetMsg.confirmSuccess(entPayResult.getPaymentNo());
-                }else{
-                    return ChannelRetMsg.waiting();
-                }
             } else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
                 TransferBatchesRequest request = new TransferBatchesRequest();
                 request.setAppid(wxServiceWrapper.getWxPayService().getConfig().getAppId());
@@ -137,7 +135,7 @@ public class WxpayTransferService implements ITransferService {
                 request.setTransferDetailList(list);
 
                 TransferBatchesResult transferBatchesResult = wxServiceWrapper.getWxPayService().getTransferService().transferBatches(request);
-                return ChannelRetMsg.confirmSuccess(transferBatchesResult.getBatchId());
+                return ChannelRetMsg.waiting();
             } else {
                 return ChannelRetMsg.sysError("请选择微信V2或V3模式");
             }
@@ -155,6 +153,58 @@ public class WxpayTransferService implements ITransferService {
 
         } catch (Exception e) {
             log.error("转账异常：", e);
+            return ChannelRetMsg.waiting();
+        }
+    }
+
+    @Override
+    public ChannelRetMsg query(TransferOrder transferOrder, MchAppConfigContext mchAppConfigContext) {
+
+        try {
+            WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+
+            if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
+
+                EntPayQueryResult entPayQueryResult = wxServiceWrapper.getWxPayService().getEntPayService().queryEntPay(transferOrder.getTransferId());
+
+                // SUCCESS，明确成功
+                if("SUCCESS".equalsIgnoreCase(entPayQueryResult.getStatus())){
+                    return ChannelRetMsg.confirmSuccess(entPayQueryResult.getDetailId());
+                } else if ("FAILED".equalsIgnoreCase(entPayQueryResult.getStatus())){ // FAILED，明确失败
+                    return ChannelRetMsg.confirmFail(entPayQueryResult.getStatus(), entPayQueryResult.getReason());
+                } else{
+                    return ChannelRetMsg.waiting();
+                }
+            } else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
+
+                TransferBatchDetailResult transferBatchDetailResult =
+                        wxServiceWrapper.getWxPayService().getTransferService().transferBatchesOutBatchNoDetail(transferOrder.getTransferId(), transferOrder.getTransferId());
+
+                // SUCCESS，明确成功
+                if("SUCCESS".equalsIgnoreCase(transferBatchDetailResult.getDetailStatus())){
+                    return ChannelRetMsg.confirmSuccess(transferBatchDetailResult.getDetailId());
+                } else if ("FAIL".equalsIgnoreCase(transferBatchDetailResult.getDetailStatus())){ // FAIL，明确失败
+                    return ChannelRetMsg.confirmFail(transferBatchDetailResult.getDetailStatus(), transferBatchDetailResult.getFailReason());
+                } else{
+                    return ChannelRetMsg.waiting();
+                }
+            } else {
+                return ChannelRetMsg.sysError("请选择微信V2或V3模式");
+            }
+
+        } catch (WxPayException e) {
+
+            // 如果查询单号对应的数据不存在，那么数据不存在的原因可能是：（1）付款还在处理中；（2）付款处理失败导致付款订单没有落地，务必再次查询确认此次付款的结果。
+            if("NOT_FOUND".equalsIgnoreCase(e.getErrCode())){
+                return ChannelRetMsg.waiting();
+            }
+
+            return ChannelRetMsg.confirmFail(null,
+                    WxpayKit.appendErrCode(e.getReturnMsg(), e.getErrCode()),
+                    WxpayKit.appendErrMsg(e.getReturnMsg(), StringUtils.defaultIfEmpty(e.getErrCodeDes(), e.getCustomErrorMsg())));
+
+        } catch (Exception e) {
+            log.error("转账状态查询异常：", e);
             return ChannelRetMsg.waiting();
         }
     }

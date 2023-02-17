@@ -41,4 +41,7 @@ public interface ITransferService {
     /** 调起退款接口，并响应数据；  内部处理普通商户和服务商模式  **/
     ChannelRetMsg transfer(TransferOrderRQ bizRQ, TransferOrder refundOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
 
+    /** 调起转账查询接口  **/
+    ChannelRetMsg query(TransferOrder transferOrder, MchAppConfigContext mchAppConfigContext);
+
 }

@@ -15,9 +15,12 @@
  */
 package com.jeequan.jeepay.pay.channel.alipay;
 
+import com.alipay.api.domain.AlipayFundTransCommonQueryModel;
 import com.alipay.api.domain.AlipayFundTransUniTransferModel;
 import com.alipay.api.domain.Participant;
+import com.alipay.api.request.AlipayFundTransCommonQueryRequest;
 import com.alipay.api.request.AlipayFundTransUniTransferRequest;
+import com.alipay.api.response.AlipayFundTransCommonQueryResponse;
 import com.alipay.api.response.AlipayFundTransUniTransferResponse;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.TransferOrder;
@@ -98,8 +101,17 @@ public class AlipayTransferService implements ITransferService {
 
         // 调用成功
         if(response.isSuccess()){
-            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
-            channelRetMsg.setChannelOrderId(response.getOrderId());
+            if ("SUCCESS".equals(response.getStatus())) {
+                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+                channelRetMsg.setChannelOrderId(response.getOrderId());
+            }else if ("FAIL".equals(response.getStatus())) {
+                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+                channelRetMsg.setChannelErrCode(AlipayKit.appendErrCode(response.getCode(), response.getSubCode()));
+                channelRetMsg.setChannelErrMsg(AlipayKit.appendErrMsg(response.getMsg(), response.getSubMsg()));
+            }else {
+                return ChannelRetMsg.waiting();
+            }
+
         }else{
 
             //若 系统繁忙， 无法确认结果
@@ -113,6 +125,40 @@ public class AlipayTransferService implements ITransferService {
         }
 
         return channelRetMsg;
+    }
+
+    @Override
+    public ChannelRetMsg query(TransferOrder transferOrder, MchAppConfigContext mchAppConfigContext) {
+
+        AlipayFundTransCommonQueryRequest request = new AlipayFundTransCommonQueryRequest();
+        AlipayFundTransCommonQueryModel model = new AlipayFundTransCommonQueryModel();
+        model.setProductCode(TransferOrder.ENTRY_BANK_CARD.equals(transferOrder.getEntryType()) ? "TRANS_BANKCARD_NO_PWD" : "TRANS_ACCOUNT_NO_PWD");
+        model.setBizScene("DIRECT_TRANSFER");
+        model.setOutBizNo(transferOrder.getTransferId()); // 商户转账唯一订单号
+
+        AlipayKit.putApiIsvInfo(mchAppConfigContext, request, model);
+        request.setBizModel(model);
+
+        // 调起支付宝接口
+        AlipayFundTransCommonQueryResponse response = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
+        if (response.isSuccess()) {
+            // SUCCESS，明确成功
+            if("SUCCESS".equalsIgnoreCase(response.getStatus())){
+                return ChannelRetMsg.confirmSuccess(response.getOrderId());
+            }
+            // REFUND：退票（适用于"单笔转账到银行卡"）； FAIL：失败（适用于"单笔转账到银行卡"）
+            else if ("REFUND".equalsIgnoreCase(response.getStatus()) || "FAIL".equalsIgnoreCase(response.getStatus())){
+                return ChannelRetMsg.confirmFail(response.getErrorCode(), response.getFailReason());
+            } else{
+                return ChannelRetMsg.waiting();
+            }
+        } else {
+            // 如果查询单号对应的数据不存在，那么数据不存在的原因可能是：（1）付款还在处理中；（2）付款处理失败导致付款订单没有落地，务必再次查询确认此次付款的结果。
+            if("ORDER_NOT_EXIST".equalsIgnoreCase(response.getSubCode())){
+                return ChannelRetMsg.waiting();
+            }
+            return ChannelRetMsg.confirmFail(AlipayKit.appendErrCode(response.getCode(), response.getSubCode()), AlipayKit.appendErrMsg(response.getMsg(), response.getSubMsg()));
+        }
     }
 
 }
