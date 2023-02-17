@@ -183,6 +183,7 @@ public class WxpayDivisionService implements IDivisionService {
 
                 com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingRequest request = new com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingRequest();
                 request.setTransactionId(payOrder.getChannelOrderNo());
+                request.setUnfreezeUnsplit(true);
 
                 request.setAppid(WxpayKit.getWxPayConfig(wxServiceWrapper).getAppId());
                 // 特约商户

@@ -120,11 +120,11 @@ public class WxpayTransferService implements ITransferService {
             } else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
                 TransferBatchesRequest request = new TransferBatchesRequest();
                 request.setAppid(wxServiceWrapper.getWxPayService().getConfig().getAppId());
-                request.setTotalAmount(transferOrder.getAmount().intValue());
-                request.setTotalNum(1);
                 request.setOutBatchNo(transferOrder.getTransferId());
                 request.setBatchName(transferOrder.getAccountName());
                 request.setBatchRemark(transferOrder.getTransferDesc());
+                request.setTotalAmount(transferOrder.getAmount().intValue());
+                request.setTotalNum(1);
 
                 List<TransferBatchesRequest.TransferDetail> list = new ArrayList<>();
                 TransferBatchesRequest.TransferDetail transferDetail = new TransferBatchesRequest.TransferDetail();
@@ -133,6 +133,7 @@ public class WxpayTransferService implements ITransferService {
                 transferDetail.setTransferAmount(transferOrder.getAmount().intValue()); //付款金额，单位为分
                 transferDetail.setUserName(transferOrder.getAccountName());
                 transferDetail.setTransferRemark(transferOrder.getTransferDesc());
+                list.add(transferDetail);
                 request.setTransferDetailList(list);
 
                 TransferBatchesResult transferBatchesResult = wxServiceWrapper.getWxPayService().getTransferService().transferBatches(request);

@@ -78,6 +78,10 @@ public class RefundOrderController extends ApiController {
                 throw new BizException("mchOrderNo 和 payOrderId不能同时为空");
             }
 
+            if(StringUtils.isNotEmpty(rq.getNotifyUrl()) && !StringKit.isAvailableUrl(rq.getNotifyUrl())){
+                throw new BizException("异步通知地址协议仅支持http:// 或 https:// !");
+            }
+
             PayOrder payOrder = payOrderService.queryMchOrder(rq.getMchNo(), rq.getPayOrderId(), rq.getMchOrderNo());
             if(payOrder == null){
                 throw new BizException("退款订单不存在");
@@ -117,10 +121,6 @@ public class RefundOrderController extends ApiController {
                 throw new BizException("商户退款订单号["+rq.getMchRefundNo()+"]已存在");
             }
 
-            if(StringUtils.isNotEmpty(rq.getNotifyUrl()) && !StringKit.isAvailableUrl(rq.getNotifyUrl())){
-                throw new BizException("异步通知地址协议仅支持http:// 或 https:// !");
-            }
-
             //获取支付参数 (缓存数据) 和 商户信息
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchNo, appId);
             if(mchAppConfigContext == null){
@@ -129,7 +129,6 @@ public class RefundOrderController extends ApiController {
 
             MchInfo mchInfo = mchAppConfigContext.getMchInfo();
             MchApp mchApp = mchAppConfigContext.getMchApp();
-
 
             //获取退款接口
             IRefundService refundService = SpringBeansUtil.getBean(payOrder.getIfCode() + "RefundService", IRefundService.class);
