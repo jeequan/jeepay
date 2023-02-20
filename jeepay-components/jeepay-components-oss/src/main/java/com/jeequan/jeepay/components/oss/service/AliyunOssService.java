@@ -19,7 +19,6 @@ import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.GetObjectRequest;
 import com.jeequan.jeepay.components.oss.config.AliyunOssYmlConfig;
-import com.jeequan.jeepay.components.oss.config.OssYmlConfig;
 import com.jeequan.jeepay.components.oss.constant.OssSavePlaceEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,70 +39,31 @@ import java.io.File;
 @Service
 @Slf4j
 @ConditionalOnProperty(name = "isys.oss.service-type", havingValue = "aliyun-oss")
-public class AliyunOssService implements IOssService {
+public class AliyunOssService implements IOssService{
 
-    @Autowired
-    private AliyunOssYmlConfig aliyunOssYmlConfig;
-
-    @Autowired
-    private OssYmlConfig ossYmlConfig;
+    @Autowired private AliyunOssYmlConfig aliyunOssYmlConfig;
 
     // ossClient 初始化
     private OSS ossClient = null;
 
     @PostConstruct
-    public void init() {
-        ossClient = new OSSClientBuilder().build(aliyunOssYmlConfig.getEndpoint(), aliyunOssYmlConfig.getAccessKeyId(),
-                aliyunOssYmlConfig.getAccessKeySecret());
-    }
-
-    /**
-     * 处理文件保存路径
-     *
-     * @param ossSavePlaceEnum 保存位置
-     * @param filePath         文件路径
-     * @return 完整路径
-     */
-    private String getFileKey(OssSavePlaceEnum ossSavePlaceEnum, String filePath) {
-        // 上传的时候需要考虑 OSS 存储空间的访问权限，并拼接路径前缀
-        String filePrefix = ossSavePlaceEnum == OssSavePlaceEnum.PUBLIC ? ossYmlConfig.getOss()
-                .getFilePublicPath() : ossYmlConfig.getOss().getFilePrivatePath();
-
-        // 如果路径包含设置的路径前缀，则跳过
-        if (filePath.startsWith(filePrefix)) {
-            // OSS 不允许路径第一个字符为 /
-            if (filePath.indexOf("/") == 0) {
-                filePath = filePath.replaceFirst("/", "");
-            }
-            return filePath;
-        }
-
-        String fullPath = (filePrefix + "/" + filePath);
-
-        // OSS 不允许路径第一个字符为 /
-        if (fullPath.indexOf("/") == 0) {
-            fullPath = fullPath.replaceFirst("/", "");
-        }
-
-        return fullPath;
+    public void init(){
+        ossClient = new OSSClientBuilder().build(aliyunOssYmlConfig.getEndpoint(), aliyunOssYmlConfig.getAccessKeyId(), aliyunOssYmlConfig.getAccessKeySecret());
     }
 
     @Override
-    public String upload2PreviewUrl(OssSavePlaceEnum ossSavePlaceEnum, MultipartFile multipartFile,
-                                    String saveDirAndFileName) {
+    public String upload2PreviewUrl(OssSavePlaceEnum ossSavePlaceEnum, MultipartFile multipartFile, String saveDirAndFileName) {
 
         try {
 
-            String fullPath = getFileKey(ossSavePlaceEnum, saveDirAndFileName);
+            this.ossClient.putObject(ossSavePlaceEnum == OssSavePlaceEnum.PUBLIC ? aliyunOssYmlConfig.getPublicBucketName() : aliyunOssYmlConfig.getPrivateBucketName()
+                    , saveDirAndFileName, multipartFile.getInputStream());
 
-            this.ossClient.putObject(
-                    ossSavePlaceEnum == OssSavePlaceEnum.PUBLIC ? aliyunOssYmlConfig.getPublicBucketName() : aliyunOssYmlConfig.getPrivateBucketName()
-                    , fullPath, multipartFile.getInputStream());
-
-            if (ossSavePlaceEnum == OssSavePlaceEnum.PUBLIC) {
+            if(ossSavePlaceEnum == OssSavePlaceEnum.PUBLIC){
                 // 文档：https://www.alibabacloud.com/help/zh/doc-detail/39607.htm  example: https://BucketName.Endpoint/ObjectName
-                return "https://" + aliyunOssYmlConfig.getPublicBucketName() + "." + aliyunOssYmlConfig.getEndpoint() + "/" + fullPath;
+                return "https://" + aliyunOssYmlConfig.getPublicBucketName() + "." + aliyunOssYmlConfig.getEndpoint() + "/" + saveDirAndFileName;
             }
+
             return saveDirAndFileName;
 
         } catch (Exception e) {
@@ -116,21 +76,9 @@ public class AliyunOssService implements IOssService {
     public boolean downloadFile(OssSavePlaceEnum ossSavePlaceEnum, String source, String target) {
 
         try {
-            String fullPath = getFileKey(ossSavePlaceEnum, source);
-
-            File downloadFile = new File(target);
-
-            // 当本地路径的上层目录不存在时，自动创建
-            // OSS SDK 在 Docker 内部可能出现 UnknownHost 错误具体表现为
-            // com.aliyun.oss.ClientException: Cannot read the content input stream.
-            if (!downloadFile.getParentFile().exists()) {
-                log.info("downloadFile parent dir not exists create it: {}",
-                        downloadFile.getParentFile().getAbsolutePath());
-                downloadFile.getParentFile().mkdirs();
-            }
 
             String bucket = ossSavePlaceEnum == OssSavePlaceEnum.PRIVATE ? aliyunOssYmlConfig.getPrivateBucketName() : aliyunOssYmlConfig.getPublicBucketName();
-            this.ossClient.getObject(new GetObjectRequest(bucket, source), downloadFile);
+            this.ossClient.getObject(new GetObjectRequest(bucket, source), new File(target));
 
             return true;
         } catch (Exception e) {
