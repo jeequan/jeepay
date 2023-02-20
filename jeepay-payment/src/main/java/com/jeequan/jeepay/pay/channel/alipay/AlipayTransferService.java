@@ -104,10 +104,12 @@ public class AlipayTransferService implements ITransferService {
             if ("SUCCESS".equals(response.getStatus())) {
                 channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
                 channelRetMsg.setChannelOrderId(response.getOrderId());
+                return channelRetMsg;
             }else if ("FAIL".equals(response.getStatus())) {
                 channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
                 channelRetMsg.setChannelErrCode(AlipayKit.appendErrCode(response.getCode(), response.getSubCode()));
                 channelRetMsg.setChannelErrMsg(AlipayKit.appendErrMsg(response.getMsg(), response.getSubMsg()));
+                return channelRetMsg;
             }else {
                 return ChannelRetMsg.waiting();
             }
@@ -122,9 +124,8 @@ public class AlipayTransferService implements ITransferService {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
             channelRetMsg.setChannelErrCode(response.getSubCode());
             channelRetMsg.setChannelErrMsg(response.getSubMsg());
+            return channelRetMsg;
         }
-
-        return channelRetMsg;
     }
 
     @Override
