@@ -72,6 +72,14 @@ public class CloseOrderController extends ApiController {
         }
 
         ClosePayOrderRS bizRes = new ClosePayOrderRS();
+
+        // 订单生成状态  直接修改订单状态
+        if (payOrder.getState() == PayOrder.STATE_INIT) {
+            payOrderService.updateInit2Close(payOrder.getPayOrderId());
+            bizRes.setChannelRetMsg(ChannelRetMsg.confirmSuccess(null));
+            return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
+        }
+
         try {
 
             String payOrderId = payOrder.getPayOrderId();

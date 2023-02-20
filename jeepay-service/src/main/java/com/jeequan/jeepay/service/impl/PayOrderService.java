@@ -90,10 +90,19 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
 
         PayOrder updateRecord = new PayOrder();
         updateRecord.setState(PayOrder.STATE_CLOSED);
-        updateRecord.setSuccessTime(new Date());
 
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
                 .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_ING));
+    }
+
+    /** 更新订单状态  【订单生成】 --》 【订单关闭】 **/
+    public boolean updateInit2Close(String payOrderId){
+
+        PayOrder updateRecord = new PayOrder();
+        updateRecord.setState(PayOrder.STATE_CLOSED);
+
+        return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
+                .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_INIT));
     }
 
 
