@@ -36,7 +36,7 @@
   <!-- 配置属性声明, 支持自定义参数 -->
   <properties>
 
-    <isys.version>1.16.0</isys.version> <!-- 指定当前[项目]版本号 -->
+    <isys.version>2.0.0</isys.version> <!-- 指定当前[项目]版本号 -->
     <projectRootDir>${basedir}</projectRootDir>
     <java.version>1.8</java.version> <!-- 指定java版本号 -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> <!-- 项目构建输出编码 -->
