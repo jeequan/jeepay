@@ -26,6 +26,7 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchDivisionReceiver;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayOrderDivisionRecord;
+import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvsubMchParams;
 import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.pay.channel.IDivisionService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
@@ -105,7 +106,10 @@ public class WxpayDivisionService implements IDivisionService {
                 profitSharingReceiver.setAppid(WxpayKit.getWxPayConfig(wxServiceWrapper).getAppId());
                 // 特约商户
                 if(mchAppConfigContext.isIsvsubMch()){
-                    profitSharingReceiver.setSubMchId(WxpayKit.getWxPayConfig(wxServiceWrapper).getSubMchId());
+                    WxpayIsvsubMchParams isvsubMchParams =
+                            (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
+
+                    profitSharingReceiver.setSubMchId(isvsubMchParams.getSubMchId());
                 }
 
                 ProfitSharingReceiver receiver = wxServiceWrapper.getWxPayService().getProfitSharingV3Service().addProfitSharingReceiver(profitSharingReceiver);
@@ -188,7 +192,10 @@ public class WxpayDivisionService implements IDivisionService {
                 request.setAppid(WxpayKit.getWxPayConfig(wxServiceWrapper).getAppId());
                 // 特约商户
                 if(mchAppConfigContext.isIsvsubMch()){
-                    request.setSubMchId(WxpayKit.getWxPayConfig(wxServiceWrapper).getSubMchId());
+                    WxpayIsvsubMchParams isvsubMchParams =
+                            (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
+
+                    request.setSubMchId(isvsubMchParams.getSubMchId());
                 }
 
                 if(recordList.isEmpty()){
@@ -265,7 +272,10 @@ public class WxpayDivisionService implements IDivisionService {
             ProfitSharingUnfreezeRequest request = new ProfitSharingUnfreezeRequest();
             // 特约商户
             if(mchAppConfigContext.isIsvsubMch()){
-                request.setSubMchId(WxpayKit.getWxPayConfig(wxServiceWrapper).getSubMchId());
+                WxpayIsvsubMchParams isvsubMchParams =
+                        (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
+
+                request.setSubMchId(isvsubMchParams.getSubMchId());
             }
 
             request.setTransactionId(payOrder.getChannelOrderNo());
