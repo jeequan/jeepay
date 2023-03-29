@@ -112,7 +112,7 @@ public class PayOrderDivisionProcessService {
 
         // 重发通知，可直接查库
         if(isResend){
-            recordList = payOrderDivisionRecordService.list(PayOrderDivisionRecord.gw().eq(PayOrderDivisionRecord::getPayOrderId, payOrderId));
+            recordList = payOrderDivisionRecordService.list(PayOrderDivisionRecord.gw().eq(PayOrderDivisionRecord::getPayOrderId, payOrderId).eq(PayOrderDivisionRecord::getState, PayOrderDivisionRecord.STATE_FAIL));
         }else{
 
             // 查询&过滤 所有的分账接收对象

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayOrderDivisionRecord;
 import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.service.mapper.PayOrderDivisionRecordMapper;
 import com.jeequan.jeepay.service.mapper.PayOrderMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,7 @@ public class PayOrderDivisionRecordService extends ServiceImpl<PayOrderDivisionR
         }
 
         PayOrderDivisionRecord updateRecordByDiv = new PayOrderDivisionRecord();
+        updateRecordByDiv.setBatchOrderId(SeqKit.genDivisionBatchId()); // 重新生成batchOrderId, 避免部分失败导致： out_trade_no重复。 
         updateRecordByDiv.setState(PayOrderDivisionRecord.STATE_WAIT); //待分账
         updateRecordByDiv.setChannelRespResult("");
         updateRecordByDiv.setChannelBatchOrderId("");
