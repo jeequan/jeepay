@@ -458,7 +458,7 @@ CREATE TABLE `t_pay_order_division_record` (
           `pay_order_division_amount` BIGINT(20) NOT NULL COMMENT '订单实际分账金额, 单位：分（订单金额 - 商户手续费 - 已退款金额）',
           `batch_order_id` VARCHAR(30) NOT NULL COMMENT '系统分账批次号',
           `channel_batch_order_id` VARCHAR(64) COMMENT '上游分账批次号',
-          `state` TINYINT(6) NOT NULL COMMENT '状态: 0-待分账 1-分账成功, 2-分账失败',
+          `state` TINYINT(6) NOT NULL COMMENT '状态: 0-待分账 1-分账成功（明确成功）, 2-分账失败（明确失败）, 3-分账已受理（上游受理）',
           `channel_resp_result` TEXT COMMENT '上游返回数据包',
           `receiver_id` BIGINT(20) NOT NULL COMMENT '账号快照》 分账接收者ID',
           `receiver_group_id` BIGINT(20) COMMENT '账号快照》 组ID（便于商户接口使用）',

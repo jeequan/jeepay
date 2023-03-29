@@ -27,8 +27,9 @@ import java.util.Date;
 public class PayOrderDivisionRecord implements Serializable {
 
     public static final byte STATE_WAIT = 0; // 待分账
-    public static final byte STATE_SUCCESS = 1; // 分账成功
-    public static final byte STATE_FAIL = 2; // 分账失败
+    public static final byte STATE_SUCCESS = 1; // 分账成功（明确成功）
+    public static final byte STATE_FAIL = 2; // 分账失败（明确失败）
+    public static final byte STATE_ACCEPT = 3; // 分账已受理（上游受理）
 
     private static final long serialVersionUID=1L;
 
