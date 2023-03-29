@@ -40,4 +40,19 @@
     </select>
 
 
+    <!-- batch_order_id 去重， 查询出所有的 分账已受理状态的订单， 支持分页。  -->
+    <select id="distinctBatchOrderIdList" resultMap="BaseResultMap">
+
+        select DISTINCT batch_order_id from t_pay_order_division_record
+
+        <where>
+            <if test="ew != null">
+                ${ew.sqlSegment} <!-- mp条件构造器 -->
+            </if>
+        </where>
+
+    </select>
+
+
+
 </mapper>
