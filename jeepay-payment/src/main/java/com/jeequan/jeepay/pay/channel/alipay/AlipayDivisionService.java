@@ -41,10 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
 * 分账接口： 支付宝官方
@@ -220,12 +217,12 @@ public class AlipayDivisionService implements IDivisionService {
         // 创建返回结果
         HashMap<Long, ChannelRetMsg> resultMap = new HashMap<>();
 
-        // 同批次分账记录结果集
-        HashMap<String, RoyaltyDetail> aliAcMap = new HashMap<>();
         try {
-            // 当无分账用户时， 支付宝不允许发起分账请求， 支付宝没有完结接口，直接响应成功即可。
-            if(recordList.isEmpty()){
-                throw new BizException("payOrderId:" + payOrder.getPayOrderId() + "分账记录为空。recordList：" + recordList);
+
+            // 得到所有的 accNo 与 recordId map
+            Map<String, Long> accnoAndRecordIdSet = new HashMap<>();
+            for (PayOrderDivisionRecord record : recordList) {
+                accnoAndRecordIdSet.put(record.getAccNo(), record.getRecordId());
             }
 
             AlipayTradeOrderSettleQueryRequest request = new AlipayTradeOrderSettleQueryRequest();
@@ -235,27 +232,37 @@ public class AlipayDivisionService implements IDivisionService {
             //统一放置 isv接口必传信息
             AlipayKit.putApiIsvInfo(mchAppConfigContext, request, model);
 
-            // 支付宝分账请求单号
-            model.setSettleNo(recordList.get(0).getBatchOrderId());
             //结算请求流水号，由商家自定义。32个字符以内，仅可包含字母、数字、下划线。需保证在商户端不重复。
-            model.setOutRequestNo(payOrder.getPayOrderId());
-            //支付宝订单号
-            model.setTradeNo(payOrder.getChannelOrderNo());
+            model.setOutRequestNo(recordList.get(0).getBatchOrderId());
+            model.setTradeNo(payOrder.getChannelOrderNo()); //支付宝订单号
 
             //调起支付宝分账接口
-            if(log.isInfoEnabled()){
-                log.info("订单：[{}], 支付宝查询分账请求：{}", recordList.get(0).getBatchOrderId(), JSON.toJSONString(model));
-            }
+            log.info("订单：[{}], 支付宝查询分账请求：{}", recordList.get(0).getBatchOrderId(), JSON.toJSONString(model));
             AlipayTradeOrderSettleQueryResponse alipayResp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
             log.info("订单：[{}], 支付宝查询分账响应：{}", payOrder.getPayOrderId(), alipayResp.getBody());
+
             if(alipayResp.isSuccess()){
                 List<RoyaltyDetail> detailList = alipayResp.getRoyaltyDetailList();
                 if (CollectionUtil.isNotEmpty(detailList)) {
                     // 遍历匹配与当前账户相同的分账单
                     detailList.stream().forEach(item -> {
+
+                        // 我方系统的分账接收记录ID
+                        Long recordId = accnoAndRecordIdSet.get(item.getTransIn());
+
                         // 分账操作类型为转账类型
-                        if ("transfer".equals(item.getOperationType())) {
-                            aliAcMap.put(item.getTransIn(), item);
+                        if ("transfer".equals(item.getOperationType()) && recordId != null) {
+
+                            // 仅返回分账记录为最终态的结果 处理中的分账单不做返回处理
+                            if ("SUCCESS".equals(item.getState())) {
+
+                                resultMap.put(recordId, ChannelRetMsg.confirmSuccess(null));
+
+                            }else if ("FAIL".equals(item.getState())) {
+
+                                resultMap.put(recordId, ChannelRetMsg.confirmFail(null, item.getErrorCode(), item.getErrorDesc()));
+                            }
+
                         }
                     });
                 }
@@ -263,30 +270,6 @@ public class AlipayDivisionService implements IDivisionService {
                 log.error("支付宝分账查询响应异常, alipayResp:{}", JSON.toJSONString(alipayResp));
                 throw new BizException("支付宝分账查询响应异常：" + alipayResp.getSubMsg());
             }
-
-            // 返回结果
-            recordList.stream().forEach(record -> {
-                // 对应入账账号匹配
-                if (aliAcMap.get(record.getAccNo()) != null) {
-                    RoyaltyDetail detail = aliAcMap.get(record.getAccNo());
-                    ChannelRetMsg channelRetMsg = new ChannelRetMsg();
-                    // 错误码
-                    channelRetMsg.setChannelErrCode(detail.getErrorCode());
-                    // 错误信息
-                    channelRetMsg.setChannelErrMsg(detail.getErrorDesc());
-
-                    // 仅返回分账记录为最终态的结果 处理中的分账单不做返回处理
-                    if ("SUCCESS".equals(detail.getState())) {
-                        channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
-
-                        resultMap.put(record.getRecordId(), channelRetMsg);
-                    }else if ("FAIL".equals(detail.getState())) {
-                        channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-
-                        resultMap.put(record.getRecordId(), channelRetMsg);
-                    }
-                }
-            });
 
         }catch (Exception e) {
             log.error("查询分账信息异常", e);

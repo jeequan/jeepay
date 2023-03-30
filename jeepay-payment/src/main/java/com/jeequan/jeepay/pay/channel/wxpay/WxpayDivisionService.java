@@ -254,10 +254,6 @@ public class WxpayDivisionService implements IDivisionService {
         // 创建返回结果
         HashMap<Long, ChannelRetMsg> resultMap = new HashMap<>();
         try {
-            // 当无分账用户时， 支付宝不允许发起分账请求， 支付宝没有完结接口，直接响应成功即可。
-            if(recordList.isEmpty()){
-                throw new BizException("payOrderId:" + payOrder.getPayOrderId() + "分账记录为空。recordList：" + recordList);
-            }
 
             WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
 

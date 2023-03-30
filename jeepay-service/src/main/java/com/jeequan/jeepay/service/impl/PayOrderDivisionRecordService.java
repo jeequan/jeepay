@@ -33,7 +33,7 @@ public class PayOrderDivisionRecordService extends ServiceImpl<PayOrderDivisionR
 
         PayOrderDivisionRecord updateRecord = new PayOrderDivisionRecord();
         updateRecord.setState(state);
-        updateRecord.setChannelRespResult(channelRespResult);
+        updateRecord.setChannelRespResult( state == PayOrderDivisionRecord.STATE_SUCCESS ? "" : channelRespResult); // 若明确成功，清空错误信息。
         update(updateRecord, PayOrderDivisionRecord.gw().eq(PayOrderDivisionRecord::getRecordId, recordId).eq(PayOrderDivisionRecord::getState, PayOrderDivisionRecord.STATE_ACCEPT));
 
     }

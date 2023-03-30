@@ -103,10 +103,10 @@ public class PayOrderDivisionRecordReissueTask {
                             continue;
                         }
                         // 查询转账接口是否存在
-                        IDivisionService divisionService = SpringBeansUtil.getBean(batchRecord.getIfCode() + "DivisionService", IDivisionService.class);
+                        IDivisionService divisionService = SpringBeansUtil.getBean(payOrder.getIfCode() + "DivisionService", IDivisionService.class);
 
                         if (divisionService == null) {
-                            log.error("查询转账接口不存在：{}",  batchRecord.getIfCode());
+                            log.error("查询分账接口不存在：{}",  payOrder.getIfCode());
                             continue;
                         }
                         MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
