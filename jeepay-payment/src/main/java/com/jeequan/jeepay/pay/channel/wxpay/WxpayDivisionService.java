@@ -16,6 +16,7 @@
 package com.jeequan.jeepay.pay.channel.wxpay;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.bean.profitsharing.*;
@@ -43,6 +44,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
 * 分账接口： 微信官方
@@ -183,7 +185,7 @@ public class WxpayDivisionService implements IDivisionService {
                 request.setReceivers(receiverJSONArray.toJSONString());
 
                 ProfitSharingResult profitSharingResult = wxServiceWrapper.getWxPayService().getProfitSharingService().profitSharing(request);
-                return ChannelRetMsg.confirmSuccess(profitSharingResult.getOrderId());
+                return ChannelRetMsg.waiting();
 
             }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
 
@@ -229,9 +231,13 @@ public class WxpayDivisionService implements IDivisionService {
                 request.setReceivers(receivers);
 
                 com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult profitSharingResult = wxServiceWrapper.getWxPayService().getProfitSharingV3Service().profitSharing(request);
-                return ChannelRetMsg.confirmSuccess(profitSharingResult.getOrderId());
+
+                return ChannelRetMsg.waiting();
+
             } else {
+
                 return ChannelRetMsg.sysError("请选择微信V2或V3模式");
+
             }
 
         } catch (WxPayException wxPayException) {
@@ -257,10 +263,14 @@ public class WxpayDivisionService implements IDivisionService {
 
             WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
 
-            if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
 
-                // 同批次分账记录结果集
-                HashMap<String, ProfitSharingQueryResult.Receiver> wxAcMap = new HashMap<>();
+            // 得到所有的 accNo 与 recordId map
+            Map<String, Long> accnoAndRecordIdSet = new HashMap<>();
+            for (PayOrderDivisionRecord record : recordList) {
+                accnoAndRecordIdSet.put(record.getAccNo(), record.getRecordId());
+            }
+
+            if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
 
                 ProfitSharingQueryRequest request = new ProfitSharingQueryRequest();
                 request.setTransactionId(payOrder.getChannelOrderNo());
@@ -272,69 +282,70 @@ public class WxpayDivisionService implements IDivisionService {
                 ProfitSharingQueryResult profitSharingQueryResult = wxServiceWrapper.getWxPayService().getProfitSharingService().profitSharingQuery(request);
                 List<ProfitSharingQueryResult.Receiver> receivers = profitSharingQueryResult.getReceivers();
 
-                if (CollectionUtil.isNotEmpty(receivers)) {
-                    // 遍历匹配与当前账户相同的分账单
-                    receivers.stream().forEach(item -> {
-                        wxAcMap.put(item.getAccount(), item);
-                    });
-                }
+                for (ProfitSharingQueryResult.Receiver receiver : receivers) {
 
-                recordList.stream().forEach(record -> {
-                    ProfitSharingQueryResult.Receiver receiver = wxAcMap.get(record.getAccNo());
-                    if (receiver != null) {
-                        ChannelRetMsg channelRetMsg = new ChannelRetMsg();
-                        // 错误信息
-                        channelRetMsg.setChannelErrMsg(receiver.getFailReason());
+                    // 我方系统的分账接收记录ID
+                    Long recordId = accnoAndRecordIdSet.get(receiver.getAccount());
 
+                    // 记录中包含账号
+                    if (recordId != null) {
+
+                        // 仅返回分账记录为最终态的结果 处理中的分账单不做返回处理
                         if ("SUCCESS".equals(receiver.getResult())) {
-                            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
 
-                            resultMap.put(record.getRecordId(), channelRetMsg);
+                            resultMap.put(recordId, ChannelRetMsg.confirmSuccess(null));
+
                         }else if ("CLOSED".equals(receiver.getResult())) {
-                            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
 
-                            resultMap.put(record.getRecordId(), channelRetMsg);
+                            resultMap.put(recordId, ChannelRetMsg.confirmFail(null, null, receiver.getFailReason()));
                         }
                     }
-                });
+
+                }
 
             }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
-                // 同批次分账记录结果集
-                HashMap<String, com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult.Receiver> wxAcMap = new HashMap<>();
 
-                // 发起请求
-                com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult profitSharingResult = wxServiceWrapper.getWxPayService().getProfitSharingV3Service().getProfitSharingResult(recordList.get(0).getBatchOrderId(), payOrder.getChannelOrderNo());
-                List<com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult.Receiver> receivers = profitSharingResult.getReceivers();
+                String url = String.format("%s/v3/profitsharing/orders/%s?transaction_id=%s",
+                            wxServiceWrapper.getWxPayService().getPayBaseUrl(), recordList.get(0).getBatchOrderId(), payOrder.getChannelOrderNo());
 
-                if (CollectionUtil.isNotEmpty(receivers)) {
-                    // 遍历匹配与当前账户相同的分账单
-                    receivers.stream().forEach(item -> {
-                        wxAcMap.put(item.getAccount(), item);
-                    });
+                // 特约商户
+                if(mchAppConfigContext.isIsvsubMch()){
+                    WxpayIsvsubMchParams isvsubMchParams =
+                            (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
+                    url += "&sub_mchid=" + isvsubMchParams.getSubMchId();
                 }
 
-                recordList.stream().forEach(record -> {
-                    com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult.Receiver receiver = wxAcMap.get(record.getAccNo());
-                    if (receiver != null) {
-                        ChannelRetMsg channelRetMsg = new ChannelRetMsg();
-                        // 错误信息
-                        channelRetMsg.setChannelErrMsg(receiver.getFailReason());
+                String result = wxServiceWrapper.getWxPayService().getV3(url);
 
+                com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult profitSharingResult = JSON.parseObject(result, com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult.class);
+
+                List<com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult.Receiver> receivers = profitSharingResult.getReceivers();
+
+                for (com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult.Receiver receiver : receivers) {
+
+                    // 我方系统的分账接收记录ID
+                    Long recordId = accnoAndRecordIdSet.get(receiver.getAccount());
+
+                    // 记录中包含账号
+                    if (recordId != null) {
+
+                        // 仅返回分账记录为最终态的结果 处理中的分账单不做返回处理
                         if ("SUCCESS".equals(receiver.getResult())) {
-                            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
 
-                            resultMap.put(record.getRecordId(), channelRetMsg);
+                            resultMap.put(recordId, ChannelRetMsg.confirmSuccess(null));
+
                         }else if ("CLOSED".equals(receiver.getResult())) {
-                            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
 
-                            resultMap.put(record.getRecordId(), channelRetMsg);
+                            resultMap.put(recordId, ChannelRetMsg.confirmFail(null, null, receiver.getFailReason()));
                         }
                     }
-                });
+
+                }
+
             }
 
         } catch (WxPayException wxPayException) {
-            log.error("微信查询分账结果失败{}", wxPayException.getCustomErrorMsg());
+            log.error("微信查询分账结果失败, e = {}", wxPayException);
             throw new BizException(wxPayException.getCustomErrorMsg());
 
         } catch (Exception e) {
