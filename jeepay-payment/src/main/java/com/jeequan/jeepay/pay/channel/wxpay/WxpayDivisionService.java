@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.pay.channel.wxpay;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.bean.profitsharing.*;
@@ -26,6 +27,7 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchDivisionReceiver;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayOrderDivisionRecord;
+import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvsubMchParams;
 import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.pay.channel.IDivisionService;
@@ -38,8 +40,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -246,6 +248,106 @@ public class WxpayDivisionService implements IDivisionService {
         }
     }
 
+    @Override
+    public HashMap<Long, ChannelRetMsg> queryDivision(PayOrder payOrder, List<PayOrderDivisionRecord> recordList, MchAppConfigContext mchAppConfigContext) {
+
+        // 创建返回结果
+        HashMap<Long, ChannelRetMsg> resultMap = new HashMap<>();
+        try {
+            // 当无分账用户时， 支付宝不允许发起分账请求， 支付宝没有完结接口，直接响应成功即可。
+            if(recordList.isEmpty()){
+                throw new BizException("payOrderId:" + payOrder.getPayOrderId() + "分账记录为空。recordList：" + recordList);
+            }
+
+            WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+
+            if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
+
+                // 同批次分账记录结果集
+                HashMap<String, ProfitSharingQueryResult.Receiver> wxAcMap = new HashMap<>();
+
+                ProfitSharingQueryRequest request = new ProfitSharingQueryRequest();
+                request.setTransactionId(payOrder.getChannelOrderNo());
+                //放置isv信息
+                WxpayKit.putApiIsvInfo(mchAppConfigContext, request);
+
+                request.setOutOrderNo(recordList.get(0).getBatchOrderId()); //取到批次号
+
+                ProfitSharingQueryResult profitSharingQueryResult = wxServiceWrapper.getWxPayService().getProfitSharingService().profitSharingQuery(request);
+                List<ProfitSharingQueryResult.Receiver> receivers = profitSharingQueryResult.getReceivers();
+
+                if (CollectionUtil.isNotEmpty(receivers)) {
+                    // 遍历匹配与当前账户相同的分账单
+                    receivers.stream().forEach(item -> {
+                        wxAcMap.put(item.getAccount(), item);
+                    });
+                }
+
+                recordList.stream().forEach(record -> {
+                    ProfitSharingQueryResult.Receiver receiver = wxAcMap.get(record.getAccNo());
+                    if (receiver != null) {
+                        ChannelRetMsg channelRetMsg = new ChannelRetMsg();
+                        // 错误信息
+                        channelRetMsg.setChannelErrMsg(receiver.getFailReason());
+
+                        if ("SUCCESS".equals(receiver.getResult())) {
+                            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+
+                            resultMap.put(record.getRecordId(), channelRetMsg);
+                        }else if ("CLOSED".equals(receiver.getResult())) {
+                            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+
+                            resultMap.put(record.getRecordId(), channelRetMsg);
+                        }
+                    }
+                });
+
+            }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
+                // 同批次分账记录结果集
+                HashMap<String, com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult.Receiver> wxAcMap = new HashMap<>();
+
+                // 发起请求
+                com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult profitSharingResult = wxServiceWrapper.getWxPayService().getProfitSharingV3Service().getProfitSharingResult(recordList.get(0).getBatchOrderId(), payOrder.getChannelOrderNo());
+                List<com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult.Receiver> receivers = profitSharingResult.getReceivers();
+
+                if (CollectionUtil.isNotEmpty(receivers)) {
+                    // 遍历匹配与当前账户相同的分账单
+                    receivers.stream().forEach(item -> {
+                        wxAcMap.put(item.getAccount(), item);
+                    });
+                }
+
+                recordList.stream().forEach(record -> {
+                    com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult.Receiver receiver = wxAcMap.get(record.getAccNo());
+                    if (receiver != null) {
+                        ChannelRetMsg channelRetMsg = new ChannelRetMsg();
+                        // 错误信息
+                        channelRetMsg.setChannelErrMsg(receiver.getFailReason());
+
+                        if ("SUCCESS".equals(receiver.getResult())) {
+                            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+
+                            resultMap.put(record.getRecordId(), channelRetMsg);
+                        }else if ("CLOSED".equals(receiver.getResult())) {
+                            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+
+                            resultMap.put(record.getRecordId(), channelRetMsg);
+                        }
+                    }
+                });
+            }
+
+        } catch (WxPayException wxPayException) {
+            log.error("微信查询分账结果失败{}", wxPayException.getCustomErrorMsg());
+            throw new BizException(wxPayException.getCustomErrorMsg());
+
+        } catch (Exception e) {
+            log.error("微信分账失败", e);
+            throw new BizException(e.getMessage());
+        }
+
+        return resultMap;
+    }
 
     /** 调用订单的完结接口 (分账对象不存在时) */
     private String divisionFinish(PayOrder payOrder,MchAppConfigContext mchAppConfigContext) throws WxPayException {

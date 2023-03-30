@@ -18,11 +18,10 @@ package com.jeequan.jeepay.pay.channel;
 import com.jeequan.jeepay.core.entity.MchDivisionReceiver;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayOrderDivisionRecord;
-import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
-import com.jeequan.jeepay.pay.rqrs.transfer.TransferOrderRQ;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -45,5 +44,8 @@ public interface IDivisionService {
 
     /** 单次分账 （无需调用完结接口，或自动解冻商户资金)  **/
     ChannelRetMsg singleDivision(PayOrder payOrder, List<PayOrderDivisionRecord> recordList, MchAppConfigContext mchAppConfigContext);
+
+    /** 查询分账结果  **/
+    HashMap<Long, ChannelRetMsg> queryDivision(PayOrder payOrder, List<PayOrderDivisionRecord> recordList, MchAppConfigContext mchAppConfigContext);
 
 }

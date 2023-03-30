@@ -19,14 +19,22 @@ import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayOrderDivisionRecord;
+import com.jeequan.jeepay.core.utils.SpringBeansUtil;
+import com.jeequan.jeepay.pay.channel.IDivisionService;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.service.impl.PayOrderDivisionRecordService;
+import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /*
@@ -43,6 +51,8 @@ public class PayOrderDivisionRecordReissueTask {
     private static final int QUERY_PAGE_SIZE = 100; //每次查询数量
 
     @Autowired private PayOrderDivisionRecordService payOrderDivisionRecordService;
+    @Autowired private ConfigContextQueryService configContextQueryService;
+    @Autowired private PayOrderService payOrderService;
 
     @Scheduled(cron="0 0/1 * * * ?") // 每分钟执行一次
     public void start() {
@@ -61,7 +71,6 @@ public class PayOrderDivisionRecordReissueTask {
         while(true){
 
             try {
-
                 IPage<PayOrderDivisionRecord> pageRecordList = payOrderDivisionRecordService.getBaseMapper().distinctBatchOrderIdList(new Page(currentPageIndex, QUERY_PAGE_SIZE), lambdaQueryWrapper);
 
                 log.info("处理分账补单任务, 共计{}条", pageRecordList.getTotal());
@@ -87,13 +96,44 @@ public class PayOrderDivisionRecordReissueTask {
                             continue;
                         }
 
+                        // 查询支付订单信息
+                        PayOrder payOrder = payOrderService.getById(batchRecord.getPayOrderId());
+                        if (payOrder == null) {
+                            log.error("支付订单记录不存在：{}",  batchRecord.getPayOrderId());
+                            continue;
+                        }
+                        // 查询转账接口是否存在
+                        IDivisionService divisionService = SpringBeansUtil.getBean(batchRecord.getIfCode() + "DivisionService", IDivisionService.class);
+
+                        if (divisionService == null) {
+                            log.error("查询转账接口不存在：{}",  batchRecord.getIfCode());
+                            continue;
+                        }
+                        MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
                         // 调用渠道侧的查单接口：   注意：  渠道内需保证：
                         // 1. 返回的条目 必须全部来自recordList， 可以少于recordList但是不得高于 recordList 数量；
                         // 2. recordList 的记录可能与接口返回的数量不一致，  接口实现不要求对条目数量做验证；
                         // 3. 接口查询的记录若recordList 不存在， 忽略即可。  （  例如两条相同的accNo, 则可能仅匹配一条。 那么另外一条将在下一次循环中处理。  ）
                         // 4. 仅明确状态的再返回，若不明确则不需返回；
+                        HashMap<Long, ChannelRetMsg> queryDivision = divisionService.queryDivision(payOrder, recordList, mchAppConfigContext);
 
-//                    channelOrderReissueService.processPayOrder(payOrder);
+                        // 处理查询结果
+                        recordList.stream().forEach(record -> {
+                            ChannelRetMsg channelRetMsg = queryDivision.get(record.getRecordId());
+
+                            // 响应状态为分账成功或失败时，更新该记录状态
+                            if (ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == channelRetMsg.getChannelState() ||
+                                    ChannelRetMsg.ChannelState.CONFIRM_FAIL == channelRetMsg.getChannelState()) {
+
+                                PayOrderDivisionRecord upDivisionRecord = new PayOrderDivisionRecord();
+                                upDivisionRecord.setRecordId(record.getRecordId());
+                                upDivisionRecord.setChannelRespResult(channelRetMsg.getChannelErrMsg());
+
+                                upDivisionRecord.setState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == channelRetMsg.getChannelState() ? PayOrderDivisionRecord.STATE_SUCCESS : PayOrderDivisionRecord.STATE_FAIL);
+
+//                                payOrderDivisionRecordService.updateRecordSuccessOrFail(upDivisionRecord);
+                            }
+                        });
 
                     } catch (Exception e1) {
                         log.error("处理补单任务单条[{}]异常",  batchRecord.getBatchOrderId(), e1);
