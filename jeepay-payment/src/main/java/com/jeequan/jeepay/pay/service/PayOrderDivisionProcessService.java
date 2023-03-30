@@ -164,20 +164,28 @@ public class PayOrderDivisionProcessService {
 
             channelRetMsg = divisionService.singleDivision(payOrder, recordList, configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId()));
 
-            // 确认分账成功
+            // 确认分账成功 ( 明确分账成功 )
             if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
 
                 //分账成功
                 payOrderDivisionRecordService.updateRecordSuccessOrFail(recordList, PayOrderDivisionRecord.STATE_SUCCESS,
                         channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelOriginResponse());
 
-            }else{
-                //分账失败
+            //分账失败  ( 明确分账成功 )
+            }else if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_FAIL){
+
                 payOrderDivisionRecordService.updateRecordSuccessOrFail(recordList, PayOrderDivisionRecord.STATE_FAIL,
+                        channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrMsg());
+
+            // 已受理
+            }else if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.WAITING){
+
+                payOrderDivisionRecordService.updateRecordSuccessOrFail(recordList, PayOrderDivisionRecord.STATE_ACCEPT,
                         channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrMsg());
             }
 
         } catch (Exception e) {
+
             log.error("{}, 调用分账接口异常", logPrefix, e);
             payOrderDivisionRecordService.updateRecordSuccessOrFail(recordList, PayOrderDivisionRecord.STATE_FAIL,
                     null, "系统异常：" + e.getMessage());
