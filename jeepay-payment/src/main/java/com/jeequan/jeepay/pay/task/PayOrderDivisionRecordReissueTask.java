@@ -125,13 +125,9 @@ public class PayOrderDivisionRecordReissueTask {
                             if (ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == channelRetMsg.getChannelState() ||
                                     ChannelRetMsg.ChannelState.CONFIRM_FAIL == channelRetMsg.getChannelState()) {
 
-                                PayOrderDivisionRecord upDivisionRecord = new PayOrderDivisionRecord();
-                                upDivisionRecord.setRecordId(record.getRecordId());
-                                upDivisionRecord.setChannelRespResult(channelRetMsg.getChannelErrMsg());
-
-                                upDivisionRecord.setState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == channelRetMsg.getChannelState() ? PayOrderDivisionRecord.STATE_SUCCESS : PayOrderDivisionRecord.STATE_FAIL);
-
-//                                payOrderDivisionRecordService.updateRecordSuccessOrFail(upDivisionRecord);
+                                Byte state = ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == channelRetMsg.getChannelState() ? PayOrderDivisionRecord.STATE_SUCCESS : PayOrderDivisionRecord.STATE_FAIL;
+                                // 更新记录状态
+                                payOrderDivisionRecordService.updateRecordSuccessOrFailBySingleItem(record.getRecordId(), state, channelRetMsg.getChannelErrMsg());
                             }
                         });
 
