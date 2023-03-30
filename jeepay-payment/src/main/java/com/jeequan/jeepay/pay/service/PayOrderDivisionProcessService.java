@@ -112,7 +112,9 @@ public class PayOrderDivisionProcessService {
 
         // 重发通知，可直接查库
         if(isResend){
-            recordList = payOrderDivisionRecordService.list(PayOrderDivisionRecord.gw().eq(PayOrderDivisionRecord::getPayOrderId, payOrderId).eq(PayOrderDivisionRecord::getState, PayOrderDivisionRecord.STATE_FAIL));
+            // 根据payOrderId && 待分账（ 重试时将更新为待分账状态 ）  ， 此处不可查询出分账成功的订单。
+            recordList = payOrderDivisionRecordService.list(PayOrderDivisionRecord.gw()
+                    .eq(PayOrderDivisionRecord::getPayOrderId, payOrderId).eq(PayOrderDivisionRecord::getState, PayOrderDivisionRecord.STATE_WAIT));
         }else{
 
             // 查询&过滤 所有的分账接收对象

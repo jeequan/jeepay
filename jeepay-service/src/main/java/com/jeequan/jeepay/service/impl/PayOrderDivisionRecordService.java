@@ -28,6 +28,17 @@ public class PayOrderDivisionRecordService extends ServiceImpl<PayOrderDivisionR
     @Autowired private PayOrderMapper payOrderMapper;
 
 
+    /** 更新分账记录为分账成功  ( 单条 )  将：  已受理 更新为： 其他状态    **/
+    public void updateRecordSuccessOrFailBySingleItem(Long recordId, Byte state, String channelRespResult){
+
+        PayOrderDivisionRecord updateRecord = new PayOrderDivisionRecord();
+        updateRecord.setState(state);
+        updateRecord.setChannelRespResult(channelRespResult);
+        update(updateRecord, PayOrderDivisionRecord.gw().eq(PayOrderDivisionRecord::getRecordId, recordId).eq(PayOrderDivisionRecord::getState, PayOrderDivisionRecord.STATE_ACCEPT));
+
+    }
+
+
     /** 更新分账记录为分账成功**/
     public void updateRecordSuccessOrFail(List<PayOrderDivisionRecord> records, Byte state, String channelBatchOrderId, String channelRespResult){
 
@@ -61,7 +72,7 @@ public class PayOrderDivisionRecordService extends ServiceImpl<PayOrderDivisionR
         }
 
         PayOrderDivisionRecord updateRecordByDiv = new PayOrderDivisionRecord();
-        updateRecordByDiv.setBatchOrderId(SeqKit.genDivisionBatchId()); // 重新生成batchOrderId, 避免部分失败导致： out_trade_no重复。 
+        updateRecordByDiv.setBatchOrderId(SeqKit.genDivisionBatchId()); // 重新生成batchOrderId, 避免部分失败导致： out_trade_no重复。
         updateRecordByDiv.setState(PayOrderDivisionRecord.STATE_WAIT); //待分账
         updateRecordByDiv.setChannelRespResult("");
         updateRecordByDiv.setChannelBatchOrderId("");

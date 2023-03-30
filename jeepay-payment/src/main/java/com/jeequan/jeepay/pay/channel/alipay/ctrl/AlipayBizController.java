@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -63,6 +64,7 @@ public class AlipayBizController extends AbstractCtrl {
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
     @Autowired private MchAppService mchAppService;
     @Autowired private IMQSender mqSender;
+
 
     /** 跳转到支付宝的授权页面 （统一从pay项目获取到isv配置信息）
      * isvAndMchNo 格式:  ISVNO_MCHAPPID
@@ -156,6 +158,31 @@ public class AlipayBizController extends AbstractCtrl {
         request.setAttribute("errMsg", errMsg);
         request.setAttribute("isAlipaySysAuth", isAlipaySysAuth);
         return "channel/alipay/isvsubMchAuth";
+    }
+
+    /**
+     * 接收  支付宝 应用 配置中： 【应用网关地址 ： 用于接收支付宝异步通知消息（例如 From蚂蚁消息等），需要传入http(s)公网可访问的网页地址。选填，若不设置，则无法接收相应的异步通知消息。】
+     *
+     * **/
+    @RequestMapping("/appGatewayMsgReceive")
+    public ModelAndView alipayAppGatewayMsgReceive() {
+
+        JSONObject reqJSON = getReqParamJSON();
+
+        // 获取到报文信息， 然后 转发到对应的ctrl
+        log.error("支付宝应用网关接收消息参数：{}", reqJSON);
+
+        // 分账交易通知
+        if("alipay.trade.order.settle.notify".equals(reqJSON.getString("msg_method"))){
+
+            // 直接转发到 分账通知的 URL去。
+            ModelAndView mv = new ModelAndView();
+            mv.setViewName("forward:/api/divisionRecordChannelNotify/" + CS.IF_CODE.ALIPAY);
+            return mv;
+        }
+
+        throw new BizException("无此事件["+ reqJSON.getString("msg_method") +"]处理器");
+
     }
 
 }
