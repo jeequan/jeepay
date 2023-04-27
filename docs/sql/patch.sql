@@ -278,7 +278,7 @@ INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_PC', '银联网关支付'
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_JSAPI', '银联Js支付');
 
 
-## -- ++++ [ NEXT ] ===>
+## -- ++++ [v2.1.0] ===>
 
 -- 分账状态新增： 已受理
 alter table t_pay_order_division_record modify column `state` TINYINT(6) NOT NULL COMMENT '状态: 0-待分账 1-分账成功（明确成功）, 2-分账失败（明确失败）, 3-分账已受理（上游受理）';
