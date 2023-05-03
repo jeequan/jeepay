@@ -53,6 +53,7 @@
     <aliyun-openservices-ons-client.version>1.8.8.1.Final</aliyun-openservices-ons-client.version>
 
     <mysql.version>8.0.28</mysql.version> <!-- 覆写 spring-boot-dependencies 的依赖版本号 -->
+    <jaxb-api.version>2.3.0</jaxb-api.version>
 
   </properties>
 
@@ -175,6 +176,12 @@
             <groupId>com.aliyun.openservices</groupId>
             <artifactId>ons-client</artifactId>
             <version>${aliyun-openservices-ons-client.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb-api.version}</version>
         </dependency>
 
     </dependencies>
