@@ -25,6 +25,7 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvsubMchParams;
 import com.jeequan.jeepay.pay.channel.AbstractPaymentService;
+import com.jeequan.jeepay.pay.channel.wxpay.model.WxpayV3OrderRequestModel;
 import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
@@ -116,53 +117,59 @@ public class WxpayPaymentService extends AbstractPaymentService {
 
     /**
      * 构建微信APIV3接口  统一下单请求数据
+     * @author terrfly
      * @param payOrder
      * @return
      */
-    public JSONObject buildV3OrderRequest(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
+    public WxpayV3OrderRequestModel buildV3OrderRequestModel(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
+
+
         String payOrderId = payOrder.getPayOrderId();
 
         // 微信统一下单请求对象
-        JSONObject reqJSON = new JSONObject();
-        reqJSON.put("out_trade_no", payOrderId);
-        reqJSON.put("description", payOrder.getSubject());
+        WxpayV3OrderRequestModel result = new WxpayV3OrderRequestModel();
+        result.setOutTradeNo(payOrderId);
+        result.setDescription(payOrder.getSubject());
+
         // 订单失效时间，遵循rfc3339标准格式，格式为yyyy-MM-DDTHH:mm:ss+TIMEZONE,示例值：2018-06-08T10:34:56+08:00
-        reqJSON.put("time_expire", String.format("%sT%s+08:00", DateUtil.format(payOrder.getExpiredTime(), DatePattern.NORM_DATE_FORMAT), DateUtil.format(payOrder.getExpiredTime(), DatePattern.NORM_TIME_FORMAT)));
+        result.setTimeExpire(String.format("%sT%s+08:00", DateUtil.format(payOrder.getExpiredTime(), DatePattern.NORM_DATE_FORMAT), DateUtil.format(payOrder.getExpiredTime(), DatePattern.NORM_TIME_FORMAT)));
 
-        reqJSON.put("notify_url", getNotifyUrl(payOrderId));
+        result.setNotifyUrl(getNotifyUrl(payOrderId));
 
-        JSONObject amount = new JSONObject();
-        amount.put("total", payOrder.getAmount().intValue());
-        amount.put("currency", "CNY");
-        reqJSON.put("amount", amount);
+        // 订单金额
+        result.setAmount(new WxpayV3OrderRequestModel.Amount().setCurrency("CNY").setTotal(payOrder.getAmount().intValue()));
 
-        JSONObject sceneInfo = new JSONObject();
-        sceneInfo.put("payer_client_ip", payOrder.getClientIp());
-        reqJSON.put("scene_info", sceneInfo);
+        // 场景信息
+        result.setSceneInfo(new WxpayV3OrderRequestModel.SceneInfo().setPayerClientIp(payOrder.getClientIp()));
 
         //订单分账， 将冻结商户资金。
         if(isDivisionOrder(payOrder)){
-           JSONObject settleInfo = new JSONObject();
-           settleInfo.put("profit_sharing", true);
-           reqJSON.put("settle_info", settleInfo);
+            result.setSettleInfo(new WxpayV3OrderRequestModel.SettleInfo().setProfitSharing(true));
         }
 
         WxPayService wxPayService = configContextQueryService.getWxServiceWrapper(mchAppConfigContext).getWxPayService();
+
         if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
 
             WxpayIsvsubMchParams isvsubMchParams = (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
-            reqJSON.put("sp_appid", wxPayService.getConfig().getAppId());
-            reqJSON.put("sp_mchid", wxPayService.getConfig().getMchId());
-            reqJSON.put("sub_mchid", isvsubMchParams.getSubMchId());
+
+            // 服务商相关参数
+            result.setSpAppid(wxPayService.getConfig().getAppId());
+            result.setSpMchid(wxPayService.getConfig().getMchId());
+            result.setSubMchid(isvsubMchParams.getSubMchId());
             if (StringUtils.isNotBlank(isvsubMchParams.getSubMchAppId())) {
-                reqJSON.put("sub_appid", isvsubMchParams.getSubMchAppId());
+                result.setSubAppid(isvsubMchParams.getSubMchAppId());
             }
+
         }else { // 普通商户
-            reqJSON.put("appid", wxPayService.getConfig().getAppId());
-            reqJSON.put("mchid", wxPayService.getConfig().getMchId());
+
+            result.setNormalMchid(wxPayService.getConfig().getMchId());
+            result.setNormalAppid(wxPayService.getConfig().getAppId());
+
         }
 
-        return reqJSON;
+        return result;
     }
+
 
 }

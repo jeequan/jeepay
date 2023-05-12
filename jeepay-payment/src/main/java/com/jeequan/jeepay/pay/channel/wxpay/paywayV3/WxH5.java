@@ -26,6 +26,7 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.channel.wxpay.WxpayPaymentService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayV3Util;
+import com.jeequan.jeepay.pay.channel.wxpay.model.WxpayV3OrderRequestModel;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
@@ -58,25 +59,12 @@ public class WxH5 extends WxpayPaymentService {
 
         WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
         WxPayService wxPayService = wxServiceWrapper.getWxPayService();
-        wxPayService.getConfig().setTradeType(WxPayConstants.TradeType.MWEB);
 
         // 构造请求数据
-        JSONObject reqJSON = buildV3OrderRequest(payOrder, mchAppConfigContext);
+        WxpayV3OrderRequestModel wxpayV3OrderRequestModel = buildV3OrderRequestModel(payOrder, mchAppConfigContext);
 
-        JSONObject sceneInfo = reqJSON.getJSONObject("scene_info");
-
-        JSONObject h5Info = new JSONObject();
-        h5Info.put("type", "iOS, Android, Wap");
-        sceneInfo.put("h5_info", h5Info);
-
-        reqJSON.put("scene_info", sceneInfo);
-
-        String reqUrl;  // 请求地址
-        if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
-            reqUrl = WxpayV3Util.ISV_URL_MAP.get(WxPayConstants.TradeType.MWEB);
-        }else {
-            reqUrl = WxpayV3Util.NORMALMCH_URL_MAP.get(WxPayConstants.TradeType.MWEB);
-        }
+        // 场景信息
+        wxpayV3OrderRequestModel.getSceneInfo().setH5Info(new WxpayV3OrderRequestModel.SceneInfo.H5Info().setType("iOS, Android, Wap"));
 
         // 构造函数响应数据
         WxH5OrderRS res = ApiResBuilder.buildSuccess(WxH5OrderRS.class);
@@ -84,10 +72,10 @@ public class WxH5 extends WxpayPaymentService {
         res.setChannelRetMsg(channelRetMsg);
 
         // 调起上游接口：
-        // 1. 如果抛异常，则订单状态为： 生成状态，此时没有查单处理操作。 订单将超时关闭
-        // 2. 接口调用成功， 后续异常需进行捕捉， 如果 逻辑代码出现异常则需要走完正常流程，此时订单状态为： 支付中， 需要查单处理。
         try {
-            JSONObject resJSON = WxpayV3Util.unifiedOrderV3(reqUrl, reqJSON, wxPayService);
+            String payInfo = WxpayV3Util.commonReqWx(wxpayV3OrderRequestModel, wxPayService, mchAppConfigContext.isIsvsubMch(), WxPayConstants.TradeType.MWEB, null);
+
+            JSONObject resJSON = JSONObject.parseObject(payInfo);
 
             // 拼接returnUrl
             String payUrl = String.format("%s&redirect_url=%s", resJSON.getString("h5_url"), URLEncodeUtil.encode(getReturnUrlOnlyJump(payOrder.getPayOrderId())));

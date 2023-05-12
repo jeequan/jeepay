@@ -15,14 +15,21 @@
  */
 package com.jeequan.jeepay.pay.channel.wxpay.paywayV3;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderV3Result;
+import com.github.binarywang.wxpay.bean.result.enums.TradeTypeEnum;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
+import com.github.binarywang.wxpay.v3.util.PemUtils;
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvsubMchParams;
+import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
 import com.jeequan.jeepay.pay.channel.wxpay.WxpayPaymentService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayV3Util;
+import com.jeequan.jeepay.pay.channel.wxpay.model.WxpayV3OrderRequestModel;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
@@ -32,6 +39,10 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxAppOrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /*
  * 微信 app支付
@@ -53,25 +64,9 @@ public class WxApp extends WxpayPaymentService {
 
         WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
         WxPayService wxPayService = wxServiceWrapper.getWxPayService();
-        wxPayService.getConfig().setTradeType(WxPayConstants.TradeType.APP);
 
         // 构造请求数据
-        JSONObject reqJSON = buildV3OrderRequest(payOrder, mchAppConfigContext);
-
-        // wxPayConfig 添加子商户参数
-        if(mchAppConfigContext.isIsvsubMch()){
-            wxPayService.getConfig().setSubMchId(reqJSON.getString("sub_mchid"));
-            if (StringUtils.isNotBlank(reqJSON.getString("sub_appid"))) {
-                wxPayService.getConfig().setSubAppId(reqJSON.getString("sub_appid"));
-            }
-        }
-
-        String reqUrl;  // 请求地址
-        if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
-            reqUrl = WxpayV3Util.ISV_URL_MAP.get(WxPayConstants.TradeType.APP);
-        }else {
-            reqUrl = WxpayV3Util.NORMALMCH_URL_MAP.get(WxPayConstants.TradeType.APP);
-        }
+        WxpayV3OrderRequestModel wxpayV3OrderRequestModel = buildV3OrderRequestModel(payOrder, mchAppConfigContext);
 
         // 构造函数响应数据
         WxAppOrderRS res = ApiResBuilder.buildSuccess(WxAppOrderRS.class);
@@ -79,12 +74,51 @@ public class WxApp extends WxpayPaymentService {
         res.setChannelRetMsg(channelRetMsg);
 
         // 调起上游接口：
-        // 1. 如果抛异常，则订单状态为： 生成状态，此时没有查单处理操作。 订单将超时关闭
-        // 2. 接口调用成功， 后续异常需进行捕捉， 如果 逻辑代码出现异常则需要走完正常流程，此时订单状态为： 支付中， 需要查单处理。
         try {
-            JSONObject resJSON = WxpayV3Util.unifiedOrderV3(reqUrl, reqJSON, wxPayService);
+            String payInfo = WxpayV3Util.commonReqWx(wxpayV3OrderRequestModel, wxPayService, mchAppConfigContext.isIsvsubMch(), WxPayConstants.TradeType.APP,
+                    (JSONObject wxRes) -> {
 
-            res.setPayInfo(resJSON.toJSONString());
+                        // 普通商户，App支付与公众号支付  同一个应用只能配置其中一个
+                        String resultAppId = wxpayV3OrderRequestModel.getNormalAppid();
+                        String resultMchId = wxpayV3OrderRequestModel.getNormalMchid();
+
+                        // 特约商户，App支付与公众号支付  同一个应用只能配置其中一个
+                        if(mchAppConfigContext.isIsvsubMch()){
+                            resultAppId = wxpayV3OrderRequestModel.getSubAppid();
+                            resultMchId = wxpayV3OrderRequestModel.getSubMchid();
+                        }
+
+                        WxPayUnifiedOrderV3Result wxPayUnifiedOrderV3Result = new WxPayUnifiedOrderV3Result();
+                        wxPayUnifiedOrderV3Result.setPrepayId(wxRes.getString("prepay_id"));
+
+                        try {
+
+                            FileInputStream fis = new FileInputStream(wxPayService.getConfig().getPrivateKeyPath());
+
+                            WxPayUnifiedOrderV3Result.AppResult appResult =
+                                    wxPayUnifiedOrderV3Result.getPayInfo(TradeTypeEnum.APP, resultAppId, resultMchId,
+                                            PemUtils.loadPrivateKey(fis));
+
+                            JSONObject jsonRes = (JSONObject) JSON.toJSON(appResult);
+                            jsonRes.put("package", jsonRes.getString("packageValue"));
+                            jsonRes.remove("packageValue");
+
+                            try {
+                                fis.close();
+                            } catch (IOException e) {
+                            }
+
+                            return JSON.toJSONString(jsonRes);
+
+                        } catch (FileNotFoundException e) {
+
+                            return null;
+
+                        }
+                    }
+            );
+
+            res.setPayData(payInfo);
 
             // 支付中
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);

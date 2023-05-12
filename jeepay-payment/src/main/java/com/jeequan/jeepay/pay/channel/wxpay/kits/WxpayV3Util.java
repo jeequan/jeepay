@@ -24,6 +24,7 @@ import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.v3.util.PemUtils;
 import com.github.binarywang.wxpay.v3.util.SignUtils;
+import com.jeequan.jeepay.pay.channel.wxpay.model.WxpayV3OrderRequestModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -56,11 +57,6 @@ public class WxpayV3Util {
         ISV_URL_MAP.put(WxPayConstants.TradeType.MWEB, "/v3/pay/partner/transactions/h5");
     }
 
-    public static JSONObject unifiedOrderV3(String reqUrl, JSONObject reqJSON, WxPayService wxPayService) throws WxPayException {
-        String response = wxPayService.postV3(PAY_BASE_URL + reqUrl, reqJSON.toJSONString());
-        return JSONObject.parseObject(getPayInfo(response, wxPayService.getConfig()));
-    }
-
     public static JSONObject queryOrderV3(String url, WxPayService wxPayService) throws WxPayException {
         String response = wxPayService.getV3(PAY_BASE_URL + url);
         return JSON.parseObject(response);
@@ -90,81 +86,41 @@ public class WxpayV3Util {
     }
 
 
-    public static String getPayInfo(String response, WxPayConfig wxPayConfig)  throws WxPayException {
+    /**
+     * 功能描述:
+     * 统一调起微信支付请求
+     * @param model
+     * @param wxPayService
+     * @param isIsvsubMch
+     * @param tradeType
+     * @param wxCallBack
+     * @Return: java.lang.String
+     * @Author: terrfly
+     * @Date: 2022/4/25 12:38
+     */
+    public static String commonReqWx(WxpayV3OrderRequestModel model, WxPayService wxPayService, boolean isIsvsubMch, String tradeType, WxCallBack wxCallBack) throws WxPayException {
 
-        try {
-            JSONObject resJSON = JSON.parseObject(response);
-            String timestamp = String.valueOf(System.currentTimeMillis() / 1000L);
-            String nonceStr = SignUtils.genRandomStr();
-            String prepayId = resJSON.getString("prepay_id");
-
-            switch(wxPayConfig.getTradeType()) {
-                case WxPayConstants.TradeType.JSAPI: {
-                    Map<String, String> payInfo = new HashMap<>(); // 如果用JsonObject会出现签名错误
-
-                    String appid = wxPayConfig.getAppId(); // 用户在服务商appid下的唯一标识
-                    if (StringUtils.isNotEmpty(wxPayConfig.getSubAppId())) {
-                        appid = wxPayConfig.getSubAppId(); // 用户在子商户appid下的唯一标识
-                    }
-
-                    payInfo.put("appId", appid);
-                    payInfo.put("timeStamp", timestamp);
-                    payInfo.put("nonceStr", nonceStr);
-                    payInfo.put("package", "prepay_id=" + prepayId);
-                    payInfo.put("signType", "RSA");
-
-                    String beforeSign = String.format("%s\n%s\n%s\n%s\n", appid, timestamp, nonceStr, "prepay_id=" + prepayId);
-                    payInfo.put("paySign", SignUtils.sign(beforeSign, PemUtils.loadPrivateKey(new FileInputStream(wxPayConfig.getPrivateKeyPath()))));
-                    // 签名以后在增加prepayId参数
-                    payInfo.put("prepayId", prepayId);
-                    return JSON.toJSONString(payInfo);
-                }
-                case WxPayConstants.TradeType.MWEB: {
-                    return response;
-                }
-                case WxPayConstants.TradeType.APP: {
-                    Map<String, String> payInfo = new HashMap<>();
-                    // APP支付绑定的是微信开放平台上的账号，APPID为开放平台上绑定APP后发放的参数
-                    String wxAppId = wxPayConfig.getAppId();
-                    // 此map用于参与调起sdk支付的二次签名,格式全小写，timestamp只能是10位,格式固定，切勿修改
-                    String partnerId = wxPayConfig.getMchId();
-
-                    if (StringUtils.isNotEmpty(wxPayConfig.getSubAppId())) {
-                        wxAppId = wxPayConfig.getSubAppId();
-                        partnerId = wxPayConfig.getSubMchId();
-                    }
-
-                    String packageValue = "Sign=WXPay";
-                    // 此map用于客户端与微信服务器交互
-                    String beforeSign = String.format("%s\n%s\n%s\n%s\n", wxAppId, timestamp, nonceStr, prepayId);
-                    payInfo.put("sign", SignUtils.sign(beforeSign, PemUtils.loadPrivateKey(new FileInputStream(wxPayConfig.getPrivateKeyPath()))));
-                    payInfo.put("prepayId", prepayId);
-                    payInfo.put("partnerId", partnerId);
-                    payInfo.put("appId", wxAppId);
-                    payInfo.put("package", packageValue);
-                    payInfo.put("timeStamp", timestamp);
-                    payInfo.put("nonceStr", nonceStr);
-                    return JSON.toJSONString(payInfo);
-                }
-                case WxPayConstants.TradeType.NATIVE:
-                    return response;
-                default:
-                    return null;
-            }
-        } catch (Exception e) {
-            throw (e instanceof WxPayException) ? (WxPayException) e : new WxPayException(e.getMessage(), e);
+        // 请求地址
+        String reqUrl = PAY_BASE_URL + NORMALMCH_URL_MAP.get(tradeType);
+        if(isIsvsubMch){ // 特约商户
+            reqUrl = PAY_BASE_URL + ISV_URL_MAP.get(tradeType);
         }
+
+        // 调起http请求
+        String response = wxPayService.postV3(reqUrl, JSON.toJSONString(model));
+
+        JSONObject wxRes = JSON.parseObject(response);
+
+        if(wxCallBack != null){
+            return wxCallBack.genPayInfo(wxRes);
+        }
+
+        return response;
     }
 
-    public static JSONObject processIsvPayer(String subAppId, String openId) {
-        JSONObject payer = new JSONObject();
-        // 子商户subAppId不为空
-        if (StringUtils.isNotBlank(subAppId)) {
-            payer.put("sub_openid", openId); // 用户在子商户appid下的唯一标识
-        }else {
-            payer.put("sp_openid", openId); // 用户在服务商appid下的唯一标识
-        }
-        return payer;
+    public interface WxCallBack{
+        /** 生成返回数据 */
+        String genPayInfo(JSONObject wxRes);
     }
 
 }

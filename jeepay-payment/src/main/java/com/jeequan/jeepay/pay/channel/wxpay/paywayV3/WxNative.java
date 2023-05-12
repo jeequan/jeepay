@@ -24,6 +24,7 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.channel.wxpay.WxpayPaymentService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayV3Util;
+import com.jeequan.jeepay.pay.channel.wxpay.model.WxpayV3OrderRequestModel;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
@@ -59,15 +60,7 @@ public class WxNative extends WxpayPaymentService {
         WxPayService wxPayService = wxServiceWrapper.getWxPayService();
 
         // 构造请求数据
-        JSONObject reqJSON = buildV3OrderRequest(payOrder, mchAppConfigContext);
-
-        wxPayService.getConfig().setTradeType(WxPayConstants.TradeType.NATIVE);
-        String reqUrl;
-        if(mchAppConfigContext.isIsvsubMch()){ // 特约商户
-            reqUrl = WxpayV3Util.ISV_URL_MAP.get(WxPayConstants.TradeType.NATIVE);
-        }else {
-            reqUrl = WxpayV3Util.NORMALMCH_URL_MAP.get(WxPayConstants.TradeType.NATIVE);
-        }
+        WxpayV3OrderRequestModel wxpayV3OrderRequestModel = buildV3OrderRequestModel(payOrder, mchAppConfigContext);
 
         // 构造函数响应数据
         WxNativeOrderRS res = ApiResBuilder.buildSuccess(WxNativeOrderRS.class);
@@ -75,10 +68,10 @@ public class WxNative extends WxpayPaymentService {
         res.setChannelRetMsg(channelRetMsg);
 
         // 调起上游接口：
-        // 1. 如果抛异常，则订单状态为： 生成状态，此时没有查单处理操作。 订单将超时关闭
-        // 2. 接口调用成功， 后续异常需进行捕捉， 如果 逻辑代码出现异常则需要走完正常流程，此时订单状态为： 支付中， 需要查单处理。
         try {
-            JSONObject resJSON = WxpayV3Util.unifiedOrderV3(reqUrl, reqJSON, wxPayService);
+            String payInfo = WxpayV3Util.commonReqWx(wxpayV3OrderRequestModel, wxPayService, mchAppConfigContext.isIsvsubMch(), WxPayConstants.TradeType.NATIVE, null);
+
+            JSONObject resJSON = JSONObject.parseObject(payInfo);
 
             String codeUrl = resJSON.getString("code_url");
             if (CS.PAY_DATA_TYPE.CODE_IMG_URL.equals(bizRQ.getPayDataType())){ //二维码图片地址
