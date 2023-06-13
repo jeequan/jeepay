@@ -27,6 +27,10 @@ import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.mgr.service.AuthService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 * @site https://www.jeequan.com
 * @date 2021/6/8 17:09
 */
+@Api(tags = "认证模块")
 @RestController
 @RequestMapping("/api/anon/auth")
 public class AuthController extends CommonCtrl {
@@ -47,10 +52,16 @@ public class AuthController extends CommonCtrl {
 	@Autowired private AuthService authService;
 
 	/** 用户信息认证 获取iToken  **/
+	@ApiOperation("登录认证")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "ia", value = "用户名 i account, 需要base64处理", required = true),
+			@ApiImplicitParam(name = "ip", value = "密码 i passport,  需要base64处理", required = true),
+			@ApiImplicitParam(name = "vc", value = "证码 vercode,  需要base64处理", required = true),
+			@ApiImplicitParam(name = "vt", value = "验证码token, vercode token ,  需要base64处理", required = true)
+	})
 	@RequestMapping(value = "/validate", method = RequestMethod.POST)
 	@MethodLog(remark = "登录认证")
 	public ApiRes validate() throws BizException {
-
 
 		String account = Base64.decodeStr(getValStringRequired("ia"));  //用户名 i account, 已做base64处理
 		String ipassport = Base64.decodeStr(getValStringRequired("ip"));	//密码 i passport,  已做base64处理

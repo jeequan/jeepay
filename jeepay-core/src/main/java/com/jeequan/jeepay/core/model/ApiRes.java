@@ -23,6 +23,7 @@ import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.core.utils.JsonKit;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -35,6 +36,7 @@ import java.io.Serializable;
 */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ApiRes<T> implements Serializable {
 
     /** 业务响应码 **/
@@ -82,13 +84,13 @@ public class ApiRes<T> implements Serializable {
     }
 
     /** 业务处理成功， 封装分页数据， 仅返回必要参数 **/
-    public static ApiRes page(IPage iPage){
+    public static <T> ApiRes<ApiPageRes.PageBean<T>> page(IPage<T> iPage){
 
-        JSONObject result = new JSONObject();
-        result.put("records", iPage.getRecords());  //记录明细
-        result.put("total", iPage.getTotal());  //总条数
-        result.put("current", iPage.getCurrent());  //当前页码
-        result.put("hasNext", iPage.getPages() > iPage.getCurrent() );  //是否有下一页
+        ApiPageRes.PageBean<T> result = new ApiPageRes.PageBean<>();
+        result.setRecords(iPage.getRecords());  //记录明细
+        result.setTotal(iPage.getTotal()); //总条数
+        result.setCurrent(iPage.getCurrent()); //当前页码
+        result.setHasNext( iPage.getPages() > iPage.getCurrent()); //是否有下一页
         return ok(result);
     }
 
@@ -105,5 +107,6 @@ public class ApiRes<T> implements Serializable {
     public static ApiRes customFail(String customMsg){
         return new ApiRes(ApiCodeEnum.CUSTOM_FAIL.getCode(), customMsg, null, null);
     }
+
 
 }
