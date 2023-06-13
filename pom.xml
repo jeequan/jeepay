@@ -184,6 +184,21 @@
             <version>${jaxb-api.version}</version>
         </dependency>
 
+
+        <!-- Knife4j  -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+
+        <!-- swagger注解包 -->
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.6.6</version>
+        </dependency>
+
     </dependencies>
 
   </dependencyManagement>

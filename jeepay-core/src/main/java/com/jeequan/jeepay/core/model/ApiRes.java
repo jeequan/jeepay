@@ -24,6 +24,8 @@ import com.jeequan.jeepay.core.utils.JsonKit;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serializable;
+
 /*
 * 接口返回对象
 *
@@ -33,7 +35,7 @@ import lombok.Data;
 */
 @Data
 @AllArgsConstructor
-public class ApiRes {
+public class ApiRes<T> implements Serializable {
 
     /** 业务响应码 **/
     private Integer code;
@@ -42,7 +44,7 @@ public class ApiRes {
     private String msg;
 
     /** 数据对象 **/
-    private Object data;
+    private T data;
 
     /** 签名值 **/
     private String sign;
@@ -58,7 +60,7 @@ public class ApiRes {
     }
 
     /** 业务处理成功 **/
-    public static ApiRes ok(Object data){
+    public static <T> ApiRes<T> ok(T data){
         return new ApiRes(ApiCodeEnum.SUCCESS.getCode(), ApiCodeEnum.SUCCESS.getMsg(), data, null);
     }
 

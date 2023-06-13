@@ -100,6 +100,12 @@
             <artifactId>jeepay-sdk-java</artifactId>
         </dependency>
 
+        <!-- Knife4j  -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
+        </dependency>
+
     </dependencies>
 
 

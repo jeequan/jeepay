@@ -85,6 +85,11 @@
       <artifactId>jaxb-api</artifactId>
     </dependency>
 
+    <!-- 所以项目依赖swagger注解包 -->
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-annotations</artifactId>
+    </dependency>
 
   </dependencies>
 

@@ -16,6 +16,7 @@
 package com.jeequan.jeepay.mgr.web;
 
 import com.jeequan.jeepay.core.utils.ApiResBodyAdviceKit;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
@@ -33,9 +34,20 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 @ControllerAdvice
 public class ApiResBodyAdvice implements ResponseBodyAdvice {
 
+    /** 注入 是否开启 knife4j **/
+    @Value("${knife4j.enable}")
+    private boolean knife4jEnable = false;
+
     /** 判断哪些需要拦截 **/
     @Override
     public boolean supports(MethodParameter returnType, Class converterType) {
+
+        // springfox.documentation.swagger.web.ApiResourceController    -- /swagger-resources
+        // springfox.documentation.swagger2.web.Swagger2ControllerWebMvc  -- /v2/api-docs
+        if(knife4jEnable && returnType.getMethod().getDeclaringClass().getName().startsWith("springfox.documentation.swagger")){
+            return false;
+        }
+
         return true;
     }
 
