@@ -142,7 +142,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                 "/**/*.mp4"   //支持mp4格式的文件匿名访问
         )
                 .antMatchers(
-                        "/api/anon/**" //匿名访问接口
+                        "/api/anon/**", //匿名访问接口
+                        "/swagger-resources/**","/v2/api-docs/**" // swagger相关
                 );
     }
 
