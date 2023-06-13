@@ -92,6 +92,10 @@ logging:
     com.jeequan.jeepay: debug   #该项目日志级别，当需要打印sql时请开启为debug
   path: ./logs  #日志存放地址
 
+# knife4j APIDOC文档
+knife4j:
+  enable: true
+
 #系统业务参数
 isys:
   #是否允许跨域请求 [生产环境建议关闭， 若api与前端项目没有在同一个域名下时，应开启此配置或在nginx统一配置允许跨域]
