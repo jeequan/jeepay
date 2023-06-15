@@ -19,6 +19,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.jeequan.jeepay.core.model.BaseModel;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -34,6 +36,7 @@ import java.util.Date;
  * @author [mybatis plus generator]
  * @since 2021-04-27
  */
+@ApiModel(value = "支付方式表", description = "")
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
@@ -49,22 +52,26 @@ public class PayWay extends BaseModel implements Serializable {
     /**
      * 支付方式代码  例如： wxpay_jsapi
      */
+    @ApiModelProperty(value = "支付方式代码  例如： wxpay_jsapi")
     @TableId
     private String wayCode;
 
     /**
      * 支付方式名称
      */
+    @ApiModelProperty(value = "支付方式名称")
     private String wayName;
 
     /**
      * 创建时间
      */
+    @ApiModelProperty(value = "创建时间")
     private Date createdAt;
 
     /**
      * 更新时间
      */
+    @ApiModelProperty(value = "更新时间")
     private Date updatedAt;
 
 

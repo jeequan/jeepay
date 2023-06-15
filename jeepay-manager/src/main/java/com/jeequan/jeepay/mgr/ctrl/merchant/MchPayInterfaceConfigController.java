@@ -34,6 +34,10 @@ import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,6 +53,7 @@ import java.util.List;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
+@Api(tags = "商户支付接口管理")
 @RestController
 @RequestMapping("/api/mch/payConfigs")
 public class MchPayInterfaceConfigController extends CommonCtrl {
@@ -64,9 +69,14 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
      * @Description: 查询应用支付接口配置列表
      * @Date: 15:50 2021/4/27
     */
+    @ApiOperation("查询应用支付接口配置列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "appId", value = "应用ID", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_LIST')")
     @GetMapping
-    public ApiRes list() {
+    public ApiRes<List<PayInterfaceDefine>> list() {
 
         List<PayInterfaceDefine> list = payInterfaceConfigService.selectAllPayIfConfigListByAppId(getValStringRequired("appId"));
         return ApiRes.ok(list);
@@ -77,6 +87,12 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
      * @Description: 根据 appId、接口类型 获取应用参数配置
      * @Date: 17:03 2021/4/27
     */
+    @ApiOperation("根据应用ID、接口类型 获取应用参数配置")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "appId", value = "应用ID", required = true),
+            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_VIEW')")
     @GetMapping("/{appId}/{ifCode}")
     public ApiRes getByAppId(@PathVariable(value = "appId") String appId, @PathVariable(value = "ifCode") String ifCode) {
@@ -109,6 +125,12 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
      * @Description: 应用支付接口配置
      * @Date: 16:13 2021/4/27
     */
+    @ApiOperation("更新应用支付参数")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "infoId", value = "商户号", required = true),
+            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_ADD')")
     @PostMapping
     @MethodLog(remark = "更新应用支付参数")
@@ -164,6 +186,11 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
 
 
     /** 查询支付宝商户授权URL **/
+    @ApiOperation("查询支付宝商户授权URL")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "mchAppId", value = "应用ID", required = true)
+    })
     @GetMapping("/alipayIsvsubMchAuthUrls/{mchAppId}")
     public ApiRes queryAlipayIsvsubMchAuthUrl(@PathVariable String mchAppId) {
 

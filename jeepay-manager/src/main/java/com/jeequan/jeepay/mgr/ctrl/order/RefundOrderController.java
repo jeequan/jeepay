@@ -20,9 +20,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.RefundOrder;
+import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.RefundOrderService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
+@Api(tags = "订单管理（退款类）")
 @RestController
 @RequestMapping("/api/refundOrder")
 public class RefundOrderController extends CommonCtrl {
@@ -48,16 +54,30 @@ public class RefundOrderController extends CommonCtrl {
      * @date: 2021/6/7 16:15
      * @describe: 退款订单信息列表
      */
+    @ApiOperation("退款订单信息列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
+            @ApiImplicitParam(name = "pageSize", value = "分页条数", dataType = "int", defaultValue = "20"),
+            @ApiImplicitParam(name = "createdStart", value = "日期格式字符串（yyyy-MM-dd HH:mm:ss），时间范围查询--开始时间，查询范围：大于等于此时间"),
+            @ApiImplicitParam(name = "createdEnd", value = "日期格式字符串（yyyy-MM-dd HH:mm:ss），时间范围查询--结束时间，查询范围：小于等于此时间"),
+            @ApiImplicitParam(name = "mchNo", value = "商户号"),
+            @ApiImplicitParam(name = "unionOrderId", value = "支付/退款订单号"),
+            @ApiImplicitParam(name = "isvNo", value = "服务商号"),
+            @ApiImplicitParam(name = "appId", value = "应用ID"),
+            @ApiImplicitParam(name = "state", value = "退款状态:0-订单生成,1-退款中,2-退款成功,3-退款失败,4-退款任务关闭", dataType = "Byte"),
+            @ApiImplicitParam(name = "mchType", value = "类型: 1-普通商户, 2-特约商户(服务商模式)")
+    })
     @PreAuthorize("hasAuthority('ENT_REFUND_LIST')")
     @RequestMapping(value="", method = RequestMethod.GET)
-    public ApiRes list() {
+    public ApiPageRes<RefundOrder> list() {
 
         RefundOrder refundOrder = getObject(RefundOrder.class);
         JSONObject paramJSON = getReqParamJSON();
         LambdaQueryWrapper<RefundOrder> wrapper = RefundOrder.gw();
         IPage<RefundOrder> pages = refundOrderService.pageList(getIPage(), wrapper, refundOrder, paramJSON);
 
-        return ApiRes.page(pages);
+        return ApiPageRes.pages(pages);
     }
 
     /**
@@ -65,6 +85,11 @@ public class RefundOrderController extends CommonCtrl {
      * @date: 2021/6/7 16:15
      * @describe: 退款订单信息
      */
+    @ApiOperation("退款订单信息详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "refundOrderId", value = "退款订单号", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_REFUND_ORDER_VIEW')")
     @RequestMapping(value="/{refundOrderId}", method = RequestMethod.GET)
     public ApiRes detail(@PathVariable("refundOrderId") String refundOrderId) {

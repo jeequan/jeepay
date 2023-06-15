@@ -26,6 +26,10 @@ import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.SysConfigService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +50,7 @@ import java.util.Map;
  * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
+@Api(tags = "系统管理（配置信息类）")
 @Slf4j
 @RestController
 @RequestMapping("api/sysConfigs")
@@ -60,9 +65,14 @@ public class SysConfigController extends CommonCtrl {
 	 * @date: 2021/6/7 16:19
 	 * @describe: 分组下的配置
 	 */
+	@ApiOperation("系统配置--查询分组下的配置")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "groupKey", value = "分组key")
+	})
 	@PreAuthorize("hasAuthority('ENT_SYS_CONFIG_INFO')")
 	@RequestMapping(value="/{groupKey}", method = RequestMethod.GET)
-	public ApiRes getConfigs(@PathVariable("groupKey") String groupKey) {
+	public ApiRes<List<SysConfig>> getConfigs(@PathVariable("groupKey") String groupKey) {
 		LambdaQueryWrapper<SysConfig> condition = SysConfig.gw();
 		condition.orderByAsc(SysConfig::getSortNum);
 		if(StringUtils.isNotEmpty(groupKey)){
@@ -78,6 +88,15 @@ public class SysConfigController extends CommonCtrl {
 	 * @date: 2021/6/7 16:19
 	 * @describe: 系统配置修改
 	 */
+	@ApiOperation("系统配置--修改分组下的配置")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "groupKey", value = "分组key", required = true),
+			@ApiImplicitParam(name = "mchSiteUrl", value = "商户平台网址(不包含结尾/)"),
+			@ApiImplicitParam(name = "mgrSiteUrl", value = "运营平台网址(不包含结尾/)"),
+			@ApiImplicitParam(name = "ossPublicSiteUrl", value = "公共oss访问地址(不包含结尾/)"),
+			@ApiImplicitParam(name = "paySiteUrl", value = "支付网关地址(不包含结尾/)")
+	})
 	@PreAuthorize("hasAuthority('ENT_SYS_CONFIG_EDIT')")
 	@MethodLog(remark = "系统配置修改")
 	@RequestMapping(value="/{groupKey}", method = RequestMethod.PUT)

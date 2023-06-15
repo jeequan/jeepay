@@ -15,7 +15,6 @@
  */
 package com.jeequan.jeepay.mgr.ctrl.isv;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.aop.MethodLog;
@@ -28,6 +27,10 @@ import com.jeequan.jeepay.core.model.params.IsvParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,7 +38,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 服务商支付接口管理类
@@ -44,6 +46,7 @@ import java.util.Map;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
+@Api(tags = "服务商管理（支付接口）")
 @RestController
 @RequestMapping("/api/isv/payConfigs")
 public class IsvPayInterfaceConfigController extends CommonCtrl {
@@ -56,9 +59,14 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
     * @Description: 查询服务商支付接口配置列表
     * @Date: 16:45 2021/4/27
    */
+   @ApiOperation("查询服务商支付接口配置列表")
+   @ApiImplicitParams({
+           @ApiImplicitParam(name = CS.ACCESS_TOKEN_NAME, value = "用户身份凭证", required = true, paramType = "header"),
+           @ApiImplicitParam(name = "isvNo", value = "服务商号", required = true)
+   })
    @PreAuthorize("hasAuthority('ENT_ISV_PAY_CONFIG_LIST')")
     @GetMapping
-    public ApiRes list() {
+    public ApiRes<List<PayInterfaceDefine>> list() {
 
         List<PayInterfaceDefine> list = payInterfaceConfigService.selectAllPayIfConfigListByIsvNo(CS.INFO_TYPE_ISV, getValStringRequired("isvNo"));
         return ApiRes.ok(list);
@@ -69,9 +77,15 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
      * @Description: 根据 服务商号、接口类型 获取商户参数配置
      * @Date: 17:03 2021/4/27
      */
+    @ApiOperation("根据[服务商号]、[接口类型]获取商户参数配置")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "isvNo", value = "服务商号", required = true),
+            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_ISV_PAY_CONFIG_VIEW')")
     @GetMapping("/{isvNo}/{ifCode}")
-    public ApiRes getByMchNo(@PathVariable(value = "isvNo") String isvNo, @PathVariable(value = "ifCode") String ifCode) {
+    public ApiRes<PayInterfaceConfig> getByMchNo(@PathVariable(value = "isvNo") String isvNo, @PathVariable(value = "ifCode") String ifCode) {
         PayInterfaceConfig payInterfaceConfig = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_ISV, isvNo, ifCode);
         if (payInterfaceConfig != null) {
             if (payInterfaceConfig.getIfRate() != null) {
@@ -87,11 +101,22 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
         return ApiRes.ok(payInterfaceConfig);
     }
 
+
     /**
      * @Author: ZhuXiao
      * @Description: 服务商支付接口参数配置
      * @Date: 16:45 2021/4/27
-    */
+     */
+    @ApiOperation("服务商支付接口参数配置")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "infoId", value = "服务商号", required = true),
+            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true),
+            @ApiImplicitParam(name = "ifParams", value = "接口配置参数,json字符串"),
+            @ApiImplicitParam(name = "ifRate", value = "支付接口费率", dataType = "BigDecimal"),
+            @ApiImplicitParam(name = "remark", value = "备注"),
+            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-启用", dataType = "Byte")
+    })
     @PreAuthorize("hasAuthority('ENT_ISV_PAY_CONFIG_ADD')")
     @PostMapping
     @MethodLog(remark = "更新服务商支付参数")
@@ -137,5 +162,4 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
 
         return ApiRes.ok();
     }
-
 }

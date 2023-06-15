@@ -46,7 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
-@Api(tags = "服务商管理")
+@Api(tags = "服务商管理（基本信息）")
 @RestController
 @RequestMapping("/api/isvInfo")
 public class IsvInfoController extends CommonCtrl {
@@ -61,7 +61,12 @@ public class IsvInfoController extends CommonCtrl {
      */
     @ApiOperation("服务商列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name= "isvNo", value = "服务商编号")
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
+            @ApiImplicitParam(name = "pageSize", value = "分页条数（-1时查全部数据）", dataType = "int", defaultValue = "20"),
+            @ApiImplicitParam(name = "isvNo", value = "服务商编号"),
+            @ApiImplicitParam(name = "isvName", value = "服务商名称"),
+            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-正常", dataType = "Byte")
     })
     @PreAuthorize("hasAuthority('ENT_ISV_LIST')")
     @RequestMapping(value="", method = RequestMethod.GET)
@@ -88,6 +93,17 @@ public class IsvInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:13
      * @describe: 新增服务商信息
      */
+    @ApiOperation("新增服务商")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "isvName", value = "服务商名称", required = true),
+            @ApiImplicitParam(name = "contactName", value = "联系人姓名", required = true),
+            @ApiImplicitParam(name = "contactTel", value = "联系人手机号"),
+            @ApiImplicitParam(name = "contactEmail", value = "联系人邮箱"),
+            @ApiImplicitParam(name = "isvShortName", value = "服务商简称"),
+            @ApiImplicitParam(name = "remark", value = "备注"),
+            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-正常", dataType = "Byte")
+    })
     @PreAuthorize("hasAuthority('ENT_ISV_INFO_ADD')")
     @MethodLog(remark = "新增服务商")
     @RequestMapping(value="", method = RequestMethod.POST)
@@ -109,6 +125,11 @@ public class IsvInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:13
      * @describe: 删除服务商信息
      */
+    @ApiOperation("删除服务商")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "isvNo", value = "服务商号", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_ISV_INFO_DEL')")
     @MethodLog(remark = "删除服务商")
     @RequestMapping(value="/{isvNo}", method = RequestMethod.DELETE)
@@ -125,6 +146,18 @@ public class IsvInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:13
      * @describe: 更新服务商信息
      */
+    @ApiOperation("更新服务商信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "isvNo", value = "服务商号", required = true),
+            @ApiImplicitParam(name = "isvName", value = "服务商名称", required = true),
+            @ApiImplicitParam(name = "contactName", value = "联系人姓名", required = true),
+            @ApiImplicitParam(name = "contactTel", value = "联系人手机号"),
+            @ApiImplicitParam(name = "contactEmail", value = "联系人邮箱"),
+            @ApiImplicitParam(name = "isvShortName", value = "服务商简称"),
+            @ApiImplicitParam(name = "remark", value = "备注"),
+            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-正常", dataType = "Byte")
+    })
     @PreAuthorize("hasAuthority('ENT_ISV_INFO_EDIT')")
     @MethodLog(remark = "更新服务商信息")
     @RequestMapping(value="/{isvNo}", method = RequestMethod.PUT)
@@ -147,6 +180,11 @@ public class IsvInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:13
      * @describe: 查看服务商信息
      */
+    @ApiOperation("查看服务商信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name= "isvNo", value = "服务商编号", required = true)
+    })
     @PreAuthorize("hasAnyAuthority('ENT_ISV_INFO_VIEW', 'ENT_ISV_INFO_EDIT')")
     @RequestMapping(value="/{isvNo}", method = RequestMethod.GET)
     public ApiRes detail(@PathVariable("isvNo") String isvNo) {

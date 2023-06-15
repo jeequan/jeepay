@@ -24,6 +24,7 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.SysRole;
 import com.jeequan.jeepay.core.entity.SysUserRoleRela;
 import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.mgr.service.AuthService;
 import com.jeequan.jeepay.service.impl.SysRoleEntRelaService;
 import com.jeequan.jeepay.service.impl.SysRoleService;
@@ -31,6 +32,10 @@ import com.jeequan.jeepay.service.impl.SysUserRoleRelaService;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +56,7 @@ import java.util.List;
 * @site https://www.jeequan.com
 * @date 2021/6/8 17:13
 */
+@Api(tags = "系统管理（用户角色）")
 @RestController
 @RequestMapping("api/sysRoles")
 public class SysRoleController extends CommonCtrl {
@@ -62,9 +68,17 @@ public class SysRoleController extends CommonCtrl {
 
 
 	/** list */
+	@ApiOperation("角色列表")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
+			@ApiImplicitParam(name = "pageSize", value = "分页条数（-1时查全部数据）", dataType = "int", defaultValue = "20"),
+			@ApiImplicitParam(name = "roleId", value = "角色ID, ROLE_开头"),
+			@ApiImplicitParam(name = "roleName", value = "角色名称")
+	})
 	@PreAuthorize("hasAnyAuthority( 'ENT_UR_ROLE_LIST', 'ENT_UR_USER_UPD_ROLE' )")
 	@RequestMapping(value="", method = RequestMethod.GET)
-	public ApiRes list() {
+	public ApiPageRes<SysRole> list() {
 
 		SysRole queryObject = getObject(SysRole.class);
 
@@ -90,11 +104,16 @@ public class SysRoleController extends CommonCtrl {
 		}
 
 		IPage<SysRole> pages = sysRoleService.page(getIPage(true), condition);
-		return ApiRes.page(pages);
+		return ApiPageRes.pages(pages);
 	}
 
 
 	/** detail */
+	@ApiOperation("角色详情")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "recordId", value = "角色ID, ROLE_开头", required = true)
+	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_ROLE_EDIT' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.GET)
 	public ApiRes detail(@PathVariable("recordId") String recordId) {
@@ -102,6 +121,12 @@ public class SysRoleController extends CommonCtrl {
 	}
 
 	/** add */
+	@ApiOperation("添加角色信息")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "roleName", value = "角色名称", required = true),
+			@ApiImplicitParam(name = "entIdListStr", value = "权限信息集合，eg：[str1,str2]，字符串列表转成json字符串，若为空，则创建的角色无任何权限")
+	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_ROLE_ADD' )")
 	@MethodLog(remark = "添加角色信息")
 	@RequestMapping(value="", method = RequestMethod.POST)
@@ -127,6 +152,13 @@ public class SysRoleController extends CommonCtrl {
 	}
 
 	/** update */
+	@ApiOperation("更新角色信息")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "recordId", value = "角色ID, ROLE_开头", required = true),
+			@ApiImplicitParam(name = "roleName", value = "角色名称", required = true),
+			@ApiImplicitParam(name = "entIdListStr", value = "权限信息集合，eg：[str1,str2]，字符串列表转成json字符串，若为空，则创建的角色无任何权限")
+	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_ROLE_EDIT' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.PUT)
 	@MethodLog(remark = "更新角色信息")
@@ -156,6 +188,11 @@ public class SysRoleController extends CommonCtrl {
 	}
 
 	/** delete */
+	@ApiOperation("删除角色")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "recordId", value = "角色ID, ROLE_开头", required = true)
+	})
 	@PreAuthorize("hasAuthority('ENT_UR_ROLE_DEL')")
 	@MethodLog(remark = "删除角色")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.DELETE)

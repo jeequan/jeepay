@@ -22,10 +22,15 @@ import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.MchApp;
+import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +42,8 @@ import org.springframework.web.bind.annotation.*;
  * @site https://www.jeequan.com
  * @date 2021-06-16 09:15
  */
+
+@Api(tags = "商户应用管理")
 @RestController
 @RequestMapping("/api/mchApps")
 public class MchAppController extends CommonCtrl {
@@ -50,13 +57,23 @@ public class MchAppController extends CommonCtrl {
      * @Description: 应用列表
      * @Date: 9:59 2021/6/16
     */
+    @ApiOperation("查询应用列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
+            @ApiImplicitParam(name = "pageSize", value = "分页条数", dataType = "int", defaultValue = "20"),
+            @ApiImplicitParam(name = "mchNo", value = "商户号"),
+            @ApiImplicitParam(name = "appId", value = "应用ID"),
+            @ApiImplicitParam(name = "appName", value = "应用名称"),
+            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-启用", dataType = "Byte")
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_APP_LIST')")
     @GetMapping
-    public ApiRes list() {
+    public ApiPageRes<MchApp> list() {
         MchApp mchApp = getObject(MchApp.class);
 
         IPage<MchApp> pages = mchAppService.selectPage(getIPage(), mchApp);
-        return ApiRes.ok(pages);
+        return ApiPageRes.pages(pages);
     }
 
     /**
@@ -64,6 +81,15 @@ public class MchAppController extends CommonCtrl {
      * @Description: 新建应用
      * @Date: 10:05 2021/6/16
     */
+    @ApiOperation("新建应用")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "appName", value = "应用名称", required = true),
+            @ApiImplicitParam(name = "appSecret", value = "应用私钥", required = true),
+            @ApiImplicitParam(name = "mchNo", value = "商户号", required = true),
+            @ApiImplicitParam(name = "remark", value = "备注"),
+            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-启用", dataType = "Byte")
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_APP_ADD')")
     @MethodLog(remark = "新建应用")
     @PostMapping
@@ -87,6 +113,11 @@ public class MchAppController extends CommonCtrl {
      * @Description: 应用详情
      * @Date: 10:13 2021/6/16
      */
+    @ApiOperation("应用详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "appId", value = "应用ID", required = true)
+    })
     @PreAuthorize("hasAnyAuthority('ENT_MCH_APP_VIEW', 'ENT_MCH_APP_EDIT')")
     @GetMapping("/{appId}")
     public ApiRes detail(@PathVariable("appId") String appId) {
@@ -103,6 +134,16 @@ public class MchAppController extends CommonCtrl {
      * @Description: 更新应用信息
      * @Date: 10:11 2021/6/16
     */
+    @ApiOperation("更新应用信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "appId", value = "应用ID", required = true),
+            @ApiImplicitParam(name = "appName", value = "应用名称", required = true),
+            @ApiImplicitParam(name = "appSecret", value = "应用私钥", required = true),
+            @ApiImplicitParam(name = "mchNo", value = "商户号", required = true),
+            @ApiImplicitParam(name = "remark", value = "备注"),
+            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-启用", dataType = "Byte")
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_APP_EDIT')")
     @MethodLog(remark = "更新应用信息")
     @PutMapping("/{appId}")
@@ -123,6 +164,11 @@ public class MchAppController extends CommonCtrl {
      * @Description: 删除应用
      * @Date: 10:14 2021/6/16
      */
+    @ApiOperation("删除应用")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "appId", value = "应用ID", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_APP_DEL')")
     @MethodLog(remark = "删除应用")
     @DeleteMapping("/{appId}")

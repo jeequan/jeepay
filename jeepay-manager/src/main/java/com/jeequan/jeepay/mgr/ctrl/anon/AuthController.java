@@ -83,6 +83,7 @@ public class AuthController extends CommonCtrl {
 	}
 
 	/** 图片验证码  **/
+	@ApiOperation("图片验证码")
 	@RequestMapping(value = "/vercode", method = RequestMethod.GET)
 	public ApiRes vercode() throws BizException {
 

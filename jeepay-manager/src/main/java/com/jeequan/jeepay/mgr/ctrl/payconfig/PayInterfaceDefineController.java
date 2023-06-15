@@ -28,6 +28,10 @@ import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import com.jeequan.jeepay.service.impl.PayInterfaceDefineService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +45,7 @@ import java.util.List;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
+@Api(tags = "支付接口配置")
 @RestController
 @RequestMapping("api/payIfDefines")
 public class PayInterfaceDefineController extends CommonCtrl {
@@ -54,9 +59,13 @@ public class PayInterfaceDefineController extends CommonCtrl {
      * @Description: list
      * @Date: 15:51 2021/4/27
     */
+    @ApiOperation("支付接口--列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
+    })
     @PreAuthorize("hasAuthority('ENT_PC_IF_DEFINE_LIST')")
     @GetMapping
-    public ApiRes list() {
+    public ApiRes<List<PayInterfaceDefine>> list() {
 
         List<PayInterfaceDefine> list = payInterfaceDefineService.list(PayInterfaceDefine.gw()
                 .orderByAsc(PayInterfaceDefine::getCreatedAt)
@@ -70,6 +79,11 @@ public class PayInterfaceDefineController extends CommonCtrl {
      * @Description: detail
      * @Date: 15:51 2021/4/27
     */
+    @ApiOperation("支付接口--详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true)
+    })
     @PreAuthorize("hasAnyAuthority('ENT_PC_IF_DEFINE_VIEW', 'ENT_PC_IF_DEFINE_EDIT')")
     @GetMapping("/{ifCode}")
     public ApiRes detail(@PathVariable("ifCode") String ifCode) {
@@ -81,6 +95,23 @@ public class PayInterfaceDefineController extends CommonCtrl {
      * @Description: add
      * @Date: 15:51 2021/4/27
     */
+    @ApiOperation("支付接口--新增")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true),
+            @ApiImplicitParam(name = "configPageType", value = "支付参数配置页面类型:1-JSON渲染,2-自定义", required = true),
+            @ApiImplicitParam(name = "icon", value = "页面展示：卡片-图标"),
+            @ApiImplicitParam(name = "bgColor", value = "页面展示：卡片-背景色"),
+            @ApiImplicitParam(name = "ifName", value = "接口名称", required = true),
+            @ApiImplicitParam(name = "isIsvMode", value = "是否支持服务商子商户模式: 0-不支持, 1-支持", required = true),
+            @ApiImplicitParam(name = "isMchMode", value = "是否支持普通商户模式: 0-不支持, 1-支持", required = true),
+            @ApiImplicitParam(name = "isvParams", value = "ISV接口配置定义描述,[{},{}]，当configPageType为1时必填"),
+            @ApiImplicitParam(name = "isvsubMchParams", value = "特约商户接口配置定义描述,[{},{}]，当configPageType为1时必填"),
+            @ApiImplicitParam(name = "normalMchParams", value = "普通商户接口配置定义描述,[{},{}]，当configPageType为1时必填"),
+            @ApiImplicitParam(name = "remark", value = "备注", required = true),
+            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-启用", required = true),
+            @ApiImplicitParam(name = "wayCodeStrs", value = "接口类型代码（若干个接口类型代码用英文逗号拼接起来）", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_PC_IF_DEFINE_ADD')")
     @PostMapping
     @MethodLog(remark = "新增支付接口")
@@ -108,6 +139,24 @@ public class PayInterfaceDefineController extends CommonCtrl {
      * @Description: update
      * @Date: 15:51 2021/4/27
     */
+    @ApiOperation("支付接口--更新")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true),
+            @ApiImplicitParam(name = "configPageType", value = "支付参数配置页面类型:1-JSON渲染,2-自定义", required = true),
+            @ApiImplicitParam(name = "icon", value = "页面展示：卡片-图标"),
+            @ApiImplicitParam(name = "bgColor", value = "页面展示：卡片-背景色"),
+            @ApiImplicitParam(name = "ifName", value = "接口名称", required = true),
+            @ApiImplicitParam(name = "isIsvMode", value = "是否支持服务商子商户模式: 0-不支持, 1-支持", required = true),
+            @ApiImplicitParam(name = "isMchMode", value = "是否支持普通商户模式: 0-不支持, 1-支持", required = true),
+            @ApiImplicitParam(name = "isvParams", value = "ISV接口配置定义描述,[{},{}]，当configPageType为1时必填"),
+            @ApiImplicitParam(name = "isvsubMchParams", value = "特约商户接口配置定义描述,[{},{}]，当configPageType为1时必填"),
+            @ApiImplicitParam(name = "normalMchParams", value = "普通商户接口配置定义描述,[{},{}]，当configPageType为1时必填"),
+            @ApiImplicitParam(name = "remark", value = "备注", required = true),
+            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-启用", required = true),
+            @ApiImplicitParam(name = "wayCodeStrs", value = "接口类型代码（若干个接口类型代码用英文逗号拼接起来）", required = true),
+            @ApiImplicitParam(name = "wayCodes", value = "接口类型代码列表")
+    })
     @PreAuthorize("hasAuthority('ENT_PC_IF_DEFINE_EDIT')")
     @PutMapping("/{ifCode}")
     @MethodLog(remark = "更新支付接口")
@@ -136,6 +185,11 @@ public class PayInterfaceDefineController extends CommonCtrl {
      * @Description: delete
      * @Date: 15:52 2021/4/27
     */
+    @ApiOperation("支付接口--删除")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_PC_IF_DEFINE_DEL')")
     @DeleteMapping("/{ifCode}")
     @MethodLog(remark = "删除支付接口")
