@@ -7,7 +7,6 @@ spring:
 
 # knife4j APIDOC文档
 knife4j:
-  enable: true
   documents:
     - group: 支付网关
       name: 接口文档
