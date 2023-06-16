@@ -21,12 +21,16 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.components.mq.model.PayOrderDivisionMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
-import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayOrderDivisionRecord;
 import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.PayOrderDivisionRecordService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,6 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @site https://www.jeequan.com
  * @date 2021-08-25 11:50
  */
+@Api(tags = "分账管理（分账记录）")
 @RestController
 @RequestMapping("api/division/records")
 public class PayOrderDivisionRecordController extends CommonCtrl {
@@ -51,9 +56,23 @@ public class PayOrderDivisionRecordController extends CommonCtrl {
 
 
 	/** list */
+	@ApiOperation("分账记录列表")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
+			@ApiImplicitParam(name = "pageSize", value = "分页条数（-1时查全部数据）", dataType = "int", defaultValue = "20"),
+			@ApiImplicitParam(name = "createdStart", value = "日期格式字符串（yyyy-MM-dd HH:mm:ss），时间范围查询--开始时间，查询范围：大于等于此时间"),
+			@ApiImplicitParam(name = "createdEnd", value = "日期格式字符串（yyyy-MM-dd HH:mm:ss），时间范围查询--结束时间，查询范围：小于等于此时间"),
+			@ApiImplicitParam(name = "appId", value = "应用ID"),
+			@ApiImplicitParam(name = "receiverId", value = "账号快照》 分账接收者ID", dataType = "Long"),
+			@ApiImplicitParam(name = "state", value = "状态: 0-待分账 1-分账成功, 2-分账失败", dataType = "Byte"),
+			@ApiImplicitParam(name = "receiverGroupId", value = "账号组ID", dataType = "Long"),
+			@ApiImplicitParam(name = "accNo", value = "账号快照》 分账接收账号"),
+			@ApiImplicitParam(name = "payOrderId", value = "系统支付订单号")
+	})
 	@PreAuthorize("hasAnyAuthority( 'ENT_DIVISION_RECORD_LIST' )")
 	@RequestMapping(value="", method = RequestMethod.GET)
-	public ApiRes list() {
+	public ApiPageRes<PayOrderDivisionRecord> list() {
 
 		PayOrderDivisionRecord queryObject = getObject(PayOrderDivisionRecord.class);
 		JSONObject paramJSON = getReqParamJSON();
@@ -97,11 +116,16 @@ public class PayOrderDivisionRecordController extends CommonCtrl {
 		condition.orderByDesc(PayOrderDivisionRecord::getCreatedAt); //时间倒序
 
 		IPage<PayOrderDivisionRecord> pages = payOrderDivisionRecordService.page(getIPage(true), condition);
-		return ApiRes.page(pages);
+		return ApiPageRes.pages(pages);
 	}
 
 
 	/** detail */
+	@ApiOperation("分账记录详情")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "recordId", value = "分账记录ID", required = true, dataType = "Long")
+	})
 	@PreAuthorize("hasAuthority( 'ENT_DIVISION_RECORD_VIEW' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.GET)
 	public ApiRes detail(@PathVariable("recordId") Long recordId) {
@@ -118,6 +142,11 @@ public class PayOrderDivisionRecordController extends CommonCtrl {
 
 
 	/** 分账接口重试 */
+	@ApiOperation("分账接口重试")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "recordId", value = "分账记录ID", required = true, dataType = "Long")
+	})
 	@PreAuthorize("hasAuthority( 'ENT_DIVISION_RECORD_RESEND' )")
 	@RequestMapping(value="/resend/{recordId}", method = RequestMethod.POST)
 	public ApiRes resend(@PathVariable("recordId") Long recordId) {

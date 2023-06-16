@@ -60,6 +60,9 @@ public class CurrentUserController extends CommonCtrl{
 	@Autowired private SysUserAuthService sysUserAuthService;
 
 	@ApiOperation("查询当前登录者的用户信息")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
+	})
 	@RequestMapping(value="/user", method = RequestMethod.GET)
 	public ApiRes currentUserInfo() {
 

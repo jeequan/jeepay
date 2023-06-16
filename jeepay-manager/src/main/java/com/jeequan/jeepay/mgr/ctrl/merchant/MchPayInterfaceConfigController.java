@@ -128,7 +128,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     @ApiOperation("更新应用支付参数")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "infoId", value = "商户号", required = true),
+            @ApiImplicitParam(name = "infoId", value = "应用AppId", required = true),
             @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_ADD')")

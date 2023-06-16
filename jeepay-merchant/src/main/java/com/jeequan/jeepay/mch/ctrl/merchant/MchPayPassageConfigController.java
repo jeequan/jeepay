@@ -26,11 +26,16 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.MchPayPassage;
 import com.jeequan.jeepay.core.entity.PayWay;
+import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.MchPayPassageService;
 import com.jeequan.jeepay.service.impl.PayWayService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.CollectionUtils;
@@ -47,6 +52,7 @@ import java.util.List;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
+@Api(tags = "商户支付通道管理")
 @RestController
 @RequestMapping("/api/mch/payPassages")
 public class MchPayPassageConfigController extends CommonCtrl {
@@ -60,9 +66,18 @@ public class MchPayPassageConfigController extends CommonCtrl {
      * @Description: 查询支付方式列表，并添加是否配置支付通道状态
      * @Date: 10:58 2021/5/13
     */
+    @ApiOperation("查询支付方式列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
+            @ApiImplicitParam(name = "pageSize", value = "分页条数", dataType = "int", defaultValue = "20"),
+            @ApiImplicitParam(name = "appId", value = "应用ID", required = true),
+            @ApiImplicitParam(name = "wayCode", value = "支付方式代码"),
+            @ApiImplicitParam(name = "wayName", value = "支付方式名称")
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_PASSAGE_LIST')")
     @GetMapping
-    public ApiRes list() {
+    public ApiPageRes<PayWay> list() {
 
         String appId = getValStringRequired("appId");
         String wayCode = getValString("wayCode");
@@ -103,14 +118,21 @@ public class MchPayPassageConfigController extends CommonCtrl {
             }
         }
 
-        return ApiRes.page(payWayPage);
+        return ApiPageRes.pages(payWayPage);
     }
 
     /**
      * @Author: ZhuXiao
      * @Description: 根据appId、支付方式查询可用的支付接口列表
      * @Date: 11:05 2021/5/13
+     * @return
     */
+    @ApiOperation("根据[应用ID]、[支付方式代码]查询可用的支付接口列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "appId", value = "应用ID", required = true),
+            @ApiImplicitParam(name = "wayCode", value = "支付方式代码", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_PASSAGE_CONFIG')")
     @GetMapping("/availablePayInterface/{appId}/{wayCode}")
     public ApiRes availablePayInterface(@PathVariable("appId") String appId, @PathVariable("wayCode") String wayCode) {
@@ -132,6 +154,11 @@ public class MchPayPassageConfigController extends CommonCtrl {
      * @Description:
      * @Date: 11:05 2021/5/13
     */
+    @ApiOperation("商户支付通道详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "id", value = "支付通道ID", required = true)
+    })
     @GetMapping("/{id}")
     public ApiRes detail(@PathVariable("id") Long id) {
         MchPayPassage payPassage = mchPayPassageService.getById(id);
@@ -150,6 +177,11 @@ public class MchPayPassageConfigController extends CommonCtrl {
      * @Description: 应用支付通道配置
      * @Date: 11:05 2021/5/13
     */
+    @ApiOperation("更新商户支付通道")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "reqParams", value = "商户支付通道配置信息", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_PASSAGE_ADD')")
     @PostMapping
     @MethodLog(remark = "更新应用支付通道")

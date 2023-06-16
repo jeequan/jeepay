@@ -18,6 +18,10 @@ package com.jeequan.jeepay.mch.ctrl.transfer;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.mch.websocket.server.WsChannelUserIdServer;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -28,10 +32,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 * @site https://www.jeequan.com
 * @date 2021/8/13 17:54
 */
+@Api(tags = "商户转账")
 @Controller
 @RequestMapping("/api/anon/channelUserIdCallback")
 public class ChannelUserIdNotifyController extends CommonCtrl {
 
+    @ApiOperation("（转账）获取用户ID - 回调函数")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "extParam", value = "扩展参数"),
+            @ApiImplicitParam(name = "channelUserId", value = "用户userId"),
+            @ApiImplicitParam(name = "appId", value = "应用ID")
+    })
     @RequestMapping("")
     public String channelUserIdCallback() {
 

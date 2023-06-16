@@ -43,7 +43,7 @@ import java.util.List;
 * @site https://www.jeequan.com
 * @date 2021/6/8 17:13
 */
-@Api(tags = "系统管理--用户权限")
+@Api(tags = "系统管理（用户权限）")
 @RestController
 @RequestMapping("api/sysEnts")
 public class SysEntController extends CommonCtrl {
@@ -52,7 +52,7 @@ public class SysEntController extends CommonCtrl {
 
 
 	/** getOne */
-	@ApiOperation("用户角色--权限--查询菜单权限详情")
+	@ApiOperation("查询菜单权限详情")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
 			@ApiImplicitParam(name = "entId", value = "权限ID[ENT_功能模块_子模块_操作], eg: ENT_ROLE_LIST_ADD", required = true),
@@ -69,7 +69,7 @@ public class SysEntController extends CommonCtrl {
 	}
 
 	/** updateById */
-	@ApiOperation("用户角色--权限--更新权限资源")
+	@ApiOperation("更新权限资源")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
 			@ApiImplicitParam(name = "entId", value = "权限ID[ENT_功能模块_子模块_操作], eg: ENT_ROLE_LIST_ADD", required = true),
@@ -91,7 +91,7 @@ public class SysEntController extends CommonCtrl {
 
 
 	/** 查询权限集合 */
-	@ApiOperation("用户角色--权限--查询权限集合")
+	@ApiOperation("查询权限集合")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
 			@ApiImplicitParam(name = "sysType", value = "所属系统： MGR-运营平台, MCH-商户中心", required = true)

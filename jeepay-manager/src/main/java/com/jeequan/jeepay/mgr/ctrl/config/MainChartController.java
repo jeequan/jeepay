@@ -55,6 +55,9 @@ public class MainChartController extends CommonCtrl {
      * @describe: 周交易总金额
      */
     @ApiOperation("周交易总金额")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
+    })
     @PreAuthorize("hasAuthority('ENT_C_MAIN_PAY_AMOUNT_WEEK')")
     @RequestMapping(value="/payAmountWeek", method = RequestMethod.GET)
     public ApiRes payAmountWeek() {
@@ -67,6 +70,9 @@ public class MainChartController extends CommonCtrl {
      * @describe: 商户总数量、服务商总数量、总交易金额、总交易笔数
      */
     @ApiOperation("商户总数量、服务商总数量、总交易金额、总交易笔数")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
+    })
     @PreAuthorize("hasAuthority('ENT_C_MAIN_NUMBER_COUNT')")
     @RequestMapping(value="/numCount", method = RequestMethod.GET)
     public ApiRes numCount() {

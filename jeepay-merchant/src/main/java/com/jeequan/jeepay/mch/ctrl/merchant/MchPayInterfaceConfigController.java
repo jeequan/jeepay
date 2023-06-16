@@ -29,6 +29,10 @@ import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,6 +50,7 @@ import java.util.Set;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
+@Api(tags = "商户支付接口管理")
 @RestController
 @RequestMapping("/api/mch/payConfigs")
 public class MchPayInterfaceConfigController extends CommonCtrl {
@@ -61,9 +66,14 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
      * @Description: 查询商户支付接口配置列表
      * @Date: 10:51 2021/5/13
     */
+    @ApiOperation("查询应用支付接口配置列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "appId", value = "应用ID", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_LIST')")
     @GetMapping
-    public ApiRes list() {
+    public ApiRes<List<PayInterfaceDefine>> list() {
         MchInfo mchInfo = mchInfoService.getById(getCurrentUser().getSysUser().getBelongInfoId());
         List<PayInterfaceDefine> list = payInterfaceConfigService.selectAllPayIfConfigListByAppId(getValStringRequired("appId"));
 
@@ -80,6 +90,12 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
      * @Description: 根据 商户号、接口类型 获取商户参数配置
      * @Date: 10:54 2021/5/13
     */
+    @ApiOperation("根据应用ID、接口类型 获取应用参数配置")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "appId", value = "应用ID", required = true),
+            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_VIEW')")
     @GetMapping("/{appId}/{ifCode}")
     public ApiRes getByMchNo(@PathVariable(value = "appId") String appId, @PathVariable(value = "ifCode") String ifCode) {
@@ -111,6 +127,12 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
      * @Description: 更新商户支付参数
      * @Date: 10:56 2021/5/13
     */
+    @ApiOperation("更新商户支付参数")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "infoId", value = "应用AppId", required = true),
+            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true)
+    })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_ADD')")
     @PostMapping
     @MethodLog(remark = "更新商户支付参数")
@@ -157,6 +179,11 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     }
 
     /** 查询支付宝商户授权URL **/
+    @ApiOperation("查询支付宝商户授权URL")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "mchAppId", value = "应用ID", required = true)
+    })
     @GetMapping("/alipayIsvsubMchAuthUrls/{mchAppId}")
     public ApiRes queryAlipayIsvsubMchAuthUrl(@PathVariable String mchAppId) {
 
@@ -179,9 +206,14 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
 
 
     /** 查询当前应用支持的支付接口 */
+    @ApiOperation("查询当前应用支持的支付接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "appId", value = "应用ID", required = true)
+    })
     @PreAuthorize("hasAuthority( 'ENT_DIVISION_RECEIVER_ADD' )")
     @RequestMapping(value="ifCodes/{appId}", method = RequestMethod.GET)
-    public ApiRes getIfCodeByAppId(@PathVariable("appId") String appId) {
+    public ApiRes<Set<String>> getIfCodeByAppId(@PathVariable("appId") String appId) {
 
         if(mchAppService.count(MchApp.gw().eq(MchApp::getMchNo, getCurrentMchNo()).eq(MchApp::getAppId, appId)) <= 0){
             throw new BizException("商户应用不存在");

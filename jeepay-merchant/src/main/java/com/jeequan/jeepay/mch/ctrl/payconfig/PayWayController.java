@@ -18,11 +18,15 @@ package com.jeequan.jeepay.mch.ctrl.payconfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.entity.PayWay;
-import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchPayPassageService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.PayWayService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
+@Api(tags = "支付方式配置")
 @RestController
 @RequestMapping("api/payWays")
 public class PayWayController extends CommonCtrl {
@@ -50,9 +55,17 @@ public class PayWayController extends CommonCtrl {
 	 * @Description: list
 	 * @Date: 15:52 2021/4/27
 	*/
+	@ApiOperation("支付方式列表")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
+			@ApiImplicitParam(name = "pageSize", value = "分页条数（-1时查全部数据）", dataType = "int", defaultValue = "20"),
+			@ApiImplicitParam(name = "wayCode", value = "支付方式代码"),
+			@ApiImplicitParam(name = "wayName", value = "支付方式名称")
+	})
 	@PreAuthorize("hasAuthority('ENT_PAY_ORDER_SEARCH_PAY_WAY')")
 	@GetMapping
-	public ApiRes list() {
+	public ApiPageRes<PayWay> list() {
 
 		PayWay queryObject = getObject(PayWay.class);
 
@@ -67,7 +80,7 @@ public class PayWayController extends CommonCtrl {
 
 		IPage<PayWay> pages = payWayService.page(getIPage(true), condition);
 
-		return ApiRes.page(pages);
+		return ApiPageRes.pages(pages);
 	}
 
 }

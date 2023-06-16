@@ -26,6 +26,7 @@ import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchDivisionReceiver;
 import com.jeequan.jeepay.core.entity.MchDivisionReceiverGroup;
 import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.exception.JeepayException;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
@@ -36,6 +37,10 @@ import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchDivisionReceiverGroupService;
 import com.jeequan.jeepay.service.impl.MchDivisionReceiverService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,6 +58,7 @@ import java.math.BigDecimal;
  * @site https://www.jeequan.com
  * @date 2021-08-23 11:50
  */
+@Api(tags = "分账管理（收款账号）")
 @RestController
 @RequestMapping("api/divisionReceivers")
 public class MchDivisionReceiverController extends CommonCtrl {
@@ -64,9 +70,21 @@ public class MchDivisionReceiverController extends CommonCtrl {
 
 
 	/** list */
+	@ApiOperation("收款账号列表")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
+			@ApiImplicitParam(name = "pageSize", value = "分页条数（-1时查全部数据）", dataType = "int", defaultValue = "20"),
+			@ApiImplicitParam(name = "appId", value = "应用ID"),
+			@ApiImplicitParam(name = "receiverId", value = "账号快照》 分账接收者ID", dataType = "Long"),
+			@ApiImplicitParam(name = "receiverAlias", value = "账号快照》 分账接收者别名"),
+			@ApiImplicitParam(name = "state", value = "状态: 0-待分账 1-分账成功, 2-分账失败", dataType = "Byte"),
+			@ApiImplicitParam(name = "receiverGroupId", value = "账号组ID", dataType = "Long"),
+			@ApiImplicitParam(name = "receiverGroupName", value = "组名称")
+	})
 	@PreAuthorize("hasAnyAuthority( 'ENT_DIVISION_RECEIVER_LIST' )")
 	@RequestMapping(value="", method = RequestMethod.GET)
-	public ApiRes list() {
+	public ApiPageRes<MchDivisionReceiver> list() {
 
 		MchDivisionReceiver queryObject = getObject(MchDivisionReceiver.class);
 
@@ -100,11 +118,16 @@ public class MchDivisionReceiverController extends CommonCtrl {
 		condition.orderByDesc(MchDivisionReceiver::getCreatedAt); //时间倒序
 
 		IPage<MchDivisionReceiver> pages = mchDivisionReceiverService.page(getIPage(true), condition);
-		return ApiRes.page(pages);
+		return ApiPageRes.pages(pages);
 	}
 
 
 	/** detail */
+	@ApiOperation("收款账号详情")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "recordId", value = "分账接收者ID", required = true, dataType = "Long")
+	})
 	@PreAuthorize("hasAuthority( 'ENT_DIVISION_RECEIVER_VIEW' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.GET)
 	public ApiRes detail(@PathVariable("recordId") Long recordId) {
@@ -119,6 +142,20 @@ public class MchDivisionReceiverController extends CommonCtrl {
 	}
 
 	/** add */
+	@ApiOperation("新增分账接收账号")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "accName", value = "接收方姓名", required = true),
+			@ApiImplicitParam(name = "accNo", value = "接收方账号", required = true),
+			@ApiImplicitParam(name = "accType", value = "账接收账号类型: 0-个人(对私) 1-商户(对公)", required = true, dataType = "Byte"),
+			@ApiImplicitParam(name = "appId", value = "应用ID", required = true),
+			@ApiImplicitParam(name = "divisionProfit", value = "分账比例", required = true, dataType = "BigDecimal"),
+			@ApiImplicitParam(name = "ifCode", value = "支付接口代码", required = true),
+			@ApiImplicitParam(name = "receiverAlias", value = "接收者账号别名", required = true),
+			@ApiImplicitParam(name = "receiverGroupId", value = "组ID（便于商户接口使用）", required = true, dataType = "Long"),
+			@ApiImplicitParam(name = "relationType", value = "分账关系类型（参考微信）， 如： SERVICE_PROVIDER 服务商等", required = true),
+			@ApiImplicitParam(name = "relationTypeName", value = "当选择自定义时，需要录入该字段。 否则为对应的名称", required = true)
+	})
 	@PreAuthorize("hasAuthority( 'ENT_DIVISION_RECEIVER_ADD' )")
 	@RequestMapping(value="", method = RequestMethod.POST)
 	@MethodLog(remark = "新增分账接收账号")
@@ -151,6 +188,21 @@ public class MchDivisionReceiverController extends CommonCtrl {
 	}
 
 	/** update */
+	@ApiOperation("更新分账接收账号")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "recordId", value = "分账接收者ID", required = true, dataType = "Long"),
+			@ApiImplicitParam(name = "accName", value = "接收方姓名", required = true),
+			@ApiImplicitParam(name = "accNo", value = "接收方账号", required = true),
+			@ApiImplicitParam(name = "accType", value = "账接收账号类型: 0-个人(对私) 1-商户(对公)", required = true, dataType = "Byte"),
+			@ApiImplicitParam(name = "appId", value = "应用ID", required = true),
+			@ApiImplicitParam(name = "divisionProfit", value = "分账比例", required = true, dataType = "BigDecimal"),
+			@ApiImplicitParam(name = "ifCode", value = "支付接口代码", required = true),
+			@ApiImplicitParam(name = "receiverAlias", value = "接收者账号别名", required = true),
+			@ApiImplicitParam(name = "receiverGroupId", value = "组ID（便于商户接口使用）", required = true, dataType = "Long"),
+			@ApiImplicitParam(name = "relationType", value = "分账关系类型（参考微信）， 如： SERVICE_PROVIDER 服务商等", required = true),
+			@ApiImplicitParam(name = "relationTypeName", value = "当选择自定义时，需要录入该字段。 否则为对应的名称", required = true)
+	})
 	@PreAuthorize("hasAuthority( 'ENT_DIVISION_RECEIVER_EDIT' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.PUT)
 	@MethodLog(remark = "更新分账接收账号")
@@ -186,6 +238,11 @@ public class MchDivisionReceiverController extends CommonCtrl {
 	}
 
 	/** delete */
+	@ApiOperation("删除分账接收账号")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "recordId", value = "分账接收者ID", required = true, dataType = "Long")
+	})
 	@PreAuthorize("hasAuthority('ENT_DIVISION_RECEIVER_DELETE')")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.DELETE)
 	@MethodLog(remark = "删除分账接收账号")

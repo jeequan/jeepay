@@ -31,6 +31,10 @@ import com.jeequan.jeepay.core.utils.TreeDataBuilder;
 import com.jeequan.jeepay.service.impl.SysEntitlementService;
 import com.jeequan.jeepay.service.impl.SysUserAuthService;
 import com.jeequan.jeepay.service.impl.SysUserService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,6 +53,7 @@ import java.util.List;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
+@Api(tags = "登录者信息")
 @RestController
 @RequestMapping("api/current")
 public class CurrentUserController extends CommonCtrl{
@@ -57,6 +62,10 @@ public class CurrentUserController extends CommonCtrl{
 	@Autowired private SysUserService sysUserService;
 	@Autowired private SysUserAuthService sysUserAuthService;
 
+	@ApiOperation("查询当前登录者的用户信息")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
+	})
 	@RequestMapping(value="/user", method = RequestMethod.GET)
 	public ApiRes currentUserInfo() {
 
@@ -94,6 +103,13 @@ public class CurrentUserController extends CommonCtrl{
 
 
 	/** 修改个人信息 */
+	@ApiOperation("修改个人信息--基本信息")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "avatarUrl", value = "头像地址"),
+			@ApiImplicitParam(name = "realname", value = "真实姓名"),
+			@ApiImplicitParam(name = "sex", value = "性别 0-未知, 1-男, 2-女")
+	})
 	@MethodLog(remark = "修改个人信息")
 	@RequestMapping(value="/user", method = RequestMethod.PUT)
 	public ApiRes modifyCurrentUserInfo() {
@@ -126,6 +142,12 @@ public class CurrentUserController extends CommonCtrl{
 
 
 	/** modifyPwd */
+	@ApiOperation("修改个人信息--安全信息")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+			@ApiImplicitParam(name = "confirmPwd", value = "新密码"),
+			@ApiImplicitParam(name = "originalPwd", value = "原密码")
+	})
 	@MethodLog(remark = "修改密码")
 	@RequestMapping(value="modifyPwd", method = RequestMethod.PUT)
 	public ApiRes modifyPwd() throws BizException{
@@ -152,6 +174,10 @@ public class CurrentUserController extends CommonCtrl{
 	}
 
 	/** 登出 */
+	@ApiOperation("退出登录")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
+	})
 	@MethodLog(remark = "退出")
 	@RequestMapping(value="logout", method = RequestMethod.POST)
 	public ApiRes logout() throws BizException{
