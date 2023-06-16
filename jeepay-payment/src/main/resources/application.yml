@@ -4,3 +4,12 @@ server:
 spring:
   redis:
     database: 3    #1库：运营平台  #2库：商户系统 #3库：支付网关
+
+# knife4j APIDOC文档
+knife4j:
+  enable: true
+  documents:
+    - group: 支付网关
+      name: 接口文档
+      # 某一个文件夹下所有的.md文件
+      locations: classpath:markdown/doc/*
