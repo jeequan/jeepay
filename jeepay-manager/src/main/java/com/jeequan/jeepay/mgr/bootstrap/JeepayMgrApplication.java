@@ -97,8 +97,8 @@ public class JeepayMgrApplication {
      * @Author: terrfly
      * @Date: 2023/6/13 15:04
      */
-    @Bean(value = "dockerBean")
-    public Docket dockerBean() {
+    @Bean(value = "knife4jDockerBean")
+    public Docket knife4jDockerBean() {
         return new Docket(DocumentationType.SWAGGER_2)  //指定使用Swagger2规范
                 .apiInfo(new ApiInfoBuilder().version("1.0").build()) //描述字段支持Markdown语法
                 .groupName("运营平台") //分组名称
