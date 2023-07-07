@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.core.utils;
 
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import com.jeequan.jeepay.core.exception.BizException;
@@ -117,7 +118,7 @@ public class DateKit {
 				time1 = DateUtil.parseDateTime("customDate".equals(dateType) ? (timeStr1 + " 00:00:00" ) : timeStr1);
 			}
 			if(StringUtils.isNotEmpty(timeStr2)){
-				time2 = DateUtil.parseDateTime("customDate".equals(dateType) ? (timeStr2 + " 23:59:59" ) : timeStr2);
+				time2 = DateUtil.parse( (  "customDate".equals(dateType) ? (timeStr2 + " 23:59:59.999" ) : timeStr2  + ".999"  ) , DatePattern.NORM_DATETIME_MS_FORMAT);
 			}
 			return new Date[]{time1, time2};
 
