@@ -118,7 +118,7 @@ public class WxApp extends WxpayPaymentService {
                     }
             );
 
-            res.setPayData(payInfo);
+            res.setPayInfo(payInfo);
 
             // 支付中
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
