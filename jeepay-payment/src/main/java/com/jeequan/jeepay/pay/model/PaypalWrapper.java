@@ -3,8 +3,7 @@ package com.jeequan.jeepay.pay.model;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.jeequan.jeepay.core.entity.PayOrder;
-import com.jeequan.jeepay.core.model.params.pppay.PpPayNormalMchParams;
-import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
+import com.jeequan.jeepay.core.model.params.pppay.PppayNormalMchParams;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.paypal.core.PayPalEnvironment;
 import com.paypal.core.PayPalHttpClient;
@@ -193,7 +192,7 @@ public class PaypalWrapper {
         return new ResponseEntity(text, httpHeaders, HttpStatus.OK);
     }
 
-    public static PaypalWrapper buildPaypalWrapper(PpPayNormalMchParams ppPayNormalMchParams){
+    public static PaypalWrapper buildPaypalWrapper(PppayNormalMchParams ppPayNormalMchParams){
         PaypalWrapper paypalWrapper = new PaypalWrapper();
         PayPalEnvironment environment = new PayPalEnvironment.Live(ppPayNormalMchParams.getClientId(), ppPayNormalMchParams.getSecret());
         if (ppPayNormalMchParams.getSandbox() == 1) {

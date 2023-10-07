@@ -25,13 +25,11 @@ import com.jeequan.jeepay.core.model.params.IsvsubMchParams;
 import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
-import com.jeequan.jeepay.core.model.params.pppay.PpPayNormalMchParams;
+import com.jeequan.jeepay.core.model.params.pppay.PppayNormalMchParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayIsvParams;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
 import com.jeequan.jeepay.pay.model.*;
 import com.jeequan.jeepay.service.impl.*;
-import com.paypal.core.PayPalEnvironment;
-import com.paypal.core.PayPalHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -227,7 +225,7 @@ public class ConfigContextService {
             }
 
             //放置 paypal client
-            PpPayNormalMchParams ppPayMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.PPPAY, PpPayNormalMchParams.class);
+            PppayNormalMchParams ppPayMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.PPPAY, PppayNormalMchParams.class);
             if (ppPayMchParams != null) {
                 mchAppConfigContext.setPaypalWrapper(PaypalWrapper.buildPaypalWrapper(ppPayMchParams));
             }

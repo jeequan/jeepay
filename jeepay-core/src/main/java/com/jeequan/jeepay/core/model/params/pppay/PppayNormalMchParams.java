@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
  * @create 2021/11/15 18:10
  */
 @Data
-public class PpPayNormalMchParams extends NormalMchParams {
+public class PppayNormalMchParams extends NormalMchParams {
     /**
      * 是否沙箱环境
      */
@@ -45,7 +45,7 @@ public class PpPayNormalMchParams extends NormalMchParams {
 
     @Override
     public String deSenData() {
-        PpPayNormalMchParams mchParams = this;
+        PppayNormalMchParams mchParams = this;
         if (StringUtils.isNotBlank(this.secret)) {
             mchParams.setSecret(StringKit.str2Star(this.secret, 6, 6, 6));
         }
