@@ -53,7 +53,7 @@ public class CloseOrderController extends ApiController {
      * @describe: 关闭订单
      */
     @RequestMapping("/api/pay/close")
-    public ApiRes queryOrder(){
+    public ApiRes closeOrder(){
 
         //获取参数 & 验签
         ClosePayOrderRQ rq = getRQByWithMchSign(ClosePayOrderRQ.class);
