@@ -2,7 +2,7 @@
 	<a href="https://www.jeequan.com"><img src="https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_logo.svg"></a>
 </p>
 <p align="center">
-	<strong>适合互联网企业使用的开源支付系统</strong>
+	<strong>计全支付 - 让支付接入更简单</strong>
 </p>
 <p align="center">
 	👉 <a href="https://www.jeequan.com">https://www.jeequan.com</a> 👈
