@@ -22,7 +22,7 @@ fi
 # 检查 配置文件是否存在
 if ! [ -f "./config.sh" ]; then
     echo '下载默认配置文件。'
-    yum install -y wget && wget -O config.sh https://gitee.com/jeequan/jeepay/raw/dev/docs/install/config.sh
+    yum install -y wget && wget -O config.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/config.sh
 fi
 
 #引入config
@@ -87,12 +87,11 @@ echo "[1] Done. "
 echo "[2] 拉取项目源代码文件.... "
 cd $rootDir/sources
 git clone https://gitee.com/jeequan/jeepay.git
-cd jeepay && git checkout -b dev origin/dev # TODO 这个在发布master后可删除。 
+# cd jeepay && git checkout -b dev origin/dev # 切换到dev分支。
 echo "[2] Done. "
 
 #源码中install.sh文件目录
 sourcesInstallPath=$rootDir/sources/jeepay/docs/install
-
 
 # 创建一个 bridge网络
 docker network create jeepay-net
@@ -215,6 +214,17 @@ docker run --name nginx118  \
 
 echo "[7] Done. "
 
-docker logs -f jeepaypayment
+docker logs jeepaypayment
+
+echo ">>>>>>> "
+echo ">>>>>>> "
+echo ">>>>>>>安装完成， 所有的配置文件和项目文件都在：$rootDir 文件夹中。 "
+echo ">>>>>>>项目访问地址 （注意开通端口防火墙）：   "
+echo ">>>>>>>运营平台： http://外网IP:19217   账号密码： jeepay/jeepay123   "
+echo ">>>>>>>商户平台： http://外网IP:19218   账号密码： 需要登录运营平台手动创建。    "
+echo ">>>>>>>支付网关： http://外网IP:19216   "
+echo ">>>>>>>若配置域名请更改 $rootDir/nginx/conf/nginx.conf 配置文件。 "
+echo ""
+echo "Complete."
 
 
