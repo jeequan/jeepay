@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.mch.bootstrap;
 
+import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
@@ -66,6 +67,9 @@ public class JeepayMchApplication {
 
         //新建fast-json转换器
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+
+        // 开启 FastJSON 安全模式！
+        ParserConfig.getGlobalInstance().setSafeMode(true);
 
         //fast-json 配置信息
         FastJsonConfig config = new FastJsonConfig();
