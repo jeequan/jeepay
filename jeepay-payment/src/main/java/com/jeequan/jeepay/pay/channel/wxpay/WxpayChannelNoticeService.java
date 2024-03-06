@@ -18,8 +18,8 @@ package com.jeequan.jeepay.pay.channel.wxpay;
 import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
+import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
-import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyV3Result;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.service.WxPayService;
@@ -89,7 +89,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                 }
 
                 // 验签 && 获取订单回调数据
-                WxPayOrderNotifyV3Result.DecryptNotifyResult result = parseOrderNotifyV3Result(request, mchAppConfigContext);
+                WxPayNotifyV3Result.DecryptNotifyResult result = parseOrderNotifyV3Result(request, mchAppConfigContext);
 
                 return MutablePair.of(result.getOutTradeNo(), result);
 
@@ -133,7 +133,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
 
             }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) { // V3
                 // 获取回调参数
-                WxPayOrderNotifyV3Result.DecryptNotifyResult result = (WxPayOrderNotifyV3Result.DecryptNotifyResult) params;
+                WxPayNotifyV3Result.DecryptNotifyResult result = (WxPayNotifyV3Result.DecryptNotifyResult) params;
 
                 // 验证参数
                 verifyWxPayParams(result, payOrder);
@@ -148,7 +148,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
                 }
 
                 channelResult.setChannelOrderId(result.getTransactionId()); //渠道订单号
-                WxPayOrderNotifyV3Result.Payer payer = result.getPayer();
+                WxPayNotifyV3Result.Payer payer = result.getPayer();
                 if (payer != null) {
                     channelResult.setChannelUserId(payer.getOpenid()); //支付用户ID
                 }
@@ -199,7 +199,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
      * @param mchAppConfigContext 商户配置
      * @return true:校验通过 false:校验不通过
      */
-    private WxPayOrderNotifyV3Result.DecryptNotifyResult parseOrderNotifyV3Result(HttpServletRequest request, MchAppConfigContext mchAppConfigContext) throws Exception {
+    private WxPayNotifyV3Result.DecryptNotifyResult parseOrderNotifyV3Result(HttpServletRequest request, MchAppConfigContext mchAppConfigContext) throws Exception {
         SignatureHeader header = new SignatureHeader();
         header.setTimeStamp(request.getHeader("Wechatpay-Timestamp"));
         header.setNonce(request.getHeader("Wechatpay-Nonce"));
@@ -221,7 +221,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
         wxPayConfig.setVerifier(verifier);
         wxPayService.setConfig(wxPayConfig);
 
-        WxPayOrderNotifyV3Result result = wxPayService.parseOrderNotifyV3Result(params, header);
+        WxPayNotifyV3Result result = wxPayService.parseOrderNotifyV3Result(params, header);
 
         return result.getResult();
     }
@@ -230,7 +230,7 @@ public class WxpayChannelNoticeService extends AbstractChannelNoticeService {
      * V3接口验证微信支付通知参数
      * @return
      */
-    public void verifyWxPayParams(WxPayOrderNotifyV3Result.DecryptNotifyResult result, PayOrder payOrder) {
+    public void verifyWxPayParams(WxPayNotifyV3Result.DecryptNotifyResult result, PayOrder payOrder) {
 
         try {
             // 核对金额

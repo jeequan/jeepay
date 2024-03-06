@@ -15,14 +15,11 @@
  */
 package com.jeequan.jeepay.pay.channel.wxpay;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.binarywang.wxpay.bean.profitsharing.*;
-import com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingReceiver;
-import com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingUnfreezeRequest;
-import com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingUnfreezeResult;
+import com.github.binarywang.wxpay.bean.profitsharing.request.*;
+import com.github.binarywang.wxpay.bean.profitsharing.result.*;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchDivisionReceiver;
@@ -100,7 +97,7 @@ public class WxpayDivisionService implements IDivisionService {
                 return ChannelRetMsg.confirmSuccess(null);
             }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
 
-                ProfitSharingReceiver profitSharingReceiver = new ProfitSharingReceiver();
+                ProfitSharingReceiverV3Request profitSharingReceiver = new ProfitSharingReceiverV3Request();
                 profitSharingReceiver.setType(mchDivisionReceiver.getAccType() == 0 ? "PERSONAL_OPENID" : "MERCHANT_ID");
                 profitSharingReceiver.setAccount(mchDivisionReceiver.getAccNo());
                 profitSharingReceiver.setName(mchDivisionReceiver.getAccName());
@@ -116,7 +113,7 @@ public class WxpayDivisionService implements IDivisionService {
                     profitSharingReceiver.setSubMchId(isvsubMchParams.getSubMchId());
                 }
 
-                ProfitSharingReceiver receiver = wxServiceWrapper.getWxPayService().getProfitSharingV3Service().addProfitSharingReceiver(profitSharingReceiver);
+                ProfitSharingReceiverV3Result receiver = wxServiceWrapper.getWxPayService().getProfitSharingService().addReceiverV3(profitSharingReceiver);
 
                 // 明确成功
                 return ChannelRetMsg.confirmSuccess(null);
@@ -189,7 +186,7 @@ public class WxpayDivisionService implements IDivisionService {
 
             }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
 
-                com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingRequest request = new com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingRequest();
+                ProfitSharingV3Request request = new ProfitSharingV3Request();
                 request.setTransactionId(payOrder.getChannelOrderNo());
                 request.setUnfreezeUnsplit(true);
 
@@ -208,7 +205,7 @@ public class WxpayDivisionService implements IDivisionService {
                     request.setOutOrderNo(recordList.get(0).getBatchOrderId()); //取到批次号
                 }
 
-                List<ProfitSharingReceiver> receivers = new ArrayList<>();
+                List<ProfitSharingV3Request.Receiver> receivers = new ArrayList<>();
                 for (int i = 0; i < recordList.size(); i++) {
 
                     PayOrderDivisionRecord record = recordList.get(i);
@@ -216,11 +213,11 @@ public class WxpayDivisionService implements IDivisionService {
                         continue;
                     }
 
-                    ProfitSharingReceiver receiver = new ProfitSharingReceiver();
+                    ProfitSharingV3Request.Receiver receiver = new ProfitSharingV3Request.Receiver();
                     // 0-个人， 1-商户  (目前仅支持服务商appI获取个人openId, 即： PERSONAL_OPENID， 不支持 PERSONAL_SUB_OPENID )
                     receiver.setType(record.getAccType() == 0 ? "PERSONAL_OPENID" : "MERCHANT_ID");
                     receiver.setAccount(record.getAccNo());
-                    receiver.setAmount(record.getCalDivisionAmount());
+                    receiver.setAmount(record.getCalDivisionAmount().intValue());
                     receiver.setDescription(record.getPayOrderId() + "分账");
                     receivers.add(receiver);
                 }
@@ -230,7 +227,8 @@ public class WxpayDivisionService implements IDivisionService {
                 }
                 request.setReceivers(receivers);
 
-                com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult profitSharingResult = wxServiceWrapper.getWxPayService().getProfitSharingV3Service().profitSharing(request);
+                ProfitSharingV3Result profitSharingResult = wxServiceWrapper.getWxPayService().
+                        getProfitSharingService().profitSharingV3(request);
 
                 return ChannelRetMsg.waiting();
 
@@ -317,11 +315,11 @@ public class WxpayDivisionService implements IDivisionService {
 
                 String result = wxServiceWrapper.getWxPayService().getV3(url);
 
-                com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult profitSharingResult = JSON.parseObject(result, com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult.class);
+                ProfitSharingV3Result profitSharingResult = JSON.parseObject(result, ProfitSharingV3Result.class);
 
-                List<com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult.Receiver> receivers = profitSharingResult.getReceivers();
+                List<ProfitSharingV3Result.Receiver> receivers = profitSharingResult.getReceivers();
 
-                for (com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingResult.Receiver receiver : receivers) {
+                for (ProfitSharingV3Result.Receiver receiver : receivers) {
 
                     // 我方系统的分账接收记录ID
                     Long recordId = accnoAndRecordIdSet.get(receiver.getAccount());
@@ -363,7 +361,7 @@ public class WxpayDivisionService implements IDivisionService {
 
         if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
 
-            ProfitSharingFinishRequest request = new ProfitSharingFinishRequest();
+            ProfitSharingUnfreezeRequest request = new ProfitSharingUnfreezeRequest();
 
             //放置isv信息
             WxpayKit.putApiIsvInfo(mchAppConfigContext, request);
@@ -378,7 +376,7 @@ public class WxpayDivisionService implements IDivisionService {
 
         }else {
 
-            ProfitSharingUnfreezeRequest request = new ProfitSharingUnfreezeRequest();
+            ProfitSharingUnfreezeV3Request request = new ProfitSharingUnfreezeV3Request();
             // 特约商户
             if(mchAppConfigContext.isIsvsubMch()){
                 WxpayIsvsubMchParams isvsubMchParams =
@@ -391,7 +389,7 @@ public class WxpayDivisionService implements IDivisionService {
             request.setOutOrderNo(SeqKit.genDivisionBatchId());
             request.setSubMchId(null);
             request.setDescription("完结分账");
-            ProfitSharingUnfreezeResult profitSharingUnfreezeResult = wxServiceWrapper.getWxPayService().getProfitSharingV3Service().profitSharingUnfreeze(request);
+            ProfitSharingUnfreezeV3Result profitSharingUnfreezeResult = wxServiceWrapper.getWxPayService().getProfitSharingService().profitSharingUnfreeze(request);
 
             // 明确成功
             return profitSharingUnfreezeResult.getOrderId();
