@@ -28,4 +28,6 @@ docker stop redis6 && docker rm redis6
 
 docker stop activemq5 && docker rm activemq5
 
+docker network rm jeepay-net
+
 rm -rf $rootDir
