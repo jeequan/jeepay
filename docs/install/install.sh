@@ -29,6 +29,10 @@ fi
 chmod 777 ./config.sh
 . ./config.sh
 
+if [ -d $rootDir ]; then
+    echo "ERROR： $rootDir 根文件夹存在，请手动删除后重试！ "
+    exit 0
+fi
 
 # 第0步：提示信息
 echo "检查配置信息是否正确（配置内容在 config.sh文件）："
