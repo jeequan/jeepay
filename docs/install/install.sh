@@ -22,7 +22,7 @@ fi
 # 检查 配置文件是否存在
 if ! [ -f "./config.sh" ]; then
     echo '下载默认配置文件。'
-    yum install -y wget && wget -O config.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/config.sh
+    wget -O config.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/config.sh
 fi
 
 #引入config
