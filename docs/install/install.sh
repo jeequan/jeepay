@@ -175,7 +175,7 @@ docker run -itd --name jeepaymanager --restart=always --network=jeepay-net \
 -v $rootDir/service/logs:/jeepayhomes/service/logs \
 -v $rootDir/service/uploads:/jeepayhomes/service/uploads \
 -v $rootDir/service/configs/manager/application.yml:/jeepayhomes/service/app/application.yml \
--d jeepay/jeepay-manager:v2.2.2
+-d jeepay/jeepay-manager
 
 echo "[6.2] 下载并启动 java 项目 [ jeepaymerchant  ] .... "
 # 运行 java项目
@@ -185,7 +185,7 @@ docker run -itd --name jeepaymerchant --restart=always --network=jeepay-net \
 -v $rootDir/service/logs:/jeepayhomes/service/logs \
 -v $rootDir/service/uploads:/jeepayhomes/service/uploads \
 -v $rootDir/service/configs/merchant/application.yml:/jeepayhomes/service/app/application.yml \
--d jeepay/jeepay-merchant:v2.2.2
+-d jeepay/jeepay-merchant
 
 echo "[6.3] 下载并启动 java 项目 [ jeepaypayment  ] .... "
 # 运行 java项目
@@ -195,7 +195,7 @@ docker run -itd --name jeepaypayment --restart=always --network=jeepay-net \
 -v $rootDir/service/logs:/jeepayhomes/service/logs \
 -v $rootDir/service/uploads:/jeepayhomes/service/uploads \
 -v $rootDir/service/configs/payment/application.yml:/jeepayhomes/service/app/application.yml \
--d jeepay/jeepay-payment:v2.2.2
+-d jeepay/jeepay-payment
 
 echo "[6] Done. "
 
