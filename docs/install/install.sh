@@ -171,6 +171,7 @@ echo "[6.1] 下载并启动 java 项目 [ jeepaymanager  ] .... "
 # 运行 java项目
 docker run -itd --name jeepaymanager --restart=always --network=jeepay-net \
 -p 9217:9217 \
+-v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/service/logs:/jeepayhomes/service/logs \
 -v $rootDir/service/uploads:/jeepayhomes/service/uploads \
 -v $rootDir/service/configs/manager/application.yml:/jeepayhomes/service/app/application.yml \
@@ -180,6 +181,7 @@ echo "[6.2] 下载并启动 java 项目 [ jeepaymerchant  ] .... "
 # 运行 java项目
 docker run -itd --name jeepaymerchant --restart=always --network=jeepay-net \
 -p 9218:9218 \
+-v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/service/logs:/jeepayhomes/service/logs \
 -v $rootDir/service/uploads:/jeepayhomes/service/uploads \
 -v $rootDir/service/configs/merchant/application.yml:/jeepayhomes/service/app/application.yml \
@@ -189,6 +191,7 @@ echo "[6.3] 下载并启动 java 项目 [ jeepaypayment  ] .... "
 # 运行 java项目
 docker run -itd --name jeepaypayment --restart=always --network=jeepay-net \
 -p 9216:9216 \
+-v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/service/logs:/jeepayhomes/service/logs \
 -v $rootDir/service/uploads:/jeepayhomes/service/uploads \
 -v $rootDir/service/configs/payment/application.yml:/jeepayhomes/service/app/application.yml \

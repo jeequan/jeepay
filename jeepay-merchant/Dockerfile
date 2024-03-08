@@ -9,6 +9,12 @@ FROM openjdk:8u342-jdk
 
 MAINTAINER Terrfly
 
+# 配置环境变量，支持中文。
+ENV LANG=C.UTF-8
+
+# 设置时区 东八区， 解决日志时间不正确的问题。
+ENV TZ=Asia/Shanghai
+
 # 对外映射的端口 ( 不明确EXPOSE 也不影响映射  )
 EXPOSE 9218
 
