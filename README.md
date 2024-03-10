@@ -164,7 +164,7 @@ Jeepay已经开发了java和python的sdk，方便接入方开发对接。
 - Java SDK：[https://gitee.com/jeequan/jeepay-sdk-java](https://gitee.com/jeequan/jeepay-sdk-java "java sdk")
 - Python SDK：[https://gitee.com/jeequan/jeepay-sdk-python](https://gitee.com/jeequan/jeepay-sdk-python "python sdk")
 
-## 🍿 功能模块
+# 功能模块
 
 > Jeepay运营平台功能
 
@@ -174,7 +174,7 @@ Jeepay已经开发了java和python的sdk，方便接入方开发对接。
 
 ![Jeepay商户系统功能](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_mch.png "Jeepay商户系统功能")
 
-## 🍯 系统截图
+# 系统截图
 
 `以下截图是从实际已完成功能界面截取,截图时间为：2021-07-06 08:59`
 
@@ -204,7 +204,7 @@ Jeepay已经开发了java和python的sdk，方便接入方开发对接。
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/022.png "Jeepay演示界面")
 
-## 🥪 更多支持
+# 更多支持
 ***
 微信扫描下面二维码，关注官方公众号：计全科技，获取更多精彩内容。
 
