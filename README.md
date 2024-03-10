@@ -214,4 +214,4 @@ Jeepay已经开发了java和python的sdk，方便接入方开发对接。
 
 ![Jeepay微信交流群](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_open_kf.png "Jeepay微信交流群")
 
-微信客服咨询：[https://work.weixin.qq.com/kfid/kfcda262e9a7799f21c](https://work.weixin.qq.com/kfid/kfcda262e9a7799f21c "jeepay微信客服咨询")
+微信客服咨询：[https://work.weixin.qq.com/kfid/kfc6de0edce151ee062](https://work.weixin.qq.com/kfid/kfc6de0edce151ee062 "jeepay微信客服咨询")
