@@ -124,7 +124,6 @@ public class WxpayTransferService implements ITransferService {
                 }else{
                     request.setBatchName(transferOrder.getTransferDesc());
                 }
-                request.setBatchName(transferOrder.getAccountName());
                 request.setBatchRemark(transferOrder.getTransferDesc());
                 request.setTotalAmount(transferOrder.getAmount().intValue());
                 request.setTotalNum(1);
