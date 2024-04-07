@@ -124,7 +124,7 @@ public class PayOrderDivisionExecController extends ApiController {
             return ApiRes.customFail(e.getMessage());
 
         } catch (Exception e) {
-            log.error("系统异常：{}", e);
+            log.error("系统异常：payOrderId={}", bizRQ.getPayOrderId(), e);
             return ApiRes.customFail("系统异常");
         }
     }
