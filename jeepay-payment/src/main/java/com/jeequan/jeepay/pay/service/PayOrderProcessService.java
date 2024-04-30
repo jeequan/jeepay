@@ -20,10 +20,13 @@ import com.jeequan.jeepay.components.mq.model.PayOrderDivisionMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /***
 * 订单处理通用逻辑
@@ -87,5 +90,26 @@ public class PayOrderProcessService {
         }
     }
 
+
+    /***
+     *
+     * 支付中 --》 支付成功或者失败
+     * **/
+    @Transactional
+    public void updateIngAndSuccessOrFailByCreatebyOrder(PayOrder payOrder, ChannelRetMsg channelRetMsg){
+
+        boolean isSuccess = payOrderService.updateInit2Ing(payOrder.getPayOrderId(), payOrder);
+        if(!isSuccess){
+            log.error("updateInit2Ing更新异常 payOrderId={}", payOrder.getPayOrderId());
+            throw new BizException("更新订单异常!");
+        }
+
+        isSuccess = payOrderService.updateIng2SuccessOrFail(payOrder.getPayOrderId(), payOrder.getState(),
+                channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelUserId(), channelRetMsg.getChannelErrCode(), channelRetMsg.getChannelErrMsg());
+        if(!isSuccess){
+            log.error("updateIng2SuccessOrFail更新异常 payOrderId={}", payOrder.getPayOrderId());
+            throw new BizException("更新订单异常!");
+        }
+    }
 
 }

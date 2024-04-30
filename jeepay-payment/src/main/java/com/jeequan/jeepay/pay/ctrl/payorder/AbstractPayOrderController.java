@@ -26,7 +26,10 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.DBApplicationConfig;
-import com.jeequan.jeepay.core.utils.*;
+import com.jeequan.jeepay.core.utils.AmountUtil;
+import com.jeequan.jeepay.core.utils.SeqKit;
+import com.jeequan.jeepay.core.utils.SpringBeansUtil;
+import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.channel.IPaymentService;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.exception.ChannelException;
@@ -372,18 +375,8 @@ public abstract class AbstractPayOrderController extends ApiController {
             payOrder.setChannelUser(channelRetMsg.getChannelUserId());
         }
 
+        payOrderProcessService.updateIngAndSuccessOrFailByCreatebyOrder(payOrder, channelRetMsg);
 
-
-        boolean isSuccess = payOrderService.updateInit2Ing(payOrder.getPayOrderId(), payOrder);
-        if(!isSuccess){
-            throw new BizException("更新订单异常!");
-        }
-
-        isSuccess = payOrderService.updateIng2SuccessOrFail(payOrder.getPayOrderId(), payOrder.getState(),
-                channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelUserId(), channelRetMsg.getChannelErrCode(), channelRetMsg.getChannelErrMsg());
-        if(!isSuccess){
-            throw new BizException("更新订单异常!");
-        }
     }
 
 
