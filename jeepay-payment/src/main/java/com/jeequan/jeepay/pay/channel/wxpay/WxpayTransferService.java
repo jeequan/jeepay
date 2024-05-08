@@ -198,8 +198,12 @@ public class WxpayTransferService implements ITransferService {
 
         } catch (WxPayException e) {
 
-            // 如果查询单号对应的数据不存在，那么数据不存在的原因可能是：（1）付款还在处理中；（2）付款处理失败导致付款订单没有落地，务必再次查询确认此次付款的结果。
-            if("NOT_FOUND".equalsIgnoreCase(e.getErrCode())){
+
+            // NOT_FOUND:那么数据不存在的原因可能是：（1）付款还在处理中；（2）付款处理失败导致付款订单没有落地，务必再次查询确认此次付款的结果。
+            // INVALID_REQUEST:请等待批次处理完成后再查询明细单据
+            // SYSTEM_ERROR: 系统错误
+            // 当出现以上情况时，继续查询，不能直接返回错误信息
+            if("NOT_FOUND".equalsIgnoreCase(e.getErrCode()) || "INVALID_REQUEST".equalsIgnoreCase(e.getErrCode()) || "SYSTEM_ERROR".equalsIgnoreCase(e.getErrCode())){
                 return ChannelRetMsg.waiting();
             }
 
