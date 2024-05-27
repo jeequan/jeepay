@@ -224,13 +224,13 @@ public class RefundOrderController extends ApiController {
         if(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == channelRetMsg.getChannelState()) {
 
             this.updateInitOrderStateThrowException(RefundOrder.STATE_SUCCESS, refundOrder, channelRetMsg);
-            payMchNotifyService.refundOrderNotify(refundOrder);
+            payMchNotifyService.refundOrderNotify(refundOrderService.getById(refundOrder.getRefundOrderId()));
 
             //明确失败
         }else if(ChannelRetMsg.ChannelState.CONFIRM_FAIL == channelRetMsg.getChannelState()) {
 
             this.updateInitOrderStateThrowException(RefundOrder.STATE_FAIL, refundOrder, channelRetMsg);
-            payMchNotifyService.refundOrderNotify(refundOrder);
+            payMchNotifyService.refundOrderNotify(refundOrderService.getById(refundOrder.getRefundOrderId()));
 
             // 上游处理中 || 未知 || 上游接口返回异常  退款单为退款中状态
         }else if( ChannelRetMsg.ChannelState.WAITING == channelRetMsg.getChannelState() ||
