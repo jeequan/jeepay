@@ -137,6 +137,13 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
             sysUserAuthService.resetAuthInfo(sysUserId, sysUser.getLoginUsername(), null, null, dbRecord.getSysType());
         }
 
+        //修改了编号
+        if(StringUtils.isNotEmpty(sysUser.getUserNo()) && dbRecord.getUserNo() != null && !dbRecord.getUserNo().equals(sysUser.getUserNo())){
+            if(count(SysUser.gw().eq(SysUser::getSysType, dbRecord.getSysType()).eq(SysUser::getUserNo, sysUser.getUserNo())) > 0){
+                throw new BizException("该员工编号已关联其他用户！");
+            }
+        }
+
         //修改用户主表
         baseMapper.updateById(sysUser);
     }
