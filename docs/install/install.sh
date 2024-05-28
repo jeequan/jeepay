@@ -114,7 +114,7 @@ docker run -p 3306:3306 --name mysql8 --network=jeepay-net  \
 -v $rootDir/mysql/log:/var/log/mysql  \
 -v $rootDir/mysql/data:/var/lib/mysql  \
 -v $rootDir/mysql/config:/etc/mysql  \
--e MYSQL_ROOT_PASSWORD=$mysql_pwd \
+-e MYSQL_ROOT_PASSWORD=jeepaydb123456 \
 -d mysql:8.0.25
 
 # 容器重启
