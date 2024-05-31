@@ -120,7 +120,7 @@ public class TransferNoticeController extends AbstractCtrl {
 
                 }else if(notifyResult.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_FAIL){
                     // 转账失败
-                    transferOrderService.updateIng2Fail(transferId, notifyResult.getChannelOrderId(), notifyResult.getChannelUserId(), notifyResult.getChannelErrCode());
+                    transferOrderService.updateIng2Fail(transferId, notifyResult.getChannelOrderId(), notifyResult.getChannelErrCode(), notifyResult.getChannelErrMsg());
                     payMchNotifyService.transferOrderNotify(transferOrderService.getById(transferId));
                 }
             }
