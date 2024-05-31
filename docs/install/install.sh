@@ -73,6 +73,7 @@ mkdir $rootDir/mysql -p
 mkdir $rootDir/mysql/config -p
 mkdir $rootDir/mysql/log -p
 mkdir $rootDir/mysql/data -p
+mkdir $rootDir/mysql/mysql-files -p
 
 # mkdir $rootDir/activemq -p
 
@@ -113,16 +114,29 @@ docker run -p 3306:3306 --name mysql8 --network=jeepay-net  \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/mysql/log:/var/log/mysql  \
 -v $rootDir/mysql/data:/var/lib/mysql  \
--v $rootDir/mysql/config:/etc/mysql  \
+-v $rootDir/mysql/mysql-files:/var/lib/mysql-files \
+-v $rootDir/mysql/config:/etc/mysql/conf.d  \
 -e MYSQL_ROOT_PASSWORD=$mysql_pwd \
--d mysql:8.0.25
-
-# 容器重启
-docker restart mysql8
+-id mysql:8.0.25
 
 # 避免未启动完成或出现错误： ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock'
-echo "等待重启mysql容器....... "
-sleep 10
+# echo "等待重启mysql容器....... "
+
+while true
+do
+ # docker exec mysql8 mysql | grep '(using password: NO)'  使用这个判断不行， 若没有启动会报错
+ docker logs mysql8 > /tmp/installmysql.log
+ logContent=$(cat /tmp/installmysql.log | grep 'MySQL init process done')
+ if [ ! -n "$logContent" ];then
+    docker logs mysql8
+    echo "[3] 等待启动mysql容器....... "
+    sleep 30
+  else
+    echo "[3] mysql启动完成 $logContent"
+    sleep 10
+    break
+  fi
+done
 
 echo "[3] 初始化数据导入 ...... "
 # 创建数据库  && 导入数据
