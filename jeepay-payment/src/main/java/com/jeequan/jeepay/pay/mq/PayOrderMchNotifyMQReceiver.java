@@ -16,6 +16,7 @@
 package com.jeequan.jeepay.pay.mq;
 
 import cn.hutool.core.net.url.UrlBuilder;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import com.jeequan.jeepay.components.mq.model.PayOrderMchNotifyMQ;
@@ -27,6 +28,8 @@ import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * 接收MQ消息
@@ -71,13 +74,10 @@ public class PayOrderMchNotifyMQReceiver implements PayOrderMchNotifyMQ.IMQRecei
             try {
                 // res = HttpUtil.createPost(notifyUrl).timeout(20000).execute().body();
 
-                int pathEndPos = notifyUrl.indexOf('?');
-                if (pathEndPos <= -1) {
-                    log.error("通知地址错误，参数为空，notifyUrl：{}", notifyUrl);
-                    throw new BizException("通知地址错误");
-                }
+                String host = notifyUrl.split("\\?")[0];
+                Map bodyMap = HttpUtil.decodeParamMap(notifyUrl, CharsetUtil.CHARSET_UTF_8);
+                res = HttpUtil.post(host, bodyMap, 20000);
 
-                res = HttpUtil.post(StrUtil.subPre(notifyUrl, pathEndPos), StrUtil.subSuf(notifyUrl, pathEndPos + 1), 20000);
             } catch (Exception e) {
                 log.error("http error", e);
                 res = "连接["+ UrlBuilder.of(notifyUrl).getHost() +"]异常:【" + e.getMessage() + "】";
