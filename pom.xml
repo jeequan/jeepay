@@ -54,6 +54,7 @@
 
     <mysql.version>8.0.28</mysql.version> <!-- 覆写 spring-boot-dependencies 的依赖版本号 -->
     <jaxb-api.version>2.3.0</jaxb-api.version>
+    <activemq.version>5.16.7</activemq.version>
 
   </properties>
 
