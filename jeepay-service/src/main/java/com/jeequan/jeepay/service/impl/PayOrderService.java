@@ -286,11 +286,9 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         param.put("createTimeStart", createdStart);
         param.put("createTimeEnd", createdEnd);
         // 查询收款的记录
-        List<Map> payOrderList = payOrderMapper.selectOrderCount(param);
-        // 查询退款的记录
-        List<Map> refundOrderList = payOrderMapper.selectOrderCount(param);
+        List<Map> payAndRefundOrderList = payOrderMapper.selectOrderCount(param);
         // 生成前端返回参数类型
-        List<Map> returnList = getReturnList(daySpace, createdEnd, payOrderList, refundOrderList);
+        List<Map> returnList = getReturnList(daySpace, createdEnd, payAndRefundOrderList);
         return returnList;
     }
 
@@ -331,7 +329,7 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
     }
 
     /** 生成首页交易统计数据类型 **/
-    public List<Map> getReturnList(int daySpace, String createdStart, List<Map> payOrderList, List<Map> refundOrderList) {
+    public List<Map> getReturnList(int daySpace, String createdStart, List<Map> payAndRefundOrderList) {
         List<Map> dayList = new ArrayList<>();
         DateTime endDay = DateUtil.parseDateTime(createdStart);
         // 先判断间隔天数 根据天数设置空的list
@@ -356,13 +354,13 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
             refundMap.put("date", dayMap.get("date").toString());
             refundMap.put("type", "退款");
             refundMap.put("payAmount", 0);
-            for (Map payOrderMap:payOrderList) {
+            for (Map payOrderMap:payAndRefundOrderList) {
                 if (dayMap.get("date").equals(payOrderMap.get("groupDate"))) {
                     payMap.put("payAmount", payOrderMap.get("payAmount"));
                 }
             }
             payListMap.add(payMap);
-            for (Map refundOrderMap:refundOrderList) {
+            for (Map refundOrderMap:payAndRefundOrderList) {
                 if (dayMap.get("date").equals(refundOrderMap.get("groupDate"))) {
                     refundMap.put("payAmount", refundOrderMap.get("refundAmount"));
                 }
