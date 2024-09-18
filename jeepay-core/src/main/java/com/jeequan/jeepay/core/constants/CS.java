@@ -200,6 +200,13 @@ public class CS {
 //        String QR_CONTENT = "qrContent";  //二维码实际内容
     }
 
+    /** 代码（项目）层面 ， 全部的系统定义， 需要注入到对应的bean中 **/
+    public interface CODE_SYS_NAME_SET {
+        String JEEPAY_MANAGER = "MANAGER";
+        String JEEPAY_MERCHANT = "MERCHANT";
+        String JEEPAY_PAYMENT = "PAYMENT";
+    }
+
 
     //接口版本
     public interface PAY_IF_VERSION{

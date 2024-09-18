@@ -22,14 +22,11 @@ import com.aliyun.openservices.ons.api.SendResult;
 import com.jeequan.jeepay.components.mq.constant.MQVenderCS;
 import com.jeequan.jeepay.components.mq.model.AbstractMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
+import com.jeequan.jeepay.core.utils.DateKit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
 
 /**
  * 阿里云rocketMQ 消息发送器的实现
@@ -58,7 +55,7 @@ public class AliYunRocketMQSender implements IMQSender {
     public void send(AbstractMQ mqModel, int delaySeconds) {
         Message message = new Message(mqModel.getMQName(), AliYunRocketMQFactory.defaultTag, mqModel.toMessage().getBytes());
         if (delaySeconds > 0) {
-            long delayTime = System.currentTimeMillis() + delayTimeCorrector(delaySeconds) * 1000;
+            long delayTime = DateKit.currentTimeMillis() + delayTimeCorrector(delaySeconds) * 1000;
             // 设置消息需要被投递的时间。
             message.setStartDeliverTime(delayTime);
         }

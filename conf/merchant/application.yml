@@ -92,7 +92,7 @@ spring:
 #  namesrvAddr: xxx
 #  accessKey: xxx
 #  secretKey: xxx
-#  groupId: GID_JEEPAY_T
+#  groupIdPrefix: GID_JEEPAY_ # (分组前缀，  具体名称详见AliyunRocketMQFactory.java )
 
   #日志配置参数。
   # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
