@@ -15,6 +15,7 @@
  */
 package com.jeequan.jeepay.pay.channel.wxpay;
 
+import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundQueryRequest;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
@@ -155,9 +156,28 @@ public class WxpayRefundService extends AbstractRefundService {
                 req.setOutRefundNo(refundOrder.getRefundOrderId()); // 退款单号
                 WxPayService wxPayService = wxServiceWrapper.getWxPayService();
 
-                WxPayRefundQueryResult result = wxPayService.refundQueryV2(req);
-                if("SUCCESS".equals(result.getResultCode())){ // 退款成功
+                WxPayRefundQueryResult result = wxPayService.refundQuery(req);
+
+                //V2 退款状态：
+                //SUCCESS—退款成功
+                //REFUNDCLOSE—退款关闭，指商户发起退款失败的情况。
+                //PROCESSING—退款处理中
+                //CHANGE—退款异常，
+                String refundState = null;
+                if("SUCCESS".equals(result.getResultCode()) && CollUtil.isNotEmpty(result.getRefundRecords()) ){
+                    refundState = result.getRefundRecords().get(0).getRefundStatus();
+                }
+
+                if("SUCCESS".equals(refundState) ){ // 退款成功
+
                     channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+
+                } else if("REFUNDCLOSE".equals(refundState) || "CHANGE".equals(refundState) ){ // 退款失败
+
+                    channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+                    channelRetMsg.setChannelErrCode(refundState);
+                    channelRetMsg.setChannelErrMsg(result.getErrCodeDes());
+
                 }else{
                     channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
                     channelRetMsg.setChannelErrMsg(result.getReturnMsg());
@@ -176,6 +196,12 @@ public class WxpayRefundService extends AbstractRefundService {
                 String status = resultJSON.getString("status");
                 if("SUCCESS".equals(status)){ // 退款成功
                     channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+
+                }else if("CLOSED".equals(status) || "ABNORMAL".equals(status)){ // 退款失败 SUCCESS: 退款成功    CLOSED: 退款关闭  PROCESSING: 退款处理中  ABNORMAL: 退款异常
+
+                    channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+                    channelRetMsg.setChannelErrCode(status);
+
                 }else{
                     channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
                     channelRetMsg.setChannelErrMsg(status);
