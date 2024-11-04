@@ -40,6 +40,7 @@ public class SeqKit {
 	private static final AtomicLong MHO_ORDER_SEQ = new AtomicLong(0L);
 	private static final AtomicLong TRANSFER_ID_SEQ = new AtomicLong(0L);
 	private static final AtomicLong DIVISION_BATCH_ID_SEQ = new AtomicLong(0L);
+	private static final AtomicLong QRCODE_CARD_ID_SEQ = new AtomicLong(0L); //码牌自增ID
 
 	private static final String PAY_ORDER_SEQ_PREFIX = "P";
 	private static final String REFUND_ORDER_SEQ_PREFIX = "R";
@@ -99,6 +100,16 @@ public class SeqKit {
 		return String.format("%s%s%04d", DIVISION_BATCH_ID_SEQ_PREFIX,
 				DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
 				(int) DIVISION_BATCH_ID_SEQ.getAndIncrement() % 10000);
+	}
+
+	/** 模拟生成分账批次号, 避免mp自增太长 导致查询失败 **/
+	public static Long genQrcodeCardId() {
+
+		return Long.parseLong(String.format("%s%02d",
+				DateKit.currentTimeMillis() + "",
+				(int) QRCODE_CARD_ID_SEQ.getAndIncrement() % 100)
+		);
+
 	}
 
 	public static void main(String[] args) throws Exception {

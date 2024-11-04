@@ -26,6 +26,7 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.DBApplicationConfig;
+import com.jeequan.jeepay.core.model.QRCodeParams;
 import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
@@ -147,7 +148,7 @@ public abstract class AbstractPayOrderController extends ApiController {
 
                 DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
 
-                String payUrl = dbApplicationConfig.genUniJsapiPayUrl(payOrderId);
+                String payUrl = dbApplicationConfig.genUniJsapiPayUrl(QRCodeParams.TYPE_PAY_ORDER, payOrderId);
                 if(CS.PAY_DATA_TYPE.CODE_IMG_URL.equals(qrCashierOrderRQ.getPayDataType())){ //二维码地址
                     qrCashierOrderRS.setCodeImgUrl(dbApplicationConfig.genScanImgUrl(payUrl));
 

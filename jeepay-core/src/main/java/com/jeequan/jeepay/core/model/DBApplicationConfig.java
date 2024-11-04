@@ -19,16 +19,17 @@ import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.utils.JeepayKit;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 
 /*
-* 系统应用配置项定义Bean
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/6/8 16:35
-*/
+ * 系统应用配置项定义Bean
+ *
+ * @author terrfly
+ * @site https://www.jeequan.com
+ * @date 2021/6/8 16:35
+ */
 @Data
 public class DBApplicationConfig implements Serializable {
 
@@ -45,13 +46,13 @@ public class DBApplicationConfig implements Serializable {
     private String ossPublicSiteUrl;
 
     /** 生成  【jsapi统一收银台跳转地址】 **/
-    public String genUniJsapiPayUrl(String payOrderId){
-        return getPaySiteUrl() + "/cashier/index.html#/hub/" + JeepayKit.aesEncode(payOrderId);
+    public String genUniJsapiPayUrl(Byte type, String id){
+        return getPaySiteUrl() + "/cashier/index.html#/hub/" + genQrToken(type, id);
     }
 
     /** 生成  【jsapi统一收银台】oauth2获取用户ID回调地址 **/
-    public String genOauth2RedirectUrlEncode(String payOrderId){
-        return URLUtil.encodeAll(getPaySiteUrl() + "/cashier/index.html#/oauth2Callback/" + JeepayKit.aesEncode(payOrderId));
+    public String genOauth2RedirectUrlEncode(String token){
+        return URLUtil.encodeAll(getPaySiteUrl() + "/cashier/index.html#/oauth2Callback/" + token);
     }
 
     /** 生成  【商户获取渠道用户ID接口】oauth2获取用户ID回调地址 **/
@@ -67,6 +68,11 @@ public class DBApplicationConfig implements Serializable {
     /** 生成  【支付宝 isv子商户的授权链接地址】 **/
     public String genAlipayIsvsubMchAuthUrl(String isvNo, String mchAppId){
         return getPaySiteUrl() + "/api/channelbiz/alipay/redirectAppToAppAuth/" + isvNo + "_" + mchAppId;
+    }
+
+    /** 生成 收银台的TOKEN  **/
+    private String genQrToken(Byte type, String id){
+        return JeepayKit.aesEncode(String.format("{type: %s, id: '%s'}", type, id));
     }
 
 }

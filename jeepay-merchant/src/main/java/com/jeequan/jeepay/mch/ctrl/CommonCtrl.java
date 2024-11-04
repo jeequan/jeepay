@@ -40,7 +40,7 @@ public abstract class CommonCtrl extends AbstractCtrl {
     protected SystemYmlConfig mainConfig;
 
     @Autowired
-    private SysConfigService sysConfigService;
+    protected SysConfigService sysConfigService;
 
     /** 获取当前用户ID */
     protected JeeUserDetails getCurrentUser(){

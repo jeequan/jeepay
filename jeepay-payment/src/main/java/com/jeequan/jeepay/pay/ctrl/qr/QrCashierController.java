@@ -15,35 +15,39 @@
  */
 package com.jeequan.jeepay.pay.ctrl.qr;
 
-import com.alipay.api.AlipayApiException;
+import com.alibaba.fastjson.JSON;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
-import com.jeequan.jeepay.core.utils.JeepayKit;
-import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.model.QRCodeParams;
+import com.jeequan.jeepay.core.service.IMchQrcodeManager;
+import com.jeequan.jeepay.core.utils.JeepayKit;
+import com.jeequan.jeepay.core.utils.SeqKit;
+import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.pay.channel.IChannelUserService;
 import com.jeequan.jeepay.pay.ctrl.payorder.AbstractPayOrderController;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliJsapiOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxJsapiOrderRQ;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.PayMchNotifyService;
-import com.jeequan.jeepay.pay.service.ConfigContextService;
-import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /*
-* 聚合码支付二维码收银台controller
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/6/8 17:27
-*/
+ * 聚合码支付二维码收银台controller
+ *
+ * @author terrfly
+ * @site https://www.jeequan.com
+ * @date 2021/6/8 17:27
+ */
 @RestController
 @RequestMapping("/api/cashier")
 public class QrCashierController extends AbstractPayOrderController {
@@ -59,14 +63,11 @@ public class QrCashierController extends AbstractPayOrderController {
     @PostMapping("/redirectUrl")
     public ApiRes redirectUrl(){
 
-        //查询订单
-        PayOrder payOrder = getPayOrder();
+        //获取商户配置信息
+        MchAppConfigContext mchAppConfigContext = this.commonQueryInfoMchAppConfigContext();
 
         //回调地址
-        String redirectUrlEncode = sysConfigService.getDBApplicationConfig().genOauth2RedirectUrlEncode(payOrder.getPayOrderId());
-
-        //获取商户配置信息
-        MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
+        String redirectUrlEncode = sysConfigService.getDBApplicationConfig().genOauth2RedirectUrlEncode(this.getToken());
 
         //获取接口并返回数据
         IChannelUserService channelUserService = getServiceByWayCode(getWayCode(), "ChannelUserService", IChannelUserService.class);
@@ -80,13 +81,11 @@ public class QrCashierController extends AbstractPayOrderController {
     @PostMapping("/channelUserId")
     public ApiRes channelUserId() throws Exception {
 
-        //查询订单
-        PayOrder payOrder = getPayOrder();
+        //获取商户配置信息
+        MchAppConfigContext mchAppConfigContext = this.commonQueryInfoMchAppConfigContext();
 
         String wayCode = getWayCode();
 
-        //获取商户配置信息
-        MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
         IChannelUserService channelUserService = getServiceByWayCode(wayCode, "ChannelUserService", IChannelUserService.class);
         return ApiRes.ok(channelUserService.getChannelUserId(getReqParamJSON(), mchAppConfigContext));
 
@@ -100,14 +99,18 @@ public class QrCashierController extends AbstractPayOrderController {
     public ApiRes payOrderInfo() throws Exception {
 
         //查询订单
-        PayOrder payOrder = getPayOrder();
+        PayOrder payOrder = this.commonQueryPayOrder();
 
         PayOrder resOrder = new PayOrder();
-        resOrder.setPayOrderId(payOrder.getPayOrderId());
-        resOrder.setMchOrderNo(payOrder.getMchOrderNo());
         resOrder.setMchName(payOrder.getMchName());
         resOrder.setAmount(payOrder.getAmount());
-        resOrder.setReturnUrl(payMchNotifyService.createReturnUrl(payOrder, configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId()).getMchApp().getAppSecret()));
+
+        if(StringUtils.isNotEmpty(payOrder.getPayOrderId())){
+            resOrder.setPayOrderId(payOrder.getPayOrderId());
+            resOrder.setMchOrderNo(payOrder.getMchOrderNo());
+            resOrder.setReturnUrl(payMchNotifyService.createReturnUrl(payOrder, configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId()).getMchApp().getAppSecret()));
+        }
+
         return ApiRes.ok(resOrder);
     }
 
@@ -117,7 +120,7 @@ public class QrCashierController extends AbstractPayOrderController {
     public ApiRes pay() throws Exception {
 
         //查询订单
-        PayOrder payOrder = getPayOrder();
+        PayOrder payOrder = this.commonQueryPayOrder();
 
         String wayCode = getWayCode();
 
@@ -134,22 +137,42 @@ public class QrCashierController extends AbstractPayOrderController {
 
 
     /** 获取支付宝的 支付参数 **/
-    private ApiRes packageAlipayPayPackage(PayOrder payOrder) throws AlipayApiException {
+    private ApiRes packageAlipayPayPackage(PayOrder payOrder){
 
         String channelUserId = getValStringRequired("channelUserId");
         AliJsapiOrderRQ rq = new AliJsapiOrderRQ();
+        this.commonSetRQ(rq, payOrder);
         rq.setBuyerUserId(channelUserId);
-        return this.unifiedOrder(getWayCode(), rq, payOrder);
+        return this.unifiedOrder(getWayCode(), rq, StringUtils.isNotEmpty(payOrder.getPayOrderId()) ? payOrder : null );
     }
 
 
     /** 获取微信的 支付参数 **/
-    private ApiRes packageWxpayPayPackage(PayOrder payOrder) throws AlipayApiException {
+    private ApiRes packageWxpayPayPackage(PayOrder payOrder){
 
         String openId = getValStringRequired("channelUserId");
         WxJsapiOrderRQ rq = new WxJsapiOrderRQ();
+        this.commonSetRQ(rq, payOrder);
         rq.setOpenid(openId);
-        return this.unifiedOrder(getWayCode(), rq, payOrder);
+        return this.unifiedOrder(getWayCode(), rq, StringUtils.isNotEmpty(payOrder.getPayOrderId()) ? payOrder : null );
+    }
+
+    /** 赋值通用字段 **/
+    private void commonSetRQ(UnifiedOrderRQ rq, PayOrder payOrder){
+
+        // 存在订单数据， 不需要处理
+        if(payOrder != null && StringUtils.isNotEmpty(payOrder.getPayOrderId())){
+            return ;
+        }
+
+        rq.setMchNo(payOrder.getMchNo());
+        rq.setAppId(payOrder.getAppId());
+        rq.setMchOrderNo(SeqKit.genMhoOrderId());
+        rq.setAmount(getRequiredAmountL("amount"));
+        rq.setCurrency("cny");
+        rq.setSubject("静态码支付");
+        rq.setBody("静态码支付");
+        rq.setSignType("MD5"); // 设置默认签名方式为MD5
     }
 
 
@@ -161,17 +184,7 @@ public class QrCashierController extends AbstractPayOrderController {
         return getValStringRequired("wayCode");
     }
 
-    private PayOrder getPayOrder(){
 
-        String payOrderId = JeepayKit.aesDecode(getToken()); //解析token
-
-        PayOrder payOrder = payOrderService.getById(payOrderId);
-        if(payOrder == null || payOrder.getState() != PayOrder.STATE_INIT){
-            throw new BizException("订单不存在或状态不正确");
-        }
-
-        return payOrderService.getById(payOrderId);
-    }
 
 
     private <T> T getServiceByWayCode(String wayCode, String serviceSuffix, Class<T> cls){
@@ -186,7 +199,43 @@ public class QrCashierController extends AbstractPayOrderController {
     }
 
 
+    private QRCodeParams tokenConvert(){
+        QRCodeParams qrCodeParams = JSON.parseObject(JeepayKit.aesDecode(getToken()), QRCodeParams.class); //解析token
+        return qrCodeParams;
+    }
 
+
+    /** 通用查询订单信息 **/
+    private PayOrder commonQueryPayOrder(){
+
+        QRCodeParams qrCodeParams = tokenConvert();
+        if(qrCodeParams.getType() == QRCodeParams.TYPE_PAY_ORDER){ // 订单
+
+            String payOrderId = this.tokenConvert().getId(); //解析token
+
+            PayOrder payOrder = payOrderService.getById(payOrderId);
+            if(payOrder == null || payOrder.getState() != PayOrder.STATE_INIT){
+                throw new BizException("订单不存在或状态不正确");
+            }
+
+            return payOrderService.getById(payOrderId);
+
+        }else if(qrCodeParams.getType() == QRCodeParams.TYPE_QRC){
+
+            return SpringBeansUtil.getBean(IMchQrcodeManager.class).queryMchInfoByQrc(qrCodeParams.getId());
+
+        }
+
+        return null;
+    }
+
+    /** 查询配置信息 **/
+    private MchAppConfigContext commonQueryInfoMchAppConfigContext(){
+
+        PayOrder payOrder = this.commonQueryPayOrder();
+        return configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
+
+    }
 
 
 

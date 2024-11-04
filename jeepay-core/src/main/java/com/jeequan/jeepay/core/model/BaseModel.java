@@ -17,8 +17,10 @@ package com.jeequan.jeepay.core.model;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.jeequan.jeepay.core.utils.DateKit;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /*
 * BaseModel 封装公共处理函数
@@ -59,5 +61,12 @@ public class BaseModel<T> implements Serializable{
 		return ext == null ? new JSONObject() : ext;
 	}
 
+	/**
+	 * 获取查询的时间范围
+	 * @return
+	 */
+	public Date[] buildQueryDateRange(){
+		return DateKit.getQueryDateRange(extv().getString("queryDateRange")); //默认参数为 queryDateRange
+	}
 
 }
