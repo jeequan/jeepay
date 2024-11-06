@@ -134,6 +134,10 @@ public abstract class AbstractPayOrderController extends ApiController {
             MchInfo mchInfo = mchAppConfigContext.getMchInfo();
             MchApp mchApp = mchAppConfigContext.getMchApp();
 
+            if(mchApp == null || mchApp.getState() != CS.YES){
+                throw new BizException("商户应用状态不可用");
+            }
+
             //收银台支付并且只有新订单需要走这里，  收银台二次下单的wayCode应该为实际支付方式。
             if(isNewOrder && CS.PAY_WAY_CODE.QR_CASHIER.equals(wayCode)){
 
