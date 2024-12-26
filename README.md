@@ -142,7 +142,11 @@ jeepay
 
 将Jeepay作为一个支付模块部署，对外提供支付接入能力，有支付需求的业务都可以接入使用。
 
-一键安装：
+#### 1、宝塔面板安装：
+-  安装宝塔面板9.2.0及以上版本， Docker搜索 jeepay 一键安装
+- 【宝塔安装教程】: https://docs.jeequan.com/docs/jeepay/jeepay-1g4h1figddgfm
+
+#### 2、shell脚本一键安装：
 
 CentOS 安装脚本 （推荐Anolis OS 8.8）：
 ```lua
@@ -154,6 +158,8 @@ apt update && apt-get -y install docker.io && apt-get -y install git && wget -O 
 ```
 视频教程：
 - 【jeepay开源聚合支付系统一键部署和测试教程】: [https://www.bilibili.com/video/BV17C411Y7EZ/?share_source=copy_web&vd_source=e48f1c20ae2c74b29a0b959a168914f2](https://www.bilibili.com/video/BV17C411Y7EZ/?share_source=copy_web&vd_source=e48f1c20ae2c74b29a0b959a168914f2"教程") 
+
+
 
 ## 项目文档
 
