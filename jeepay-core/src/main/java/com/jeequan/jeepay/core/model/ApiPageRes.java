@@ -17,8 +17,8 @@ package com.jeequan.jeepay.core.model;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import com.jeequan.jeepay.core.entity.ApiModel;
+import com.jeequan.jeepay.core.entity.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;

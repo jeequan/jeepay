@@ -22,8 +22,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler;
 import com.jeequan.jeepay.core.model.BaseModel;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -53,7 +51,7 @@ public class PayInterfaceDefine extends BaseModel implements Serializable {
     private static final long serialVersionUID=1L;
 
     /**
-     * 接口代码 全小写  wxpay alipay 
+     * 接口代码 全小写  wxpay alipay
      */
     @ApiModelProperty(value = "接口代码 全小写  wxpay alipay")
     @TableId
