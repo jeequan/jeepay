@@ -33,7 +33,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /*

@@ -33,19 +33,19 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 @Configuration
 public class RedisConfig {
 
-    @Value("${spring.redis.host}")
+    @Value("${spring.data.redis.host}")
     private String host;
 
-    @Value("${spring.redis.port}")
+    @Value("${spring.data.redis.port}")
     private Integer port;
 
-    @Value("${spring.redis.timeout}")
+    @Value("${spring.data.redis.timeout}")
     private Integer timeout;
 
     @Value("${spring.redis.database}")
     private Integer defaultDatabase;
 
-    @Value("${spring.redis.password}")
+    @Value("${spring.data.redis.password}")
     private String password;
 
     /** 当前系统的redis缓存操作对象 (主对象) **/

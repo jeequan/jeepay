@@ -25,10 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Collectors;

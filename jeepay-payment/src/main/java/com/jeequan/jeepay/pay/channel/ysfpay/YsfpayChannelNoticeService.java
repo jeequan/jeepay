@@ -31,7 +31,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 云闪付回调

@@ -41,15 +41,15 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
     </dependency>
 
     <!-- mybatis plus -->
     <dependency>
       <groupId>com.baomidou</groupId>
-      <artifactId>mybatis-plus-boot-starter</artifactId>
+      <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
       <version>${mybatis.plus.starter.version}</version>
       <scope>provided</scope>
     </dependency>

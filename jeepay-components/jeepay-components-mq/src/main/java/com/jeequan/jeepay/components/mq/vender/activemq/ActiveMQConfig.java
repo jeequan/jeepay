@@ -26,8 +26,8 @@ import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Destination;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

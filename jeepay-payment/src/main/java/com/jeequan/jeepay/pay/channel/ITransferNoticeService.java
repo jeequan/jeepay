@@ -21,7 +21,7 @@ import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.http.ResponseEntity;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /*
 * 转账订单通知解析实现 异步回调

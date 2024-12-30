@@ -21,6 +21,7 @@ import com.jeequan.jeepay.components.mq.constant.MQSendTypeEnum;
 import com.jeequan.jeepay.components.mq.constant.MQVenderCS;
 import com.jeequan.jeepay.components.mq.model.AbstractMQ;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
+import jakarta.annotation.PostConstruct;
 import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.Set;
 
 /**

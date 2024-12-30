@@ -4,7 +4,7 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.pay.rqrs.payorder.CommonPayDataRQ;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * none.

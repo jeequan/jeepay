@@ -24,7 +24,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.jms.TextMessage;
+import jakarta.jms.TextMessage;
 
 /**
 *  activeMQ 消息发送器的实现

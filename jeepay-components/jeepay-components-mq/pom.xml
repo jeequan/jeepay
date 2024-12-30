@@ -25,12 +25,6 @@
       <artifactId>jeepay-core</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
-      <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
-    </dependency>
-
     <!-- ↓↓↓↓↓↓ MQ依赖包 ↓↓↓↓↓↓ -->
     <!-- 使用的厂商 scope=compile,  否则需要scope=provided(仅编译，不依赖) -->
 

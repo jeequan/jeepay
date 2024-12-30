@@ -17,7 +17,7 @@ package com.jeequan.jeepay.pay.rqrs;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 /*
 * 商户获取渠道用户ID 请求参数对象

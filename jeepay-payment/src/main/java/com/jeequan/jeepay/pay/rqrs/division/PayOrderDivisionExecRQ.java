@@ -18,7 +18,7 @@ package com.jeequan.jeepay.pay.rqrs.division;
 import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /*
 * 发起订单分账 请求参数

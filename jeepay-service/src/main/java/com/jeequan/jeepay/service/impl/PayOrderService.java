@@ -253,9 +253,9 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
     public JSONObject mainPageNumCount(String mchNo) {
         JSONObject json = new JSONObject();
         // 商户总数
-        int mchCount = mchInfoMapper.selectCount(MchInfo.gw());
+        long mchCount = mchInfoMapper.selectCount(MchInfo.gw());
         // 服务商总数
-        int isvCount = isvInfoMapper.selectCount(IsvInfo.gw());
+        long isvCount = isvInfoMapper.selectCount(IsvInfo.gw());
         // 总交易金额
         Map<String, String> payCountMap = payCount(mchNo, PayOrder.STATE_SUCCESS, null, null, null);
         json.put("totalMch", mchCount);

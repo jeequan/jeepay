@@ -22,7 +22,7 @@ import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.http.ResponseEntity;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /*
 * 渠道侧的退款订单通知解析实现 【分为同步跳转（doReturn）和异步回调(doNotify) 】

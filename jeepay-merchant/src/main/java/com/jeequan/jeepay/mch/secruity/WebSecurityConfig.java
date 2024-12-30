@@ -21,20 +21,24 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 /*
  * Spring Security 配置项
@@ -45,20 +49,61 @@ import org.springframework.web.filter.CorsFilter;
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true) //开启@PreAuthorize @PostAuthorize 等前置后置安全校验注解
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
+public class WebSecurityConfig{
 
     @Autowired private UserDetailsService userDetailsService;
     @Autowired private JeeAuthenticationEntryPoint unauthorizedHandler;
     @Autowired private SystemYmlConfig systemYmlConfig;
 
     @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                // 前后端分离架构不需要csrf保护
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(withDefaults())
+                .addFilter(corsFilter())
+                .headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.cacheControl(HeadersConfigurer.CacheControlConfig::disable))
+                // 基于token，所以不需要session
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // 认证失败处理方式
+                .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(unauthorizedHandler))
+                .authenticationProvider(authenticationProvider())
+                // 添加JWT filter
+                .addFilterBefore(new JeeAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests((auth) -> {
+                    auth
+                            .requestMatchers(HttpMethod.GET,
+                                    "/",
+                                    "/*.html",
+                                    "/favicon.ico",
+                                    "/*/*.html",
+                                    "/*/*.css",
+                                    "/*/*.js",
+                                    "/*/*.png",
+                                    "/*/*.jpg",
+                                    "/*/*.jpeg",
+                                    "/*/*.svg",
+                                    "/*/*.ico",
+                                    "/*/*.webp",
+                                    "/*.txt",
+                                    "/*/*.xls",
+                                    "/*/*.mp4"   //支持mp4格式的文件匿名访问
+                            ).permitAll()
+                            .requestMatchers(
+                                    "/api/anon/**", //匿名访问接口
+                                    "/webjars/**","/v3/api-docs/**" // swagger相关
+                            ).permitAll()
+                            .anyRequest().authenticated();
+                });
+
+        // 构建过滤链并返回
+        return http.build();
     }
 
-
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return username -> userDetailsService.loadUserByUsername(username);
+    }
 
     /**
      * 使用BCrypt强哈希函数 实现PasswordEncoder
@@ -68,11 +113,27 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         return new BCryptPasswordEncoder();
     }
 
-    @Autowired
-    public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-        authenticationManagerBuilder
-                .userDetailsService(this.userDetailsService)
-                .passwordEncoder(passwordEncoder());
+    /**
+     * 调用loadUserByUsername获得UserDetail信息，在AbstractUserDetailsAuthenticationProvider里执行用户状态检查
+     */
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        // DaoAuthenticationProvider 从自定义的 userDetailsService.loadUserByUsername 方法获取UserDetails
+        authProvider.setUserDetailsService(userDetailsService());
+        // 设置密码编辑器
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        // DaoAuthenticationProvider 从自定义的 userDetailsService.loadUserByUsername 方法获取UserDetails
+        authProvider.setUserDetailsService(userDetailsService());
+        // 设置密码编辑器
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return new ProviderManager(authProvider);
     }
 
     /** 允许跨域请求 **/
@@ -90,61 +151,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
             source.registerCorsConfiguration("/**", config); // CORS 配置对所有接口都有效
         }
         return new CorsFilter(source);
-    }
-
-    @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                // 由于使用的是JWT，我们这里不需要csrf
-                .csrf().disable()
-
-                .cors().and()
-
-                // 认证失败处理方式
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-
-                // 基于token，所以不需要session
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-
-                .authorizeRequests()
-
-                // 除上面外的所有请求全部需要鉴权认证
-                .anyRequest().authenticated();
-
-        // 添加JWT filter
-        httpSecurity.addFilterBefore(new JeeAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
-        // 禁用缓存
-        httpSecurity.headers().cacheControl();
-    }
-
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        //ignore文件 ： 无需进入spring security 框架
-        // 1.允许对于网站静态资源的无授权访问
-        // 2.对于获取token的rest api要允许匿名访问
-        web.ignoring().antMatchers(
-                HttpMethod.GET,
-                "/",
-                "/*.html",
-                "/favicon.ico",
-                "/**/*.html",
-                "/**/*.css",
-                "/**/*.js",
-                "/**/*.png",
-                "/**/*.jpg",
-                "/**/*.jpeg",
-                "/**/*.svg",
-                "/**/*.ico",
-                "/**/*.webp",
-                "/*.txt",
-                "/**/*.xls",
-                "/**/*.mp4"   //支持mp4格式的文件匿名访问
-        )
-                .antMatchers(
-                        "/api/anon/**", //匿名访问接口
-                        "/swagger-resources/**","/v2/api-docs/**" // swagger相关
-                );
     }
 
 }

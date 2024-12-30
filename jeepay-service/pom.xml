@@ -26,8 +26,8 @@
 
     <!-- MySql 数据库连接包 -->
     <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
     </dependency>
 
     <!-- Druid 连接池 -->
@@ -40,7 +40,7 @@
     <!-- orm映射框架：mybatis-plus,  自动引入spring-tx -->
     <dependency>
       <groupId>com.baomidou</groupId>
-      <artifactId>mybatis-plus-boot-starter</artifactId>
+      <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
     </dependency>
 
     <!-- Spring Security -->

@@ -20,13 +20,13 @@ import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.GetObjectRequest;
 import com.jeequan.jeepay.components.oss.config.AliyunOssYmlConfig;
 import com.jeequan.jeepay.components.oss.constant.OssSavePlaceEnum;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 
 /**

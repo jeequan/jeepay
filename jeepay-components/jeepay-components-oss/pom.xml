@@ -50,17 +50,15 @@
       <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
     </dependency>
 
-    <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
-      <scope>provided</scope> <!-- 仅编译依赖该jar， 运行时存在 -->
-    </dependency>
-
     <!-- 阿里云oss组件  -->
     <dependency>
       <groupId>com.aliyun.oss</groupId>
       <artifactId>aliyun-sdk-oss</artifactId>
       <scope>provided</scope> <!-- 当对象存储使用aliyunOSS时，需要改为：compile， 否则使用provided仅用于编译代码 -->
+    </dependency>
+    <dependency>
+        <groupId>jakarta.annotation</groupId>
+        <artifactId>jakarta.annotation-api</artifactId>
     </dependency>
 
   </dependencies>

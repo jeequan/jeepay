@@ -18,7 +18,6 @@ package com.jeequan.jeepay.pay.rqrs.payorder;
 import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
 
 /*
 * 查询订单请求参数对象

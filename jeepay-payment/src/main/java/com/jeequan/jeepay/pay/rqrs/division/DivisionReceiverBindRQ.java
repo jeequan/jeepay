@@ -19,8 +19,8 @@ import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import lombok.Data;
 import org.hibernate.validator.constraints.Range;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 /*
 * 分账账号的绑定 请求参数

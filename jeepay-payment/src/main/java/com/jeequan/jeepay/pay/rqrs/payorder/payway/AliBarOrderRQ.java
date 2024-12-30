@@ -19,7 +19,7 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 /*
  * 支付方式： ALI_BAR

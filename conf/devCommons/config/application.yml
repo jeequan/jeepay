@@ -5,13 +5,13 @@ server:
   servlet:
     context-path: / #设置应用的目录.  前缀需要带/, 无需设置后缀, 示例 【 /xxx 】 or 【 / 】
 spring:
+  main:
+    allow-circular-references: true
   servlet:
     multipart:
       enabled: true #是否启用http上传处理
       max-request-size: 10MB #最大请求文件的大小
       max-file-size: 10MB #设置单个文件最大长度
-  resources:
-    static-locations: classpath:/static #项目静态资源路径 （可直接通过http访问）
   freemarker:
     template-loader-path: classpath:/templates  #freemarker模板目录
     template-encoding: UTF-8
@@ -45,11 +45,12 @@ spring:
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
   cache:
     type: redis
-  redis:
-    host: 127.0.0.1
-    port: 6379
-    timeout: 1000
-    password:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      timeout: 1000
+      password:
 
 # #activeMQ配置 ( 注意： activeMQ配置项需在spring的下级 )
   activemq:
@@ -86,15 +87,32 @@ spring:
   #日志配置参数。
   # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
   # 不存在logback-spring.xml 文件时， 使用springboot的配置， 同样可用。
+  web:
+    resources:
+      static-locations: classpath:/static
 logging:
   level:
     root: info   #主日志级别
     com.jeequan.jeepay: debug   #该项目日志级别，当需要打印sql时请开启为debug
-  path: ./logs  #日志存放地址
+  file:
+    path: ./logs
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.jeequan.jeepay.mgr.ctrl.isv
 # knife4j APIDOC文档
 knife4j:
   enable: true
+  setting:
+    language: zh_cn
 
 #系统业务参数
 isys:

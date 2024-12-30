@@ -20,7 +20,6 @@ import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.model.BaseModel;
 import com.jeequan.jeepay.core.model.security.JeeUserDetails;
-import com.jeequan.jeepay.mgr.config.SystemYmlConfig;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +37,6 @@ import java.util.List;
 */
 public abstract class CommonCtrl extends AbstractCtrl {
 
-    @Autowired
-    protected SystemYmlConfig mainConfig;
     @Autowired
     protected MchInfoService mchInfoService;
 

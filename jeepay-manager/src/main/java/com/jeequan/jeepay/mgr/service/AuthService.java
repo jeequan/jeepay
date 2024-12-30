@@ -17,10 +17,10 @@ package com.jeequan.jeepay.mgr.service;
 
 import cn.hutool.core.util.IdUtil;
 import com.jeequan.jeepay.core.cache.ITokenService;
+import com.jeequan.jeepay.core.cache.RedisUtil;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.SysUser;
 import com.jeequan.jeepay.core.exception.BizException;
-import com.jeequan.jeepay.core.cache.RedisUtil;
 import com.jeequan.jeepay.core.exception.JeepayAuthenticationException;
 import com.jeequan.jeepay.core.jwt.JWTPayload;
 import com.jeequan.jeepay.core.jwt.JWTUtils;
@@ -30,6 +30,7 @@ import com.jeequan.jeepay.service.impl.SysRoleEntRelaService;
 import com.jeequan.jeepay.service.impl.SysRoleService;
 import com.jeequan.jeepay.service.impl.SysUserService;
 import com.jeequan.jeepay.service.mapper.SysEntitlementMapper;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,10 +40,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.*;
 
 /*

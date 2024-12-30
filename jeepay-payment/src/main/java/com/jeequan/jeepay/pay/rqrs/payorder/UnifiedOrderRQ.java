@@ -25,9 +25,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.beans.BeanUtils;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 /*
 * 创建订单请求参数对象

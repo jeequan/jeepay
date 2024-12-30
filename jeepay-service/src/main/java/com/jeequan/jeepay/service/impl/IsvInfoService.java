@@ -52,7 +52,7 @@ public class IsvInfoService extends ServiceImpl<IsvInfoMapper, IsvInfo> {
         }
 
         // 1.查询当前服务商下是否存在商户
-        int mchCount = mchInfoService.count(MchInfo.gw().eq(MchInfo::getIsvNo, isvNo).eq(MchInfo::getType, CS.MCH_TYPE_ISVSUB));
+        long mchCount = mchInfoService.count(MchInfo.gw().eq(MchInfo::getIsvNo, isvNo).eq(MchInfo::getType, CS.MCH_TYPE_ISVSUB));
         if (mchCount > 0) {
             throw new BizException("该服务商下存在商户，不可删除");
         }

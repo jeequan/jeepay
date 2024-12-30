@@ -43,7 +43,7 @@ public class StaticController extends CommonCtrl {
     @Autowired private OssYmlConfig ossYmlConfig;
 
     /** 图片预览 **/
-    @GetMapping("/api/anon/localOssFiles/**/*.*")
+    @GetMapping("/api/anon/localOssFiles/*/*.*")
     public ResponseEntity<?> imgView() {
 
         try {

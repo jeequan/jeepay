@@ -170,7 +170,7 @@ public class PayOrderDivisionExecController extends ApiController {
 
         if(!receiverIdSet.isEmpty()){
 
-            int receiverCount = mchDivisionReceiverService.count(MchDivisionReceiver.gw()
+            long receiverCount = mchDivisionReceiverService.count(MchDivisionReceiver.gw()
                     .in(MchDivisionReceiver::getReceiverId, receiverIdSet)
                     .eq(MchDivisionReceiver::getMchNo, mchNo)
                     .eq(MchDivisionReceiver::getAppId, appId)
@@ -185,7 +185,7 @@ public class PayOrderDivisionExecController extends ApiController {
 
         if(!receiverGroupIdSet.isEmpty()){
 
-            int receiverGroupCount = mchDivisionReceiverGroupService.count(MchDivisionReceiverGroup.gw()
+            long receiverGroupCount = mchDivisionReceiverGroupService.count(MchDivisionReceiverGroup.gw()
                     .in(MchDivisionReceiverGroup::getReceiverGroupId, receiverGroupIdSet)
                     .eq(MchDivisionReceiverGroup::getMchNo, mchNo)
             );
