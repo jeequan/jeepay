@@ -12,6 +12,7 @@ springdoc:
     path: /v3/api-docs
   group-configs:
     - group: 'default'
+      display-name: '支付网关'
       paths-to-match: '/**'
       packages-to-scan: com.jeequan.jeepay.pay.ctrl.test
 
@@ -22,18 +23,6 @@ knife4j:
     language: zh_cn
     swagger-model-name: 公共响应
   documents:
-    - name: 接口规则
-      locations: classpath:markdown/doc/api1.md
-      group: 1.0
-    - name: 支付接口
-      locations: classpath:markdown/doc/api2.md
-      group: 1.0
-    - name: 退款接口
-      locations: classpath:markdown/doc/api3.md
-      group: 1.0
-    - name: 转账接口
-      locations: classpath:markdown/doc/api4.md
-      group: 1.0
-    - name: 分账接口
-      locations: classpath:markdown/doc/api5.md
-      group: 1.0
+    - name: API
+      locations: classpath:markdown/doc/*
+      group: default
