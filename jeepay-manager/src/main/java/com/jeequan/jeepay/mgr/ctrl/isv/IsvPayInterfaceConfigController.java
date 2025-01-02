@@ -27,10 +27,11 @@ import com.jeequan.jeepay.core.model.params.IsvParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,7 +47,8 @@ import java.util.List;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
-@Api(tags = "服务商管理（支付接口）")
+
+@Tag(name = "服务商管理（支付接口）")
 @RestController
 @RequestMapping("/api/isv/payConfigs")
 public class IsvPayInterfaceConfigController extends CommonCtrl {
@@ -59,10 +61,10 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
     * @Description: 查询服务商支付接口配置列表
     * @Date: 16:45 2021/4/27
    */
-   @ApiOperation("查询服务商支付接口配置列表")
-   @ApiImplicitParams({
-           @ApiImplicitParam(name = CS.ACCESS_TOKEN_NAME, value = "用户身份凭证", required = true, paramType = "header"),
-           @ApiImplicitParam(name = "isvNo", value = "服务商号", required = true)
+   @Operation(summary = "查询服务商支付接口配置列表", description = "")
+   @Parameters({
+           @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+           @Parameter(name = "isvNo", description = "服务商号", required = true)
    })
    @PreAuthorize("hasAuthority('ENT_ISV_PAY_CONFIG_LIST')")
     @GetMapping
@@ -77,11 +79,11 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
      * @Description: 根据 服务商号、接口类型 获取商户参数配置
      * @Date: 17:03 2021/4/27
      */
-    @ApiOperation("根据[服务商号]、[接口类型]获取商户参数配置")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "isvNo", value = "服务商号", required = true),
-            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true)
+    @Operation(summary = "根据[服务商号]、[接口类型]获取商户参数配置", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "isvNo", description = "服务商号", required = true),
+            @Parameter(name = "ifCode", description = "接口类型代码", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_ISV_PAY_CONFIG_VIEW')")
     @GetMapping("/{isvNo}/{ifCode}")
@@ -107,15 +109,15 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
      * @Description: 服务商支付接口参数配置
      * @Date: 16:45 2021/4/27
      */
-    @ApiOperation("服务商支付接口参数配置")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "infoId", value = "服务商号", required = true),
-            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true),
-            @ApiImplicitParam(name = "ifParams", value = "接口配置参数,json字符串"),
-            @ApiImplicitParam(name = "ifRate", value = "支付接口费率", dataType = "BigDecimal"),
-            @ApiImplicitParam(name = "remark", value = "备注"),
-            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-启用", dataType = "Byte")
+    @Operation(summary = "服务商支付接口参数配置", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "infoId", description = "服务商号", required = true),
+            @Parameter(name = "ifCode", description = "接口类型代码", required = true),
+            @Parameter(name = "ifParams", description = "接口配置参数,json字符串"),
+            @Parameter(name = "ifRate", description = "支付接口费率"),
+            @Parameter(name = "remark", description = "备注"),
+            @Parameter(name = "state", description = "状态: 0-停用, 1-启用")
     })
     @PreAuthorize("hasAuthority('ENT_ISV_PAY_CONFIG_ADD')")
     @PostMapping

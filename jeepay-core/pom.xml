@@ -84,19 +84,16 @@
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>
     </dependency>
+
+    <!-- Knife4j  -->
+    <dependency>
+      <groupId>com.github.xiaoymin</groupId>
+      <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+    </dependency>
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-annotations-jakarta</artifactId>
-      <version>2.2.22</version>
-      <scope>compile</scope>
+      <artifactId>swagger-models-jakarta</artifactId>
     </dependency>
-
-    <!-- 所以项目依赖swagger注解包 -->
-<!--    <dependency>-->
-<!--      <groupId>io.swagger</groupId>-->
-<!--      <artifactId>swagger-annotations</artifactId>-->
-<!--    </dependency>-->
-
   </dependencies>
 
   <build>

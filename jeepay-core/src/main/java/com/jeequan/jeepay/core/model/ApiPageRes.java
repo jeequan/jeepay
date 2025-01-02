@@ -17,8 +17,7 @@ package com.jeequan.jeepay.core.model;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
-import com.jeequan.jeepay.core.entity.ApiModel;
-import com.jeequan.jeepay.core.entity.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.List;
@@ -31,11 +30,11 @@ import java.util.List;
 * @date 2021/6/8 16:35
 */
 @Data
-@ApiModel
+@Schema(description = "分页res")
 public class ApiPageRes<M> extends ApiRes {
 
     /** 数据对象 **/
-    @ApiModelProperty(value = "业务数据")
+    @Schema(description = "业务数据")
     private PageBean<M> data;
 
 
@@ -58,23 +57,23 @@ public class ApiPageRes<M> extends ApiRes {
 
 
     @Data
-    @ApiModel
+    @Schema(description = "分页data")
     public static class PageBean<M> {
 
         /** 数据列表 */
-        @ApiModelProperty(value = "数据列表")
+        @Schema(title = "records", description = "数据列表")
         private List<M> records;
 
         /** 总数量 */
-        @ApiModelProperty(value = "总数量")
+        @Schema(title = "total", description = "总数量")
         private Long total;
 
         /** 当前页码 */
-        @ApiModelProperty(value = "当前页码")
+        @Schema(title = "current", description = "当前页码")
         private Long current;
 
         /** 是否包含下一页， true:包含 ，false: 不包含 */
-        @ApiModelProperty(value = "是否包含下一页， true:包含 ，false: 不包含")
+        @Schema(title = "hasNext", description = "是否包含下一页， true:包含 ，false: 不包含")
         private boolean hasNext;
 
     }

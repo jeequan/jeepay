@@ -32,10 +32,11 @@ import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.MchPayPassageService;
 import com.jeequan.jeepay.service.impl.PayWayService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.CollectionUtils;
@@ -52,7 +53,7 @@ import java.util.List;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
-@Api(tags = "商户支付通道管理")
+@Tag(name = "商户支付通道管理")
 @RestController
 @RequestMapping("/api/mch/payPassages")
 public class MchPayPassageConfigController extends CommonCtrl {
@@ -66,14 +67,14 @@ public class MchPayPassageConfigController extends CommonCtrl {
      * @Description: 查询支付方式列表，并添加是否配置支付通道状态
      * @Date: 10:58 2021/5/13
     */
-    @ApiOperation("查询支付方式列表")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
-            @ApiImplicitParam(name = "pageSize", value = "分页条数", dataType = "int", defaultValue = "20"),
-            @ApiImplicitParam(name = "appId", value = "应用ID", required = true),
-            @ApiImplicitParam(name = "wayCode", value = "支付方式代码"),
-            @ApiImplicitParam(name = "wayName", value = "支付方式名称")
+    @Operation(summary = "查询支付方式列表")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "pageNumber", description = "分页页码"),
+            @Parameter(name = "pageSize", description = "分页条数"),
+            @Parameter(name = "appId", description = "应用ID", required = true),
+            @Parameter(name = "wayCode", description = "支付方式代码"),
+            @Parameter(name = "wayName", description = "支付方式名称")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_PASSAGE_LIST')")
     @GetMapping
@@ -127,11 +128,11 @@ public class MchPayPassageConfigController extends CommonCtrl {
      * @Date: 11:05 2021/5/13
      * @return
     */
-    @ApiOperation("根据[应用ID]、[支付方式代码]查询可用的支付接口列表")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "appId", value = "应用ID", required = true),
-            @ApiImplicitParam(name = "wayCode", value = "支付方式代码", required = true)
+    @Operation(summary = "根据[应用ID]、[支付方式代码]查询可用的支付接口列表")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "appId", description = "应用ID", required = true),
+            @Parameter(name = "wayCode", description = "支付方式代码", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_PASSAGE_CONFIG')")
     @GetMapping("/availablePayInterface/{appId}/{wayCode}")
@@ -154,13 +155,13 @@ public class MchPayPassageConfigController extends CommonCtrl {
      * @Description:
      * @Date: 11:05 2021/5/13
     */
-    @ApiOperation("商户支付通道详情")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "id", value = "支付通道ID", required = true)
+    @Operation(summary = "商户支付通道详情")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "id", description = "支付通道ID", required = true)
     })
     @GetMapping("/{id}")
-    public ApiRes detail(@PathVariable("id") Long id) {
+    public ApiRes<MchPayPassage> detail(@PathVariable("id") Long id) {
         MchPayPassage payPassage = mchPayPassageService.getById(id);
         if (payPassage == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
@@ -177,10 +178,10 @@ public class MchPayPassageConfigController extends CommonCtrl {
      * @Description: 应用支付通道配置
      * @Date: 11:05 2021/5/13
     */
-    @ApiOperation("更新商户支付通道")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "reqParams", value = "商户支付通道配置信息", required = true)
+    @Operation(summary = "更新商户支付通道")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "reqParams", description = "商户支付通道配置信息", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_PASSAGE_ADD')")
     @PostMapping

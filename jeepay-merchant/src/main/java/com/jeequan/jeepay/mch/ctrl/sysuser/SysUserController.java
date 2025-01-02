@@ -29,10 +29,11 @@ import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.mch.service.AuthService;
 import com.jeequan.jeepay.service.impl.SysUserAuthService;
 import com.jeequan.jeepay.service.impl.SysUserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,7 +52,7 @@ import java.util.Arrays;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
-@Api(tags = "系统管理（操作员）")
+@Tag(name = "系统管理（操作员）")
 @RestController
 @RequestMapping("api/sysUsers")
 public class SysUserController extends CommonCtrl {
@@ -62,13 +63,13 @@ public class SysUserController extends CommonCtrl {
 
 
 	/** list */
-	@ApiOperation("操作员列表")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
-			@ApiImplicitParam(name = "pageSize", value = "分页条数", dataType = "int", defaultValue = "20"),
-			@ApiImplicitParam(name = "sysUserId", value = "用户ID"),
-			@ApiImplicitParam(name = "realname", value = "用户姓名")
+	@Operation(summary = "操作员列表")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "pageNumber", description = "分页页码"),
+			@Parameter(name = "pageSize", description = "分页条数"),
+			@Parameter(name = "sysUserId", description = "用户ID"),
+			@Parameter(name = "realname", description = "用户姓名")
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_LIST' )")
 	@RequestMapping(value="", method = RequestMethod.GET)
@@ -95,14 +96,14 @@ public class SysUserController extends CommonCtrl {
 
 
 	/** detail */
-	@ApiOperation("操作员详情")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "recordId", value = "用户ID", required = true, dataType = "Long")
+	@Operation(summary = "操作员详情")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "recordId", description = "用户ID", required = true)
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_EDIT' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.GET)
-	public ApiRes detail(@PathVariable("recordId") Integer recordId) {
+	public ApiRes<SysUser> detail(@PathVariable("recordId") Integer recordId) {
 
 		SysUser sysUser = sysUserService.getById(recordId);
 		if (sysUser == null) {
@@ -115,16 +116,16 @@ public class SysUserController extends CommonCtrl {
 	}
 
 	/** add */
-	@ApiOperation("添加操作员")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "isAdmin", value = "是否超管（超管拥有全部权限） 0-否 1-是", required = true, dataType = "Byte"),
-			@ApiImplicitParam(name = "loginUsername", value = "登录用户名", required = true),
-			@ApiImplicitParam(name = "realname", value = "真实姓名", required = true),
-			@ApiImplicitParam(name = "sex", value = "性别 0-未知, 1-男, 2-女", required = true, dataType = "Byte"),
-			@ApiImplicitParam(name = "telphone", value = "手机号", required = true),
-			@ApiImplicitParam(name = "userNo", value = "员工编号", required = true),
-			@ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-启用", required = true, dataType = "Byte")
+	@Operation(summary = "添加操作员")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "isAdmin", description = "是否超管（超管拥有全部权限） 0-否 1-是", required = true),
+			@Parameter(name = "loginUsername", description = "登录用户名", required = true),
+			@Parameter(name = "realname", description = "真实姓名", required = true),
+			@Parameter(name = "sex", description = "性别 0-未知, 1-男, 2-女", required = true),
+			@Parameter(name = "telphone", description = "手机号", required = true),
+			@Parameter(name = "userNo", description = "员工编号", required = true),
+			@Parameter(name = "state", description = "状态: 0-停用, 1-启用", required = true)
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_ADD' )")
 	@RequestMapping(value="", method = RequestMethod.POST)
@@ -164,20 +165,20 @@ public class SysUserController extends CommonCtrl {
 
 
 	/** update */
-	@ApiOperation("修改操作员信息")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "recordId", value = "用户ID", required = true, dataType = "Long"),
-			@ApiImplicitParam(name = "isAdmin", value = "是否超管（超管拥有全部权限） 0-否 1-是", required = true, dataType = "Byte"),
-			@ApiImplicitParam(name = "loginUsername", value = "登录用户名", required = true),
-			@ApiImplicitParam(name = "realname", value = "真实姓名", required = true),
-			@ApiImplicitParam(name = "sex", value = "性别 0-未知, 1-男, 2-女", required = true, dataType = "Byte"),
-			@ApiImplicitParam(name = "telphone", value = "手机号", required = true),
-			@ApiImplicitParam(name = "userNo", value = "员工编号", required = true),
-			@ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-启用", required = true, dataType = "Byte"),
-			@ApiImplicitParam(name = "resetPass", value = "是否重置密码", dataType = "Boolean"),
-			@ApiImplicitParam(name = "confirmPwd", value = "待更新的密码，base64加密"),
-			@ApiImplicitParam(name = "defaultPass", value = "是否默认密码", dataType = "Boolean")
+	@Operation(summary = "修改操作员信息")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "recordId", description = "用户ID", required = true),
+			@Parameter(name = "isAdmin", description = "是否超管（超管拥有全部权限） 0-否 1-是", required = true),
+			@Parameter(name = "loginUsername", description = "登录用户名", required = true),
+			@Parameter(name = "realname", description = "真实姓名", required = true),
+			@Parameter(name = "sex", description = "性别 0-未知, 1-男, 2-女", required = true),
+			@Parameter(name = "telphone", description = "手机号", required = true),
+			@Parameter(name = "userNo", description = "员工编号", required = true),
+			@Parameter(name = "state", description = "状态: 0-停用, 1-启用", required = true),
+			@Parameter(name = "resetPass", description = "是否重置密码"),
+			@Parameter(name = "confirmPwd", description = "待更新的密码，base64加密"),
+			@Parameter(name = "defaultPass", description = "是否默认密码")
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_EDIT' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.PUT)
@@ -220,10 +221,10 @@ public class SysUserController extends CommonCtrl {
 	}
 
 	/** delete */
-	@ApiOperation("删除操作员信息")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "recordId", value = "用户ID", required = true, dataType = "Long")
+	@Operation(summary = "删除操作员信息")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "recordId", description = "用户ID", required = true)
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_DELETE' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.DELETE)

@@ -20,6 +20,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.jeequan.jeepay.core.model.BaseModel;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -35,7 +37,7 @@ import java.util.Date;
  * @author [mybatis plus generator]
  * @since 2021-04-27
  */
-@ApiModel(value = "服务商信息表", description = "")
+@Schema(description = "服务商信息表")
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
@@ -52,74 +54,74 @@ public class IsvInfo extends BaseModel implements Serializable {
     /**
      * 服务商号
      */
-    @ApiModelProperty(value = "服务商号")
+    @Schema(title = "isvNo", description = "服务商号")
     @TableId(value = "isv_no", type = IdType.INPUT)
     private String isvNo;
 
     /**
      * 服务商名称
      */
-    @ApiModelProperty(value = "服务商名称")
+    @Schema(title = "isvName", description = "服务商名称")
     private String isvName;
 
     /**
      * 服务商简称
      */
-    @ApiModelProperty(value = "服务商简称")
+    @Schema(title = "isvShortName", description = "服务商简称")
     private String isvShortName;
 
     /**
      * 联系人姓名
      */
-    @ApiModelProperty(value = "联系人姓名")
+    @Schema(title = "contactName", description = "联系人姓名")
     private String contactName;
 
     /**
      * 联系人手机号
      */
-    @ApiModelProperty(value = "联系人手机号")
+    @Schema(title = "contactTel", description = "联系人手机号")
     private String contactTel;
 
     /**
      * 联系人邮箱
      */
-    @ApiModelProperty(value = "联系人邮箱")
+    @Schema(title = "contactEmail", description = "联系人邮箱")
     private String contactEmail;
 
     /**
      * 状态: 0-停用, 1-正常
      */
-    @ApiModelProperty(value = "状态: 0-停用, 1-正常")
+    @Schema(title = "state", description = "状态: 0-停用, 1-正常")
     private Byte state;
 
     /**
      * 备注
      */
-    @ApiModelProperty(value = "备注")
+    @Schema(title = "remark", description = "备注")
     private String remark;
 
     /**
      * 创建者用户ID
      */
-    @ApiModelProperty(value = "创建者用户ID")
+    @Schema(title = "createdUid", description = "创建者用户ID")
     private Long createdUid;
 
     /**
      * 创建者姓名
      */
-    @ApiModelProperty(value = "创建者姓名")
+    @Schema(title = "createdBy", description = "创建者姓名")
     private String createdBy;
 
     /**
      * 创建时间
      */
-    @ApiModelProperty(value = "创建时间")
+    @Schema(title = "createdAt", description = "创建时间")
     private Date createdAt;
 
     /**
      * 更新时间
      */
-    @ApiModelProperty(value = "更新时间")
+    @Schema(title = "updatedAt", description = "更新时间")
     private Date updatedAt;
 
 

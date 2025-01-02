@@ -1,4 +1,4 @@
-package com.jeequan.jeepay.mgr.config;
+package com.jeequan.jeepay.mch.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -19,7 +19,7 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI(){
         return new OpenAPI()
             .info(new Info() // 基本信息配置
-                .title("Jeepay运营平台Api接口文档") // 标题
+                .title("Jeepay商户系统Api接口文档") // 标题
                 .version("1.0") // 版本
                 // 设置OpenAPI文档的联系信息，包括联系人姓名为"patrick"，邮箱为"patrick@gmail.com"。
                 .contact(new Contact().name("jeequan"))

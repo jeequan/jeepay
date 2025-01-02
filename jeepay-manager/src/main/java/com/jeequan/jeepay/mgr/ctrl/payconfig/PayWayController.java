@@ -29,10 +29,11 @@ import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchPayPassageService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.PayWayService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,7 +46,7 @@ import org.springframework.web.bind.annotation.*;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
-@Api(tags = "支付方式配置")
+@Tag(name = "支付方式配置")
 @RestController
 @RequestMapping("api/payWays")
 public class PayWayController extends CommonCtrl {
@@ -59,13 +60,13 @@ public class PayWayController extends CommonCtrl {
 	 * @Description: list
 	 * @Date: 15:52 2021/4/27
 	*/
-	@ApiOperation("支付方式--列表")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
-			@ApiImplicitParam(name = "pageSize", value = "分页条数（-1时查全部数据）", dataType = "int", defaultValue = "20"),
-			@ApiImplicitParam(name = "wayCode", value = "支付方式代码"),
-			@ApiImplicitParam(name = "wayName", value = "支付方式名称")
+	@Operation(summary = "支付方式--列表")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "pageNumber", description = "分页页码"),
+			@Parameter(name = "pageSize", description = "分页条数（-1时查全部数据）"),
+			@Parameter(name = "wayCode", description = "支付方式代码"),
+			@Parameter(name = "wayName", description = "支付方式名称")
 	})
 	@PreAuthorize("hasAnyAuthority('ENT_PC_WAY_LIST', 'ENT_PAY_ORDER_SEARCH_PAY_WAY')")
 	@GetMapping
@@ -93,14 +94,14 @@ public class PayWayController extends CommonCtrl {
 	 * @Description: detail
 	 * @Date: 15:52 2021/4/27
 	*/
-	@ApiOperation("支付方式--详情")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "wayCode", value = "支付方式代码", required = true)
+	@Operation(summary = "支付方式--详情")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "wayCode", description = "支付方式代码", required = true)
 	})
 	@PreAuthorize("hasAnyAuthority('ENT_PC_WAY_VIEW', 'ENT_PC_WAY_EDIT')")
 	@GetMapping("/{wayCode}")
-	public ApiRes detail(@PathVariable("wayCode") String wayCode) {
+	public ApiRes<PayWay> detail(@PathVariable("wayCode") String wayCode) {
 		return ApiRes.ok(payWayService.getById(wayCode));
 	}
 
@@ -109,11 +110,11 @@ public class PayWayController extends CommonCtrl {
 	 * @Description: add
 	 * @Date: 15:52 2021/4/27
 	*/
-	@ApiOperation("支付方式--新增")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "wayCode", value = "支付方式代码", required = true),
-			@ApiImplicitParam(name = "wayName", value = "支付方式名称", required = true)
+	@Operation(summary = "支付方式--新增")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "wayCode", description = "支付方式代码", required = true),
+			@Parameter(name = "wayName", description = "支付方式名称", required = true)
 	})
 	@PreAuthorize("hasAuthority('ENT_PC_WAY_ADD')")
 	@PostMapping
@@ -138,11 +139,11 @@ public class PayWayController extends CommonCtrl {
 	 * @Description: update
 	 * @Date: 15:52 2021/4/27
 	*/
-	@ApiOperation("支付方式--更新")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "wayCode", value = "支付方式代码", required = true),
-			@ApiImplicitParam(name = "wayName", value = "支付方式名称", required = true)
+	@Operation(summary = "支付方式--更新")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "wayCode", description = "支付方式代码", required = true),
+			@Parameter(name = "wayName", description = "支付方式名称", required = true)
 	})
 	@PreAuthorize("hasAuthority('ENT_PC_WAY_EDIT')")
 	@PutMapping("/{wayCode}")
@@ -162,10 +163,10 @@ public class PayWayController extends CommonCtrl {
 	 * @Description: delete
 	 * @Date: 15:52 2021/4/27
 	*/
-	@ApiOperation("支付方式--删除")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "wayCode", value = "支付方式代码", required = true)
+	@Operation(summary = "支付方式--删除")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "wayCode", description = "支付方式代码", required = true)
 	})
 	@PreAuthorize("hasAuthority('ENT_PC_WAY_DEL')")
 	@DeleteMapping("/{wayCode}")

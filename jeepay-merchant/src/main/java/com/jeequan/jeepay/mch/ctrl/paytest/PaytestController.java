@@ -31,10 +31,11 @@ import com.jeequan.jeepay.response.PayOrderCreateResponse;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchPayPassageService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,7 +51,7 @@ import java.util.Set;
 * @site https://www.jeequan.com
 * @date 2021/6/22 9:43
 */
-@Api(tags = "支付测试")
+@Tag(name = "支付测试")
 @RestController
 @RequestMapping("/api/paytest")
 public class PaytestController extends CommonCtrl {
@@ -60,10 +61,10 @@ public class PaytestController extends CommonCtrl {
     @Autowired private SysConfigService sysConfigService;
 
     /** 查询商户对应应用下支持的支付方式 **/
-    @ApiOperation("查询商户对应应用下支持的支付方式")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "appId", value = "应用ID", required = true)
+    @Operation(summary = "查询商户对应应用下支持的支付方式")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "appId", description = "应用ID", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_TEST_PAYWAY_LIST')")
     @GetMapping("/payways/{appId}")
@@ -82,23 +83,23 @@ public class PaytestController extends CommonCtrl {
 
 
     /** 调起下单接口 **/
-    @ApiOperation("调起下单接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "mchOrderNo", value = "商户订单号", required = true),
-            @ApiImplicitParam(name = "appId", value = "应用ID", required = true),
-            @ApiImplicitParam(name = "wayCode", value = "支付方式代码", required = true),
-            @ApiImplicitParam(name = "amount", value = "转账金额,单位元", required = true),
-            @ApiImplicitParam(name = "returnUrl", value = "页面跳转地址", required = true),
-            @ApiImplicitParam(name = "divisionMode", value = "订单分账模式：0-该笔订单不允许分账, 1-支付成功按配置自动完成分账, 2-商户手动分账(解冻商户金额)", required = true),
-            @ApiImplicitParam(name = "orderTitle", value = "订单标题", required = true),
-            @ApiImplicitParam(name = "expiredTime", value = "过期时间"),
-            @ApiImplicitParam(name = "clientIp", value = "客户端IP"),
-            @ApiImplicitParam(name = "notifyUrl", value = "通知地址"),
-            @ApiImplicitParam(name = "channelExtra", value = "特定渠道发起时额外参数"),
-            @ApiImplicitParam(name = "payDataType", value = "支付数据包 类型，eg：form--表单提交，wxapp--微信app参数，aliapp--支付宝app参数，ysfapp--云闪付app参数，codeUrl--二维码URL，codeImgUrl--二维码图片显示URL，none--无参数"),
-            @ApiImplicitParam(name = "authCode", value = "支付条码"),
-            @ApiImplicitParam(name = "extParam", value = "扩展参数")
+    @Operation(summary = "调起下单接口")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "mchOrderNo", description = "商户订单号", required = true),
+            @Parameter(name = "appId", description = "应用ID", required = true),
+            @Parameter(name = "wayCode", description = "支付方式代码", required = true),
+            @Parameter(name = "amount", description = "转账金额,单位元", required = true),
+            @Parameter(name = "returnUrl", description = "页面跳转地址", required = true),
+            @Parameter(name = "divisionMode", description = "订单分账模式：0-该笔订单不允许分账, 1-支付成功按配置自动完成分账, 2-商户手动分账(解冻商户金额)", required = true),
+            @Parameter(name = "orderTitle", description = "订单标题", required = true),
+            @Parameter(name = "expiredTime", description = "过期时间"),
+            @Parameter(name = "clientIp", description = "客户端IP"),
+            @Parameter(name = "notifyUrl", description = "通知地址"),
+            @Parameter(name = "channelExtra", description = "特定渠道发起时额外参数"),
+            @Parameter(name = "payDataType", description = "支付数据包 类型，eg：form--表单提交，wxapp--微信app参数，aliapp--支付宝app参数，ysfapp--云闪付app参数，codeUrl--二维码URL，codeImgUrl--二维码图片显示URL，none--无参数"),
+            @Parameter(name = "authCode", description = "支付条码"),
+            @Parameter(name = "extParam", description = "扩展参数")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_TEST_DO')")
     @PostMapping("/payOrders")

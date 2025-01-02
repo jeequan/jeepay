@@ -27,10 +27,10 @@ import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.mch.service.AuthService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
-@Api(tags = "认证模块")
+@Tag(name = "认证模块")
 @RestController
 @RequestMapping("/api/anon/auth")
 public class AuthController extends CommonCtrl {
@@ -52,12 +52,12 @@ public class AuthController extends CommonCtrl {
 	@Autowired private AuthService authService;
 
 	/** 用户信息认证 获取iToken  **/
-	@ApiOperation("登录认证")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "ia", value = "用户名 i account, 需要base64处理", required = true),
-			@ApiImplicitParam(name = "ip", value = "密码 i passport,  需要base64处理", required = true),
-			@ApiImplicitParam(name = "vc", value = "证码 vercode,  需要base64处理", required = true),
-			@ApiImplicitParam(name = "vt", value = "验证码token, vercode token ,  需要base64处理", required = true)
+	@Operation(summary = "登录认证")
+	@Parameters({
+			@Parameter(name = "ia", description = "用户名 i account, 需要base64处理", required = true),
+			@Parameter(name = "ip", description = "密码 i passport,  需要base64处理", required = true),
+			@Parameter(name = "vc", description = "证码 vercode,  需要base64处理", required = true),
+			@Parameter(name = "vt", description = "验证码token, vercode token ,  需要base64处理", required = true)
 	})
 	@RequestMapping(value = "/validate", method = RequestMethod.POST)
 	@MethodLog(remark = "登录认证")
@@ -83,7 +83,7 @@ public class AuthController extends CommonCtrl {
 	}
 
 	/** 图片验证码  **/
-	@ApiOperation("图片验证码")
+	@Operation(summary = "图片验证码")
 	@RequestMapping(value = "/vercode", method = RequestMethod.GET)
 	public ApiRes vercode() throws BizException {
 

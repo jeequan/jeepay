@@ -91,7 +91,7 @@ public class WebSecurityConfig{
                             ).permitAll()
                             .requestMatchers(
                                     "/api/anon/**", //匿名访问接口
-                                    "/webjars/**","/v3/api-docs/**" // swagger相关
+                                    "/webjars/**","/v3/api-docs/**", "/doc.html", "/knife4j/**", "/swagger-ui/**", "/swagger-resources/**" // swagger相关
                             ).permitAll()
                             .anyRequest().authenticated();
                 });

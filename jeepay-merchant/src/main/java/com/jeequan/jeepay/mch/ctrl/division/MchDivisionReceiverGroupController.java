@@ -29,10 +29,11 @@ import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchDivisionReceiverGroupService;
 import com.jeequan.jeepay.service.impl.MchDivisionReceiverService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -48,7 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @site https://www.jeequan.com
  * @date 2021-08-23 11:50
  */
-@Api(tags = "分账管理（账号组）")
+@Tag(name = "分账管理（账号组）")
 @RestController
 @RequestMapping("api/divisionReceiverGroups")
 public class MchDivisionReceiverGroupController extends CommonCtrl {
@@ -57,13 +58,13 @@ public class MchDivisionReceiverGroupController extends CommonCtrl {
 	@Autowired private MchDivisionReceiverService mchDivisionReceiverService;
 
 	/** list */
-	@ApiOperation("账号组列表")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
-			@ApiImplicitParam(name = "pageSize", value = "分页条数（-1时查全部数据）", dataType = "int", defaultValue = "20"),
-			@ApiImplicitParam(name = "receiverGroupId", value = "账号组ID", dataType = "Long"),
-			@ApiImplicitParam(name = "receiverGroupName", value = "组名称")
+	@Operation(summary = "账号组列表")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "pageNumber", description = "分页页码"),
+			@Parameter(name = "pageSize", description = "分页条数（-1时查全部数据）"),
+			@Parameter(name = "receiverGroupId", description = "账号组ID"),
+			@Parameter(name = "receiverGroupName", description = "组名称")
 	})
 	@PreAuthorize("hasAnyAuthority( 'ENT_DIVISION_RECEIVER_GROUP_LIST' )")
 	@RequestMapping(value="", method = RequestMethod.GET)
@@ -90,14 +91,14 @@ public class MchDivisionReceiverGroupController extends CommonCtrl {
 
 
 	/** detail */
-	@ApiOperation("账号组详情")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "recordId", value = "账号组ID", required = true, dataType = "Long")
+	@Operation(summary = "账号组详情")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "recordId", description = "账号组ID", required = true)
 	})
 	@PreAuthorize("hasAuthority( 'ENT_DIVISION_RECEIVER_GROUP_VIEW' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.GET)
-	public ApiRes detail(@PathVariable("recordId") Long recordId) {
+	public ApiRes<MchDivisionReceiverGroup> detail(@PathVariable("recordId") Long recordId) {
 		MchDivisionReceiverGroup record = mchDivisionReceiverGroupService
 				.getOne(MchDivisionReceiverGroup.gw()
 						.eq(MchDivisionReceiverGroup::getMchNo, getCurrentMchNo())
@@ -109,11 +110,11 @@ public class MchDivisionReceiverGroupController extends CommonCtrl {
 	}
 
 	/** add */
-	@ApiOperation("新增分账账号组")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "autoDivisionFlag", value = "自动分账组（当订单分账模式为自动分账，改组将完成分账逻辑） 0-否 1-是", required = true, dataType = "Byte"),
-			@ApiImplicitParam(name = "receiverGroupName", value = "组名称", required = true)
+	@Operation(summary = "新增分账账号组")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "autoDivisionFlag", description = "自动分账组（当订单分账模式为自动分账，改组将完成分账逻辑） 0-否 1-是", required = true),
+			@Parameter(name = "receiverGroupName", description = "组名称", required = true)
 	})
 	@PreAuthorize("hasAuthority( 'ENT_DIVISION_RECEIVER_GROUP_ADD' )")
 	@RequestMapping(value="", method = RequestMethod.POST)
@@ -138,12 +139,12 @@ public class MchDivisionReceiverGroupController extends CommonCtrl {
 	}
 
 	/** update */
-	@ApiOperation("更新分账账号组")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "recordId", value = "账号组ID", required = true, dataType = "Long"),
-			@ApiImplicitParam(name = "autoDivisionFlag", value = "自动分账组（当订单分账模式为自动分账，改组将完成分账逻辑） 0-否 1-是", required = true, dataType = "Byte"),
-			@ApiImplicitParam(name = "receiverGroupName", value = "组名称", required = true)
+	@Operation(summary = "更新分账账号组")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "recordId", description = "账号组ID", required = true),
+			@Parameter(name = "autoDivisionFlag", description = "自动分账组（当订单分账模式为自动分账，改组将完成分账逻辑） 0-否 1-是", required = true),
+			@Parameter(name = "receiverGroupName", description = "组名称", required = true)
 	})
 	@PreAuthorize("hasAuthority( 'ENT_DIVISION_RECEIVER_GROUP_EDIT' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.PUT)
@@ -176,10 +177,10 @@ public class MchDivisionReceiverGroupController extends CommonCtrl {
 	}
 
 	/** delete */
-	@ApiOperation("删除分账账号组")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "recordId", value = "账号组ID", required = true, dataType = "Long")
+	@Operation(summary = "删除分账账号组")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "recordId", description = "账号组ID", required = true)
 	})
 	@PreAuthorize("hasAuthority('ENT_DIVISION_RECEIVER_GROUP_DELETE')")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.DELETE)

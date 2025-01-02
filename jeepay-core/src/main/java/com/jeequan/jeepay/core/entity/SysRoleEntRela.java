@@ -17,6 +17,7 @@ package com.jeequan.jeepay.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -31,7 +32,7 @@ import java.io.Serializable;
  * @author [mybatis plus generator]
  * @since 2021-04-23
  */
-@ApiModel(value = "系统角色权限关联表", description = "")
+@Schema(description = "系统角色权限关联表")
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
@@ -48,13 +49,13 @@ public class SysRoleEntRela implements Serializable {
     /**
      * 角色ID
      */
-    @ApiModelProperty(value = "角色ID")
+    @Schema(title = "roleId", description = "角色ID")
     private String roleId;
 
     /**
      * 权限ID
      */
-    @ApiModelProperty(value = "权限ID")
+    @Schema(title = "entId", description = "权限ID")
     private String entId;
 
 

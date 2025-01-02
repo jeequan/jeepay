@@ -21,6 +21,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.core.utils.JsonKit;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,21 +35,26 @@ import java.io.Serializable;
 * @site https://www.jeequan.com
 * @date 2021/6/8 16:35
 */
+@Schema(description = "响应参数")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApiRes<T> implements Serializable {
+public class ApiRes<M> implements Serializable {
 
     /** 业务响应码 **/
+    @Schema(title = "code", description = "业务响应码")
     private Integer code;
 
     /** 业务响应信息 **/
+    @Schema(title = "msg", description = "业务响应信息")
     private String msg;
 
     /** 数据对象 **/
-    private T data;
+    @Schema(title = "data", description = "数据对象")
+    private M data;
 
     /** 签名值 **/
+    @Schema(title = "sign", description = "签名值")
     private String sign;
 
     /** 输出json格式字符串 **/
@@ -62,7 +68,7 @@ public class ApiRes<T> implements Serializable {
     }
 
     /** 业务处理成功 **/
-    public static <T> ApiRes<T> ok(T data){
+    public static <M> ApiRes<M> ok(M data){
         return new ApiRes(ApiCodeEnum.SUCCESS.getCode(), ApiCodeEnum.SUCCESS.getMsg(), data, null);
     }
 
@@ -84,9 +90,9 @@ public class ApiRes<T> implements Serializable {
     }
 
     /** 业务处理成功， 封装分页数据， 仅返回必要参数 **/
-    public static <T> ApiRes<ApiPageRes.PageBean<T>> page(IPage<T> iPage){
+    public static <M> ApiRes<ApiPageRes.PageBean<M>> page(IPage<M> iPage){
 
-        ApiPageRes.PageBean<T> result = new ApiPageRes.PageBean<>();
+        ApiPageRes.PageBean<M> result = new ApiPageRes.PageBean<>();
         result.setRecords(iPage.getRecords());  //记录明细
         result.setTotal(iPage.getTotal()); //总条数
         result.setCurrent(iPage.getCurrent()); //当前页码

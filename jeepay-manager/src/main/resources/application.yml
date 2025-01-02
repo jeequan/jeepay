@@ -8,3 +8,18 @@ spring:
 #系统业务参数
 isys:
     jwt-secret: t7w3P8X6472qWc3u #生成jwt的秘钥。 要求每个系统有单独的秘钥管理机制。
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.jeequan.jeepay.mgr.ctrl
+# knife4j APIDOC文档
+knife4j:
+  enable: true

@@ -25,15 +25,16 @@ import com.jeequan.jeepay.core.entity.SysUserRoleRela;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.mch.service.AuthService;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
+import com.jeequan.jeepay.mch.service.AuthService;
 import com.jeequan.jeepay.service.impl.SysRoleEntRelaService;
 import com.jeequan.jeepay.service.impl.SysRoleService;
 import com.jeequan.jeepay.service.impl.SysUserRoleRelaService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,7 +53,7 @@ import java.util.List;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
-@Api(tags = "系统管理（用户-角色-权限关联信息）")
+@Tag(name = "系统管理（用户-角色-权限关联信息）")
 @RestController
 @RequestMapping("api/sysRoleEntRelas")
 public class SysRoleEntRelaController extends CommonCtrl {
@@ -63,12 +64,12 @@ public class SysRoleEntRelaController extends CommonCtrl {
 	@Autowired private AuthService authService;
 
 	/** list */
-	@ApiOperation("关联关系--角色-权限关联信息列表")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
-			@ApiImplicitParam(name = "pageSize", value = "分页条数（-1时查全部数据）", dataType = "int", defaultValue = "20"),
-			@ApiImplicitParam(name = "roleId", value = "角色ID, ROLE_开头")
+	@Operation(summary = "关联关系--角色-权限关联信息列表")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "pageNumber", description = "分页页码"),
+			@Parameter(name = "pageSize", description = "分页条数（-1时查全部数据）"),
+			@Parameter(name = "roleId", description = "角色ID, ROLE_开头")
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_ROLE_DIST' )")
 	@RequestMapping(value="", method = RequestMethod.GET)

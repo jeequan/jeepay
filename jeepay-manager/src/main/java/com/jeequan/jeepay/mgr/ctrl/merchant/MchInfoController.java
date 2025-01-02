@@ -17,7 +17,6 @@ package com.jeequan.jeepay.mgr.ctrl.merchant;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.DateUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.components.mq.model.CleanMchLoginAuthCacheMQ;
@@ -34,10 +33,11 @@ import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.SysUserAuthService;
 import com.jeequan.jeepay.service.impl.SysUserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,7 +46,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 商户管理类
@@ -55,7 +58,7 @@ import java.util.*;
  * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
-@Api(tags = "商户基本信息管理")
+@Tag(name = "商户基本信息管理")
 @RestController
 @RequestMapping("/api/mchInfo")
 public class MchInfoController extends CommonCtrl {
@@ -70,16 +73,16 @@ public class MchInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:14
      * @describe: 商户信息列表
      */
-    @ApiOperation("查询商户列表")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
-            @ApiImplicitParam(name = "pageSize", value = "分页条数", dataType = "int", defaultValue = "20"),
-            @ApiImplicitParam(name = "mchNo", value = "商户号"),
-            @ApiImplicitParam(name = "mchName", value = "商户名称"),
-            @ApiImplicitParam(name = "isvNo", value = "服务商号"),
-            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-启用", dataType = "Byte"),
-            @ApiImplicitParam(name = "type", value = "类型: 1-普通商户, 2-特约商户(服务商模式)", dataType = "Byte")
+    @Operation(summary = "查询商户列表", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "pageNumber", description = "分页页码"),
+            @Parameter(name = "pageSize", description = "分页条数"),
+            @Parameter(name = "mchNo", description = "商户号", required = true),
+            @Parameter(name = "mchName", description = "商户名称"),
+            @Parameter(name = "isvNo", description = "服务商号"),
+            @Parameter(name = "state", description = "状态: 0-停用, 1-启用"),
+            @Parameter(name = "type", description = "类型: 1-普通商户, 2-特约商户(服务商模式)")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_LIST')")
     @RequestMapping(value="", method = RequestMethod.GET)
@@ -113,19 +116,19 @@ public class MchInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:14
      * @describe: 新增商户信息
      */
-    @ApiOperation("新增商户信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "mchName", value = "商户名称", required = true),
-            @ApiImplicitParam(name = "mchShortName", value = "商户简称", required = true),
-            @ApiImplicitParam(name = "loginUserName", value = "登录名", required = true),
-            @ApiImplicitParam(name = "isvNo", value = "服务商号，type为2时必填"),
-            @ApiImplicitParam(name = "contactName", value = "联系人姓名", required = true),
-            @ApiImplicitParam(name = "contactTel", value = "联系人手机号", required = true),
-            @ApiImplicitParam(name = "contactEmail", value = "联系人邮箱"),
-            @ApiImplicitParam(name = "remark", value = "备注"),
-            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-启用", dataType = "Byte"),
-            @ApiImplicitParam(name = "type", value = "类型: 1-普通商户, 2-特约商户(服务商模式)", dataType = "Byte")
+    @Operation(summary = "新增商户信息", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "mchName", description = "商户名称", required = true),
+            @Parameter(name = "mchShortName", description = "商户简称", required = true),
+            @Parameter(name = "loginUserName", description = "登录名", required = true),
+            @Parameter(name = "isvNo", description = "服务商号，type为2时必填"),
+            @Parameter(name = "contactName", description = "联系人姓名", required = true),
+            @Parameter(name = "contactTel", description = "联系人手机号", required = true),
+            @Parameter(name = "contactEmail", description = "联系人邮箱"),
+            @Parameter(name = "remark", description = "备注"),
+            @Parameter(name = "state", description = "状态: 0-停用, 1-启用"),
+            @Parameter(name = "type", description = "类型: 1-普通商户, 2-特约商户(服务商模式)")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_INFO_ADD')")
     @MethodLog(remark = "新增商户")
@@ -149,10 +152,10 @@ public class MchInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:14
      * @describe: 删除商户信息
      */
-    @ApiOperation("删除商户信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "mchNo", value = "商户号", required = true)
+    @Operation(summary = "删除商户信息", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "mchNo", description = "商户号", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_INFO_DEL')")
     @MethodLog(remark = "删除商户")
@@ -173,20 +176,21 @@ public class MchInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:14
      * @describe: 更新商户信息
      */
-    @ApiOperation("更新商户信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "mchName", value = "商户名称", required = true),
-            @ApiImplicitParam(name = "mchShortName", value = "商户简称", required = true),
-            @ApiImplicitParam(name = "loginUserName", value = "登录名", required = true),
-            @ApiImplicitParam(name = "contactName", value = "联系人姓名", required = true),
-            @ApiImplicitParam(name = "contactTel", value = "联系人手机号", required = true),
-            @ApiImplicitParam(name = "contactEmail", value = "联系人邮箱"),
-            @ApiImplicitParam(name = "remark", value = "备注"),
-            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-启用", dataType = "Byte"),
-            @ApiImplicitParam(name = "resetPass", value = "是否重置密码", dataType = "Boolean"),
-            @ApiImplicitParam(name = "confirmPwd", value = "待更新的密码，base64加密"),
-            @ApiImplicitParam(name = "defaultPass", value = "是否默认密码", dataType = "Boolean")
+    @Operation(summary = "更新商户信息", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "mchNo", description = "商户号", required = true),
+            @Parameter(name = "mchName", description = "商户名称", required = true),
+            @Parameter(name = "mchShortName", description = "商户简称", required = true),
+            @Parameter(name = "loginUserName", description = "登录名", required = true),
+            @Parameter(name = "contactName", description = "联系人姓名", required = true),
+            @Parameter(name = "contactTel", description = "联系人手机号", required = true),
+            @Parameter(name = "contactEmail", description = "联系人邮箱"),
+            @Parameter(name = "remark", description = "备注"),
+            @Parameter(name = "state", description = "状态: 0-停用, 1-启用"),
+            @Parameter(name = "resetPass", description = "是否重置密码"),
+            @Parameter(name = "confirmPwd", description = "待更新的密码，base64加密"),
+            @Parameter(name = "defaultPass", description = "是否默认密码")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_INFO_EDIT')")
     @MethodLog(remark = "更新商户信息")
@@ -244,14 +248,14 @@ public class MchInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:14
      * @describe: 查询商户信息
      */
-    @ApiOperation("查询商户信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "mchNo", value = "商户号", required = true)
+    @Operation(summary = "查询商户信息", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "mchNo", description = "商户号", required = true)
     })
     @PreAuthorize("hasAnyAuthority('ENT_MCH_INFO_VIEW', 'ENT_MCH_INFO_EDIT')")
     @RequestMapping(value="/{mchNo}", method = RequestMethod.GET)
-    public ApiRes detail(@PathVariable("mchNo") String mchNo) {
+    public ApiRes<MchInfo> detail(@PathVariable("mchNo") String mchNo) {
         MchInfo mchInfo = mchInfoService.getById(mchNo);
         if (mchInfo == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);

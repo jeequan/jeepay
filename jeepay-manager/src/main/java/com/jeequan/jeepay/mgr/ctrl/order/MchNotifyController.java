@@ -27,10 +27,11 @@ import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,7 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
-@Api(tags = "订单管理（通知类）")
+@Tag(name = "订单管理（通知类）")
 @RestController
 @RequestMapping("/api/mchNotify")
 public class MchNotifyController extends CommonCtrl {
@@ -59,20 +60,20 @@ public class MchNotifyController extends CommonCtrl {
      * @date: 2021/6/7 16:14
      * @describe: 商户通知列表
      */
-    @ApiOperation("查询商户通知列表")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
-            @ApiImplicitParam(name = "pageSize", value = "分页条数", dataType = "int", defaultValue = "20"),
-            @ApiImplicitParam(name = "createdStart", value = "日期格式字符串（yyyy-MM-dd HH:mm:ss），时间范围查询--开始时间，查询范围：大于等于此时间"),
-            @ApiImplicitParam(name = "createdEnd", value = "日期格式字符串（yyyy-MM-dd HH:mm:ss），时间范围查询--结束时间，查询范围：小于等于此时间"),
-            @ApiImplicitParam(name = "mchNo", value = "商户号"),
-            @ApiImplicitParam(name = "orderId", value = "订单ID"),
-            @ApiImplicitParam(name = "mchOrderNo", value = "商户订单号"),
-            @ApiImplicitParam(name = "isvNo", value = "服务商号"),
-            @ApiImplicitParam(name = "appId", value = "应用ID"),
-            @ApiImplicitParam(name = "state", value = "通知状态,1-通知中,2-通知成功,3-通知失败", dataType = "Byte"),
-            @ApiImplicitParam(name = "orderType", value = "订单类型:1-支付,2-退款", dataType = "Byte")
+    @Operation(summary = "查询商户通知列表")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "pageNumber", description = "分页页码"),
+            @Parameter(name = "pageSize", description = "分页条数"),
+            @Parameter(name = "createdStart", description = "日期格式字符串（yyyy-MM-dd HH:mm:ss），时间范围查询--开始时间，查询范围：大于等于此时间"),
+            @Parameter(name = "createdEnd", description = "日期格式字符串（yyyy-MM-dd HH:mm:ss），时间范围查询--结束时间，查询范围：小于等于此时间"),
+            @Parameter(name = "mchNo", description = "商户号"),
+            @Parameter(name = "orderId", description = "订单ID"),
+            @Parameter(name = "mchOrderNo", description = "商户订单号"),
+            @Parameter(name = "isvNo", description = "服务商号"),
+            @Parameter(name = "appId", description = "应用ID"),
+            @Parameter(name = "state", description = "通知状态,1-通知中,2-通知成功,3-通知失败"),
+            @Parameter(name = "orderType", description = "订单类型:1-支付,2-退款")
     })
     @PreAuthorize("hasAuthority('ENT_NOTIFY_LIST')")
     @RequestMapping(value="", method = RequestMethod.GET)
@@ -122,14 +123,14 @@ public class MchNotifyController extends CommonCtrl {
      * @date: 2021/6/7 16:14
      * @describe: 商户通知信息
      */
-    @ApiOperation("通知信息详情")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "notifyId", value = "商户通知记录ID", required = true)
+    @Operation(summary = "通知信息详情")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "notifyId", description = "商户通知记录ID", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_NOTIFY_VIEW')")
     @RequestMapping(value="/{notifyId}", method = RequestMethod.GET)
-    public ApiRes detail(@PathVariable("notifyId") String notifyId) {
+    public ApiRes<MchNotifyRecord> detail(@PathVariable("notifyId") String notifyId) {
         MchNotifyRecord mchNotify = mchNotifyService.getById(notifyId);
         if (mchNotify == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
@@ -142,14 +143,14 @@ public class MchNotifyController extends CommonCtrl {
     * @Author: terrfly
     * @Date: 2021/6/21 17:41
     */
-    @ApiOperation("商户通知重发")
-    @ApiImplicitParams({
-           @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-           @ApiImplicitParam(name = "notifyId", value = "商户通知记录ID", required = true)
+    @Operation(summary = "商户通知重发")
+    @Parameters({
+           @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+           @Parameter(name = "notifyId", description = "商户通知记录ID", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_NOTIFY_RESEND')")
     @RequestMapping(value="resend/{notifyId}", method = RequestMethod.POST)
-    public ApiRes resend(@PathVariable("notifyId") Long notifyId) {
+    public ApiRes<MchNotifyRecord> resend(@PathVariable("notifyId") Long notifyId) {
         MchNotifyRecord mchNotify = mchNotifyService.getById(notifyId);
         if (mchNotify == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);

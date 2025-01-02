@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -19,7 +20,7 @@ import java.util.Date;
  * @author [mybatis plus generator]
  * @since 2021-08-23
  */
-@ApiModel(value = "分账账号组", description = "")
+@Schema(description = "分账账号组")
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
@@ -36,50 +37,50 @@ public class MchDivisionReceiverGroup implements Serializable {
     /**
      * 组ID
      */
-    @ApiModelProperty(value = "组ID")
+    @Schema(title = "receiverGroupId", description = "组ID")
     @TableId(value = "receiver_group_id", type = IdType.AUTO)
     private Long receiverGroupId;
 
     /**
      * 组名称
      */
-    @ApiModelProperty(value = "组名称")
+    @Schema(title = "receiverGroupName", description = "组名称")
     private String receiverGroupName;
 
     /**
      * 商户号
      */
-    @ApiModelProperty(value = "商户号")
+    @Schema(title = "mchNo", description = "商户号")
     private String mchNo;
 
     /**
      * 自动分账组（当订单分账模式为自动分账，改组将完成分账逻辑） 0-否 1-是
      */
-    @ApiModelProperty(value = "自动分账组（当订单分账模式为自动分账，改组将完成分账逻辑） 0-否 1-是")
+    @Schema(title = "autoDivisionFlag", description = "自动分账组（当订单分账模式为自动分账，改组将完成分账逻辑） 0-否 1-是")
     private Byte autoDivisionFlag;
 
     /**
      * 创建者用户ID
      */
-    @ApiModelProperty(value = "创建者用户ID")
+    @Schema(title = "createdUid", description = "创建者用户ID")
     private Long createdUid;
 
     /**
      * 创建者姓名
      */
-    @ApiModelProperty(value = "创建者姓名")
+    @Schema(title = "createdBy", description = "创建者姓名")
     private String createdBy;
 
     /**
      * 创建时间
      */
-    @ApiModelProperty(value = "创建时间")
+    @Schema(title = "createdAt", description = "创建时间")
     private Date createdAt;
 
     /**
      * 更新时间
      */
-    @ApiModelProperty(value = "更新时间")
+    @Schema(title = "updatedAt", description = "更新时间")
     private Date updatedAt;
 
 

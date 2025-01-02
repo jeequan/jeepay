@@ -21,10 +21,10 @@ import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.mch.websocket.server.WsPayOrderServer;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.util.JeepayKit;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,18 +38,18 @@ import java.io.IOException;
 * @site https://www.jeequan.com
 * @date 2021/6/22 14:22
 */
-@Api(tags = "支付测试")
+@Tag(name = "支付测试")
 @RestController
 @RequestMapping("/api/anon/paytestNotify")
 public class PaytestNotifyController extends CommonCtrl {
 
     @Autowired private MchAppService mchAppService;
 
-    @ApiOperation("支付回调信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "appId", value = "应用ID", required = true),
-            @ApiImplicitParam(name = "mchNo", value = "商户号", required = true),
-            @ApiImplicitParam(name = "sign", value = "签名值", required = true)
+    @Operation(summary = "支付回调信息")
+    @Parameters({
+            @Parameter(name = "appId", description = "应用ID", required = true),
+            @Parameter(name = "mchNo", description = "商户号", required = true),
+            @Parameter(name = "sign", description = "签名值", required = true)
     })
     @RequestMapping("/payOrder")
     public void payOrderNotify() throws IOException {

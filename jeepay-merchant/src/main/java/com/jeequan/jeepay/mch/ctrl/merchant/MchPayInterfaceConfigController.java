@@ -21,18 +21,25 @@ import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.entity.*;
+import com.jeequan.jeepay.core.entity.MchApp;
+import com.jeequan.jeepay.core.entity.MchInfo;
+import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
+import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.DBApplicationConfig;
 import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
-import com.jeequan.jeepay.service.impl.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import com.jeequan.jeepay.service.impl.MchAppService;
+import com.jeequan.jeepay.service.impl.MchInfoService;
+import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
+import com.jeequan.jeepay.service.impl.SysConfigService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,7 +57,7 @@ import java.util.Set;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
-@Api(tags = "商户支付接口管理")
+@Tag(name = "商户支付接口管理")
 @RestController
 @RequestMapping("/api/mch/payConfigs")
 public class MchPayInterfaceConfigController extends CommonCtrl {
@@ -66,10 +73,10 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
      * @Description: 查询商户支付接口配置列表
      * @Date: 10:51 2021/5/13
     */
-    @ApiOperation("查询应用支付接口配置列表")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "appId", value = "应用ID", required = true)
+    @Operation(summary = "查询应用支付接口配置列表")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "appId", description = "应用ID", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_LIST')")
     @GetMapping
@@ -90,15 +97,15 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
      * @Description: 根据 商户号、接口类型 获取商户参数配置
      * @Date: 10:54 2021/5/13
     */
-    @ApiOperation("根据应用ID、接口类型 获取应用参数配置")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "appId", value = "应用ID", required = true),
-            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true)
+    @Operation(summary = "根据应用ID、接口类型 获取应用参数配置")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "appId", description = "应用ID", required = true),
+            @Parameter(name = "ifCode", description = "接口类型代码", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_VIEW')")
     @GetMapping("/{appId}/{ifCode}")
-    public ApiRes getByMchNo(@PathVariable(value = "appId") String appId, @PathVariable(value = "ifCode") String ifCode) {
+    public ApiRes<PayInterfaceConfig> getByMchNo(@PathVariable(value = "appId") String appId, @PathVariable(value = "ifCode") String ifCode) {
         PayInterfaceConfig payInterfaceConfig = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_MCH_APP, appId, ifCode);
         if (payInterfaceConfig != null) {
             // 费率转换为百分比数值
@@ -127,11 +134,11 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
      * @Description: 更新商户支付参数
      * @Date: 10:56 2021/5/13
     */
-    @ApiOperation("更新商户支付参数")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "infoId", value = "应用AppId", required = true),
-            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true)
+    @Operation(summary = "更新应用支付参数")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "infoId", description = "应用AppId", required = true),
+            @Parameter(name = "ifCode", description = "接口类型代码", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_ADD')")
     @PostMapping
@@ -179,10 +186,10 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     }
 
     /** 查询支付宝商户授权URL **/
-    @ApiOperation("查询支付宝商户授权URL")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "mchAppId", value = "应用ID", required = true)
+    @Operation(summary = "查询支付宝商户授权URL")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "mchAppId", description = "应用ID", required = true)
     })
     @GetMapping("/alipayIsvsubMchAuthUrls/{mchAppId}")
     public ApiRes queryAlipayIsvsubMchAuthUrl(@PathVariable String mchAppId) {
@@ -206,10 +213,10 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
 
 
     /** 查询当前应用支持的支付接口 */
-    @ApiOperation("查询当前应用支持的支付接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "appId", value = "应用ID", required = true)
+    @Operation(summary = "查询当前应用支持的支付接口")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "appId", description = "应用ID", required = true)
     })
     @PreAuthorize("hasAuthority( 'ENT_DIVISION_RECEIVER_ADD' )")
     @RequestMapping(value="ifCodes/{appId}", method = RequestMethod.GET)

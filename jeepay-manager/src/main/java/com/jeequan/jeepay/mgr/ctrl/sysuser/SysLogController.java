@@ -25,10 +25,11 @@ import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.SysLogService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -47,7 +48,7 @@ import java.util.List;
  * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
-@Api(tags = "系统管理（系统日志）")
+@Tag(name = "系统管理（系统日志）")
 @RestController
 @RequestMapping("api/sysLog")
 public class SysLogController extends CommonCtrl {
@@ -60,16 +61,16 @@ public class SysLogController extends CommonCtrl {
      * @date: 2021/6/7 16:15
      * @describe: 日志记录列表
      */
-    @ApiOperation("系统日志列表")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
-            @ApiImplicitParam(name = "pageSize", value = "分页条数", dataType = "int", defaultValue = "20"),
-            @ApiImplicitParam(name = "createdStart", value = "日期格式字符串（yyyy-MM-dd HH:mm:ss），时间范围查询--开始时间，查询范围：大于等于此时间"),
-            @ApiImplicitParam(name = "createdEnd", value = "日期格式字符串（yyyy-MM-dd HH:mm:ss），时间范围查询--结束时间，查询范围：小于等于此时间"),
-            @ApiImplicitParam(name = "userId", value = "系统用户ID"),
-            @ApiImplicitParam(name = "userName", value = "用户姓名"),
-            @ApiImplicitParam(name = "sysType", value = "所属系统： MGR-运营平台, MCH-商户中心")
+    @Operation(summary = "系统日志列表")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "pageNumber", description = "分页页码"),
+            @Parameter(name = "pageSize", description = "分页条数"),
+            @Parameter(name = "createdStart", description = "日期格式字符串（yyyy-MM-dd HH:mm:ss），时间范围查询--开始时间，查询范围：大于等于此时间"),
+            @Parameter(name = "createdEnd", description = "日期格式字符串（yyyy-MM-dd HH:mm:ss），时间范围查询--结束时间，查询范围：小于等于此时间"),
+            @Parameter(name = "userId", description = "系统用户ID"),
+            @Parameter(name = "userName", description = "用户姓名"),
+            @Parameter(name = "sysType", description = "所属系统： MGR-运营平台, MCH-商户中心")
     })
     @PreAuthorize("hasAuthority('ENT_LOG_LIST')")
     @RequestMapping(value="", method = RequestMethod.GET)
@@ -105,14 +106,14 @@ public class SysLogController extends CommonCtrl {
      * @date: 2021/6/7 16:16
      * @describe: 查看日志信息
      */
-    @ApiOperation("系统日志详情")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "sysLogId", value = "系统日志ID", required = true)
+    @Operation(summary = "系统日志详情")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "sysLogId", description = "系统日志ID", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_SYS_LOG_VIEW')")
     @RequestMapping(value="/{sysLogId}", method = RequestMethod.GET)
-    public ApiRes detail(@PathVariable("sysLogId") String sysLogId) {
+    public ApiRes<SysLog> detail(@PathVariable("sysLogId") String sysLogId) {
         SysLog sysLog = sysLogService.getById(sysLogId);
         if (sysLog == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
@@ -125,10 +126,10 @@ public class SysLogController extends CommonCtrl {
      * @date: 2021/6/7 16:16
      * @describe: 删除日志信息
      */
-    @ApiOperation("删除日志信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "selectedIds", value = "系统日志ID（若干个ID用英文逗号拼接）", required = true)
+    @Operation(summary = "删除日志信息")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "selectedIds", description = "系统日志ID（若干个ID用英文逗号拼接）", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_SYS_LOG_DEL')")
     @MethodLog(remark = "删除日志信息")

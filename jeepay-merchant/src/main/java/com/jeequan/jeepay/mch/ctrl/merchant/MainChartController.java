@@ -24,10 +24,11 @@ import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.SysUserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,7 +47,7 @@ import java.util.Map;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
-@Api(tags = "主页统计")
+@Tag(name = "主页统计")
 @Slf4j
 @RestController
 @RequestMapping("api/mainChart")
@@ -60,9 +61,9 @@ public class MainChartController extends CommonCtrl {
 
 
     /** 周交易总金额 */
-    @ApiOperation("周交易总金额")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
+    @Operation(summary = "周交易总金额",description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_MAIN_PAY_AMOUNT_WEEK')")
     @RequestMapping(value="/payAmountWeek", method = RequestMethod.GET)
@@ -74,9 +75,9 @@ public class MainChartController extends CommonCtrl {
      * 商户总数量、服务商总数量、总交易金额、总交易笔数
      * @return
      */
-    @ApiOperation("商户总数量、服务商总数量、总交易金额、总交易笔数")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
+    @Operation(summary = "商户总数量、服务商总数量、总交易金额、总交易笔数", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_MAIN_NUMBER_COUNT')")
     @RequestMapping(value="/numCount", method = RequestMethod.GET)
@@ -85,11 +86,11 @@ public class MainChartController extends CommonCtrl {
     }
 
     /** 交易统计 */
-    @ApiOperation("交易统计")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "createdStart", value = "日期格式字符串（yyyy-MM-dd），时间范围查询--开始时间，须和结束时间一起使用，否则默认查最近七天（含今天）"),
-            @ApiImplicitParam(name = "createdEnd", value = "日期格式字符串（yyyy-MM-dd），时间范围查询--结束时间，须和开始时间一起使用，否则默认查最近七天（含今天）")
+    @Operation(summary = "交易统计", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "createdStart", description = "日期格式字符串（yyyy-MM-dd），时间范围查询--开始时间，须和结束时间一起使用，否则默认查最近七天（含今天）"),
+            @Parameter(name = "createdEnd", description = "日期格式字符串（yyyy-MM-dd），时间范围查询--结束时间，须和开始时间一起使用，否则默认查最近七天（含今天）")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_MAIN_PAY_COUNT')")
     @RequestMapping(value="/payCount", method = RequestMethod.GET)
@@ -105,11 +106,11 @@ public class MainChartController extends CommonCtrl {
     }
 
     /** 支付方式统计 */
-    @ApiOperation("支付方式统计")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "createdStart", value = "日期格式字符串（yyyy-MM-dd），时间范围查询--开始时间，须和结束时间一起使用，否则默认查最近七天（含今天）"),
-            @ApiImplicitParam(name = "createdEnd", value = "日期格式字符串（yyyy-MM-dd），时间范围查询--结束时间，须和开始时间一起使用，否则默认查最近七天（含今天）")
+    @Operation(summary = "支付方式统计", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "createdStart", description = "日期格式字符串（yyyy-MM-dd），时间范围查询--开始时间，须和结束时间一起使用，否则默认查最近七天（含今天）"),
+            @Parameter(name = "createdEnd", description = "日期格式字符串（yyyy-MM-dd），时间范围查询--结束时间，须和开始时间一起使用，否则默认查最近七天（含今天）")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_MAIN_PAY_TYPE_COUNT')")
     @RequestMapping(value="/payTypeCount", method = RequestMethod.GET)
@@ -123,9 +124,9 @@ public class MainChartController extends CommonCtrl {
     }
 
     /** 商户基本信息、用户基本信息 **/
-    @ApiOperation("商户基本信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
+    @Operation(summary = "商户基本信息", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
     })
     @PreAuthorize("hasAuthority('ENT_MCH_MAIN_USER_INFO')")
     @RequestMapping(value="", method = RequestMethod.GET)

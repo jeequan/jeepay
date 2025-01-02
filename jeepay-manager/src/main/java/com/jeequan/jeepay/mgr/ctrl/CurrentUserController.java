@@ -26,22 +26,25 @@ import com.jeequan.jeepay.core.entity.SysEntitlement;
 import com.jeequan.jeepay.core.entity.SysUser;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.core.utils.TreeDataBuilder;
 import com.jeequan.jeepay.core.model.security.JeeUserDetails;
+import com.jeequan.jeepay.core.utils.TreeDataBuilder;
 import com.jeequan.jeepay.service.impl.SysEntitlementService;
 import com.jeequan.jeepay.service.impl.SysUserAuthService;
 import com.jeequan.jeepay.service.impl.SysUserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /*
 * 当前登录者的信息相关接口
@@ -50,7 +53,7 @@ import java.util.*;
 * @site https://www.jeequan.com
 * @date 2021/6/8 17:10
 */
-@Api(tags = "登录者信息")
+@Tag(name = "登录者信息")
 @RestController
 @RequestMapping("api/current")
 public class CurrentUserController extends CommonCtrl{
@@ -59,12 +62,12 @@ public class CurrentUserController extends CommonCtrl{
 	@Autowired private SysUserService sysUserService;
 	@Autowired private SysUserAuthService sysUserAuthService;
 
-	@ApiOperation("查询当前登录者的用户信息")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
+	@Operation(summary = "查询当前登录者的用户信息")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER)
 	})
 	@RequestMapping(value="/user", method = RequestMethod.GET)
-	public ApiRes currentUserInfo() {
+	public ApiRes<SysUser> currentUserInfo() {
 
 		///当前用户信息
 		JeeUserDetails jeeUserDetails = getCurrentUser();
@@ -99,12 +102,12 @@ public class CurrentUserController extends CommonCtrl{
 
 
 	/** 修改个人信息 */
-	@ApiOperation("修改个人信息--基本信息")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "avatarUrl", value = "头像地址"),
-			@ApiImplicitParam(name = "realname", value = "真实姓名"),
-			@ApiImplicitParam(name = "sex", value = "性别 0-未知, 1-男, 2-女")
+	@Operation(summary = "修改个人信息--基本信息")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "avatarUrl", description = "头像地址"),
+			@Parameter(name = "realname", description = "真实姓名"),
+			@Parameter(name = "sex", description = "性别 0-未知, 1-男, 2-女")
 	})
 	@RequestMapping(value="/user", method = RequestMethod.PUT)
 	@MethodLog(remark = "修改信息")
@@ -138,11 +141,11 @@ public class CurrentUserController extends CommonCtrl{
 
 
 	/** 修改密码 */
-	@ApiOperation("修改个人信息--安全信息")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "confirmPwd", value = "新密码"),
-			@ApiImplicitParam(name = "originalPwd", value = "原密码")
+	@Operation(summary = "修改个人信息--安全信息")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "confirmPwd", description = "新密码"),
+			@Parameter(name = "originalPwd", description = "原密码")
 	})
 	@RequestMapping(value="modifyPwd", method = RequestMethod.PUT)
 	@MethodLog(remark = "修改密码")

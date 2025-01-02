@@ -35,10 +35,11 @@ import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import com.jeequan.jeepay.service.impl.PayInterfaceDefineService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -53,7 +54,7 @@ import java.util.List;
 * @site https://www.jeequan.com
 * @date 2021/8/13 14:43
 */
-@Api(tags = "商户转账")
+@Tag(name = "商户转账")
 @RestController
 @RequestMapping("/api/mchTransfers")
 public class MchTransferController extends CommonCtrl {
@@ -64,26 +65,27 @@ public class MchTransferController extends CommonCtrl {
     @Autowired private SysConfigService sysConfigService;
 
     /** 查询商户对应应用下支持的支付通道 **/
-    @ApiOperation("查询商户对应应用下支持的支付通道")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "appId", value = "应用ID", required = true)
+    @Operation(summary = "查询商户对应应用下支持的支付通道")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "appId", description = "应用ID", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_TRANSFER_IF_CODE_LIST')")
     @GetMapping("/ifCodes/{appId}")
-    public ApiRes<List> ifCodeList(@PathVariable("appId") String appId) {
+    public ApiRes<List<PayInterfaceDefine>> ifCodeList(@PathVariable("appId") String appId) {
 
         List<String> ifCodeList = new ArrayList<>();
-        payInterfaceConfigService.list(
+        List<PayInterfaceConfig> list = payInterfaceConfigService.list(
                 PayInterfaceConfig.gw().select(PayInterfaceConfig::getIfCode)
                         .eq(PayInterfaceConfig::getInfoType, CS.INFO_TYPE_MCH_APP)
                         .eq(PayInterfaceConfig::getInfoId, appId)
                         .eq(PayInterfaceConfig::getState, CS.PUB_USABLE)
-        ).stream().forEach(r -> ifCodeList.add(r.getIfCode()));
-
-        if(ifCodeList.isEmpty()){
-            return ApiRes.ok(ifCodeList);
+        );
+        if(list.isEmpty()){
+            return ApiRes.ok(new ArrayList<PayInterfaceDefine>());
         }
+
+        list.forEach(r -> ifCodeList.add(r.getIfCode()));
 
         List<PayInterfaceDefine> result = payInterfaceDefineService.list(PayInterfaceDefine.gw().in(PayInterfaceDefine::getIfCode, ifCodeList));
         return ApiRes.ok(result);
@@ -92,12 +94,12 @@ public class MchTransferController extends CommonCtrl {
 
 
     /** 获取渠道侧用户ID **/
-    @ApiOperation("获取渠道侧用户ID")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "appId", value = "应用ID", required = true),
-            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true),
-            @ApiImplicitParam(name = "extParam", value = "扩展参数", required = true)
+    @Operation(summary = "获取渠道侧用户ID")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "appId", description = "应用ID", required = true),
+            @Parameter(name = "ifCode", description = "接口类型代码", required = true),
+            @Parameter(name = "extParam", description = "扩展参数", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_TRANSFER_CHANNEL_USER')")
     @GetMapping("/channelUserId")
@@ -130,21 +132,21 @@ public class MchTransferController extends CommonCtrl {
 
 
     /** 调起下单接口 **/
-    @ApiOperation("调起转账接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "mchOrderNo", value = "商户订单号", required = true),
-            @ApiImplicitParam(name = "entryType", value = "入账方式： WX_CASH-微信零钱; ALIPAY_CASH-支付宝转账; BANK_CARD-银行卡", required = true),
-            @ApiImplicitParam(name = "ifCode", value = "接口类型代码", required = true),
-            @ApiImplicitParam(name = "amount", value = "转账金额,单位元", required = true),
-            @ApiImplicitParam(name = "accountNo", value = "收款账号", required = true),
-            @ApiImplicitParam(name = "accountName", value = "收款人姓名"),
-            @ApiImplicitParam(name = "bankName", value = "收款人开户行名称"),
-            @ApiImplicitParam(name = "clientIp", value = "客户端IP"),
-            @ApiImplicitParam(name = "transferDesc", value = "转账备注信息"),
-            @ApiImplicitParam(name = "notifyUrl", value = "通知地址"),
-            @ApiImplicitParam(name = "channelExtra", value = "特定渠道发起时额外参数"),
-            @ApiImplicitParam(name = "extParam", value = "扩展参数")
+    @Operation(summary = "调起转账接口")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "mchOrderNo", description = "商户订单号", required = true),
+            @Parameter(name = "entryType", description = "入账方式： WX_CASH-微信零钱; ALIPAY_CASH-支付宝转账; BANK_CARD-银行卡", required = true),
+            @Parameter(name = "ifCode", description = "接口类型代码", required = true),
+            @Parameter(name = "amount", description = "转账金额,单位元", required = true),
+            @Parameter(name = "accountNo", description = "收款账号", required = true),
+            @Parameter(name = "accountName", description = "收款人姓名"),
+            @Parameter(name = "bankName", description = "收款人开户行名称"),
+            @Parameter(name = "clientIp", description = "客户端IP"),
+            @Parameter(name = "transferDesc", description = "转账备注信息"),
+            @Parameter(name = "notifyUrl", description = "通知地址"),
+            @Parameter(name = "channelExtra", description = "特定渠道发起时额外参数"),
+            @Parameter(name = "extParam", description = "扩展参数")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_TEST_DO')")
     @PostMapping("/doTransfer")

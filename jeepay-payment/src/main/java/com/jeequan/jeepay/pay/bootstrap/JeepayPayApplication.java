@@ -70,7 +70,7 @@ public class JeepayPayApplication {
     public HttpMessageConverters fastJsonConfig(){
 
         //新建fast-json转换器
-        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+        FastJsonHttpMessageConverterEx converter = new FastJsonHttpMessageConverterEx();
 
         // 开启 FastJSON 安全模式！
         ParserConfig.getGlobalInstance().setSafeMode(true);

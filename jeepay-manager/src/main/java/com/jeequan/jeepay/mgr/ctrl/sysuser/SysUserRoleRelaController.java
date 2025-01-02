@@ -26,10 +26,11 @@ import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.mgr.service.AuthService;
 import com.jeequan.jeepay.service.impl.SysUserRoleRelaService;
 import com.jeequan.jeepay.service.impl.SysUserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,7 +48,7 @@ import java.util.List;
 * @site https://www.jeequan.com
 * @date 2021/6/8 17:13
 */
-@Api(tags = "系统管理（用户-角色-权限关联信息）")
+@Tag(name = "系统管理（用户-角色-权限关联信息）")
 @RestController
 @RequestMapping("api/sysUserRoleRelas")
 public class SysUserRoleRelaController extends CommonCtrl {
@@ -57,12 +58,12 @@ public class SysUserRoleRelaController extends CommonCtrl {
 	@Autowired private AuthService authService;
 
 	/** list */
-	@ApiOperation("关联关系--用户-角色关联信息列表")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
-			@ApiImplicitParam(name = "pageSize", value = "分页条数（-1时查全部数据）", dataType = "int", defaultValue = "20"),
-			@ApiImplicitParam(name = "userId", value = "用户ID")
+	@Operation(summary = "关联关系--用户-角色关联信息列表")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "pageNumber", description = "分页页码"),
+			@Parameter(name = "pageSize", description = "分页条数（-1时查全部数据）"),
+			@Parameter(name = "userId", description = "用户ID")
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_UPD_ROLE' )")
 	@RequestMapping(value="", method = RequestMethod.GET)
@@ -82,11 +83,11 @@ public class SysUserRoleRelaController extends CommonCtrl {
 	}
 
 	/** 重置用户角色关联信息 */
-	@ApiOperation("更改用户角色信息")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "sysUserId", value = "用户ID", required = true),
-			@ApiImplicitParam(name = "roleIdListStr", value = "角色信息，eg：[str1,str2]，字符串列表转成json字符串", required = true)
+	@Operation(summary = "更改用户角色信息")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "sysUserId", description = "用户ID", required = true),
+			@Parameter(name = "roleIdListStr", description = "角色信息，eg：[str1,str2]，字符串列表转成json字符串", required = true)
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_UPD_ROLE' )")
 	@RequestMapping(value="relas/{sysUserId}", method = RequestMethod.POST)

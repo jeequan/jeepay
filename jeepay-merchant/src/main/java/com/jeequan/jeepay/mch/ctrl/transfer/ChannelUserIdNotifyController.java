@@ -18,10 +18,10 @@ package com.jeequan.jeepay.mch.ctrl.transfer;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.mch.websocket.server.WsChannelUserIdServer;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -32,16 +32,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 * @site https://www.jeequan.com
 * @date 2021/8/13 17:54
 */
-@Api(tags = "商户转账")
+@Tag(name = "商户转账回调函数")
 @Controller
 @RequestMapping("/api/anon/channelUserIdCallback")
 public class ChannelUserIdNotifyController extends CommonCtrl {
 
-    @ApiOperation("（转账）获取用户ID - 回调函数")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "extParam", value = "扩展参数"),
-            @ApiImplicitParam(name = "channelUserId", value = "用户userId"),
-            @ApiImplicitParam(name = "appId", value = "应用ID")
+    @Operation(summary = "（转账）获取用户ID - 回调函数")
+    @Parameters({
+            @Parameter(name = "extParam", description = "扩展参数"),
+            @Parameter(name = "channelUserId", description = "用户userId"),
+            @Parameter(name = "appId", description = "应用ID")
     })
     @RequestMapping("")
     public String channelUserIdCallback() {

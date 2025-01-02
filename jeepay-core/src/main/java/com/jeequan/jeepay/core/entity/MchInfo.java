@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.jeequan.jeepay.core.model.BaseModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -35,7 +36,7 @@ import java.util.Date;
  * @author [mybatis plus generator]
  * @since 2021-04-27
  */
-@ApiModel(value = "商户信息表", description = "")
+@Schema(description = "商户信息表")
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
@@ -56,92 +57,92 @@ public class MchInfo extends BaseModel implements Serializable {
     /**
      * 商户号
      */
-    @ApiModelProperty(value = "商户号")
+    @Schema(title = "mchNo", description = "商户号")
     @TableId(value = "mch_no", type = IdType.INPUT)
     private String mchNo;
 
     /**
      * 商户名称
      */
-    @ApiModelProperty(value = "商户名称")
+    @Schema(title = "mchName", description = "商户名称")
     private String mchName;
 
     /**
      * 商户简称
      */
-    @ApiModelProperty(value = "商户简称")
+    @Schema(title = "mchShortName", description = "商户简称")
     private String mchShortName;
 
     /**
      * 类型: 1-普通商户, 2-特约商户(服务商模式)
      */
-    @ApiModelProperty(value = "类型: 1-普通商户, 2-特约商户(服务商模式)")
+    @Schema(title = "type", description = "类型: 1-普通商户, 2-特约商户(服务商模式)")
     private Byte type;
 
     /**
      * 服务商号
      */
-    @ApiModelProperty(value = "服务商号")
+    @Schema(title = "isvNo", description = "服务商号")
     private String isvNo;
 
     /**
      * 联系人姓名
      */
-    @ApiModelProperty(value = "联系人姓名")
+    @Schema(title = "contactName", description = "联系人姓名")
     private String contactName;
 
     /**
      * 联系人手机号
      */
-    @ApiModelProperty(value = "联系人手机号")
+    @Schema(title = "contactTel", description = "联系人手机号")
     private String contactTel;
 
     /**
      * 联系人邮箱
      */
-    @ApiModelProperty(value = "联系人邮箱")
+    @Schema(title = "contactEmail", description = "联系人邮箱")
     private String contactEmail;
 
     /**
      * 商户状态: 0-停用, 1-正常
      */
-    @ApiModelProperty(value = "商户状态: 0-停用, 1-正常")
+    @Schema(title = "state", description = "商户状态: 0-停用, 1-正常")
     private Byte state;
 
     /**
      * 商户备注
      */
-    @ApiModelProperty(value = "商户备注")
+    @Schema(title = "remark", description = "商户备注")
     private String remark;
 
     /**
      * 初始用户ID（创建商户时，允许商户登录的用户）
      */
-    @ApiModelProperty(value = "初始用户ID（创建商户时，允许商户登录的用户）")
+    @Schema(title = "initUserId", description = "初始用户ID（创建商户时，允许商户登录的用户）")
     private Long initUserId;
 
     /**
      * 创建者用户ID
      */
-    @ApiModelProperty(value = "创建者用户ID")
+    @Schema(title = "createdUid", description = "创建者用户ID")
     private Long createdUid;
 
     /**
      * 创建者姓名
      */
-    @ApiModelProperty(value = "创建者姓名")
+    @Schema(title = "createdBy", description = "创建者姓名")
     private String createdBy;
 
     /**
      * 创建时间
      */
-    @ApiModelProperty(value = "创建时间")
+    @Schema(title = "createdAt", description = "创建时间")
     private Date createdAt;
 
     /**
      * 更新时间
      */
-    @ApiModelProperty(value = "更新时间")
+    @Schema(title = "updatedAt", description = "更新时间")
     private Date updatedAt;
 
 

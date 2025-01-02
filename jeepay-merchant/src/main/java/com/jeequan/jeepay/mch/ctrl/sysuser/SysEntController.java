@@ -23,10 +23,11 @@ import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.utils.TreeDataBuilder;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.SysEntitlementService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,7 +44,7 @@ import java.util.List;
  * @site https://www.jeequan.com
  * @date 2021-04-27 15:50
  */
-@Api(tags = "系统管理（用户权限）")
+@Tag(name = "系统管理（用户权限）")
 @RestController
 @RequestMapping("api/sysEnts")
 public class SysEntController extends CommonCtrl {
@@ -51,10 +52,9 @@ public class SysEntController extends CommonCtrl {
 	@Autowired SysEntitlementService sysEntitlementService;
 
 	/** 查询权限集合 */
-	@ApiOperation("查询权限集合")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "sysType", value = "所属系统： MGR-运营平台, MCH-商户中心", required = true)
+	@Operation(summary = "查询权限集合")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
 	})
 	@PreAuthorize("hasAnyAuthority( 'ENT_UR_ROLE_ENT_LIST', 'ENT_UR_ROLE_DIST' )")
 	@RequestMapping(value="/showTree", method = RequestMethod.GET)

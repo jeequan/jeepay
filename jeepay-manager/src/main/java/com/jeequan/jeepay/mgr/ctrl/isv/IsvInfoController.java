@@ -27,10 +27,11 @@ import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.IsvInfoService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,7 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
-@Api(tags = "服务商管理（基本信息）")
+@Tag(name = "服务商管理（基本信息）")
 @RestController
 @RequestMapping("/api/isvInfo")
 public class IsvInfoController extends CommonCtrl {
@@ -59,14 +60,14 @@ public class IsvInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:12
      * @describe: 查询服务商信息列表
      */
-    @ApiOperation("服务商列表")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
-            @ApiImplicitParam(name = "pageSize", value = "分页条数（-1时查全部数据）", dataType = "int", defaultValue = "20"),
-            @ApiImplicitParam(name = "isvNo", value = "服务商编号"),
-            @ApiImplicitParam(name = "isvName", value = "服务商名称"),
-            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-正常", dataType = "Byte")
+    @Operation(summary = "服务商列表", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "pageNumber", description = "分页页码"),
+            @Parameter(name = "pageSize", description = "分页条数（-1时查全部数据）"),
+            @Parameter(name = "isvNo", description = "服务商编号"),
+            @Parameter(name = "isvName", description = "服务商名称"),
+            @Parameter(name = "state", description = "状态: 0-停用, 1-正常")
     })
     @PreAuthorize("hasAuthority('ENT_ISV_LIST')")
     @RequestMapping(value="", method = RequestMethod.GET)
@@ -93,16 +94,16 @@ public class IsvInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:13
      * @describe: 新增服务商信息
      */
-    @ApiOperation("新增服务商")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "isvName", value = "服务商名称", required = true),
-            @ApiImplicitParam(name = "contactName", value = "联系人姓名", required = true),
-            @ApiImplicitParam(name = "contactTel", value = "联系人手机号"),
-            @ApiImplicitParam(name = "contactEmail", value = "联系人邮箱"),
-            @ApiImplicitParam(name = "isvShortName", value = "服务商简称"),
-            @ApiImplicitParam(name = "remark", value = "备注"),
-            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-正常", dataType = "Byte")
+    @Operation(summary = "新增服务商", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "isvName", description = "服务商名称", required = true),
+            @Parameter(name = "contactName", description = "联系人姓名", required = true),
+            @Parameter(name = "contactTel", description = "联系人手机号"),
+            @Parameter(name = "contactEmail", description = "联系人邮箱"),
+            @Parameter(name = "isvShortName", description = "服务商简称"),
+            @Parameter(name = "remark", description = "备注"),
+            @Parameter(name = "state", description = "状态: 0-停用, 1-正常")
     })
     @PreAuthorize("hasAuthority('ENT_ISV_INFO_ADD')")
     @MethodLog(remark = "新增服务商")
@@ -125,10 +126,10 @@ public class IsvInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:13
      * @describe: 删除服务商信息
      */
-    @ApiOperation("删除服务商")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "isvNo", value = "服务商号", required = true)
+    @Operation(summary = "删除服务商", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "isvNo", description = "服务商号", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_ISV_INFO_DEL')")
     @MethodLog(remark = "删除服务商")
@@ -146,17 +147,17 @@ public class IsvInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:13
      * @describe: 更新服务商信息
      */
-    @ApiOperation("更新服务商信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name = "isvNo", value = "服务商号", required = true),
-            @ApiImplicitParam(name = "isvName", value = "服务商名称", required = true),
-            @ApiImplicitParam(name = "contactName", value = "联系人姓名", required = true),
-            @ApiImplicitParam(name = "contactTel", value = "联系人手机号"),
-            @ApiImplicitParam(name = "contactEmail", value = "联系人邮箱"),
-            @ApiImplicitParam(name = "isvShortName", value = "服务商简称"),
-            @ApiImplicitParam(name = "remark", value = "备注"),
-            @ApiImplicitParam(name = "state", value = "状态: 0-停用, 1-正常", dataType = "Byte")
+    @Operation(summary = "更新服务商信息", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "isvNo", description = "服务商号", required = true),
+            @Parameter(name = "isvName", description = "服务商名称", required = true),
+            @Parameter(name = "contactName", description = "联系人姓名", required = true),
+            @Parameter(name = "contactTel", description = "联系人手机号"),
+            @Parameter(name = "contactEmail", description = "联系人邮箱"),
+            @Parameter(name = "isvShortName", description = "服务商简称"),
+            @Parameter(name = "remark", description = "备注"),
+            @Parameter(name = "state", description = "状态: 0-停用, 1-正常")
     })
     @PreAuthorize("hasAuthority('ENT_ISV_INFO_EDIT')")
     @MethodLog(remark = "更新服务商信息")
@@ -180,16 +181,16 @@ public class IsvInfoController extends CommonCtrl {
      * @date: 2021/6/7 16:13
      * @describe: 查看服务商信息
      */
-    @ApiOperation("查看服务商信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-            @ApiImplicitParam(name= "isvNo", value = "服务商编号", required = true)
+    @Operation(summary = "查看服务商信息", description = "")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name= "isvNo", description = "服务商编号", required = true)
     })
     @PreAuthorize("hasAnyAuthority('ENT_ISV_INFO_VIEW', 'ENT_ISV_INFO_EDIT')")
     @RequestMapping(value="/{isvNo}", method = RequestMethod.GET)
-    public ApiRes detail(@PathVariable("isvNo") String isvNo) {
+    public ApiRes<IsvInfo> detail(@PathVariable("isvNo") String isvNo) {
         IsvInfo isvInfo = isvInfoService.getById(isvNo);
-        if (isvInfo == null) {
+        if (isvInfo != null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
         return ApiRes.ok(isvInfo);

@@ -37,10 +37,11 @@ import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchDivisionReceiverGroupService;
 import com.jeequan.jeepay.service.impl.MchDivisionReceiverService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,7 +59,7 @@ import java.math.BigDecimal;
  * @site https://www.jeequan.com
  * @date 2021-08-23 11:50
  */
-@Api(tags = "分账管理（收款账号）")
+@Tag(name = "分账管理（收款账号）")
 @RestController
 @RequestMapping("api/divisionReceivers")
 public class MchDivisionReceiverController extends CommonCtrl {
@@ -70,17 +71,17 @@ public class MchDivisionReceiverController extends CommonCtrl {
 
 
 	/** list */
-	@ApiOperation("收款账号列表")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "pageNumber", value = "分页页码", dataType = "int", defaultValue = "1"),
-			@ApiImplicitParam(name = "pageSize", value = "分页条数（-1时查全部数据）", dataType = "int", defaultValue = "20"),
-			@ApiImplicitParam(name = "appId", value = "应用ID"),
-			@ApiImplicitParam(name = "receiverId", value = "账号快照》 分账接收者ID", dataType = "Long"),
-			@ApiImplicitParam(name = "receiverAlias", value = "账号快照》 分账接收者别名"),
-			@ApiImplicitParam(name = "state", value = "状态: 0-待分账 1-分账成功, 2-分账失败", dataType = "Byte"),
-			@ApiImplicitParam(name = "receiverGroupId", value = "账号组ID", dataType = "Long"),
-			@ApiImplicitParam(name = "receiverGroupName", value = "组名称")
+	@Operation(summary = "收款账号列表")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "pageNumber", description = "分页页码"),
+			@Parameter(name = "pageSize", description = "分页条数（-1时查全部数据）"),
+			@Parameter(name = "appId", description = "应用ID"),
+			@Parameter(name = "receiverId", description = "账号快照》 分账接收者ID"),
+			@Parameter(name = "receiverAlias", description = "账号快照》 分账接收者别名"),
+			@Parameter(name = "state", description = "状态: 0-待分账 1-分账成功, 2-分账失败"),
+			@Parameter(name = "receiverGroupId", description = "账号组ID"),
+			@Parameter(name = "receiverGroupName", description = "组名称")
 	})
 	@PreAuthorize("hasAnyAuthority( 'ENT_DIVISION_RECEIVER_LIST' )")
 	@RequestMapping(value="", method = RequestMethod.GET)
@@ -123,14 +124,14 @@ public class MchDivisionReceiverController extends CommonCtrl {
 
 
 	/** detail */
-	@ApiOperation("收款账号详情")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "recordId", value = "分账接收者ID", required = true, dataType = "Long")
+	@Operation(summary = "收款账号详情")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "recordId", description = "分账接收者ID", required = true)
 	})
 	@PreAuthorize("hasAuthority( 'ENT_DIVISION_RECEIVER_VIEW' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.GET)
-	public ApiRes detail(@PathVariable("recordId") Long recordId) {
+	public ApiRes<MchDivisionReceiver> detail(@PathVariable("recordId") Long recordId) {
 		MchDivisionReceiver record = mchDivisionReceiverService
 				.getOne(MchDivisionReceiver.gw()
 						.eq(MchDivisionReceiver::getMchNo, getCurrentMchNo())
@@ -142,19 +143,19 @@ public class MchDivisionReceiverController extends CommonCtrl {
 	}
 
 	/** add */
-	@ApiOperation("新增分账接收账号")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "accName", value = "接收方姓名", required = true),
-			@ApiImplicitParam(name = "accNo", value = "接收方账号", required = true),
-			@ApiImplicitParam(name = "accType", value = "账接收账号类型: 0-个人(对私) 1-商户(对公)", required = true, dataType = "Byte"),
-			@ApiImplicitParam(name = "appId", value = "应用ID", required = true),
-			@ApiImplicitParam(name = "divisionProfit", value = "分账比例", required = true, dataType = "BigDecimal"),
-			@ApiImplicitParam(name = "ifCode", value = "支付接口代码", required = true),
-			@ApiImplicitParam(name = "receiverAlias", value = "接收者账号别名", required = true),
-			@ApiImplicitParam(name = "receiverGroupId", value = "组ID（便于商户接口使用）", required = true, dataType = "Long"),
-			@ApiImplicitParam(name = "relationType", value = "分账关系类型（参考微信）， 如： SERVICE_PROVIDER 服务商等", required = true),
-			@ApiImplicitParam(name = "relationTypeName", value = "当选择自定义时，需要录入该字段。 否则为对应的名称", required = true)
+	@Operation(summary = "新增分账接收账号")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "accName", description = "接收方姓名", required = true),
+			@Parameter(name = "accNo", description = "接收方账号", required = true),
+			@Parameter(name = "accType", description = "账接收账号类型: 0-个人(对私) 1-商户(对公)", required = true),
+			@Parameter(name = "appId", description = "应用ID", required = true),
+			@Parameter(name = "divisionProfit", description = "分账比例", required = true),
+			@Parameter(name = "ifCode", description = "支付接口代码", required = true),
+			@Parameter(name = "receiverAlias", description = "接收者账号别名", required = true),
+			@Parameter(name = "receiverGroupId", description = "组ID（便于商户接口使用）", required = true),
+			@Parameter(name = "relationType", description = "分账关系类型（参考微信）， 如： SERVICE_PROVIDER 服务商等", required = true),
+			@Parameter(name = "relationTypeName", description = "当选择自定义时，需要录入该字段。 否则为对应的名称", required = true)
 	})
 	@PreAuthorize("hasAuthority( 'ENT_DIVISION_RECEIVER_ADD' )")
 	@RequestMapping(value="", method = RequestMethod.POST)
@@ -188,20 +189,20 @@ public class MchDivisionReceiverController extends CommonCtrl {
 	}
 
 	/** update */
-	@ApiOperation("更新分账接收账号")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "recordId", value = "分账接收者ID", required = true, dataType = "Long"),
-			@ApiImplicitParam(name = "accName", value = "接收方姓名", required = true),
-			@ApiImplicitParam(name = "accNo", value = "接收方账号", required = true),
-			@ApiImplicitParam(name = "accType", value = "账接收账号类型: 0-个人(对私) 1-商户(对公)", required = true, dataType = "Byte"),
-			@ApiImplicitParam(name = "appId", value = "应用ID", required = true),
-			@ApiImplicitParam(name = "divisionProfit", value = "分账比例", required = true, dataType = "BigDecimal"),
-			@ApiImplicitParam(name = "ifCode", value = "支付接口代码", required = true),
-			@ApiImplicitParam(name = "receiverAlias", value = "接收者账号别名", required = true),
-			@ApiImplicitParam(name = "receiverGroupId", value = "组ID（便于商户接口使用）", required = true, dataType = "Long"),
-			@ApiImplicitParam(name = "relationType", value = "分账关系类型（参考微信）， 如： SERVICE_PROVIDER 服务商等", required = true),
-			@ApiImplicitParam(name = "relationTypeName", value = "当选择自定义时，需要录入该字段。 否则为对应的名称", required = true)
+	@Operation(summary = "更新分账接收账号")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "recordId", description = "分账接收者ID", required = true),
+			@Parameter(name = "accName", description = "接收方姓名", required = true),
+			@Parameter(name = "accNo", description = "接收方账号", required = true),
+			@Parameter(name = "accType", description = "账接收账号类型: 0-个人(对私) 1-商户(对公)", required = true),
+			@Parameter(name = "appId", description = "应用ID", required = true),
+			@Parameter(name = "divisionProfit", description = "分账比例", required = true),
+			@Parameter(name = "ifCode", description = "支付接口代码", required = true),
+			@Parameter(name = "receiverAlias", description = "接收者账号别名", required = true),
+			@Parameter(name = "receiverGroupId", description = "组ID（便于商户接口使用）", required = true),
+			@Parameter(name = "relationType", description = "分账关系类型（参考微信）， 如： SERVICE_PROVIDER 服务商等", required = true),
+			@Parameter(name = "relationTypeName", description = "当选择自定义时，需要录入该字段。 否则为对应的名称", required = true)
 	})
 	@PreAuthorize("hasAuthority( 'ENT_DIVISION_RECEIVER_EDIT' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.PUT)
@@ -238,10 +239,10 @@ public class MchDivisionReceiverController extends CommonCtrl {
 	}
 
 	/** delete */
-	@ApiOperation("删除分账接收账号")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "recordId", value = "分账接收者ID", required = true, dataType = "Long")
+	@Operation(summary = "删除分账接收账号")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "recordId", description = "分账接收者ID", required = true)
 	})
 	@PreAuthorize("hasAuthority('ENT_DIVISION_RECEIVER_DELETE')")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.DELETE)

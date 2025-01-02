@@ -5,10 +5,35 @@ spring:
   redis:
     database: 3    #1库：运营平台  #2库：商户系统 #3库：支付网关
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.jeequan.jeepay.pay.ctrl.test
+
 # knife4j APIDOC文档
 knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    swagger-model-name: 公共响应
   documents:
-    - group: 支付网关
-      name: 接口文档
-      # 某一个文件夹下所有的.md文件
-      locations: classpath:markdown/doc/*
+    - name: 接口规则
+      locations: classpath:markdown/doc/api1.md
+      group: 1.0
+    - name: 支付接口
+      locations: classpath:markdown/doc/api2.md
+      group: 1.0
+    - name: 退款接口
+      locations: classpath:markdown/doc/api3.md
+      group: 1.0
+    - name: 转账接口
+      locations: classpath:markdown/doc/api4.md
+      group: 1.0
+    - name: 分账接口
+      locations: classpath:markdown/doc/api5.md
+      group: 1.0

@@ -97,23 +97,6 @@ logging:
   file:
     path: ./logs
 
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-    tags-sorter: alpha
-    operations-sorter: alpha
-  api-docs:
-    path: /v3/api-docs
-  group-configs:
-    - group: 'default'
-      paths-to-match: '/**'
-      packages-to-scan: com.jeequan.jeepay.mgr.ctrl.isv
-# knife4j APIDOC文档
-knife4j:
-  enable: true
-  setting:
-    language: zh_cn
-
 #系统业务参数
 isys:
   #是否允许跨域请求 [生产环境建议关闭， 若api与前端项目没有在同一个域名下时，应开启此配置或在nginx统一配置允许跨域]

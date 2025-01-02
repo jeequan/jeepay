@@ -23,10 +23,11 @@ import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.utils.TreeDataBuilder;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.SysEntitlementService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,7 +44,7 @@ import java.util.List;
 * @site https://www.jeequan.com
 * @date 2021/6/8 17:13
 */
-@Api(tags = "系统管理（用户权限）")
+@Tag(name = "系统管理（用户权限）")
 @RestController
 @RequestMapping("api/sysEnts")
 public class SysEntController extends CommonCtrl {
@@ -52,15 +53,15 @@ public class SysEntController extends CommonCtrl {
 
 
 	/** getOne */
-	@ApiOperation("查询菜单权限详情")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "entId", value = "权限ID[ENT_功能模块_子模块_操作], eg: ENT_ROLE_LIST_ADD", required = true),
-			@ApiImplicitParam(name = "sysType", value = "所属系统： MGR-运营平台, MCH-商户中心", required = true)
+	@Operation(summary = "查询菜单权限详情")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "entId", description = "权限ID[ENT_功能模块_子模块_操作], eg: ENT_ROLE_LIST_ADD", required = true),
+			@Parameter(name = "sysType", description = "所属系统： MGR-运营平台, MCH-商户中心", required = true)
 	})
 	@PreAuthorize("hasAnyAuthority( 'ENT_UR_ROLE_ENT_LIST' )")
 	@RequestMapping(value="/bySysType", method = RequestMethod.GET)
-	public ApiRes bySystem() {
+	public ApiRes<SysEntitlement> bySystem() {
 
 		return ApiRes.ok(sysEntitlementService.getOne(SysEntitlement.gw()
 				.eq(SysEntitlement::getEntId, getValStringRequired("entId"))
@@ -69,15 +70,15 @@ public class SysEntController extends CommonCtrl {
 	}
 
 	/** updateById */
-	@ApiOperation("更新权限资源")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "entId", value = "权限ID[ENT_功能模块_子模块_操作], eg: ENT_ROLE_LIST_ADD", required = true),
-			@ApiImplicitParam(name = "entName", value = "权限名称", required = true),
-			@ApiImplicitParam(name = "menuUri", value = "菜单uri/路由地址"),
-			@ApiImplicitParam(name = "entSort", value = "排序字段, 规则：正序"),
-			@ApiImplicitParam(name = "quickJump", value = "快速开始菜单 0-否, 1-是"),
-			@ApiImplicitParam(name = "state", value = "状态 0-停用, 1-启用")
+	@Operation(summary = "更新权限资源")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "entId", description = "权限ID[ENT_功能模块_子模块_操作], eg: ENT_ROLE_LIST_ADD", required = true),
+			@Parameter(name = "entName", description = "权限名称", required = true),
+			@Parameter(name = "menuUri", description = "菜单uri/路由地址"),
+			@Parameter(name = "entSort", description = "排序字段, 规则：正序"),
+			@Parameter(name = "quickJump", description = "快速开始菜单 0-否, 1-是"),
+			@Parameter(name = "state", description = "状态 0-停用, 1-启用")
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_ROLE_ENT_EDIT')")
 	@MethodLog(remark = "更新资源权限")
@@ -91,10 +92,10 @@ public class SysEntController extends CommonCtrl {
 
 
 	/** 查询权限集合 */
-	@ApiOperation("查询权限集合")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
-			@ApiImplicitParam(name = "sysType", value = "所属系统： MGR-运营平台, MCH-商户中心", required = true)
+	@Operation(summary = "查询权限集合")
+	@Parameters({
+			@Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+			@Parameter(name = "sysType", description = "所属系统： MGR-运营平台, MCH-商户中心", required = true)
 	})
 	@PreAuthorize("hasAnyAuthority( 'ENT_UR_ROLE_ENT_LIST', 'ENT_UR_ROLE_DIST' )")
 	@RequestMapping(value="/showTree", method = RequestMethod.GET)
