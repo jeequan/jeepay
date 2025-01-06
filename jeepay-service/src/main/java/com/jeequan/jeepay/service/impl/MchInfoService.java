@@ -85,7 +85,7 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
         sysUser.setBelongInfoId(mchInfo.getMchNo());
         sysUser.setSex(CS.SEX_MALE);
         sysUser.setIsAdmin(CS.YES);
-        sysUser.setState(mchInfo.getState());
+        sysUser.setState(CS.YES);
         sysUserService.addSysUser(sysUser, CS.SYS_TYPE.MCH);
 
         // 插入商户默认应用

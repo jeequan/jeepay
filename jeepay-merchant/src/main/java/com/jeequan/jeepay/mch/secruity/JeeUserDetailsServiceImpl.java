@@ -16,11 +16,13 @@
 package com.jeequan.jeepay.mch.secruity;
 
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.SysUser;
 import com.jeequan.jeepay.core.entity.SysUserAuth;
 import com.jeequan.jeepay.core.exception.JeepayAuthenticationException;
 import com.jeequan.jeepay.core.model.security.JeeUserDetails;
 import com.jeequan.jeepay.core.utils.RegKit;
+import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.SysUserAuthService;
 import com.jeequan.jeepay.service.impl.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,9 @@ public class JeeUserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private SysUserAuthService sysUserAuthService;
+
+    @Autowired
+    private MchInfoService mchInfoService;
 
     /**
      *
@@ -78,8 +83,13 @@ public class JeeUserDetailsServiceImpl implements UserDetailsService {
             throw JeepayAuthenticationException.build("用户名/密码错误！");
         }
 
-        if(CS.PUB_USABLE != sysUser.getState()){ //状态不合法
-            throw JeepayAuthenticationException.build("用户状态不可登录，请联系管理员！");
+        MchInfo mchInfo = mchInfoService.getById(sysUser.getBelongInfoId());
+        if (mchInfo == null) {
+            throw JeepayAuthenticationException.build("所属商户为空，请联系管理员！");
+        }
+
+        if(CS.PUB_USABLE != mchInfo.getState()){ //状态不合法
+            throw JeepayAuthenticationException.build("商户状态停用，请联系管理员！");
         }
 
         return new JeeUserDetails(sysUser, auth.getCredential());
