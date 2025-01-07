@@ -103,8 +103,25 @@ logging:
   path: /jeepayhomes/service/logs  #日志存放地址
 
 # knife4j APIDOC文档
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      display-name: '支付网关'
+      paths-to-match: '/**'
+      packages-to-scan: com.jeequan.jeepay.pay.ctrl.test
 knife4j:
-  enable: false
+  enable: true
+  setting:
+    language: zh_cn
+    swagger-model-name: 公共响应
+  documents:
+    - name: API
+      locations: classpath:markdown/doc/*
+      group: default
 
 #系统业务参数
 isys:

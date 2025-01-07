@@ -104,8 +104,19 @@ logging:
   path: /jeepayhomes/service/logs  #日志存放地址
 
 # knife4j APIDOC文档
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.jeequan.jeepay.mgr.ctrl
 knife4j:
-  enable: false
+  enable: true
 
 #系统业务参数
 isys:
