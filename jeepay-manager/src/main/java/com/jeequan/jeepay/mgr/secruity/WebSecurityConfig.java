@@ -26,6 +26,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -71,33 +72,37 @@ public class WebSecurityConfig{
                 // 添加JWT filter
                 .addFilterBefore(new JeeAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((auth) -> {
-                    auth
-                            .requestMatchers(HttpMethod.GET,
-                                    "/",
-                                    "/*.html",
-                                    "/favicon.ico",
-                                    "/*/*.html",
-                                    "/*/*.css",
-                                    "/*/*.js",
-                                    "/*/*.png",
-                                    "/*/*.jpg",
-                                    "/*/*.jpeg",
-                                    "/*/*.svg",
-                                    "/*/*.ico",
-                                    "/*/*.webp",
-                                    "/*.txt",
-                                    "/*/*.xls",
-                                    "/*/*.mp4"   //支持mp4格式的文件匿名访问
-                            ).permitAll()
-                            .requestMatchers(
-                                    "/api/anon/**", //匿名访问接口
-                                    "/webjars/**","/v3/api-docs/**", "/doc.html", "/knife4j/**", "/swagger-ui/**", "/swagger-resources/**" // swagger相关
-                            ).permitAll()
-                            .anyRequest().authenticated();
+                    auth.anyRequest().authenticated();
                 });
 
         // 构建过滤链并返回
         return http.build();
+    }
+
+    @Bean
+    public WebSecurityCustomizer ignoringCustomizer() {
+        return (web) -> web.ignoring()
+                .requestMatchers(HttpMethod.GET,
+                        "/",
+                        "/*.html",
+                        "/favicon.ico",
+                        "/*/*.html",
+                        "/*/*.css",
+                        "/*/*.js",
+                        "/*/*.png",
+                        "/*/*.jpg",
+                        "/*/*.jpeg",
+                        "/*/*.svg",
+                        "/*/*.ico",
+                        "/*/*.webp",
+                        "/*.txt",
+                        "/*/*.xls",
+                        "/*/*.mp4"   //支持mp4格式的文件匿名访问
+                )
+                .requestMatchers(
+                        "/api/anon/**", //匿名访问接口
+                        "/webjars/**","/v3/api-docs/**", "/doc.html", "/knife4j/**", "/swagger-ui/**", "/swagger-resources/**" // swagger相关
+                );
     }
 
     @Bean
