@@ -190,7 +190,7 @@ public class IsvInfoController extends CommonCtrl {
     @RequestMapping(value="/{isvNo}", method = RequestMethod.GET)
     public ApiRes<IsvInfo> detail(@PathVariable("isvNo") String isvNo) {
         IsvInfo isvInfo = isvInfoService.getById(isvNo);
-        if (isvInfo != null) {
+        if (isvInfo == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
         return ApiRes.ok(isvInfo);
