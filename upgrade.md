@@ -210,3 +210,12 @@
 3. 修复：解决商户通知转义问题#I9UT23
 4. 修复：解决退款直接成功时没有返回 successTime问题
 5. 优化：部分情况更新订单异常的现象
+
+[v2.4.1_20250108]
+1. 修复：统一下单校验商户应用状态 
+2. 修复：优化微信官方退款查询接口的退款逻辑判断；https://gitee.com/jeequan/jeepay/issues/I9RX2D
+3. 优化：完善聚合码付款相关业务
+4. 优化：selectOrderCount查询一次即可。 https://gitee.com/jeequan/jeepay/issues/IANUTB
+5. 优化：更新activemq到5.16.7
+6. 优化：优化AliYunRocketMQ的配置和消息组管理命名
+
