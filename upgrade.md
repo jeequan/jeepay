@@ -219,3 +219,10 @@
 5. 优化：更新activemq到5.16.7
 6. 优化：优化AliYunRocketMQ的配置和消息组管理命名
 
+[v3.0.0_20250109]
+1. 新增： 升级编译代码到jdk17
+2. 新增： 升级springboot到3.3.7
+3. 新增： 升级Knife4j和兼容历史swagger api 
+4. 优化： 新建商户后不支持更改服务商  https://gitee.com/jeequan/jeepay/issues/IBF9D9
+5. 修复： 解决已知问题
+
