@@ -54,12 +54,13 @@ spring:
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
   cache:
     type: redis
-  redis:
-    host: redis6
-    port: 6379
-    database: 1    #1库：运营平台  #2库：商户系统 #3库：支付网关
-    timeout: 1000
-    password:
+  data:
+    redis:
+      host: redis6
+      port: 6379
+      database: 1    #1库：运营平台  #2库：商户系统 #3库：支付网关
+      timeout: 1000
+      password:
 
 # #activeMQ配置 ( 注意： activeMQ配置项需在spring的下级 )
   activemq:

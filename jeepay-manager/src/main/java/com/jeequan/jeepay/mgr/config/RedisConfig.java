@@ -42,7 +42,7 @@ public class RedisConfig {
     @Value("${spring.data.redis.timeout}")
     private Integer timeout;
 
-    @Value("${spring.redis.database}")
+    @Value("${spring.data.redis.database}")
     private Integer defaultDatabase;
 
     @Value("${spring.data.redis.password}")

@@ -2,8 +2,9 @@ server:
   port: 9217 #设置端口
 
 spring:
-  redis:
-    database: 1    #1库：运营平台  #2库：商户系统 #3库：支付网关
+  data:
+    redis:
+      database: 1    #1库：运营平台  #2库：商户系统 #3库：支付网关
 
 #系统业务参数
 isys:
