@@ -24,6 +24,9 @@
 	<a target="_blank" href='https://github.com/jeequan/jeepay'>
 		<img src="https://img.shields.io/github/stars/jeequan/jeepay.svg?style=social" alt="github star"/>
 	</a>
+	<a target="_blank" href='https://gitcode.com/jeequantech/jeepay'>
+		<img src="https://gitcode.com/jeequantech/jeepay/star/badge.svg" alt="gitcode star"/>
+	</a>
 </p>
 
 <br/>
@@ -175,8 +178,8 @@ apt update && apt-get -y install docker.io && apt-get -y install git && wget -O 
 
 Jeepay已经开发了java和python的sdk，方便接入方开发对接。
 
-- Java SDK：[https://gitee.com/jeequan/jeepay-sdk-java](https://gitee.com/jeequan/jeepay-sdk-java "java sdk")
-- Python SDK：[https://gitee.com/jeequan/jeepay-sdk-python](https://gitee.com/jeequan/jeepay-sdk-python "python sdk")
+- Java SDK：[https://gitee.com/jeequan/jeepay-sdk-java](https://gitee.com/jeequan/jeepay-sdk-java "java sdk") 或 https://gitcode.com/jeequantech/jeepay-sdk-java
+- Python SDK：[https://gitee.com/jeequan/jeepay-sdk-python](https://gitee.com/jeequan/jeepay-sdk-python "python sdk") 或 https://gitcode.com/jeequantech/jeepay-sdk-python
 
 # 功能模块
 
