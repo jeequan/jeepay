@@ -72,7 +72,7 @@ Jeepay = Jee + pay，是由原XxPay支付系统作者带领团队开发，“Jee
 
 接口市场：https://www.jeequan.com/ifstore/list.html
 
-安装说明：https://docs.jeequan.com/docs/jeepay/jeepay-1ejdnsuhveb16
+安装说明：https://doc.jeequan.com/#/integrate/open/dev/113
 
 目前发布接口包括
 
@@ -147,7 +147,7 @@ jeepay
 
 #### 1、宝塔面板安装：
 -  安装宝塔面板9.2.0及以上版本， Docker搜索 jeepay 一键安装
-- 【宝塔安装教程】: https://docs.jeequan.com/docs/jeepay/jeepay-1g4h1figddgfm
+- 【宝塔安装教程】: https://doc.jeequan.com/#/integrate/open/dev/108
 
 #### 2、shell脚本一键安装：
 
@@ -166,13 +166,13 @@ apt update && apt-get -y install docker.io && apt-get -y install git && wget -O 
 
 ## 项目文档
 
-- 项目文档：[https://docs.jeequan.com/docs/jeepay](https://docs.jeequan.com/docs/jeepay "Jeepay项目文档")
-- 开发指导：[https://docs.jeequan.com/docs/jeepay/dev_serv](https://docs.jeequan.com/docs/jeepay/dev_serv)
-- 通道对接：[https://docs.jeequan.com/docs/jeepay/dev_channel](https://docs.jeequan.com/docs/jeepay/dev_channel)
-- 线上部署：[https://docs.jeequan.com/docs/jeepay/deploy](https://docs.jeequan.com/docs/jeepay/deploy)
-- 接口文档：[https://docs.jeequan.com/docs/jeepay/payment_api](https://docs.jeequan.com/docs/jeepay/payment_api)
-- 常见问题：[https://docs.jeequan.com/docs/jeepay/jeepay-1d99ciatu11h5](https://docs.jeequan.com/docs/jeepay/jeepay-1d99ciatu11h5)
-- 快速上手：[https://docs.jeequan.com/docs/jeepay/jeepay-1dbdn8bqgo270](https://docs.jeequan.com/docs/jeepay/jeepay-1dbdn8bqgo270 "Jeepay快速使用")
+- 项目文档：[https://doc.jeequan.com/#/integrate/open](https://doc.jeequan.com/#/integrate/open "Jeepay项目文档")
+- 开发指导：[https://doc.jeequan.com/#/integrate/open/dev/103](https://doc.jeequan.com/#/integrate/open/dev/103)
+- 通道对接：[https://doc.jeequan.com/#/integrate/open/dev/104](https://doc.jeequan.com/#/integrate/open/dev/104)
+- 线上部署：[https://doc.jeequan.com/#/integrate/open/dev/111](https://doc.jeequan.com/#/integrate/open/dev/111)
+- 接口文档：[https://doc.jeequan.com/#/integrate/open/api/81](https://doc.jeequan.com/#/integrate/open/api/81)
+- 常见问题：[https://doc.jeequan.com/#/integrate/open/dev/107](https://doc.jeequan.com/#/integrate/open/dev/107)
+- 快速上手：[https://doc.jeequan.com/#/integrate/open/dev/109](https://doc.jeequan.com/#/integrate/open/dev/109 "Jeepay快速使用")
 
 ## SDK对接
 
