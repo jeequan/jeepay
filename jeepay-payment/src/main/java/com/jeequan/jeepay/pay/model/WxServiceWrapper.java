@@ -53,7 +53,8 @@ public class WxServiceWrapper {
 
 
     public static WxServiceWrapper buildWxServiceWrapper(String mchId, String appId, String appSecret, String mchKey, String apiVersion, String apiV3Key,
-                                                   String serialNo, String cert, String apiClientCert, String apiClientKey){
+                                                   String serialNo, String cert, String apiClientCert, String apiClientKey,
+                                                         String wxpayPublicKeyId, String wxpayPublicKey){
 
         WxPayConfig wxPayConfig = new WxPayConfig();
         wxPayConfig.setMchId(mchId);
@@ -82,6 +83,13 @@ public class WxServiceWrapper {
             wxPayConfig.setPrivateKeyPath(channelCertConfigKitBean.getCertFilePath(apiClientKey));
         }
 
+        if(StringUtils.isNotEmpty(wxpayPublicKey)){ // 微信公钥证书
+            wxPayConfig.setPublicKeyPath(channelCertConfigKitBean.getCertFilePath(wxpayPublicKey));
+        }
+        if(StringUtils.isNotEmpty(wxpayPublicKeyId)){
+            wxPayConfig.setPublicKeyId(wxpayPublicKeyId);  // 微信公钥ID
+        }
+
         WxPayService wxPayService = new WxPayServiceImpl();
         wxPayService.setConfig(wxPayConfig); //微信配置信息
 
@@ -100,14 +108,16 @@ public class WxServiceWrapper {
         //放置 wxJavaService
         return buildWxServiceWrapper(wxpayParams.getMchId(), wxpayParams.getAppId(),
                 wxpayParams.getAppSecret(), wxpayParams.getKey(), wxpayParams.getApiVersion(), wxpayParams.getApiV3Key(),
-                wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientCert(), wxpayParams.getApiClientKey());
+                wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientCert(), wxpayParams.getApiClientKey(),
+                wxpayParams.getWxpayPublicKeyId(), wxpayParams.getWxpayPublicKey());
     }
 
     public static WxServiceWrapper buildWxServiceWrapper(WxpayNormalMchParams wxpayParams){
         //放置 wxJavaService
         return buildWxServiceWrapper(wxpayParams.getMchId(), wxpayParams.getAppId(),
                 wxpayParams.getAppSecret(), wxpayParams.getKey(), wxpayParams.getApiVersion(), wxpayParams.getApiV3Key(),
-                wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientCert(), wxpayParams.getApiClientKey());
+                wxpayParams.getSerialNo(), wxpayParams.getCert(), wxpayParams.getApiClientCert(), wxpayParams.getApiClientKey(),
+                wxpayParams.getWxpayPublicKeyId(), wxpayParams.getWxpayPublicKey());
     }
 
 

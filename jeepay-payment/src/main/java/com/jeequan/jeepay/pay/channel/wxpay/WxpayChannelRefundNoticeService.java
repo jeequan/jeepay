@@ -186,12 +186,18 @@ public class WxpayChannelRefundNoticeService extends AbstractChannelRefundNotice
 
         WxPayService wxPayService = configContextQueryService.getWxServiceWrapper(mchAppConfigContext).getWxPayService();
         WxPayConfig wxPayConfig = wxPayService.getConfig();
-        // 自动获取微信平台证书
-        PrivateKey privateKey = PemUtils.loadPrivateKey(new FileInputStream(wxPayConfig.getPrivateKeyPath()));
-        AutoUpdateCertificatesVerifier verifier = new AutoUpdateCertificatesVerifier(
-                new WxPayCredentials(wxPayConfig.getMchId(), new PrivateKeySigner(wxPayConfig.getCertSerialNo(), privateKey)),
-                wxPayConfig.getApiV3Key().getBytes("utf-8"));
-        wxPayConfig.setVerifier(verifier);
+
+        if(StringUtils.isEmpty(wxPayConfig.getPublicKeyId())){ // 如果存在wxPublicKeyId, 那么无需自动换取平台证书
+            // 自动获取微信平台证书
+            FileInputStream fis = new FileInputStream(wxPayConfig.getPrivateKeyPath());
+            PrivateKey privateKey = PemUtils.loadPrivateKey(fis);
+            fis.close();
+            AutoUpdateCertificatesVerifier verifier = new AutoUpdateCertificatesVerifier(
+                    new WxPayCredentials(wxPayConfig.getMchId(), new PrivateKeySigner(wxPayConfig.getCertSerialNo(), privateKey)),
+                    wxPayConfig.getApiV3Key().getBytes("utf-8"), "https://api.mch.weixin.qq.com");
+            wxPayConfig.setVerifier(verifier);
+        }
+
         wxPayService.setConfig(wxPayConfig);
 
         WxPayRefundNotifyV3Result result = wxPayService.parseRefundNotifyV3Result(params, header);

@@ -68,6 +68,12 @@ public class WxpayIsvParams extends IsvParams {
     /** 私钥文件(.pem格式) **/
     private String apiClientKey;
 
+    /** 微信侧公钥ID **/
+    private String wxpayPublicKeyId;
+
+    /** 微信侧公钥证书文件 pub_key.pem **/
+    private String wxpayPublicKey;
+
 
     @Override
     public String deSenData() {
