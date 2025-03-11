@@ -200,8 +200,11 @@ public class WxpayTransferService implements ITransferService {
             transferBillsRequest.setUserName(transferOrder.getAccountName()); // 收款方真实姓名
             transferBillsRequest.setTransferAmount(transferOrder.getAmount().intValue()); // 转账金额单位为“分”
             transferBillsRequest.setTransferRemark(transferOrder.getTransferDesc()); // 转账备注
-            // TODO 回调地址
-//            transferBillsRequest.setNotifyUrl("https://www.baidu.com");
+            // 回调地址
+            String notifyUrl = sysConfigService.getDBApplicationConfig().getPaySiteUrl() +
+                    "/api/transfer/notify/" + transferOrder.getIfCode() + "/" + transferOrder.getTransferId();
+
+            transferBillsRequest.setNotifyUrl(notifyUrl);
             // 转账场景报备信息
             transferBillsRequest.setTransferSceneReportInfos(transferSceneReportInfos);
             TransferBillsResult transferBillsResult = wxServiceWrapper.getWxPayService().getTransferService().transferBills(transferBillsRequest);
@@ -259,7 +262,7 @@ public class WxpayTransferService implements ITransferService {
             WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
             WxpayNormalMchParams normalMchParams = (WxpayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), transferOrder.getIfCode());
             // 转账版本信息
-            String transferVersion = StringUtils.defaultString(normalMchParams.getTransferVersion(), "old");
+            String transferVersion = StringUtils.defaultIfEmpty(normalMchParams.getTransferVersion(), "old");
 
             if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
                 if (transferVersion.equals("new202501")) {
@@ -328,6 +331,14 @@ public class WxpayTransferService implements ITransferService {
                 channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
                 channelRetMsg.setChannelErrCode(transferBillsGetResult.getState());
                 channelRetMsg.setChannelErrMsg(transferBillsGetResult.getFailReason());
+                return channelRetMsg;
+            }
+
+            // 转账撤销 CANCELING: 商户撤销请求受理成功，该笔转账正在撤销中 CANCELLED: 转账撤销完成
+            if ("CANCELLING".equals(state) || "CANCELED".equals(state)) {
+                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+                channelRetMsg.setChannelErrCode(transferBillsGetResult.getState());
+                channelRetMsg.setChannelErrMsg("转账失败，该笔转账记录已执行撤销操作");
                 return channelRetMsg;
             }
 
