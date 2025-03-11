@@ -61,6 +61,9 @@ public class TransferOrderRS extends AbstractRS {
     /** 渠道退款单号   **/
     private String channelOrderNo;
 
+    /** 渠道响应数据（如微信确认数据包）   **/
+    private String channelResData;
+
     /** 渠道返回错误代码 **/
     private String errCode;
 
