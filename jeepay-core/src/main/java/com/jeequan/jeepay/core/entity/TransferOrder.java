@@ -176,6 +176,12 @@ public class TransferOrder implements Serializable {
     private String channelOrderNo;
 
     /**
+     * 渠道响应数据（如微信确认数据包）
+     */
+    @Schema(title = "channelResData", description = "渠道响应数据（如微信确认数据包）")
+    private String channelResData;
+
+    /**
      * 渠道支付错误码
      */
     @Schema(title = "errCode", description = "渠道支付错误码")

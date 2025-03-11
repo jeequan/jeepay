@@ -390,6 +390,7 @@ CREATE TABLE `t_transfer_order` (
            `state` TINYINT(6) NOT NULL DEFAULT '0' COMMENT '支付状态: 0-订单生成, 1-转账中, 2-转账成功, 3-转账失败, 4-订单关闭',
            `channel_extra` VARCHAR(512) DEFAULT NULL COMMENT '特定渠道发起额外参数',
            `channel_order_no` VARCHAR(64) DEFAULT NULL COMMENT '渠道订单号',
+           `channel_res_data` TEXT DEFAULT NULL COMMENT '渠道响应数据（如微信确认数据包）',
            `err_code` VARCHAR(128) DEFAULT NULL COMMENT '渠道支付错误码',
            `err_msg` VARCHAR(256) DEFAULT NULL COMMENT '渠道支付错误描述',
            `ext_param` VARCHAR(128) DEFAULT NULL COMMENT '商户扩展参数',

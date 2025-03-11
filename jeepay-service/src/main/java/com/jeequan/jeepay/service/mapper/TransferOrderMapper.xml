@@ -23,6 +23,7 @@
         <result column="state" property="state" />
         <result column="channel_extra" property="channelExtra" />
         <result column="channel_order_no" property="channelOrderNo" />
+        <result column="channel_res_data" property="channelResData" />
         <result column="err_code" property="errCode" />
         <result column="err_msg" property="errMsg" />
         <result column="ext_param" property="extParam" />
