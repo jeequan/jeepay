@@ -54,6 +54,7 @@
             function (res) {
                 if (res.err_msg === 'requestMerchantTransfer:ok') {
                     // res.err_msg将在页面展示成功后返回应用时返回success，并不代表付款成功
+                    WeixinJSBridge.call('closeWindow');
                 }
             }
         );

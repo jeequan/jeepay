@@ -199,7 +199,7 @@ public class WxpayTransferService implements ITransferService {
             transferBillsRequest.setOpenid(transferOrder.getAccountNo()); // 收款用户OpenID
             transferBillsRequest.setUserName(transferOrder.getAccountName()); // 收款方真实姓名
             transferBillsRequest.setTransferAmount(transferOrder.getAmount().intValue()); // 转账金额单位为“分”
-            transferBillsRequest.setTransferRemark(transferOrder.getAccountName()); // 转账备注
+            transferBillsRequest.setTransferRemark(transferOrder.getTransferDesc()); // 转账备注
             // TODO 回调地址
 //            transferBillsRequest.setNotifyUrl("https://www.baidu.com");
             // 转账场景报备信息

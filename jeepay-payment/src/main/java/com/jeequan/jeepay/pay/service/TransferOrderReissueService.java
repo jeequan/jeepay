@@ -141,8 +141,9 @@ public class TransferOrderReissueService {
         transferOrder.setChannelOrderNo(channelRetMsg.getChannelOrderId());
         transferOrder.setErrCode(channelRetMsg.getChannelErrCode());
         transferOrder.setErrMsg(channelRetMsg.getChannelErrMsg());
+        transferOrder.setChannelResData(channelRetMsg.getChannelAttach());
 
-        boolean isSuccess = transferOrderService.updateInit2Ing(transferOrder.getTransferId());
+        boolean isSuccess = transferOrderService.updateInit2Ing(transferOrder.getTransferId(), transferOrder.getChannelResData());
         if(!isSuccess){
             throw new BizException("更新转账单异常!");
         }

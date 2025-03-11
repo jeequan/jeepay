@@ -127,6 +127,11 @@ public class TransferOrderController extends ApiController {
             //处理退款单状态
             this.processChannelMsg(channelRetMsg, transferOrder);
 
+            // 如果是系统异常，需要响应错误信息
+            if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.SYS_ERROR){
+                transferOrder.setErrMsg(channelRetMsg.getChannelErrMsg());
+            }
+
             TransferOrderRS bizRes = TransferOrderRS.buildByRecord(transferOrder);
             return ApiRes.okWithSign(bizRes, mchApp.getAppSecret());
 
@@ -234,7 +239,7 @@ public class TransferOrderController extends ApiController {
         transferOrder.setErrMsg(channelRetMsg.getChannelErrMsg());
 
 
-        boolean isSuccess = transferOrderService.updateInit2Ing(transferOrder.getTransferId());
+        boolean isSuccess = transferOrderService.updateInit2Ing(transferOrder.getTransferId(), transferOrder.getChannelResData());
         if(!isSuccess){
             throw new BizException("更新转账订单异常!");
         }

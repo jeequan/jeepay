@@ -41,10 +41,11 @@ public class TransferOrderService extends ServiceImpl<TransferOrderMapper, Trans
 
 
     /** 更新转账订单状态  【转账订单生成】 --》 【转账中】 **/
-    public boolean updateInit2Ing(String transferId){
+    public boolean updateInit2Ing(String transferId, String channelResData){
 
         TransferOrder updateRecord = new TransferOrder();
         updateRecord.setState(TransferOrder.STATE_ING);
+        updateRecord.setChannelResData(channelResData);
 
         return update(updateRecord, new LambdaUpdateWrapper<TransferOrder>()
                 .eq(TransferOrder::getTransferId, transferId).eq(TransferOrder::getState, TransferOrder.STATE_INIT));

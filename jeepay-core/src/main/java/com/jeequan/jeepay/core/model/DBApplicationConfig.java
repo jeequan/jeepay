@@ -77,7 +77,7 @@ public class DBApplicationConfig implements Serializable {
 
     /** 生成  【微信转账用户确认领取链接】 **/
     public String genTransferUserConfirm(String ifCode, String transferOrderId){
-        return getPaySiteUrl() + "/api/channelbiz/" + ifCode + "/transferUserConfirm" + JeepayKit.aesEncode(transferOrderId);
+        return getPaySiteUrl() + "/api/channelbiz/" + ifCode + "/transferUserConfirm/" + JeepayKit.aesEncode(transferOrderId);
     }
 
 }
