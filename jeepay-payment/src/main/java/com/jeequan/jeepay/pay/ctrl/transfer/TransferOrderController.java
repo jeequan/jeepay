@@ -229,6 +229,7 @@ public class TransferOrderController extends ApiController {
 
         transferOrder.setState(orderState);
         transferOrder.setChannelOrderNo(channelRetMsg.getChannelOrderId());
+        transferOrder.setChannelResData(channelRetMsg.getChannelAttach());
         transferOrder.setErrCode(channelRetMsg.getChannelErrCode());
         transferOrder.setErrMsg(channelRetMsg.getChannelErrMsg());
 

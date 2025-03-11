@@ -15,17 +15,15 @@
  */
 package com.jeequan.jeepay.pay.channel.wxpay;
 
-import com.github.binarywang.wxpay.bean.entpay.EntPayQueryRequest;
+import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.bean.entpay.EntPayQueryResult;
 import com.github.binarywang.wxpay.bean.entpay.EntPayRequest;
 import com.github.binarywang.wxpay.bean.entpay.EntPayResult;
-import com.github.binarywang.wxpay.bean.transfer.TransferBatchDetailResult;
-import com.github.binarywang.wxpay.bean.transfer.TransferBatchesRequest;
-import com.github.binarywang.wxpay.bean.transfer.TransferBatchesResult;
+import com.github.binarywang.wxpay.bean.transfer.*;
 import com.github.binarywang.wxpay.exception.WxPayException;
-import com.github.binarywang.wxpay.service.WxPayService;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.TransferOrder;
+import com.jeequan.jeepay.core.model.DBApplicationConfig;
 import com.jeequan.jeepay.core.model.params.wxpay.WxpayNormalMchParams;
 import com.jeequan.jeepay.pay.channel.ITransferService;
 import com.jeequan.jeepay.pay.channel.wxpay.kits.WxpayKit;
@@ -34,6 +32,7 @@ import com.jeequan.jeepay.pay.model.WxServiceWrapper;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.transfer.TransferOrderRQ;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
+import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +53,7 @@ import java.util.List;
 public class WxpayTransferService implements ITransferService {
 
     @Autowired private ConfigContextQueryService configContextQueryService;
+    @Autowired protected SysConfigService sysConfigService;
 
     @Override
     public String getIfCode() {
@@ -88,13 +88,18 @@ public class WxpayTransferService implements ITransferService {
 
     @Override
     public ChannelRetMsg transfer(TransferOrderRQ bizRQ, TransferOrder transferOrder, MchAppConfigContext mchAppConfigContext){
-
         try {
 
             WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+            WxpayNormalMchParams normalMchParams = (WxpayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), transferOrder.getIfCode());
+            // 转账版本信息
+            String transferVersion = StringUtils.defaultString(normalMchParams.getTransferVersion(), "old");
 
             if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
-
+                // 如果是新版 直接响应接口不支持
+                if (transferVersion.equals("new202501")) {
+                    return ChannelRetMsg.sysError("请选择微信V3模式");
+                }
                 EntPayRequest request = new EntPayRequest();
 
                 request.setMchAppid(wxServiceWrapper.getWxPayService().getConfig().getAppId());  // 商户账号appid
@@ -116,6 +121,9 @@ public class WxpayTransferService implements ITransferService {
                 return ChannelRetMsg.waiting();
 
             } else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
+                if (transferVersion.equals("new202501")) {
+                    return version202501Transfer(wxServiceWrapper, bizRQ, transferOrder);
+                }
                 TransferBatchesRequest request = new TransferBatchesRequest();
                 request.setAppid(wxServiceWrapper.getWxPayService().getConfig().getAppId());
                 request.setOutBatchNo(transferOrder.getTransferId());
@@ -161,13 +169,102 @@ public class WxpayTransferService implements ITransferService {
         }
     }
 
+    /** 适用于2015年01月15日更新后的版本 **/
+    private ChannelRetMsg version202501Transfer(WxServiceWrapper wxServiceWrapper, TransferOrderRQ bizRQ, TransferOrder transferOrder) {
+        if (StringUtils.isBlank(bizRQ.getChannelExtra())) {
+            return ChannelRetMsg.sysError("channelExtra不能为空");
+        }
+        // 场景类型ID
+        String transferSceneId;
+        List<TransferBillsRequest.TransferSceneReportInfo> transferSceneReportInfos;
+        try {
+            JSONObject channelExtra = JSONObject.parseObject(bizRQ.getChannelExtra());
+            transferSceneId = StringUtils.defaultIfEmpty(channelExtra.getString("transferSceneId"), "1000");
+            // 转账场景报备信息
+            transferSceneReportInfos = channelExtra.getJSONArray("transferSceneReportInfos").toJavaList(TransferBillsRequest.TransferSceneReportInfo.class);
+            if (transferSceneReportInfos.isEmpty()) {
+                return ChannelRetMsg.sysError("channelExtra.transferSceneReportInfos不能为空");
+            }
+        } catch (Exception e){
+            log.error("转账数据转换异常：", e);
+            return ChannelRetMsg.sysError("channelExtra格式不正确");
+        }
+
+        ChannelRetMsg channelRetMsg = new ChannelRetMsg();
+        TransferBillsRequest transferBillsRequest = new TransferBillsRequest();
+        try {
+            transferBillsRequest.setAppid(wxServiceWrapper.getWxPayService().getConfig().getAppId());// 商户AppId
+            transferBillsRequest.setOutBillNo(transferOrder.getTransferId()); // 商户单号
+            transferBillsRequest.setTransferSceneId(transferSceneId); // 1000-现金营销
+            transferBillsRequest.setOpenid(transferOrder.getAccountNo()); // 收款用户OpenID
+            transferBillsRequest.setUserName(transferOrder.getAccountName()); // 收款方真实姓名
+            transferBillsRequest.setTransferAmount(transferOrder.getAmount().intValue()); // 转账金额单位为“分”
+            transferBillsRequest.setTransferRemark(transferOrder.getAccountName()); // 转账备注
+            // TODO 回调地址
+//            transferBillsRequest.setNotifyUrl("https://www.baidu.com");
+            // 转账场景报备信息
+            transferBillsRequest.setTransferSceneReportInfos(transferSceneReportInfos);
+            TransferBillsResult transferBillsResult = wxServiceWrapper.getWxPayService().getTransferService().transferBills(transferBillsRequest);
+
+            String state = transferBillsResult.getState();
+            // 明确转账失败
+            if ("FAIL".equals(state)) {
+                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+                channelRetMsg.setChannelErrCode(transferBillsResult.getState());
+                channelRetMsg.setChannelErrMsg(transferBillsResult.getFailReason());
+                return channelRetMsg;
+            }
+
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
+            if ("SUCCESS".equals(state)) {
+                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+            }
+            // 组装转账数据包
+            JSONObject transferData = new JSONObject();
+            transferData.put("appId", wxServiceWrapper.getWxPayService().getConfig().getAppId());
+            transferData.put("mchId", wxServiceWrapper.getWxPayService().getConfig().getMchId());
+            transferData.put("package", transferBillsResult.getPackageInfo());
+            // 转账确认链接
+            DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
+            String userH5ConfirmUrl = dbApplicationConfig.genTransferUserConfirm(transferOrder.getIfCode(), transferOrder.getTransferId());
+            transferData.put("userH5ConfirmUrl", userH5ConfirmUrl);
+            // 图片格式链接地址
+            transferData.put("userH5ConfirmQrImgUrl", dbApplicationConfig.genScanImgUrl(userH5ConfirmUrl));
+
+            channelRetMsg.setChannelAttach(transferData.toJSONString());
+
+        } catch (WxPayException e) {
+
+            //出现未明确的错误码时（SYSTEMERROR等），请务必用原商户订单号重试，或通过查询接口确认此次付款的结果。
+            if("SYSTEMERROR".equalsIgnoreCase(e.getErrCode())){
+                return ChannelRetMsg.waiting();
+            }
+
+            return ChannelRetMsg.confirmFail(null,
+                    WxpayKit.appendErrCode(e.getReturnMsg(), e.getErrCode()),
+                    WxpayKit.appendErrMsg(e.getReturnMsg(), StringUtils.defaultIfEmpty(e.getErrCodeDes(), e.getCustomErrorMsg())));
+
+        } catch (Exception e) {
+            log.error("转账异常：", e);
+            return ChannelRetMsg.waiting();
+        }
+        return channelRetMsg;
+    }
+
+
     @Override
     public ChannelRetMsg query(TransferOrder transferOrder, MchAppConfigContext mchAppConfigContext) {
 
         try {
             WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
+            WxpayNormalMchParams normalMchParams = (WxpayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), transferOrder.getIfCode());
+            // 转账版本信息
+            String transferVersion = StringUtils.defaultString(normalMchParams.getTransferVersion(), "old");
 
             if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
+                if (transferVersion.equals("new202501")) {
+                    return ChannelRetMsg.sysError("请选择微信V3模式");
+                }
 
                 EntPayQueryResult entPayQueryResult = wxServiceWrapper.getWxPayService().getEntPayService().queryEntPay(transferOrder.getTransferId());
 
@@ -180,7 +277,9 @@ public class WxpayTransferService implements ITransferService {
                     return ChannelRetMsg.waiting();
                 }
             } else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
-
+                if (transferVersion.equals("new202501")) {
+                    return version202501TransferQuery(wxServiceWrapper, transferOrder);
+                }
                 TransferBatchDetailResult transferBatchDetailResult =
                         wxServiceWrapper.getWxPayService().getTransferService().transferBatchesOutBatchNoDetail(transferOrder.getTransferId(), transferOrder.getTransferId());
 
@@ -217,4 +316,41 @@ public class WxpayTransferService implements ITransferService {
         }
     }
 
+    /** 适用于2015年01月15日更新后的版本 **/
+    private ChannelRetMsg version202501TransferQuery(WxServiceWrapper wxServiceWrapper, TransferOrder transferOrder) {
+        ChannelRetMsg channelRetMsg = new ChannelRetMsg();
+        try {
+            TransferBillsGetResult transferBillsGetResult = wxServiceWrapper.getWxPayService().getTransferService().getBillsByOutBillNo(transferOrder.getTransferId());
+
+            String state = transferBillsGetResult.getState();
+            // 明确转账失败
+            if ("FAIL".equals(state)) {
+                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+                channelRetMsg.setChannelErrCode(transferBillsGetResult.getState());
+                channelRetMsg.setChannelErrMsg(transferBillsGetResult.getFailReason());
+                return channelRetMsg;
+            }
+
+            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
+            if ("SUCCESS".equals(state)) {
+                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+                channelRetMsg.setChannelOrderId(transferBillsGetResult.getTransferBillNo());
+                return channelRetMsg;
+            }
+            return ChannelRetMsg.waiting();
+        } catch (WxPayException e) {
+            //出现未明确的错误码时（SYSTEMERROR等），请务必用原商户订单号重试，或通过查询接口确认此次付款的结果。
+            if("SYSTEMERROR".equalsIgnoreCase(e.getErrCode())){
+                return ChannelRetMsg.waiting();
+            }
+
+            return ChannelRetMsg.confirmFail(null,
+                    WxpayKit.appendErrCode(e.getReturnMsg(), e.getErrCode()),
+                    WxpayKit.appendErrMsg(e.getReturnMsg(), StringUtils.defaultIfEmpty(e.getErrCodeDes(), e.getCustomErrorMsg())));
+
+        } catch (Exception e) {
+            log.error("转账查询异常：", e);
+            return ChannelRetMsg.waiting();
+        }
+    }
 }
