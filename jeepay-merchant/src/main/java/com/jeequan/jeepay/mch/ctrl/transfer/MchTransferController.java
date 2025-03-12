@@ -164,6 +164,8 @@ public class MchTransferController extends CommonCtrl {
         model.setMchNo(this.getCurrentMchNo());
         model.setAppId(mchApp.getAppId());
         model.setCurrency("CNY");
+        DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
+        model.setNotifyUrl(dbApplicationConfig.getMchSiteUrl() + "/api/anon/transferNotify/transferOrder"); //回调地址
         request.setBizModel(model);
 
         JeepayClient jeepayClient = new JeepayClient(sysConfigService.getDBApplicationConfig().getPaySiteUrl(), mchApp.getAppSecret());
