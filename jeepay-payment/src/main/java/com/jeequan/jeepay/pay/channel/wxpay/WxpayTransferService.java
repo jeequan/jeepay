@@ -93,7 +93,7 @@ public class WxpayTransferService implements ITransferService {
             WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
             WxpayNormalMchParams normalMchParams = (WxpayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), transferOrder.getIfCode());
             // 转账版本信息
-            String transferVersion = StringUtils.defaultString(normalMchParams.getTransferVersion(), "old");
+            String transferVersion = StringUtils.defaultIfEmpty(normalMchParams.getTransferVersion(), "old");
 
             if (CS.PAY_IF_VERSION.WX_V2.equals(wxServiceWrapper.getApiVersion())) {  //V2
                 // 如果是新版 直接响应接口不支持

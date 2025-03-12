@@ -64,8 +64,6 @@ public class WxpayTransferNoticeService extends AbstractTransferNoticeService {
     @Override
     public MutablePair<String, Object> parseParams(HttpServletRequest request, String urlOrderId) {
         try {
-            JSONObject params = getReqParamJSON();
-            log.info("【微信转账】回调通知参数：{}", params.toJSONString());
             // 获取转账单信息
             TransferOrder transferOrder = transferOrderService.getById(urlOrderId);
             if(transferOrder == null){
@@ -157,6 +155,7 @@ public class WxpayTransferNoticeService extends AbstractTransferNoticeService {
             FileInputStream fis = new FileInputStream(wxPayConfig.getPrivateKeyPath());
             PrivateKey privateKey = PemUtils.loadPrivateKey(fis);
             fis.close();
+
             AutoUpdateCertificatesVerifier verifier = new AutoUpdateCertificatesVerifier(
                     new WxPayCredentials(wxPayConfig.getMchId(), new PrivateKeySigner(wxPayConfig.getCertSerialNo(), privateKey)),
                     wxPayConfig.getApiV3Key().getBytes("utf-8"), "https://api.mch.weixin.qq.com");
