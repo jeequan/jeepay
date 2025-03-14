@@ -296,7 +296,10 @@ VALUES ('alipay', '支付宝官方', 1, 1, 1,
         'http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/alipay.png', '#1779FF', 1, '支付宝官方通道');
 
 
-## -- ++++ [v3.0.0] ===>
+## -- ++++ [v3.0.0] ===> [v3.1.0]  ====
 
 -- 增加转账渠道响应数据字段
 alter table t_transfer_order add column `channel_res_data` TEXT DEFAULT NULL COMMENT '渠道响应数据（如微信确认数据包）' after `channel_order_no`;
+
+
+## -- ++++ [v3.1.0] ===> NEXT

@@ -226,3 +226,9 @@
 4. 优化： 新建商户后不支持更改服务商  https://gitee.com/jeequan/jeepay/issues/IBF9D9
 5. 修复： 解决已知问题
 
+[v3.1.0_20250314]
+1. 新增： 支持微信公钥模式
+2. 新增： 新版微信转账的接入 公告： https://developers.weixin.qq.com/community/pay/doc/000a060bb4c13095b6b27cc1b6ac01?page=1
+3. 优化： 支付测试自动关闭流程 
+4. 修复： 解决已知问题
+
