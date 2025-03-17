@@ -87,7 +87,10 @@ public class ChannelNoticeController extends AbstractCtrl {
             }
 
             // 仅做跳转，直接跳转订单的returnUrl
-            onlyJump(urlOrderId, logPrefix);
+            if (StringUtils.isNotBlank(urlOrderId) && urlOrderId.startsWith(CS.PAY_RETURNURL_FIX_ONLY_JUMP_PREFIX)) {
+                onlyJump(urlOrderId, logPrefix);
+                return null;
+            }
 
             // 解析订单号 和 请求参数
             MutablePair<String, Object> mutablePair = payNotifyService.parseParams(request, urlOrderId, IChannelNoticeService.NoticeTypeEnum.DO_RETURN);
