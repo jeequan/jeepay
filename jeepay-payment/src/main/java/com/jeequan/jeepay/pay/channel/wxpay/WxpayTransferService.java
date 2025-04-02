@@ -169,7 +169,7 @@ public class WxpayTransferService implements ITransferService {
         }
     }
 
-    /** 适用于2015年01月15日更新后的版本 **/
+    /** 适用于2025年01月15日更新后的版本 **/
     private ChannelRetMsg version202501Transfer(WxServiceWrapper wxServiceWrapper, TransferOrderRQ bizRQ, TransferOrder transferOrder) {
         if (StringUtils.isBlank(bizRQ.getChannelExtra())) {
             return ChannelRetMsg.sysError("channelExtra不能为空");
