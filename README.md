@@ -72,7 +72,7 @@ Jeepay = Jee + pay，是由原XxPay支付系统作者带领团队开发，“Jee
 
 接口市场：https://www.jeequan.com/ifstore/list.html
 
-安装说明：https://doc.jeequan.com/#/integrate/open/dev/113
+接口插件安装说明：https://doc.jeequan.com/#/integrate/open/dev/113
 
 目前发布接口包括
 
@@ -81,6 +81,20 @@ Jeepay = Jee + pay，是由原XxPay支付系统作者带领团队开发，“Jee
 银行：工行支付、浦发银行、建行龙支付、交行支付、
 
 四方：付呗支付、米花支付
+
+## 项目地址
+
+### 服务端项目
+
+github 地址：https://github.com/jeequan/jeepay    
+gitee 地址：https://gitee.com/jeequan/jeepay   
+gitcode 地址：https://gitcode.com/jeequantech/jeepay   
+
+### 前端项目
+
+github 地址：https://github.com/jeequan/jeepay-ui   
+gitee 地址：https://gitee.com/jeequan/jeepay-ui
+gitcode 地址：https://gitcode.com/jeequantech/jeepay-ui
 
 # 系统架构
 
@@ -101,15 +115,15 @@ Jeepay = Jee + pay，是由原XxPay支付系统作者带领团队开发，“Jee
 |Redis | 分布式缓存 | 3.2.8 或 高版本
 |MySQL | 数据库 | 5.7.X 或 8.0 高版本
 |MQ | 消息中间件 | ActiveMQ 或 RabbitMQ 或 RocketMQ
-|[Ant Design Vue](https://www.antdv.com/docs/vue/introduce-cn/) | Ant Design的Vue实现，前端开发使用 | 4.2.6
-|[MyBatis-Plus](https://mp.baomidou.com/) | MyBatis增强工具 | 3.4.2
-|[WxJava](https://gitee.com/binary/weixin-java-tools) | 微信开发Java SDK | 4.6.0
-|[Hutool](https://www.hutool.cn/) | Java工具类库 | 5.8.26
+|Ant Design Vue | Ant Design的Vue实现，前端开发使用 | 4.2.6
+|MyBatis-Plus | MyBatis增强工具 | 3.4.2
+|WxJava | 微信开发Java SDK | 4.6.0
+|Hutool | Java工具类库 | 5.8.26
 
 ## 项目结构
 
 ```lua
-jeepay-ui  -- https://gitee.com/jeequan/jeepay-ui
+jeepay-ui 
 
 jeepay
 ├── conf -- 存放系统部署使用的.yml文件
@@ -138,18 +152,25 @@ jeepay
 - Jeepay运营平台和商户系统演体验：[https://www.jeequan.com/doc/detail_84.html](https://www.jeequan.com/doc/detail_84.html "Jeepay支付系统体验")
 
 
-
 # 如何使用
 
-## 最佳实践
+## 对接指南
 
-将Jeepay作为一个支付模块部署，对外提供支付接入能力，有支付需求的业务都可以接入使用。
+将Jeepay作为一个支付模块部署，对外提供支付接入能力，有支付需求的业务系统通过http接口接入使用。
 
-#### 1、宝塔面板安装：
+## SDK对接
+
+Jeepay已经开发了java和python的sdk，以及php对接的demo，方便接入方开发对接。
+
+sdk下载地址：https://doc.jeequan.com/#/integrate/open/api/116
+
+## 部署安装
+
+### 1、宝塔面板安装：
 -  安装宝塔面板9.2.0及以上版本， Docker搜索 jeepay 一键安装
 - 【宝塔安装教程】: https://doc.jeequan.com/#/integrate/open/dev/108
 
-#### 2、shell脚本一键安装：
+### 2、shell脚本一键安装：
 
 CentOS 安装脚本 （推荐Anolis OS 8.8）：
 ```lua
@@ -162,8 +183,6 @@ apt update && apt-get -y install docker.io && apt-get -y install git && wget -O 
 视频教程：
 - 【jeepay开源聚合支付系统一键部署和测试教程】: [https://www.bilibili.com/video/BV17C411Y7EZ/?share_source=copy_web&vd_source=e48f1c20ae2c74b29a0b959a168914f2](https://www.bilibili.com/video/BV17C411Y7EZ/?share_source=copy_web&vd_source=e48f1c20ae2c74b29a0b959a168914f2"教程") 
 
-
-
 ## 项目文档
 
 - 项目文档：[https://doc.jeequan.com/#/integrate/open](https://doc.jeequan.com/#/integrate/open "Jeepay项目文档")
@@ -173,15 +192,6 @@ apt update && apt-get -y install docker.io && apt-get -y install git && wget -O 
 - 接口文档：[https://doc.jeequan.com/#/integrate/open/api/81](https://doc.jeequan.com/#/integrate/open/api/81)
 - 常见问题：[https://doc.jeequan.com/#/integrate/open/dev/107](https://doc.jeequan.com/#/integrate/open/dev/107)
 - 快速上手：[https://doc.jeequan.com/#/integrate/open/dev/109](https://doc.jeequan.com/#/integrate/open/dev/109 "Jeepay快速使用")
-
-## SDK对接
-
-Jeepay已经开发了java和python的sdk，方便接入方开发对接。
-
-- Java SDK：[https://gitee.com/jeequan/jeepay-sdk-java](https://gitee.com/jeequan/jeepay-sdk-java "java sdk")    
-  或 https://gitcode.com/jeequantech/jeepay-sdk-java
-- Python SDK：[https://gitee.com/jeequan/jeepay-sdk-python](https://gitee.com/jeequan/jeepay-sdk-python "python sdk")    
-  或 https://gitcode.com/jeequantech/jeepay-sdk-python
 
 # 功能模块
 
