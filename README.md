@@ -93,7 +93,7 @@ gitcode 地址：https://gitcode.com/jeequantech/jeepay
 ### 前端项目
 
 github 地址：https://github.com/jeequan/jeepay-ui   
-gitee 地址：https://gitee.com/jeequan/jeepay-ui
+gitee 地址：https://gitee.com/jeequan/jeepay-ui   
 gitcode 地址：https://gitcode.com/jeequantech/jeepay-ui
 
 # 系统架构
