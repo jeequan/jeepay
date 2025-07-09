@@ -114,7 +114,7 @@ public class PlspayRefundService extends AbstractRefundService {
             PlspayNormalMchParams normalMchParams = (PlspayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.PLSPAY);
             model.setMchNo(normalMchParams.getMerchantNo());            // 商户号
             model.setAppId(normalMchParams.getAppId());                 // 应用ID
-            model.setRefundOrderId(refundOrder.getRefundOrderId());     // 退款订单号
+            model.setRefundOrderId(refundOrder.getChannelOrderNo());     // 渠道退款订单号
             request.setBizModel(model);
             // 发起请求
             RefundOrderQueryResponse response = new RefundOrderQueryResponse();
