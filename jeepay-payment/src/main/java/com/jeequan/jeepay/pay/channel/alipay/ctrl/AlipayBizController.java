@@ -73,7 +73,8 @@ public class AlipayBizController extends AbstractCtrl {
     @RequestMapping("/redirectAppToAppAuth/{isvAndMchAppId}")
     public void redirectAppToAppAuth(@PathVariable("isvAndMchAppId") String isvAndMchAppId) throws IOException {
 
-        String isvNo = isvAndMchAppId.split("_")[0];
+        String[] splitState = parseIsvAndMchAppId(isvAndMchAppId);
+        String isvNo = splitState[0];
 
         AlipayIsvParams alipayIsvParams = (AlipayIsvParams) configContextQueryService.queryIsvParams(isvNo, CS.IF_CODE.ALIPAY);
         alipayIsvParams.getSandbox();
@@ -101,10 +102,14 @@ public class AlipayBizController extends AbstractCtrl {
 
             if(StringUtils.isNotEmpty(isvAndMchAppId) && StringUtils.isNotEmpty(appAuthCode)){
                 isAlipaySysAuth = false;
-                String isvNo = isvAndMchAppId.split("_")[0];
-                String mchAppId = isvAndMchAppId.split("_")[1];
+                String[] splitState = parseIsvAndMchAppId(isvAndMchAppId);
+                String isvNo = splitState[0];
+                String mchAppId = splitState[1];
 
                 MchApp mchApp = mchAppService.getById(mchAppId);
+                if(mchApp == null){
+                    throw new BizException("应用不存在");
+                }
 
                 MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchApp.getMchNo(), mchAppId);
                 AlipayClientWrapper alipayClientWrapper = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext);
@@ -158,6 +163,18 @@ public class AlipayBizController extends AbstractCtrl {
         request.setAttribute("errMsg", errMsg);
         request.setAttribute("isAlipaySysAuth", isAlipaySysAuth);
         return "channel/alipay/isvsubMchAuth";
+    }
+
+    private String[] parseIsvAndMchAppId(String isvAndMchAppId) {
+        if (StringUtils.isBlank(isvAndMchAppId)) {
+            throw new BizException("state参数为空");
+        }
+
+        String[] splitState = isvAndMchAppId.split("_", 2);
+        if (splitState.length != 2 || StringUtils.isAnyBlank(splitState[0], splitState[1])) {
+            throw new BizException("state参数格式错误");
+        }
+        return splitState;
     }
 
     /**
