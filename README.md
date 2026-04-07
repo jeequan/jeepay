@@ -1,211 +1,287 @@
 <p align="center">
-	<a href="https://www.jeequan.com"><img src="https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_logo.svg"></a>
-</p>
-<p align="center">
-	<strong>计全支付 - 让支付接入更简单</strong>
-</p>
-<p align="center">
-	👉 <a href="https://www.jeequan.com">https://www.jeequan.com</a> 👈
+  <a href="https://www.jeequan.com">
+    <img src="https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_logo.svg" alt="Jeepay Logo">
+  </a>
 </p>
 
 <p align="center">
-	<a target="_blank" href="https://spring.io/projects/spring-boot">
-		<img src="https://img.shields.io/badge/spring%20boot-3.3.7-yellowgreen" />
-	</a>
-    <a target="_blank" href="https://www.oracle.com/java/technologies/downloads/#java17">
-		<img src="https://img.shields.io/badge/JDK-17-green.svg" />
-	</a>
-	<a target="_blank" href="http://www.gnu.org/licenses/lgpl.html">
-		<img src="https://img.shields.io/badge/license-LGPL--3.0-blue" />
-	</a>
-	<a href='https://gitee.com/jeequan/jeepay/stargazers' target="_blank">
-        <img src='https://gitee.com/jeequan/jeepay/badge/star.svg?theme=gvp' alt='star'></img>
-    </a>
-	<a target="_blank" href='https://github.com/jeequan/jeepay'>
-		<img src="https://img.shields.io/github/stars/jeequan/jeepay.svg?style=social" alt="github star"/>
-	</a>
-	<a target="_blank" href='https://gitcode.com/jeequantech/jeepay'>
-		<img src="https://gitcode.com/jeequantech/jeepay/star/badge.svg" alt="gitcode star"/>
-	</a>
+  <strong>计全支付（Jeepay）- 让支付接入更简单</strong>
 </p>
 
-<br/>
 <p align="center">
-	<a href="https://jq.qq.com/?_wv=1027&k=94WnXmdL">
-        <img src="https://img.shields.io/badge/qq%E7%BE%A4%E2%91%A0-635647058-critical"/>
-    </a>
+  👉 <a href="https://www.jeequan.com">https://www.jeequan.com</a> 👈
 </p>
 
--------------------------------------------------------------------------------
+<p align="center">
+  <a target="_blank" href="https://spring.io/projects/spring-boot">
+    <img src="https://img.shields.io/badge/Spring%20Boot-3.3.7-yellowgreen" />
+  </a>
+  <a target="_blank" href="https://www.oracle.com/java/technologies/downloads/#java17">
+    <img src="https://img.shields.io/badge/JDK-17-green.svg" />
+  </a>
+  <a target="_blank" href="http://www.gnu.org/licenses/lgpl.html">
+    <img src="https://img.shields.io/badge/license-LGPL--3.0-blue" />
+  </a>
+  <a href="https://gitee.com/jeequan/jeepay/stargazers" target="_blank">
+    <img src="https://gitee.com/jeequan/jeepay/badge/star.svg?theme=gvp" alt="gitee star">
+  </a>
+  <a target="_blank" href="https://github.com/jeequan/jeepay">
+    <img src="https://img.shields.io/github/stars/jeequan/jeepay.svg?style=social" alt="github star"/>
+  </a>
+  <a target="_blank" href="https://gitcode.com/jeequantech/jeepay">
+    <img src="https://gitcode.com/jeequantech/jeepay/star/badge.svg" alt="gitcode star"/>
+  </a>
+</p>
 
-# 项目介绍
+<p align="center">
+  <a href="https://jq.qq.com/?_wv=1027&k=94WnXmdL">
+    <img src="https://img.shields.io/badge/QQ%E7%BE%A4%E2%91%A0-635647058-critical" alt="QQ群">
+  </a>
+</p>
 
-Jeepay是一套适合互联网企业使用的开源支付系统，支持多渠道服务商和普通商户模式。已对接`微信支付`，`支付宝`，`云闪付`官方接口，支持聚合码支付。
+---
 
-Jeepay使用`Spring Boot`和`Ant Design Vue`开发，集成`Spring Security`实现权限管理功能，是一套非常实用的web开发框架。
+# Jeepay 是什么
 
-## 名称的由来
+Jeepay 是一套面向互联网企业的开源支付系统，支持 **普通商户模式** 与 **多渠道服务商模式**，已对接：
 
-Jeepay = Jee + pay，是由原XxPay支付系统作者带领团队开发，“Jee”是公司计全科技名称的表示，pay表示支付。中文名称为计全支付，释为：计出万全、支付安全，让支付更加方便安全。
+- 微信支付
+- 支付宝
+- 云闪付
 
-## 项目特点
-* 支持多渠道对接，多种支付产品
-* 已对接`微信`服务商和普通商户接口，支持`V2`和`V3`接口
-* 已对接`支付宝`服务商和普通商户接口，支持RSA和RSA2签名
-* 已对接`云闪付`服务商接口，可选择多家支付机构
-* 提供http形式接口，提供各语言的`sdk`实现，方便对接
-* 接口请求和响应数据采用签名机制，保证交易安全可靠
-* 系统安全，支持`分布式`部署，`高并发`
-* 支持`多商户模式`，商户多应用接入
-* 管理平台操作界面简洁、易用
-* 支付平台到商户系统的订单通知使用MQ实现，保证了高可用，消息可达，支持多个产品MQ
-* 支付渠道的接口参数配置界面自动化生成
-* 使用`spring security`实现权限管理
-* 前后端分离架构，方便二次开发
-* 由原`XxPay`团队开发，有着多年支付系统开发经验
-* 支持docker部署，官方发布一键部署脚本，10分钟部署完成
+并支持 **聚合码支付** 等常见支付场景。
 
-## 接口市场
+项目采用：
 
-计全官方团队基于开源版代码，开发了对接各家三方支付和银行的对接代码。为了让用户能够快速接入支付，目前已将对接好的代码发布到官方接口市场，并不断更新。
-如有需要，可前去接口市场购买。
+- 后端：`Spring Boot`
+- 前端：`Ant Design Vue`
+- 权限体系：`Spring Security`
 
-接口市场：https://www.jeequan.com/ifstore/list.html
+适合用于：
 
-接口插件安装说明：https://doc.jeequan.com/#/integrate/open/dev/113
+- 聚合支付平台搭建
+- 商户支付能力接入
+- 支付中台建设
+- 二次开发与支付业务扩展
 
-目前发布接口包括
+---
 
-三方：汇付Adapay、斗拱支付、支付宝直付通、微信收付通、银盛支付、银联条码前置、银联支付、联动优势、国通星驿付、丰付支付、盛付通、乐刷、杉德支付、瑞银信、拉拉卡、汇聚支付、新生支付、河马支付、海科融通、富友支付、易生支付、支付宝云支付、通联支付
+# 项目亮点
 
-银行：工行支付、浦发银行、建行龙支付、交行支付、
+- 支持多渠道对接、多种支付产品形态
+- 支持微信服务商 / 普通商户接口，兼容 `V2` 与 `V3`
+- 支持支付宝服务商 / 普通商户接口，兼容 `RSA` / `RSA2`
+- 支持云闪付服务商接口，可接入多家支付机构
+- 提供标准化 HTTP 接口，便于业务系统快速接入
+- 提供多语言 SDK，降低接入成本
+- 请求与响应数据采用签名机制，保障交易安全
+- 支持分布式部署与高并发业务场景
+- 支持多商户、多应用接入模式
+- 后台界面完整，便于运营、商户和支付管理
+- 支付通知通过 MQ 投递，保障消息可达性与系统高可用
+- 支付渠道参数配置支持界面化、自动化生成
+- 前后端分离架构，便于维护与二次开发
+- 支持 Docker 部署，并提供一键安装脚本
+- 由原 `XxPay` 团队持续开发维护，具备多年支付系统实战经验
 
-四方：付呗支付、米花支付
+---
 
-## 项目地址
+# 名称由来
 
-### 服务端项目
+`Jeepay = Jee + Pay`
 
-github 地址：https://github.com/jeequan/jeepay    
-gitee 地址：https://gitee.com/jeequan/jeepay   
-gitcode 地址：https://gitcode.com/jeequantech/jeepay   
+- `Jee`：代表计全科技
+- `Pay`：代表支付能力
 
-### 前端项目
+中文名称为 **计全支付**，寓意：**计出万全、支付安全，让支付接入更加方便高效**。
 
-github 地址：https://github.com/jeequan/jeepay-ui   
-gitee 地址：https://gitee.com/jeequan/jeepay-ui   
-gitcode 地址：https://gitcode.com/jeequantech/jeepay-ui
+---
 
-# 系统架构
+# 快速入口
 
-> Jeepay计全支付系统架构图
+## 在线体验
 
-![Jeepay系统架构图](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_framework.png "Jeepay系统架构图")
+### 支付体验
+- Jeepay 支付流程体验：<https://www.jeequan.com/demo/jeepay_cashier.html>
 
-> Jeepay计全支付聚合码支付流程图
-
-![Jeepay计全支付聚合码支付流程图](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_qr.png "Jeepay计全支付聚合码支付流程图")
-
-## 核心技术栈
-
-| 软件名称  | 描述 | 版本
-|---|---|---
-|Jdk | Java环境 | 17
-|Spring Boot | 开发框架 | 3.3.7
-|Redis | 分布式缓存 | 3.2.8 或 高版本
-|MySQL | 数据库 | 5.7.X 或 8.0 高版本
-|MQ | 消息中间件 | ActiveMQ 或 RabbitMQ 或 RocketMQ
-|Ant Design Vue | Ant Design的Vue实现，前端开发使用 | 4.2.6
-|MyBatis-Plus | MyBatis增强工具 | 3.4.2
-|WxJava | 微信开发Java SDK | 4.6.0
-|Hutool | Java工具类库 | 5.8.26
-
-## 项目结构
-
-```lua
-jeepay-ui 
-
-jeepay
-├── conf -- 存放系统部署使用的.yml文件
-├── docker -- 存放docker相关文件
-└── docs -- 存放项目相关文档说明
-     ├── intsll -- 项目部署shell脚本
-     ├── script -- 项目启动shell脚本
-     └── sql -- 初始化sql文件
-└── jeepay-components -- 公共组件目录
-     ├── jeepay-components-mq -- mq组件
-     └── jeepay-components-oss -- oss组件
-├── jeepay-core -- 核心依赖包
-├── jeepay-manager -- 运营平台服务端[9217]
-├── jeepay-merchant -- 商户系统服务端[9218]
-├── jeepay-payment -- 支付网关[9216]
-├── jeepay-service -- 业务层代码
-└── jeepay-z-codegen -- mybatis代码生成
-```
-
-# 项目体验
-
-## 支付体验
-- Jeepay支付流程体验：[https://www.jeequan.com/demo/jeepay_cashier.html](https://www.jeequan.com/demo/jeepay_cashier.html "Jeepay支付体验")
-
-## 管理平台
-- Jeepay运营平台和商户系统演体验：[https://www.jeequan.com/doc/detail_84.html](https://www.jeequan.com/doc/detail_84.html "Jeepay支付系统体验")
-
-
-# 如何使用
-
-## 对接指南
-
-将Jeepay作为一个支付模块部署，对外提供支付接入能力，有支付需求的业务系统通过http接口接入使用。
-
-## SDK对接
-
-Jeepay已经开发了java和python的sdk，以及php对接的demo，方便接入方开发对接。
-
-sdk下载地址：https://doc.jeequan.com/#/integrate/open/api/116
-
-## 部署安装
-
-### 1、宝塔面板安装：
--  安装宝塔面板9.2.0及以上版本， Docker搜索 jeepay 一键安装
-- 【宝塔安装教程】: https://doc.jeequan.com/#/integrate/open/dev/108
-
-### 2、shell脚本一键安装：
-
-CentOS 安装脚本 （推荐Anolis OS 8.8）：
-```lua
-yum install -y wget && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && sh install.sh
-```
-Ubuntu 安装脚本 （推荐 Ubuntu 22.04 64位）：
-```lua
-apt update && apt-get -y install docker.io && apt-get -y install git && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && sh install.sh
-```
-视频教程：
-- 【jeepay开源聚合支付系统一键部署和测试教程】: [https://www.bilibili.com/video/BV17C411Y7EZ/?share_source=copy_web&vd_source=e48f1c20ae2c74b29a0b959a168914f2](https://www.bilibili.com/video/BV17C411Y7EZ/?share_source=copy_web&vd_source=e48f1c20ae2c74b29a0b959a168914f2"教程") 
+### 管理平台体验
+- Jeepay 运营平台 / 商户系统演示：<https://www.jeequan.com/doc/detail_84.html>
 
 ## 项目文档
 
-- 项目文档：[https://doc.jeequan.com/#/integrate/open](https://doc.jeequan.com/#/integrate/open "Jeepay项目文档")
-- 开发指导：[https://doc.jeequan.com/#/integrate/open/dev/103](https://doc.jeequan.com/#/integrate/open/dev/103)
-- 通道对接：[https://doc.jeequan.com/#/integrate/open/dev/104](https://doc.jeequan.com/#/integrate/open/dev/104)
-- 线上部署：[https://doc.jeequan.com/#/integrate/open/dev/111](https://doc.jeequan.com/#/integrate/open/dev/111)
-- 接口文档：[https://doc.jeequan.com/#/integrate/open/api/81](https://doc.jeequan.com/#/integrate/open/api/81)
-- 常见问题：[https://doc.jeequan.com/#/integrate/open/dev/107](https://doc.jeequan.com/#/integrate/open/dev/107)
-- 快速上手：[https://doc.jeequan.com/#/integrate/open/dev/109](https://doc.jeequan.com/#/integrate/open/dev/109 "Jeepay快速使用")
+- 项目文档：<https://doc.jeequan.com/#/integrate/open>
+- 快速上手：<https://doc.jeequan.com/#/integrate/open/dev/109>
+- 开发指导：<https://doc.jeequan.com/#/integrate/open/dev/103>
+- 通道对接：<https://doc.jeequan.com/#/integrate/open/dev/104>
+- 线上部署：<https://doc.jeequan.com/#/integrate/open/dev/111>
+- 接口文档：<https://doc.jeequan.com/#/integrate/open/api/81>
+- 常见问题：<https://doc.jeequan.com/#/integrate/open/dev/107>
+
+## SDK 资源
+
+Jeepay 已提供 Java、Python SDK，以及 PHP 对接 Demo，方便业务系统快速接入。
+
+- SDK 下载地址：<https://doc.jeequan.com/#/integrate/open/api/116>
+
+---
+
+# 项目地址
+
+## 服务端项目
+
+- GitHub：<https://github.com/jeequan/jeepay>
+- Gitee：<https://gitee.com/jeequan/jeepay>
+- GitCode：<https://gitcode.com/jeequantech/jeepay>
+
+## 前端项目
+
+- GitHub：<https://github.com/jeequan/jeepay-ui>
+- Gitee：<https://gitee.com/jeequan/jeepay-ui>
+- GitCode：<https://gitcode.com/jeequantech/jeepay-ui>
+
+---
+
+# 系统架构
+
+> Jeepay 计全支付系统架构图
+
+![Jeepay系统架构图](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_framework.png "Jeepay系统架构图")
+
+> Jeepay 聚合码支付流程图
+
+![Jeepay计全支付聚合码支付流程图](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_qr.png "Jeepay计全支付聚合码支付流程图")
+
+---
+
+# 核心技术栈
+
+| 软件名称 | 描述 | 版本 |
+|---|---|---|
+| JDK | Java 运行环境 | 17 |
+| Spring Boot | 后端开发框架 | 3.3.7 |
+| Redis | 分布式缓存 | 3.2.8 或更高版本 |
+| MySQL | 数据库 | 5.7.x / 8.0+ |
+| MQ | 消息中间件 | ActiveMQ / RabbitMQ / RocketMQ |
+| Ant Design Vue | 前端 UI 框架 | 4.2.6 |
+| MyBatis-Plus | MyBatis 增强工具 | 3.4.2 |
+| WxJava | 微信开发 Java SDK | 4.6.0 |
+| Hutool | Java 工具类库 | 5.8.26 |
+
+---
+
+# 项目结构
+
+```text
+jeepay-ui
+
+jeepay
+├── conf                     # 系统部署所需 yml 配置
+├── docker                   # Docker 相关文件
+├── docs                     # 项目文档
+│   ├── install              # 安装脚本
+│   ├── script               # 启动脚本
+│   └── sql                  # 初始化 SQL 文件
+├── jeepay-components        # 公共组件目录
+│   ├── jeepay-components-mq # MQ 组件
+│   └── jeepay-components-oss# OSS 组件
+├── jeepay-core              # 核心依赖模块
+├── jeepay-manager           # 运营平台服务端（9217）
+├── jeepay-merchant          # 商户系统服务端（9218）
+├── jeepay-payment           # 支付网关（9216）
+├── jeepay-service           # 业务层代码
+└── jeepay-z-codegen         # MyBatis 代码生成模块
+```
+
+---
+
+# 如何使用
+
+## 对接方式
+
+Jeepay 可以作为独立支付模块部署，对外提供统一支付接入能力。业务系统通过 HTTP 接口完成支付、查询、退款、回调等能力接入。
+
+适用于：
+
+- 自研业务系统统一接入支付能力
+- 多商户支付能力聚合
+- 服务商模式支付中台建设
+
+## SDK 对接
+
+推荐优先使用官方 SDK 或示例代码进行接入，以减少签名、验签、参数组装等重复开发工作。
+
+---
+
+# 部署安装
+
+## 方式一：宝塔面板一键安装
+
+- 安装 **宝塔面板 9.2.0 及以上版本**
+- 在 Docker 应用中搜索 `jeepay`，即可一键安装
+- 安装教程：<https://doc.jeequan.com/#/integrate/open/dev/108>
+
+## 方式二：Shell 脚本一键安装
+
+### CentOS
+
+> 推荐系统：Anolis OS 8.8
+
+```bash
+yum install -y wget && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && sh install.sh
+```
+
+### Ubuntu
+
+> 推荐系统：Ubuntu 22.04 64 位
+
+```bash
+apt update && apt-get -y install docker.io && apt-get -y install git && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && sh install.sh
+```
+
+### 视频教程
+
+- Jeepay 开源聚合支付系统一键部署和测试教程：<https://www.bilibili.com/video/BV17C411Y7EZ/?share_source=copy_web&vd_source=e48f1c20ae2c74b29a0b959a168914f2>
+
+---
+
+# 接口市场
+
+计全官方团队基于开源版代码，持续开发了多家第三方支付机构、银行以及扩展支付接口的对接代码。为了帮助用户更快完成支付能力接入，已将相关对接能力发布到官方接口市场，并持续更新。
+
+- 接口市场：<https://www.jeequan.com/ifstore/list.html>
+- 插件安装说明：<https://doc.jeequan.com/#/integrate/open/dev/113>
+
+## 已发布接口示例
+
+### 三方支付
+
+汇付 Adapay、斗拱支付、支付宝直付通、微信收付通、银盛支付、银联条码前置、银联支付、联动优势、国通星驿付、丰付支付、盛付通、乐刷、杉德支付、瑞银信、拉卡拉、汇聚支付、新生支付、河马支付、海科融通、富友支付、易生支付、支付宝云支付、通联支付。
+
+### 银行
+
+工行支付、浦发银行、建行龙支付、交行支付。
+
+### 四方支付
+
+付呗支付、米花支付。
+
+---
 
 # 功能模块
 
-> Jeepay运营平台功能
+> Jeepay 运营平台功能
 
 ![Jeepay运营平台功能](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_mgr.png "Jeepay运营平台功能")
 
-> Jeepay商户系统功能
+> Jeepay 商户系统功能
 
 ![Jeepay商户系统功能](https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_mch.png "Jeepay商户系统功能")
 
+---
+
 # 系统截图
 
-`以下截图是从实际已完成功能界面截取,截图时间为：2021-07-06 08:59`
+> 以下截图来源于已实现功能界面，截图时间：2021-07-06 08:59
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/001.png "Jeepay演示界面")
 
@@ -233,14 +309,24 @@ apt update && apt-get -y install docker.io && apt-get -y install git && wget -O 
 
 ![Jeepay演示界面](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/yanshi/022.png "Jeepay演示界面")
 
+---
+
 # 更多支持
-***
-微信扫描下面二维码，关注官方公众号：计全科技，获取更多精彩内容。
+
+欢迎关注官方渠道，获取更多产品动态、部署指导与社区支持。
+
+## 官方公众号
+
+微信扫描下方二维码，关注 **计全科技** 公众号：
 
 ![计全科技公众号](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jee-qrcode.jpg "计全科技公众号")
 
-微信扫描下方二维码，邀请进官方微信交流群。开源不易，进群前请先点Star给与支持。
+## 官方微信交流群
+
+微信扫描下方二维码加入官方交流群。若项目对你有帮助，欢迎先点一个 Star 支持。
 
 ![Jeepay微信交流群](http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/jeepay_open_kf.png "Jeepay微信交流群")
 
-微信客服咨询：[https://work.weixin.qq.com/kfid/kfc6de0edce151ee062](https://work.weixin.qq.com/kfid/kfc6de0edce151ee062 "jeepay微信客服咨询")
+## 微信客服
+
+- 微信客服咨询：<https://work.weixin.qq.com/kfid/kfc6de0edce151ee062>
