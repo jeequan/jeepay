@@ -1,21 +1,17 @@
-version: '3'
-
 # Maven 依赖提前编译，修改 MQ 队列 (修改 jeepay-components-mq 依赖) 也需要重新运行此命令
-# docker build -t jeepay-deps:latest -f docs/Dockerfile .
-# 启动命令 docker-compose up
-# 启动并运行在后台  docker-compose up -d
-# 重新编译 docker-compose up --build
-# 重新创建 docker-composer up --force-recreate
-# 重新编译并覆盖之前的 docker-composer up --build --force-recreate
-
-
-# 编译前端请先执行 git submodule updata --init --recursive
-# 或者 git clone https://gitee.com/jeequan/jeepay-ui.git
+# 启动命令 docker compose up
+# 启动并运行在后台  docker compose up -d
+# 重新编译 docker compose up --build
+# 重新创建 docker compose up --force-recreate
+# 重新编译并覆盖之前的 docker compose up --build --force-recreate
+#
+# 前端目录默认使用本仓库同级的 ../jeepay-ui，可在 .env 中覆盖 UI_BASE_DIR。
 
 services:
   mysql:
     hostname: mysql
     container_name: jeepay-mysql
+    restart: always
     # amd64 平台
     #image: mysql/mysql-server:latest
     image: mysql:8
@@ -40,6 +36,7 @@ services:
     hostname: activemq
     container_name: jeepay-activemq
     image: jeepay-activemq:latest
+    restart: always
     ports: #- "1883:1883"
       #- "5672:5672"
       - "8161:8161"
@@ -108,6 +105,7 @@ services:
   redis:
     hostname: redis
     container_name: jeepay-redis
+    restart: always
     image: redis:latest
     ports:
       - "6380:6379"
@@ -118,14 +116,12 @@ services:
       - redis:/data
   payment:
     build:
-      context: .
+      context: ./jeepay-payment
       dockerfile: Dockerfile
-      args:
-        PORT: 9216
-        PLATFORM: payment
     image: jeepay-payment:latest
     hostname: payment
     container_name: jeepay-payment
+    restart: always
     ports:
       - "9216:9216"
     depends_on:
@@ -138,18 +134,16 @@ services:
       jeepay:
         ipv4_address: 172.20.0.21
     volumes:
-      - ./logs/payment:/workspace/logs
-      - ./conf/payment/application.yml:/workspace/application.yml
+      - ./logs/payment:/jeepayhomes/service/logs
+      - ./conf/payment/application.yml:/jeepayhomes/service/app/application.yml
   manager:
     build:
-      context: .
+      context: ./jeepay-manager
       dockerfile: Dockerfile
-      args:
-        PORT: 9217
-        PLATFORM: manager
     image: jeepay-manager:latest
     hostname: manager
     container_name: jeepay-manager
+    restart: always
     ports:
       - "9217:9217"
     depends_on:
@@ -162,18 +156,16 @@ services:
       jeepay:
         ipv4_address: 172.20.0.22
     volumes:
-      - ./logs/manager:/workspace/logs
-      - ./conf/manager/application.yml:/workspace/application.yml
+      - ./logs/manager:/jeepayhomes/service/logs
+      - ./conf/manager/application.yml:/jeepayhomes/service/app/application.yml
   merchant:
     build:
-      context: .
+      context: ./jeepay-merchant
       dockerfile: Dockerfile
-      args:
-        PORT: 9218
-        PLATFORM: merchant
     image: jeepay-merchant:latest
     hostname: merchant
     container_name: jeepay-merchant
+    restart: always
     ports:
       - "9218:9218"
     depends_on:
@@ -186,17 +178,18 @@ services:
       jeepay:
         ipv4_address: 172.20.0.23
     volumes:
-      - ./logs/merchant:/workspace/logs
-      - ./conf/merchant/application.yml:/workspace/application.yml
+      - ./logs/merchant:/jeepayhomes/service/logs
+      - ./conf/merchant/application.yml:/jeepayhomes/service/app/application.yml
   ui-payment:
     build:
-      context: ${UI_BASE_DIR}/jeepay-ui
+      context: ${UI_BASE_DIR:-..}/jeepay-ui
       dockerfile: Dockerfile
       args:
         PLATFORM: cashier
     image: jeepay-ui-payment:latest
     hostname: payment-ui
     container_name: jeepay-ui-payment
+    restart: always
     environment:
       - BACKEND_HOST=172.20.0.21:9216
     ports:
@@ -208,13 +201,14 @@ services:
         ipv4_address: 172.20.0.31
   ui-manager:
     build:
-      context: ${UI_BASE_DIR}/jeepay-ui
+      context: ${UI_BASE_DIR:-..}/jeepay-ui
       dockerfile: Dockerfile
       args:
         PLATFORM: manager
     image: jeepay-ui-manager:latest
     hostname: manager-ui
     container_name: jeepay-ui-manager
+    restart: always
     environment:
       - BACKEND_HOST=172.20.0.22:9217
     ports:
@@ -226,13 +220,14 @@ services:
         ipv4_address: 172.20.0.32
   ui-merchant:
     build:
-      context: ${UI_BASE_DIR}/jeepay-ui
+      context: ${UI_BASE_DIR:-..}/jeepay-ui
       dockerfile: Dockerfile
       args:
         PLATFORM: merchant
     image: jeepay-ui-merchant:latest
     hostname: merchant-ui
     container_name: jeepay-ui-merchant
+    restart: always
     environment:
       - BACKEND_HOST=172.20.0.23:9218
     ports:

@@ -277,6 +277,77 @@ apt update && apt-get -y install docker.io && apt-get -y install git && wget -O 
 - 分别部署 `payment / manager / merchant` 服务
 - 独立部署前端工程 `jeepay-ui`
 
+## 方式四：Docker Compose 部署
+
+适合希望通过容器快速拉起完整开发 / 测试环境的场景。
+
+### 目录要求
+
+默认约定：
+
+```text
+jeepay-open/
+├── jeepay/
+└── jeepay-ui/
+```
+
+如果你的前端目录不在 `jeepay` 同级目录，可在 `jeepay/.env` 中覆盖 `UI_BASE_DIR`。
+可参考根目录的 `.env.example`。
+
+### 构建前准备
+
+#### 1. 编译后端 JAR
+
+在 `jeepay` 根目录执行：
+
+```bash
+mvn clean package -DskipTests
+```
+
+生成的 JAR 位于：
+
+- `jeepay-payment/target/jeepay-payment.jar`
+- `jeepay-manager/target/jeepay-manager.jar`
+- `jeepay-merchant/target/jeepay-merchant.jar`
+
+#### 2. 准备前端代码
+
+确保 `jeepay-ui` 仓库已拉取到本地，且目录结构满足上面的要求。
+
+### 启动方式
+
+```bash
+docker compose up -d --build
+```
+
+### 启动前校验
+
+```bash
+docker compose config
+```
+
+### 默认暴露端口
+
+| 组件 | 端口 |
+|---|---|
+| MySQL | `3306` |
+| Redis | `6380` |
+| ActiveMQ 控制台 | `8161` |
+| ActiveMQ 消息端口 | `61616` |
+| payment | `9216` |
+| manager | `9217` |
+| merchant | `9218` |
+| manager UI | `9227` |
+| merchant UI | `9228` |
+| cashier UI | `9226` |
+
+### 说明
+
+- Compose 已补齐关键服务 `restart: always`，用于提升 Docker 部署的自动恢复能力。
+- Java 服务挂载的配置文件路径已与模块 Dockerfile 对齐。
+- Compose 当前默认使用模块内 Dockerfile 构建 `payment / manager / merchant`，不再错误指向根目录不存在的 Dockerfile。
+- 若前端镜像构建失败，优先检查 `jeepay-ui` 是否存在，以及 Node 依赖是否可正常安装。
+
 ---
 
 # 项目结构
