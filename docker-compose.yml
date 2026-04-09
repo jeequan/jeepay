@@ -12,8 +12,6 @@ services:
     hostname: mysql
     container_name: jeepay-mysql
     restart: always
-    # amd64 平台
-    #image: mysql/mysql-server:latest
     image: mysql:8
     environment:
       LANG: C.UTF-8
@@ -29,26 +27,44 @@ services:
     networks:
       jeepay:
         ipv4_address: 172.20.0.10
-  activemq:
-    build:
-      context: ./docker/activemq
-      dockerfile: Dockerfile
-    hostname: activemq
-    container_name: jeepay-activemq
-    image: jeepay-activemq:latest
+
+  # 使用 RocketMQ 作为默认 MQ 方案
+  rocketmq-namesrv:
+    image: apache/rocketmq:4.9.8
+    hostname: rocketmq-namesrv
+    container_name: jeepay-rocketmq-namesrv
     restart: always
-    ports: #- "1883:1883"
-      #- "5672:5672"
-      - "8161:8161"
-      #- "61613:61613"
-      #- "61614:61614"
-      - "61616:61616"
+    ports:
+      - "9876:9876"
+    command: sh mqnamesrv
     volumes:
-      - activemq:/opt/activemq
-      - ./docker/activemq/activemq.xml:/opt/activemq/conf/activemq.xml
+      - rocketmq_namesrv_logs:/home/rocketmq/logs
     networks:
       jeepay:
         ipv4_address: 172.20.0.11
+
+  rocketmq-broker:
+    image: apache/rocketmq:4.9.8
+    hostname: rocketmq-broker
+    container_name: jeepay-rocketmq-broker
+    restart: always
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+      - "10912:10912"
+    environment:
+      NAMESRV_ADDR: rocketmq-namesrv:9876
+    command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-4.9.8/conf/broker.conf
+    depends_on:
+      - rocketmq-namesrv
+    volumes:
+      - rocketmq_broker_logs:/home/rocketmq/logs
+      - rocketmq_broker_store:/home/rocketmq/store
+      - ./docker/rocketmq/broker/conf/broker.conf:/home/rocketmq/rocketmq-4.9.8/conf/broker.conf:ro
+    networks:
+      jeepay:
+        ipv4_address: 172.20.0.13
+
   # 扩展额外延迟插件的 RabbitMQ
   #rabbitmq:
   #  build:
@@ -57,6 +73,7 @@ services:
   #  hostname: rabbitmq
   #  container_name: jeepay-rabbitmq
   #  image: jeepay-rabbitmq:latest
+  #  restart: always
   #  ports:
   #    - "15672:15672"
   #    - "4369:4369"
@@ -70,38 +87,27 @@ services:
   #    - rabbitmq:/var/lib/rabbitmq
   #  networks:
   #    jeepay:
-  #      ipv4_address: 172.20.0.11
-  # 使用 activemq 如有需要请修改 docker/activemq.xml 下相关配置
-  #rocketmq-namesrv:
-  #  image: apache/rocketmq:4.9.3
-  #  container_name: rmqnamesrv
+  #      ipv4_address: 172.20.0.14
+
+  # 如需回退 ActiveMQ，可启用下面服务并同步修改 conf/*.yml 中的 MQ 配置。
+  #activemq:
+  #  build:
+  #    context: ./docker/activemq
+  #    dockerfile: Dockerfile
+  #  hostname: activemq
+  #  container_name: jeepay-activemq
+  #  image: jeepay-activemq:latest
+  #  restart: always
   #  ports:
-  #    - 9876:9876
+  #    - "8161:8161"
+  #    - "61616:61616"
   #  volumes:
-  #    - ./docker/rocketmq/namesrv/logs:/home/rocketmq/logs
-  #  command: sh mqnamesrv
+  #    - activemq:/opt/activemq
+  #    - ./docker/activemq/activemq.xml:/opt/activemq/conf/activemq.xml
   #  networks:
   #    jeepay:
-  #      ipv4_address: 172.20.0.11
-  #rocketmq-broker:
-  #  image: apache/rocketmq:4.9.3
-  #  container_name: rmqbroker
-  #  ports:
-  #    - 10909:10909
-  #    - 10911:10911
-  #    - 10912:10912
-  #  environment:
-  #    - NAMESRV_ADDR=namesrv:9876
-  #  volumes:
-  #    - ./docker/rocketmq/broker/logs:/home/rocketmq/logs
-  #    - ./docker/rocketmq/broker/store:/home/rocketmq/store
-  #    - ./docker/rocketmq/broker/conf/broker.conf:/opt/rocketmq-4.9.3/conf/broker.conf
-  #  command: sh mqbroker -c /opt/rocketmq-4.9.3/conf/broker.conf
-  #  depends_on:
-  #    - rocketmq-namesrv
-  #  networks:
-  #    jeepay:
-  #      ipv4_address: 172.20.0.13
+  #      ipv4_address: 172.20.0.15
+
   redis:
     hostname: redis
     container_name: jeepay-redis
@@ -109,11 +115,12 @@ services:
     image: redis:latest
     ports:
       - "6380:6379"
+    volumes:
+      - redis:/data
     networks:
       jeepay:
         ipv4_address: 172.20.0.12
-    volumes:
-      - redis:/data
+
   payment:
     build:
       context: ./jeepay-payment
@@ -127,15 +134,14 @@ services:
     depends_on:
       - mysql
       - redis
-      - activemq
-      # - rabbitmq
-      # - rocketmq-broker
-    networks:
-      jeepay:
-        ipv4_address: 172.20.0.21
+      - rocketmq-broker
     volumes:
       - ./logs/payment:/jeepayhomes/service/logs
       - ./conf/payment/application.yml:/jeepayhomes/service/app/application.yml
+    networks:
+      jeepay:
+        ipv4_address: 172.20.0.21
+
   manager:
     build:
       context: ./jeepay-manager
@@ -149,15 +155,14 @@ services:
     depends_on:
       - mysql
       - redis
-      - activemq
-      # - rabbitmq
-      # - rocketmq-broker
-    networks:
-      jeepay:
-        ipv4_address: 172.20.0.22
+      - rocketmq-broker
     volumes:
       - ./logs/manager:/jeepayhomes/service/logs
       - ./conf/manager/application.yml:/jeepayhomes/service/app/application.yml
+    networks:
+      jeepay:
+        ipv4_address: 172.20.0.22
+
   merchant:
     build:
       context: ./jeepay-merchant
@@ -171,15 +176,14 @@ services:
     depends_on:
       - mysql
       - redis
-      - activemq
-      # - rabbitmq
-      # - rocketmq-broker
-    networks:
-      jeepay:
-        ipv4_address: 172.20.0.23
+      - rocketmq-broker
     volumes:
       - ./logs/merchant:/jeepayhomes/service/logs
       - ./conf/merchant/application.yml:/jeepayhomes/service/app/application.yml
+    networks:
+      jeepay:
+        ipv4_address: 172.20.0.23
+
   ui-payment:
     build:
       context: ${UI_BASE_DIR:-..}/jeepay-ui
@@ -199,6 +203,7 @@ services:
     networks:
       jeepay:
         ipv4_address: 172.20.0.31
+
   ui-manager:
     build:
       context: ${UI_BASE_DIR:-..}/jeepay-ui
@@ -218,6 +223,7 @@ services:
     networks:
       jeepay:
         ipv4_address: 172.20.0.32
+
   ui-merchant:
     build:
       context: ${UI_BASE_DIR:-..}/jeepay-ui
@@ -237,6 +243,7 @@ services:
     networks:
       jeepay:
         ipv4_address: 172.20.0.33
+
   # 如果你需要对外完整配置，可以使用下面的方式
   # https://www.digitalocean.com/community/tools/nginx?domains.0.server.domain=pay.test.com&domains.0.server.documentRoot=&domains.0.server.redirectSubdomains=false&domains.0.https.hsts=false&domains.0.https.hstsPreload=true&domains.0.php.php=false&domains.0.reverseProxy.reverseProxy=true&domains.0.reverseProxy.proxyPass=http%3A%2F%2F172.20.0.26%3A9226&domains.0.routing.index=index.html&domains.0.routing.fallbackHtml=true&domains.0.routing.fallbackPhp=false&domains.0.logging.accessLog=true&domains.0.logging.errorLog=true&global.reverseProxy.proxyCoexistenceXForwarded=remove&global.app.lang=zhCN
   # 访问并配置好所有域名和代理，下载文件放到项目根目录下取名叫做 nginx.tar.gz
@@ -266,4 +273,7 @@ volumes:
   mysql:
   redis:
   activemq:
+  rocketmq_namesrv_logs:
+  rocketmq_broker_logs:
+  rocketmq_broker_store:
 #  rabbitmq:

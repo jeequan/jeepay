@@ -30,7 +30,7 @@ spring:
       number_format: '#' #数字格式进行原样显示，不加格式化字符例如  100,00
   datasource:
     # yml填写url连接串， 无需将&符号进行转义
-    url: jdbc:mysql://mysql8:3306/jeepaydb?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://mysql:3306/jeepaydb?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: jeepaydb123456
     druid:
@@ -56,7 +56,7 @@ spring:
     type: redis
   data:
     redis:
-      host: redis6
+      host: redis
       port: 6379
       database: 2    #1库：运营平台  #2库：商户系统 #3库：支付网关
       timeout: 1000
@@ -148,5 +148,10 @@ isys:
       access-key-secret: SECRET_SECRET_SECRET  #AccessKeySecret
 
   mq:
-    vender: activeMQ  #  切换MQ厂商， 支持：【 activeMQ  rabbitMQ  rocketMQ  aliYunRocketMQ 】， 需正确配置 【对应的yml参数】 和 【jeepay-components-mq项目下pom.xml中的依赖包】。
+    vender: rocketMQ  #  切换MQ厂商， 支持：【 activeMQ  rabbitMQ  rocketMQ  aliYunRocketMQ 】， 需正确配置 【对应的yml参数】 和 【jeepay-components-mq项目下pom.xml中的依赖包】。
+
+rocketmq:
+  name-server: rocketmq-namesrv:9876
+  producer:
+    group: JEEPAY-GROUP
 

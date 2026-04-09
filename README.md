@@ -164,7 +164,7 @@ Jeepay 适合以下业务场景：
 | Maven | 建议 3.8+ |
 | MySQL | 5.7.x / 8.0+ |
 | Redis | 3.2.8+ |
-| MQ | ActiveMQ / RabbitMQ / RocketMQ（按需启用） |
+| MQ | RocketMQ（默认）/ ActiveMQ / RabbitMQ（按需启用） |
 | Node.js | 前端工程按 `jeepay-ui` 要求准备 |
 
 ## 代码获取
@@ -332,8 +332,8 @@ docker compose config
 |---|---|
 | MySQL | `3306` |
 | Redis | `6380` |
-| ActiveMQ 控制台 | `8161` |
-| ActiveMQ 消息端口 | `61616` |
+| RocketMQ NameServer | `9876` |
+| RocketMQ Broker | `10909` / `10911` / `10912` |
 | payment | `9216` |
 | manager | `9217` |
 | merchant | `9218` |
@@ -343,9 +343,11 @@ docker compose config
 
 ### 说明
 
-- Compose 已补齐关键服务 `restart: always`，用于提升 Docker 部署的自动恢复能力。
+- Compose 默认使用 RocketMQ，已补齐 `rocketmq-namesrv` 与 `rocketmq-broker`，并统一设置 `restart: always`，用于提升 Docker 部署的自动恢复能力。
+- `conf/payment`、`conf/manager`、`conf/merchant` 已默认切换为 `rocketMQ`，同时将 Docker 场景下的 MySQL / Redis 主机名修正为 `mysql`、`redis`。
 - Java 服务挂载的配置文件路径已与模块 Dockerfile 对齐。
 - Compose 当前默认使用模块内 Dockerfile 构建 `payment / manager / merchant`，不再错误指向根目录不存在的 Dockerfile。
+- 如需回退到 ActiveMQ 或切换 RabbitMQ，需要同时调整 `docker-compose.yml` 与 `conf/*.yml` 中对应 MQ 配置。
 - 若前端镜像构建失败，优先检查 `jeepay-ui` 是否存在，以及 Node 依赖是否可正常安装。
 
 ---
