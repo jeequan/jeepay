@@ -296,7 +296,36 @@ jeepay-open/
 
 ### 构建前准备
 
-#### 1. 编译后端 JAR
+#### 1. 配置 Docker 国内镜像加速（强烈建议）
+
+国内网络拉取 Docker Hub 镜像较慢或被墙，建议配置多个镜像加速源（单个源随时可能失效，Docker 会自动 fallback）。
+
+Docker daemon 配置示例：
+
+```json
+{
+  "registry-mirrors": [
+    "https://docker.1ms.run",
+    "https://docker.m.daocloud.io",
+    "https://docker.xuanyuan.me",
+    "https://hub.rat.dev",
+    "https://docker.1panel.live"
+  ]
+}
+```
+
+配置位置：
+
+- **Linux**：`/etc/docker/daemon.json`，修改后执行 `sudo systemctl restart docker`
+- **Docker Desktop（macOS / Windows）**：Settings -> Docker Engine，写入上述 JSON 后点击 Apply & Restart
+
+验证是否生效：
+
+```bash
+docker info | grep -A 5 "Registry Mirrors"
+```
+
+#### 2. 编译后端 JAR
 
 在 `jeepay` 根目录执行：
 
@@ -310,14 +339,24 @@ mvn clean package -DskipTests
 - `jeepay-manager/target/jeepay-manager.jar`
 - `jeepay-merchant/target/jeepay-merchant.jar`
 
-#### 2. 准备前端代码
+#### 3. 准备前端代码
 
 确保 `jeepay-ui` 仓库已拉取到本地，且目录结构满足上面的要求。
 
 ### 启动方式
 
 ```bash
+# 首次启动（编译镜像 + 启动）
 docker compose up -d --build
+
+# 后续启动（跳过编译）
+docker compose up -d
+
+# 仅重新编译后端服务
+docker compose build payment manager merchant
+
+# 重启某个服务
+docker compose restart payment
 ```
 
 ### 启动前校验
@@ -328,27 +367,87 @@ docker compose config
 
 ### 默认暴露端口
 
-| 组件 | 端口 |
-|---|---|
-| MySQL | `3306` |
-| Redis | `6380` |
-| RocketMQ NameServer | `9876` |
-| RocketMQ Broker | `10909` / `10911` / `10912` |
-| payment | `9216` |
-| manager | `9217` |
-| merchant | `9218` |
-| manager UI | `9227` |
-| merchant UI | `9228` |
-| cashier UI | `9226` |
+| 组件 | 端口 | 说明 |
+|---|---|---|
+| MySQL | `13306` | 映射宿主机 13306，避免与本地 MySQL 冲突 |
+| Redis | `6380` | |
+| RocketMQ NameServer | `9876` | |
+| RocketMQ Broker | `10909` / `10911` / `10912` | |
+| payment | `9216` | 支付网关 |
+| manager | `9217` | 运营平台后端 |
+| merchant | `9218` | 商户系统后端 |
+| manager UI | `9227` | 运营平台前端 |
+| merchant UI | `9228` | 商户系统前端 |
+| cashier UI | `9226` | 收银台前端 |
 
-### 说明
+### 默认账号
 
-- Compose 默认使用 RocketMQ，已补齐 `rocketmq-namesrv` 与 `rocketmq-broker`，并统一设置 `restart: always`，用于提升 Docker 部署的自动恢复能力。
-- `conf/payment`、`conf/manager`、`conf/merchant` 已默认切换为 `rocketMQ`，同时将 Docker 场景下的 MySQL / Redis 主机名修正为 `mysql`、`redis`。
-- Java 服务挂载的配置文件路径已与模块 Dockerfile 对齐。
-- Compose 当前默认使用模块内 Dockerfile 构建 `payment / manager / merchant`，不再错误指向根目录不存在的 Dockerfile。
-- 如需回退到 ActiveMQ 或切换 RabbitMQ，需要同时调整 `docker-compose.yml` 与 `conf/*.yml` 中对应 MQ 配置。
-- 若前端镜像构建失败，优先检查 `jeepay-ui` 是否存在，以及 Node 依赖是否可正常安装。
+| 平台 | 地址 | 用户名 | 密码 |
+|---|---|---|---|
+| 运营平台 | http://localhost:9227 | jeepay | jeepay123 |
+| 商户系统 | http://localhost:9228 | jeepay | jeepay123 |
+
+### 核心组件版本
+
+| 组件 | 版本 | 说明 |
+|---|---|---|
+| RocketMQ Server | `5.3.1` | NameServer + Broker |
+| rocketmq-spring-boot-starter | `2.3.5` | Spring Boot 集成，内置 client 5.3.2 |
+| MySQL | `8` | |
+| Redis | `latest` | |
+| Java 基础镜像 | `eclipse-temurin:17-jre` | openjdk 官方镜像已停止维护 |
+
+### 配置说明
+
+- Compose 默认使用 **RocketMQ** 作为消息队列，已配置 `rocketmq-namesrv` 与 `rocketmq-broker`。
+- `conf/payment`、`conf/manager`、`conf/merchant` 已默认切换为 `rocketMQ`，MySQL / Redis 主机名配置为容器内网名 `mysql`、`redis`。
+- MySQL 映射为 `13306:3306`，避免与宿主机本地 MySQL 冲突；容器内部服务仍通过 `mysql:3306` 通信。
+- Java 服务的配置文件通过 volume 挂载，修改 `conf/` 目录下的 yml 后重启对应服务即可生效。
+- 如需回退到 ActiveMQ 或切换 RabbitMQ，需同时调整 `docker-compose.yml` 与 `conf/*.yml`。
+
+### 启动后验证
+
+```bash
+# 查看所有容器状态
+docker compose ps
+
+# 查看核心服务日志
+docker compose logs --tail=100 payment manager merchant rocketmq-namesrv rocketmq-broker
+
+# 确认 RocketMQ Broker 启动成功（应看到 "boot success"）
+docker logs jeepay-rocketmq-broker 2>&1 | grep "boot success"
+```
+
+### 常见问题
+
+#### RocketMQ Broker 启动失败（NullPointerException）
+
+如果 Broker 日志中出现 `ScheduleMessageService.configFilePath` 相关 NPE，通常是 Docker named volume 的权限问题。RocketMQ 5.x 镜像以 `rocketmq`（uid=3000）用户运行，而 Docker 创建的 volume 默认 `root` 权限。
+
+Compose 中已通过 `user: "0:0"` 解决此问题。如果手动部署遇到此问题，可执行：
+
+```bash
+docker run --rm -u root -v jeepay_rocketmq_broker_store:/data alpine chown -R 3000:3000 /data
+docker run --rm -u root -v jeepay_rocketmq_broker_logs:/data alpine chown -R 3000:3000 /data
+```
+
+#### Apple Silicon（M1/M2/M3）注意事项
+
+RocketMQ 官方镜像仅提供 `linux/amd64` 版本，在 Apple Silicon 上通过 Rosetta 2 模拟运行，启动较慢属于正常现象。确保 Docker Desktop 已开启 "Use Rosetta for x86_64/amd64 emulation on Apple Silicon"。
+
+#### 前端镜像构建失败
+
+优先检查：
+- `jeepay-ui` 目录是否存在且在正确位置
+- Node.js 依赖是否可正常安装（npm 源是否可达）
+
+#### 登录提示"认证服务出现异常"
+
+检查 `conf/*/application.yml` 中的数据库连接配置是否与 `docker-compose.yml` 中的 MySQL 密码一致。Compose 默认 root 密码为 `rootroot`。
+
+#### 镜像拉取失败（403 Forbidden）
+
+镜像加速源可能失效，建议配置多个加速源（参见上方"配置 Docker 国内镜像加速"），Docker 会自动尝试下一个。
 
 ---
 

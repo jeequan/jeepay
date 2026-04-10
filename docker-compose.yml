@@ -20,7 +20,13 @@ services:
       MYSQL_USER: "jeepay"
       MYSQL_PASSWORD: "jeepay"
     ports:
-      - "3306:3306"
+      - "13306:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
     volumes:
       - mysql:/var/lib/mysql
       - ./docs/sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -30,13 +36,24 @@ services:
 
   # 使用 RocketMQ 作为默认 MQ 方案
   rocketmq-namesrv:
-    image: apache/rocketmq:4.9.8
+    image: apache/rocketmq:5.3.1
     hostname: rocketmq-namesrv
     container_name: jeepay-rocketmq-namesrv
     restart: always
+    user: "0:0"
     ports:
       - "9876:9876"
+    environment:
+      # 开发环境降低 NameServer 内存占用
+      HEAP_OPTS: "-Xms256m -Xmx256m -Xmn128m"
     command: sh mqnamesrv
+    healthcheck:
+      # arm64 模拟 amd64 时 bash 启动较慢，需增大超时
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/9876'"]
+      interval: 15s
+      timeout: 15s
+      retries: 10
+      start_period: 40s
     volumes:
       - rocketmq_namesrv_logs:/home/rocketmq/logs
     networks:
@@ -44,23 +61,25 @@ services:
         ipv4_address: 172.20.0.11
 
   rocketmq-broker:
-    image: apache/rocketmq:4.9.8
+    image: apache/rocketmq:5.3.1
     hostname: rocketmq-broker
     container_name: jeepay-rocketmq-broker
     restart: always
+    # Docker 创建的 named volume 默认 root 权限，而镜像以 rocketmq(uid=3000) 运行，需要提权
+    user: "0:0"
     ports:
       - "10909:10909"
       - "10911:10911"
       - "10912:10912"
     environment:
       NAMESRV_ADDR: rocketmq-namesrv:9876
-    command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-4.9.8/conf/broker.conf
+    command: sh mqbroker -n rocketmq-namesrv:9876
     depends_on:
-      - rocketmq-namesrv
+      rocketmq-namesrv:
+        condition: service_healthy
     volumes:
       - rocketmq_broker_logs:/home/rocketmq/logs
       - rocketmq_broker_store:/home/rocketmq/store
-      - ./docker/rocketmq/broker/conf/broker.conf:/home/rocketmq/rocketmq-4.9.8/conf/broker.conf:ro
     networks:
       jeepay:
         ipv4_address: 172.20.0.13
@@ -115,6 +134,12 @@ services:
     image: redis:latest
     ports:
       - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
     volumes:
       - redis:/data
     networks:
@@ -132,9 +157,12 @@ services:
     ports:
       - "9216:9216"
     depends_on:
-      - mysql
-      - redis
-      - rocketmq-broker
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_started
     volumes:
       - ./logs/payment:/jeepayhomes/service/logs
       - ./conf/payment/application.yml:/jeepayhomes/service/app/application.yml
@@ -153,9 +181,12 @@ services:
     ports:
       - "9217:9217"
     depends_on:
-      - mysql
-      - redis
-      - rocketmq-broker
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_started
     volumes:
       - ./logs/manager:/jeepayhomes/service/logs
       - ./conf/manager/application.yml:/jeepayhomes/service/app/application.yml
@@ -174,9 +205,12 @@ services:
     ports:
       - "9218:9218"
     depends_on:
-      - mysql
-      - redis
-      - rocketmq-broker
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_started
     volumes:
       - ./logs/merchant:/jeepayhomes/service/logs
       - ./conf/merchant/application.yml:/jeepayhomes/service/app/application.yml

@@ -4,8 +4,8 @@
 
 # ------   START   ------
 
-# 基础镜像来自： https://hub.docker.com/ 官方OFFICIAL
-FROM openjdk:17
+# Eclipse Temurin JRE 17（openjdk 官方镜像已停止维护）
+FROM eclipse-temurin:17-jre
 
 MAINTAINER Terrfly
 

@@ -14,6 +14,8 @@ server:
   servlet:
     context-path: / #设置应用的目录.  前缀需要带/, 无需设置后缀, 示例 【 /xxx 】 or 【 / 】
 spring:
+  application:
+    name: jeepay-manager
   servlet:
     multipart:
       enabled: true #是否启用http上传处理
@@ -32,7 +34,7 @@ spring:
     # yml填写url连接串， 无需将&符号进行转义
     url: jdbc:mysql://mysql:3306/jeepaydb?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: jeepaydb123456
+    password: rootroot
     druid:
       # 连接池配置项
       initial-size: 5 #初始化时建立物理连接的个数
@@ -153,5 +155,7 @@ isys:
 rocketmq:
   name-server: rocketmq-namesrv:9876
   producer:
-    group: JEEPAY-GROUP
-
+    group: PID_JEEPAY_MANAGER
+    send-message-timeout: 10000
+    retry-times-when-send-failed: 2
+    retry-times-when-send-async-failed: 2
