@@ -1,42 +1,27 @@
 #
-#   jeepay-payment（商户平台） java程序镜像构建脚本   .Power by terrfly
+#   jeepay-payment（支付网关） java程序镜像构建脚本
 #
-
-# ------   START   ------
 
 # Eclipse Temurin JRE 17（openjdk 官方镜像已停止维护）
 FROM eclipse-temurin:17-jre
 
-MAINTAINER Terrfly
+LABEL maintainer="Terrfly"
 
-# 配置环境变量，支持中文。
 ENV LANG=C.UTF-8
-
-# 设置时区 东八区， 解决日志时间不正确的问题。
 ENV TZ=Asia/Shanghai
 
-# 对外映射的端口 ( 不明确EXPOSE 也不影响映射  )
 EXPOSE 9216
 
-# 挂载目录 "/jeepayhomes/service/app/application.yml 这个文件不能写到VOLUME中， 否则将映射成为了目录导致启动异常。
 VOLUME ["/jeepayhomes/service/logs", "/jeepayhomes/service/uploads"]
 
-# 使用jeepay用户启动。 ( 需要 RUN adduser等一系列操作 )
-# USER jeepay:jeepay
+RUN mkdir -p /jeepayhomes/service/app
 
-# 创建目录
-RUN mkdir /jeepayhomes/service/app -p
-
-# 安装
 COPY ./target/jeepay-payment.jar /jeepayhomes/service/app/jeepay-payment.jar
 
-# 设置工作目录
 WORKDIR /jeepayhomes/service/app
 
-CMD ["java", "-jar", "jeepay-payment.jar"]
+# 显式指定外部配置路径，便于 Docker 部署时挂载覆盖
+CMD ["java", "-jar", "jeepay-payment.jar", "--spring.config.additional-location=file:/jeepayhomes/service/app/application.yml"]
 
-# ------   END   ------
-
-
-
-
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD curl -sf http://localhost:9216/ || exit 1

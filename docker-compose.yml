@@ -29,7 +29,8 @@ services:
       start_period: 20s
     volumes:
       - mysql:/var/lib/mysql
-      - ./docs/sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./docs/sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./docs/sql/patch.sql:/docker-entrypoint-initdb.d/02-patch.sql:ro
     networks:
       jeepay:
         ipv4_address: 172.20.0.10
@@ -73,13 +74,20 @@ services:
       - "10912:10912"
     environment:
       NAMESRV_ADDR: rocketmq-namesrv:9876
-    command: sh mqbroker -n rocketmq-namesrv:9876
+    command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
     depends_on:
       rocketmq-namesrv:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/10911'"]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+      start_period: 120s
     volumes:
       - rocketmq_broker_logs:/home/rocketmq/logs
       - rocketmq_broker_store:/home/rocketmq/store
+      - ./docker/rocketmq/broker/conf/broker.conf:/home/rocketmq/rocketmq-5.3.1/conf/broker.conf:ro
     networks:
       jeepay:
         ipv4_address: 172.20.0.13
@@ -162,7 +170,7 @@ services:
       redis:
         condition: service_healthy
       rocketmq-broker:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./logs/payment:/jeepayhomes/service/logs
       - ./conf/payment/application.yml:/jeepayhomes/service/app/application.yml
@@ -186,7 +194,7 @@ services:
       redis:
         condition: service_healthy
       rocketmq-broker:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./logs/manager:/jeepayhomes/service/logs
       - ./conf/manager/application.yml:/jeepayhomes/service/app/application.yml
@@ -210,7 +218,7 @@ services:
       redis:
         condition: service_healthy
       rocketmq-broker:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./logs/merchant:/jeepayhomes/service/logs
       - ./conf/merchant/application.yml:/jeepayhomes/service/app/application.yml
