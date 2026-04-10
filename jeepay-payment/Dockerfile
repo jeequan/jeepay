@@ -23,5 +23,6 @@ WORKDIR /jeepayhomes/service/app
 # 显式指定外部配置路径，便于 Docker 部署时挂载覆盖
 CMD ["java", "-jar", "jeepay-payment.jar", "--spring.config.additional-location=file:/jeepayhomes/service/app/application.yml"]
 
+# 端口探测，不依赖 curl/wget 等外部工具
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD curl -sf http://localhost:9216/ || exit 1
+  CMD bash -c 'echo > /dev/tcp/localhost/9216'
