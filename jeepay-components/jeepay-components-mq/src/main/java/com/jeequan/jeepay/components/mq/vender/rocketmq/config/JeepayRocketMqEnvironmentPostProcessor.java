@@ -55,6 +55,8 @@ public class JeepayRocketMqEnvironmentPostProcessor implements EnvironmentPostPr
 
     @Override
     public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
+        // 必须在 ConfigDataEnvironmentPostProcessor（HIGHEST_PRECEDENCE + 10）之后执行，
+        // 否则 application.yml 尚未加载，isys.mq.vender 始终为 null，默认值不会生效
+        return Ordered.LOWEST_PRECEDENCE;
     }
 }

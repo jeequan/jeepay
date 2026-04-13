@@ -74,6 +74,8 @@ services:
       - "10912:10912"
     environment:
       NAMESRV_ADDR: rocketmq-namesrv:9876
+      # 开发环境限制 Broker 堆内存，默认 2g+1g 在 Docker Desktop 上容易 OOM
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m -Xmn256m"
     command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
     depends_on:
       rocketmq-namesrv:
@@ -241,7 +243,8 @@ services:
     ports:
       - "9226:80"
     depends_on:
-      - payment
+      payment:
+        condition: service_healthy
     networks:
       jeepay:
         ipv4_address: 172.20.0.31
@@ -261,7 +264,8 @@ services:
     ports:
       - "9227:80"
     depends_on:
-      - manager
+      manager:
+        condition: service_healthy
     networks:
       jeepay:
         ipv4_address: 172.20.0.32
@@ -281,7 +285,8 @@ services:
     ports:
       - "9228:80"
     depends_on:
-      - merchant
+      merchant:
+        condition: service_healthy
     networks:
       jeepay:
         ipv4_address: 172.20.0.33
@@ -314,7 +319,6 @@ networks:
 volumes:
   mysql:
   redis:
-  activemq:
   rocketmq_namesrv_logs:
   rocketmq_broker_logs:
   rocketmq_broker_store:
