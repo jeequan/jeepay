@@ -33,6 +33,20 @@ class JeepayRocketMqEnvironmentPostProcessorTest {
     }
 
     @Test
+    void shouldNotOverrideExplicitlyConfiguredProducerGroup() {
+        ConfigurableEnvironment environment = new StandardEnvironment();
+        environment.getPropertySources().addFirst(new MapPropertySource("test", Map.of(
+                MQVenderCS.YML_VENDER_KEY, MQVenderCS.ROCKET_MQ,
+                "spring.application.name", "jeepay-payment",
+                "rocketmq.producer.group", "MY_CUSTOM_GROUP"
+        )));
+
+        processor.postProcessEnvironment(environment, new SpringApplication());
+
+        assertEquals("MY_CUSTOM_GROUP", environment.getProperty("rocketmq.producer.group"));
+    }
+
+    @Test
     void shouldLeaveEnvironmentUntouchedWhenVendorDoesNotMatch() {
         ConfigurableEnvironment environment = new StandardEnvironment();
         environment.getPropertySources().addFirst(new MapPropertySource("test", Map.of(
