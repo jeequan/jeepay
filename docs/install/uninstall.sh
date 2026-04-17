@@ -26,7 +26,9 @@ docker stop mysql8 && docker rm mysql8
 
 docker stop redis6 && docker rm redis6
 
-docker stop activemq5 && docker rm activemq5
+docker stop rocketmq-broker && docker rm rocketmq-broker
+
+docker stop rocketmq-namesrv && docker rm rocketmq-namesrv
 
 docker network rm jeepay-net
 

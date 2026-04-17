@@ -251,6 +251,8 @@ Jeepay 默认包含以下 3 个核心服务：
 
 ## 方式二：Shell 脚本一键安装
 
+> Shell 一键安装脚本当前默认部署 **RocketMQ**，会自动启动 `rocketmq-namesrv` 与 `rocketmq-broker`；如需改回 ActiveMQ / RabbitMQ，请同步调整脚本与 `conf/*.yml` 配置。
+
 ### CentOS
 
 > 推荐系统：Anolis OS 8.8
@@ -266,6 +268,27 @@ yum install -y wget && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/m
 ```bash
 apt update && apt-get -y install docker.io && apt-get -y install git && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && sh install.sh
 ```
+
+### Shell 脚本默认开放端口
+
+| 组件 | 端口 | 说明 |
+| --- | --- | --- |
+| MySQL | `3306` | 数据库 |
+| Redis | `6379` | 缓存 |
+| RocketMQ NameServer | `9876` | RocketMQ 注册中心 |
+| RocketMQ Broker | `10909` / `10911` / `10912` | RocketMQ Broker |
+| 支付网关 | `19216` | payment 服务 |
+| 运营平台 | `19217` | manager 服务 |
+| 商户平台 | `19218` | merchant 服务 |
+| Nginx | `80` | 前端静态资源与反向代理 |
+
+### 卸载
+
+```bash
+cd /your/install/path/sources/jeepay/docs/install && sh uninstall.sh
+```
+
+> 卸载脚本会同时删除 `rocketmq-namesrv` 与 `rocketmq-broker` 容器。
 
 ## 方式三：自助源码部署
 

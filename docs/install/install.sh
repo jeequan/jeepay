@@ -1,6 +1,6 @@
 #! /bin/sh
 #exec 2>>build.log  ##编译过程打印到日志文件中
-## 一键启动jeepay服务，包含mysqlDB/MQ/redis/javaservice/nginx   .Power by terrfly
+## 一键启动jeepay服务，包含mysqlDB/RocketMQ/redis/javaservice/nginx   .Power by terrfly
 
 
 if [ $UID != '0' ]; then
@@ -75,7 +75,11 @@ mkdir $rootDir/mysql/log -p
 mkdir $rootDir/mysql/data -p
 mkdir $rootDir/mysql/mysql-files -p
 
-# mkdir $rootDir/activemq -p
+mkdir $rootDir/rocketmq -p
+mkdir $rootDir/rocketmq/namesrv/logs -p
+mkdir $rootDir/rocketmq/broker/logs -p
+mkdir $rootDir/rocketmq/broker/store -p
+mkdir $rootDir/rocketmq/broker/conf -p
 
 mkdir $rootDir/redis -p
 mkdir $rootDir/redis/config -p
@@ -163,14 +167,56 @@ docker run -p 6379:6379 --name redis6 --network=jeepay-net  \
 echo "[4] Done. "
 
 
-# 第5步：下载并启动activemq容器
-echo "[5] 下载并启动activemq容器.... "
+# 第5步：下载并启动 RocketMQ 容器
+echo "[5] 下载并启动 RocketMQ 容器.... "
 
-docker run -p 8161:8161 -p 61616:61616 --name activemq5 --network=jeepay-net \
+# 拷贝 broker 配置文件
+cd $sourcesInstallPath && cp ./../../docker/rocketmq/broker/conf/broker.conf $rootDir/rocketmq/broker/conf/broker.conf
+
+# 启动 NameServer
+docker run -d --name rocketmq-namesrv --network=jeepay-net \
+-p 9876:9876 \
 --restart=always \
 -v /etc/localtime:/etc/localtime:ro \
--d jeepay/activemq:5.15.16
+-v $rootDir/rocketmq/namesrv/logs:/home/rocketmq/logs \
+-e JAVA_OPT_EXT="-Xms256m -Xmx256m -Xmn128m" \
+apache/rocketmq:5.3.1 sh mqnamesrv
 
+# 启动 Broker
+mkdir -p $rootDir/rocketmq/broker/store/config
+cat > $rootDir/rocketmq/broker/store/config/topics.json <<'EOF'
+{"dataVersion":{"counter":0,"timestamp":0},"topicConfigTable":{}}
+EOF
+cat > $rootDir/rocketmq/broker/store/config/topicQueueMapping.json <<'EOF'
+{"dataVersion":{"counter":0,"timestamp":0},"topicQueueMappingInfoMap":{}}
+EOF
+
+docker run -d --name rocketmq-broker --network=jeepay-net \
+-p 10909:10909 -p 10911:10911 -p 10912:10912 \
+--restart=always \
+-u 0:0 \
+-v /etc/localtime:/etc/localtime:ro \
+-v $rootDir/rocketmq/broker/logs:/home/rocketmq/logs \
+-v $rootDir/rocketmq/broker/store:/home/rocketmq/store \
+-v $rootDir/rocketmq/broker/conf/broker.conf:/home/rocketmq/rocketmq-5.3.1/conf/broker.conf:ro \
+-e JAVA_OPT_EXT="-Xms512m -Xmx512m -Xmn256m" \
+-e NAMESRV_ADDR="rocketmq-namesrv:9876" \
+apache/rocketmq:5.3.1 sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
+
+while true
+do
+  docker logs rocketmq-broker > /tmp/installrocketmq.log 2>&1
+  logContent=$(cat /tmp/installrocketmq.log | grep 'boot success')
+  if [ ! -n "$logContent" ]; then
+    docker logs --tail 20 rocketmq-broker
+    echo "[5] 等待启动 RocketMQ Broker....... "
+    sleep 15
+  else
+    echo "[5] RocketMQ 启动完成 $logContent"
+    sleep 5
+    break
+  fi
+done
 
 echo "[5] Done. "
 
