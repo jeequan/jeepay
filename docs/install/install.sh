@@ -203,19 +203,42 @@ docker run -d --name rocketmq-broker --network=jeepay-net \
 -e NAMESRV_ADDR="rocketmq-namesrv:9876" \
 apache/rocketmq:5.3.1 sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
 
+rocketmqWaitCount=0
 while true
 do
   docker logs rocketmq-broker > /tmp/installrocketmq.log 2>&1
   logContent=$(cat /tmp/installrocketmq.log | grep 'boot success')
-  if [ ! -n "$logContent" ]; then
-    docker logs --tail 20 rocketmq-broker
-    echo "[5] 等待启动 RocketMQ Broker....... "
-    sleep 15
-  else
+  failContent=$(cat /tmp/installrocketmq.log | grep -E 'NullPointerException|ERROR|Exception')
+
+  if [ -n "$logContent" ]; then
     echo "[5] RocketMQ 启动完成 $logContent"
     sleep 5
     break
   fi
+
+  rocketmqWaitCount=$((rocketmqWaitCount + 1))
+
+  if [ -n "$failContent" ] && [ $rocketmqWaitCount -ge 3 ]; then
+    echo "[5] ERROR: RocketMQ Broker 启动失败，请检查最近日志："
+    docker logs --tail 100 rocketmq-broker
+    echo "[5] 常见原因："
+    echo "    1. RocketMQ 镜像架构与服务器不兼容（当前使用 apache/rocketmq:5.3.1）"
+    echo "    2. Broker 存储目录权限异常：$rootDir/rocketmq/broker/store"
+    echo "    3. broker.conf 配置或挂载失败：$rootDir/rocketmq/broker/conf/broker.conf"
+    echo "    4. NameServer 未正常启动，可执行：docker logs --tail 50 rocketmq-namesrv"
+    exit 1
+  fi
+
+  if [ $rocketmqWaitCount -ge 20 ]; then
+    echo "[5] ERROR: RocketMQ Broker 启动超时，请检查日志："
+    docker logs --tail 100 rocketmq-broker
+    echo "[5] 可继续排查：docker logs rocketmq-namesrv && docker logs rocketmq-broker"
+    exit 1
+  fi
+
+  docker logs --tail 20 rocketmq-broker
+  echo "[5] 等待启动 RocketMQ Broker....... ($rocketmqWaitCount/20)"
+  sleep 15
 done
 
 echo "[5] Done. "

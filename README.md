@@ -290,6 +290,24 @@ cd /your/install/path/sources/jeepay/docs/install && sh uninstall.sh
 
 > 卸载脚本会同时删除 `rocketmq-namesrv` 与 `rocketmq-broker` 容器。
 
+### Shell 脚本安装常见问题
+
+#### RocketMQ Broker 启动失败
+
+如果安装过程中卡在 RocketMQ 启动阶段，脚本会自动输出最近日志并直接失败退出。优先检查：
+
+1. 服务器架构是否兼容 `apache/rocketmq:5.3.1`
+2. `$rootDir/rocketmq/broker/store` 目录权限是否正常
+3. `$rootDir/rocketmq/broker/conf/broker.conf` 是否成功挂载
+4. `rocketmq-namesrv` 是否已正常启动
+
+可手动执行：
+
+```bash
+docker logs --tail 50 rocketmq-namesrv
+docker logs --tail 100 rocketmq-broker
+```
+
 ## 方式三：自助源码部署
 
 适合需要二次开发、自定义部署架构或接入内部基础设施的团队：
