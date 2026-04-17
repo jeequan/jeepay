@@ -78,7 +78,7 @@ public class TransferOrderReissueService {
 
             }else if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_FAIL){
                 // 转账失败
-                transferOrderService.updateIng2Fail(transferId, channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrCode(),channelRetMsg.getChannelErrMsg());
+                transferOrderService.updateIng2Fail(transferId, channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrCode(), channelRetMsg.getChannelErrMsg());
                 payMchNotifyService.transferOrderNotify(transferOrderService.getById(transferId));
             }
 
