@@ -175,6 +175,8 @@ git clone https://github.com/jeequan/jeepay-ui.git
 | 自助源码部署 | 需要二次开发 / 接入内部基础设施的团队 | 自行准备 MySQL / Redis / MQ，按环境调整 `conf/` 后 Maven 打包部署 |
 | Docker Compose 部署 | 本地或测试环境快速起完整集群（含前端） | [docs/deploy/compose.md](docs/deploy/compose.md) |
 
+> **国内零配置直达**：Shell 脚本与 Docker Compose 的默认镜像都指向 **华为云 SWR 公开仓库**（`swr.cn-south-1.myhuaweicloud.com/jeepay/*`），由计全官方维护，公网匿名可拉，不依赖 Docker Hub，**无需登录也不需要配置加速器**。
+>
 > 部署过程中碰到问题，优先看 [docs/deploy/troubleshooting.md](docs/deploy/troubleshooting.md)。
 
 ---

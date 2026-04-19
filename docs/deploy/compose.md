@@ -2,6 +2,8 @@
 
 适合希望通过容器快速拉起完整开发 / 测试环境的场景。
 
+> **国内用户零配置直达。** `docker-compose.yml` 中 MySQL / Redis / RocketMQ 默认镜像、以及 3 个 jeepay 应用 Dockerfile 的 `ARG BASE_IMAGE`（`eclipse-temurin:17-jre`）都已指向 **华为云 SWR 公开仓库**（`swr.cn-south-1.myhuaweicloud.com/jeepay/*`），由计全官方维护，**公网匿名可拉**，不依赖 Docker Hub，无需加速器。下述"国内镜像加速"章节仅在你主动把镜像改回 Docker Hub 或使用其他第三方镜像时才需要。
+
 ## 目录要求
 
 默认约定：
@@ -16,7 +18,9 @@ jeepay-open/
 
 ## 构建前准备
 
-### 1. 配置 Docker 国内镜像加速（强烈建议）
+### 1. 配置 Docker 国内镜像加速（仅在不走 SWR 时需要）
+
+> 默认镜像都走华为云 SWR 公开仓库，**直接拉即可跳过本节**。只有在你覆盖为 Docker Hub 上游镜像，或者 Compose 文件里某些非 jeepay 维护的镜像仍然来自 Docker Hub 时，才需要配置下面的加速源。
 
 国内网络拉取 Docker Hub 镜像较慢或被墙，建议配置多个镜像加速源（单个源随时可能失效，Docker 会自动 fallback）。
 
@@ -139,9 +143,9 @@ docker compose logs --tail=100 payment manager merchant rocketmq-namesrv rocketm
 docker logs jeepay-rocketmq-broker 2>&1 | grep "boot success"
 ```
 
-## 镜像发布（维护者流程）
+## 镜像发布（维护者流程，终端用户跳过）
 
-> 以下章节面向维护者 / 二开团队，用于向镜像仓库推送自己构建的 jeepay 镜像。终端用户无需执行。
+> 以下章节仅面向 **维护者 / 二开团队**，用于向自己的镜像仓库推送构建好的 jeepay 镜像。**终端用户请忽略本节**，直接用仓库默认的华为云 SWR 公开镜像即可。
 
 ### 发布到 Docker Hub
 

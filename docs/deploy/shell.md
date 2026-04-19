@@ -1,5 +1,7 @@
 # Shell 脚本一键安装
 
+> **国内用户直接使用默认镜像即可。** 脚本中 MySQL / Redis / RocketMQ / Nginx 以及 3 个 jeepay 应用镜像已全部默认指向 **华为云 SWR 公开仓库**（`swr.cn-south-1.myhuaweicloud.com/jeepay/*`），由计全官方维护，**公网可直接匿名拉取**，不依赖 Docker Hub，无需登录，也不需要镜像加速器。
+
 > Shell 一键安装脚本默认部署 **RocketMQ**，会自动启动 `rocketmq-namesrv` 与 `rocketmq-broker`；如需改回 ActiveMQ / RabbitMQ，请同步调整脚本与 `conf/*.yml` 配置。
 
 ## CentOS
@@ -48,9 +50,15 @@ cd /your/install/path/sources/jeepay/docs/install && sh uninstall.sh
 
 卸载脚本会同时删除 `rocketmq-namesrv` 与 `rocketmq-broker` 容器；脚本已做成幂等，缺失容器或网络会自动跳过。
 
-## 自定义镜像源
+## 自定义镜像源（高级）
 
-`install.sh` 默认镜像指向华为云 SWR（`swr.cn-south-1.myhuaweicloud.com/jeepay/*`），你可以在执行前用环境变量覆盖，例如切回 Docker Hub：
+绝大多数用户直接用脚本默认镜像（华为云 SWR 公开仓库）即可。只有以下场景需要覆盖：
+
+- 公司 / 集群有内部镜像仓库，想走内部网络；
+- 想固定到特定版本或自行构建的镜像；
+- 一定要回到 Docker Hub 上游镜像（一般不推荐，国内拉取慢且依赖加速器）。
+
+执行前用环境变量覆盖即可，例如切回 Docker Hub 上游：
 
 ```bash
 export mysqlImage=mysql:8.0.25
