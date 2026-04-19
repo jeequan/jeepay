@@ -276,3 +276,17 @@
    部署拓扑（三子域 / 一域名 + 路径前缀 / 只暴露收银台）与外层 nginx
    示例片段，避免"加域名就出问题"。
 4. 优化： install.sh 默认 jeepayRef 由 V3.2.1 跟进到 V3.2.2。
+
+[v3.2.3_20260419]
+> 跨发行版安装加固补丁版本：业务代码零改动，与 3.2.0 / V3.2.x 业务镜像
+> 完全兼容，无需重打 jeepay-manager / jeepay-merchant / jeepay-payment
+> 镜像。主要修复用户在 Ubuntu / Debian 上直接执行 install.sh 时出现
+> "docker: command not found" 的问题（原脚本仅 yum 路径有自动安装兜底）。
+1. 修复： install.sh 依赖自动安装改为跨发行版适配，自动检测
+   apt / dnf / yum / apk 包管理器并选择对应安装路径；包含 wget / curl
+   / git / docker 四个命令的自动安装与落地校验。
+2. 新增： install.sh 安装失败时给出明确错误提示（包管理器类型、对应
+   手动安装命令），避免后续步骤连串 command not found。
+3. 新增： install.sh 在装完 docker 后执行 docker info 校验 daemon
+   可用，daemon 未启动会提示 systemctl / service 启动命令。
+4. 优化： install.sh 默认 jeepayRef 由 V3.2.2 跟进到 V3.2.3。

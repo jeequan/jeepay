@@ -8,6 +8,119 @@ if [ $UID != '0' ]; then
     exit 0
 fi
 
+# ---------------------------------------------------------------------------
+# 跨发行版的依赖安装辅助：检测包管理器（apt/dnf/yum/apk），对 wget/curl/git/
+# docker 做自动安装并校验，无法自动安装时给出明确错误。
+# ---------------------------------------------------------------------------
+detect_pkg_mgr() {
+    if command -v apt-get >/dev/null 2>&1; then
+        echo "apt"
+    elif command -v dnf >/dev/null 2>&1; then
+        echo "dnf"
+    elif command -v yum >/dev/null 2>&1; then
+        echo "yum"
+    elif command -v apk >/dev/null 2>&1; then
+        echo "apk"
+    else
+        echo "unknown"
+    fi
+}
+
+PKG_MGR=$(detect_pkg_mgr)
+APT_UPDATED=0
+
+pkg_install() {
+    case "$PKG_MGR" in
+        apt)
+            if [ "$APT_UPDATED" -eq 0 ]; then
+                apt-get update -y >/dev/null 2>&1 || true
+                APT_UPDATED=1
+            fi
+            DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
+            ;;
+        dnf) dnf install -y "$@" ;;
+        yum) yum install -y "$@" ;;
+        apk) apk add --no-cache "$@" ;;
+        *)
+            echo "ERROR: 未识别的包管理器（非 apt/dnf/yum/apk），请手动安装：$*"
+            return 1
+            ;;
+    esac
+}
+
+ensure_cmd() {
+    cmdName=$1
+    pkgName=${2:-$cmdName}
+    if command -v "$cmdName" >/dev/null 2>&1; then
+        return 0
+    fi
+    echo "install $pkgName..."
+    if ! pkg_install "$pkgName"; then
+        echo "ERROR: 自动安装 $pkgName 失败（包管理器：$PKG_MGR），请手动安装后重试。"
+        exit 1
+    fi
+    if ! command -v "$cmdName" >/dev/null 2>&1; then
+        echo "ERROR: 已尝试安装 $pkgName 但仍找不到 $cmdName，请排查后重试。"
+        exit 1
+    fi
+}
+
+ensure_docker() {
+    if command -v docker >/dev/null 2>&1; then
+        return 0
+    fi
+    echo "install docker..."
+    case "$PKG_MGR" in
+        apt)
+            pkg_install docker.io
+            ;;
+        dnf|yum)
+            # 添加阿里云的 docker-ce 源（仅对 RHEL 系）
+            $PKG_MGR install -y yum-utils >/dev/null 2>&1 || true
+            if command -v yum-config-manager >/dev/null 2>&1; then
+                yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo >/dev/null 2>&1 || true
+            fi
+            $PKG_MGR makecache >/dev/null 2>&1 || true
+            pkg_install docker-ce
+            ;;
+        apk)
+            pkg_install docker
+            command -v rc-update >/dev/null 2>&1 && rc-update add docker default 2>/dev/null || true
+            command -v service >/dev/null 2>&1 && service docker start 2>/dev/null || true
+            ;;
+        *)
+            echo "ERROR: 未识别的系统，无法自动安装 docker。"
+            echo "       请参考 https://docs.docker.com/engine/install/ 手动安装后重试。"
+            exit 1
+            ;;
+    esac
+    if ! command -v docker >/dev/null 2>&1; then
+        echo "ERROR: docker 自动安装失败，请手动安装后重试。"
+        exit 1
+    fi
+    # 启动 docker daemon（systemd 系统）
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl start docker 2>/dev/null || true
+        systemctl enable docker 2>/dev/null || true
+    fi
+    # 校验 daemon 可用
+    if ! docker info >/dev/null 2>&1; then
+        echo "ERROR: docker 已安装但 daemon 未能启动。请执行以下命令手动启动后重试："
+        echo "       systemctl start docker   # systemd 系统"
+        echo "       service docker start     # 非 systemd 系统"
+        exit 1
+    fi
+}
+
+if [ "$PKG_MGR" = "unknown" ]; then
+    echo "WARN: 未识别到支持的包管理器（apt/dnf/yum/apk），将跳过依赖自动安装；"
+    echo "      请确保 wget / curl / git / docker 已手动安装。"
+fi
+
+# 预置 wget / curl，用于下载 config.sh / html.tar.gz 与部署自检
+ensure_cmd wget
+ensure_cmd curl
+
 # 第0步：提示信息
 echo "请确认当前是全新服务器安装,  是否继续？"
 echo "(Please confirm if it is a brand new server installation, do you want to continue?)"
@@ -46,19 +159,9 @@ then
     exit 0
 fi
 
-# 检查 git
-if ! [ -x "$(command -v git)" ]; then
-    echo 'install git...'
-    yum install -y git
-fi
-
-# 检查 docker环境
-if ! [ -x "$(command -v docker)" ]; then
-    echo 'install docker...'
-    yum install  -y yum-utils && yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-    yum makecache && yum install  -y docker-ce
-    systemctl restart docker && systemctl enable docker
-fi
+# 检查 git、docker（基于 detect_pkg_mgr 结果自动适配 apt/dnf/yum/apk）
+ensure_cmd git
+ensure_docker
 
 
 # 第1步：创建基本目录
@@ -104,10 +207,10 @@ paymentImage=${paymentImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-paym
 # 其他镜像（mysql/redis/nginx）已具备多架构 manifest，不再强制 platform。
 rocketmqPlatform=${rocketmqPlatform:-linux/amd64}
 
-# 源码 ref：默认锁到 V3.2.2 release tag，保证 git clone 下来的 SQL / broker.conf.template /
-# nginx.conf / conf/* 与业务镜像（3.2.0 / V3.2.2 兼容）契合，不受 master 后续演进影响。
+# 源码 ref：默认锁到 V3.2.3 release tag，保证 git clone 下来的 SQL / broker.conf.template /
+# nginx.conf / conf/* 与业务镜像（3.2.0 / V3.2.3 兼容）契合，不受 master 后续演进影响。
 # 如需用最新 master 或其他 tag，安装前导出 jeepayRef=xxx 覆盖即可（透传给 git clone --branch）。
-jeepayRef=${jeepayRef:-V3.2.2}
+jeepayRef=${jeepayRef:-V3.2.3}
 
 # 第2步：拉取项目源代码  || 拉取脚本文件
 echo "[2] 拉取项目源代码文件 (ref=$jeepayRef).... "
