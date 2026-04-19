@@ -290,3 +290,19 @@
 3. 新增： install.sh 在装完 docker 后执行 docker info 校验 daemon
    可用，daemon 未启动会提示 systemctl / service 启动命令。
 4. 优化： install.sh 默认 jeepayRef 由 V3.2.2 跟进到 V3.2.3。
+
+[v3.2.4_20260419]
+> 宿主端口冲突预检补丁版本：业务代码零改动，与 3.2.0 / V3.2.x 业务镜像
+> 完全兼容。修复用户在已有 MySQL / Redis 的宿主机上执行 install.sh，
+> 直接走到 [3]/[4] 才因 "address already in use" 失败、留下半成品容器
+> 的体验问题。
+1. 新增： install.sh 启动阶段预检 9 个宿主端口
+   （3306 / 6379 / 9876 / 10909-10912 / 19216-19218），任一被占直接
+   打印占用进程并退出，避免后续容器启动失败后手工排查。
+2. 新增： mysqlHostPort / redisHostPort 两个环境变量 / config.sh 覆盖项，
+   支持在已有 MySQL / Redis 的宿主机上改用其他 host port。jeepay 服务
+   在 jeepay-net 内部仍通过 mysql:3306 / redis:6379 通信，host port
+   变化不影响业务。
+3. 文档： docs/deploy/shell.md 新增"宿主端口冲突"小节，说明哪些端口
+   可改、哪些必须释放，以及 RocketMQ / Nginx 为何暂不支持覆盖。
+4. 优化： install.sh 默认 jeepayRef 由 V3.2.3 跟进到 V3.2.4。

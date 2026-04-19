@@ -31,10 +31,16 @@ mysql_pwd="jeepaydb123456"
 # 若使用自行构建的 arm64 RocketMQ 镜像，请同时覆盖 rocketmqImage 并将下行改为 linux/arm64：
 # rocketmqPlatform="linux/amd64"
 
-# 源码 ref：install.sh 默认锁到 V3.2.3 release tag。如需切到其他 tag 或 master，
+# 源码 ref：install.sh 默认锁到 V3.2.4 release tag。如需切到其他 tag 或 master，
 # 取消以下注释并改为目标 ref；确保该 ref 下的 SQL / broker.conf.template / nginx.conf /
 # conf/* 与所选业务镜像版本兼容。
 # jeepayRef="master"
+
+# 宿主端口覆盖：若宿主机本地已有 MySQL / Redis 占用 3306 / 6379，可改用其他端口。
+# jeepay 内部服务通过 jeepay-net 访问 mysql:3306 / redis:6379，host port 变化不影响
+# 业务通信；仅影响"从宿主机访问"。RocketMQ / Nginx 的端口与容器通信耦合不支持覆盖。
+# mysqlHostPort="13306"
+# redisHostPort="16379"
 
 
 #当前路径， 不要更改参数。

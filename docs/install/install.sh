@@ -147,6 +147,73 @@ if [ -d $rootDir ]; then
     exit 0
 fi
 
+# MySQL / Redis 的宿主端口可通过环境变量（或 config.sh）覆盖；jeepay 服务
+# 在 jeepay-net 内部通过容器名 + 标准端口通信，host port 变化不影响业务。
+mysqlHostPort=${mysqlHostPort:-3306}
+redisHostPort=${redisHostPort:-6379}
+
+# ---------------------------------------------------------------------------
+# 宿主端口占用预检：提前识别 3306 / 6379 / 9876 / 10909-10912 / 19216-19218
+# 任一端口被占时直接退出，避免到 docker run 才失败、留下一堆半成品容器。
+# ---------------------------------------------------------------------------
+port_in_use() {
+    portNum=$1
+    if command -v ss >/dev/null 2>&1; then
+        ss -lnt 2>/dev/null | awk '{print $4}' | grep -qE "[:.]${portNum}$"
+    elif command -v netstat >/dev/null 2>&1; then
+        netstat -lnt 2>/dev/null | awk '{print $4}' | grep -qE "[:.]${portNum}$"
+    else
+        return 1
+    fi
+}
+
+print_port_owner() {
+    portNum=$1
+    if command -v ss >/dev/null 2>&1; then
+        ss -lntp 2>/dev/null | grep -E "[:.]${portNum}[[:space:]]" | head -3
+    elif command -v lsof >/dev/null 2>&1; then
+        lsof -i :"$portNum" -sTCP:LISTEN 2>/dev/null | tail -n +2 | head -3
+    elif command -v netstat >/dev/null 2>&1; then
+        netstat -lntp 2>/dev/null | grep -E "[:.]${portNum}[[:space:]]" | head -3
+    fi
+}
+
+portConflict=0
+check_port() {
+    portLabel=$1
+    portNum=$2
+    if port_in_use "$portNum"; then
+        echo "  - 端口 $portNum ($portLabel) 已被占用："
+        print_port_owner "$portNum" | sed 's/^/      /'
+        portConflict=1
+    fi
+}
+
+echo "检查宿主端口占用情况..."
+check_port "MySQL"                        "$mysqlHostPort"
+check_port "Redis"                        "$redisHostPort"
+check_port "RocketMQ NameServer"          9876
+check_port "RocketMQ Broker 10909"        10909
+check_port "RocketMQ Broker 10911"        10911
+check_port "RocketMQ Broker 10912"        10912
+check_port "Nginx -> payment"             19216
+check_port "Nginx -> manager"             19217
+check_port "Nginx -> merchant"            19218
+
+if [ "$portConflict" -eq 1 ]; then
+    echo
+    echo "ERROR： 上述端口被占用，安装无法继续。处理方式："
+    echo "  1) 释放占用端口（停止对应服务或容器）后重跑本脚本。"
+    echo "  2) 仅对 MySQL / Redis 支持宿主端口覆盖，安装前导出环境变量即可："
+    echo "       export mysqlHostPort=13306"
+    echo "       export redisHostPort=16379"
+    echo "       sh install.sh"
+    echo "     （jeepay 各服务通过 jeepay-net 内部访问 mysql:3306 / redis:6379，"
+    echo "      host port 变化不影响业务通信。）"
+    echo "  3) RocketMQ / Nginx 端口与容器内通信耦合，暂不支持覆盖，请先释放。"
+    exit 1
+fi
+
 # 第0步：提示信息
 echo "检查配置信息是否正确（配置内容在 config.sh文件）："
 echo "【项目根目录的地址】： $rootDir"
@@ -207,10 +274,10 @@ paymentImage=${paymentImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-paym
 # 其他镜像（mysql/redis/nginx）已具备多架构 manifest，不再强制 platform。
 rocketmqPlatform=${rocketmqPlatform:-linux/amd64}
 
-# 源码 ref：默认锁到 V3.2.3 release tag，保证 git clone 下来的 SQL / broker.conf.template /
-# nginx.conf / conf/* 与业务镜像（3.2.0 / V3.2.3 兼容）契合，不受 master 后续演进影响。
+# 源码 ref：默认锁到 V3.2.4 release tag，保证 git clone 下来的 SQL / broker.conf.template /
+# nginx.conf / conf/* 与业务镜像（3.2.0 / V3.2.4 兼容）契合，不受 master 后续演进影响。
 # 如需用最新 master 或其他 tag，安装前导出 jeepayRef=xxx 覆盖即可（透传给 git clone --branch）。
-jeepayRef=${jeepayRef:-V3.2.3}
+jeepayRef=${jeepayRef:-V3.2.4}
 
 # 第2步：拉取项目源代码  || 拉取脚本文件
 echo "[2] 拉取项目源代码文件 (ref=$jeepayRef).... "
@@ -238,6 +305,8 @@ managerImage="$managerImage"
 merchantImage="$merchantImage"
 paymentImage="$paymentImage"
 jeepayRef="$jeepayRef"
+mysqlHostPort="$mysqlHostPort"
+redisHostPort="$redisHostPort"
 currentPath=\`pwd\`
 EOF
 
@@ -252,7 +321,7 @@ echo "提示：  如下载进度缓慢，建议配置阿里云或其他镜像加
 cd $sourcesInstallPath && cp ./include/my.cnf $rootDir/mysql/config/my.cnf
 
 # 镜像启动
-docker run -p 3306:3306 --name mysql8 --network=jeepay-net  \
+docker run -p $mysqlHostPort:3306 --name mysql8 --network=jeepay-net  \
 --restart=always --privileged=true \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/mysql/log:/var/log/mysql  \
@@ -296,7 +365,7 @@ cd $sourcesInstallPath && cp ./include/redis.conf $rootDir/redis/config/redis.co
 chmod 644 $rootDir/redis/config/redis.conf
 
 # 镜像启动
-docker run -p 6379:6379 --name redis6 --network=jeepay-net  \
+docker run -p $redisHostPort:6379 --name redis6 --network=jeepay-net  \
 --restart=always --privileged=true \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/redis/config/redis.conf:/etc/redis/redis.conf \

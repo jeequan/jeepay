@@ -145,6 +145,24 @@ server {
 - 外层 nginx 若开启 `gzip`，注意排除 SSE / WebSocket 类型（`text/event-stream`）。
 - 修改 `nginx.conf` 后：`docker exec nginx118 nginx -s reload`。
 
+## 宿主端口冲突
+
+`install.sh` 在进入 `[1]` 之前会预检以下宿主端口，任一被占直接退出并打印占用进程：
+
+`3306` `6379` `9876` `10909` `10911` `10912` `19216` `19217` `19218`
+
+- **MySQL / Redis 的宿主端口可以改**（容器内仍是标准端口，jeepay 各服务在 `jeepay-net` 内部通过 `mysql:3306` / `redis:6379` 通信，不受 host port 影响）。例如宿主机本就有一份 MySQL 占 3306：
+
+  ```bash
+  export mysqlHostPort=13306
+  export redisHostPort=16379
+  sh install.sh
+  ```
+
+  同样的变量也可以在 `config.sh` 里取消注释生效。
+
+- **RocketMQ / Nginx 的端口与容器内通信耦合**（RocketMQ broker 会向客户端广播 `brokerIP1:10911`，Nginx 的 `listen` 写进了静态配置），目前不支持覆盖。命中冲突请先释放再重跑。
+
 ## 卸载
 
 ```bash
@@ -157,7 +175,7 @@ cd /your/install/path/sources/jeepay/docs/install && sh uninstall.sh
 
 ## 锁定源码版本
 
-`install.sh` 默认 `jeepayRef=V3.2.3`，即 `git clone --branch V3.2.3 --depth 1`，和业务镜像（`3.2.0`，V3.2.3 与之完全兼容）锁在同一版本，避免业务镜像固定而源码继续漂移出现的"老镜像 + 新配置"混装问题。
+`install.sh` 默认 `jeepayRef=V3.2.4`，即 `git clone --branch V3.2.4 --depth 1`，和业务镜像（`3.2.0`，V3.2.4 与之完全兼容）锁在同一版本，避免业务镜像固定而源码继续漂移出现的"老镜像 + 新配置"混装问题。
 
 如需临时改用最新 master 或其他 release tag，安装前导出环境变量即可：
 
