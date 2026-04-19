@@ -12,7 +12,7 @@ services:
     hostname: mysql
     container_name: jeepay-mysql
     restart: always
-    image: mysql:8
+    image: ${MYSQL_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/mysql:8}
     environment:
       LANG: C.UTF-8
       MYSQL_ROOT_PASSWORD: "rootroot"
@@ -37,7 +37,8 @@ services:
 
   # 使用 RocketMQ 作为默认 MQ 方案
   rocketmq-namesrv:
-    image: apache/rocketmq:5.3.1
+    platform: linux/amd64
+    image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
     hostname: rocketmq-namesrv
     container_name: jeepay-rocketmq-namesrv
     restart: always
@@ -62,7 +63,8 @@ services:
         ipv4_address: 172.20.0.11
 
   rocketmq-broker:
-    image: apache/rocketmq:5.3.1
+    platform: linux/amd64
+    image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
     hostname: rocketmq-broker
     container_name: jeepay-rocketmq-broker
     restart: always
@@ -138,10 +140,11 @@ services:
   #      ipv4_address: 172.20.0.15
 
   redis:
+    platform: linux/amd64
     hostname: redis
     container_name: jeepay-redis
     restart: always
-    image: redis:latest
+    image: ${REDIS_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/redis:6.2.14}
     ports:
       - "6380:6379"
     healthcheck:
@@ -166,6 +169,12 @@ services:
     restart: always
     ports:
       - "9216:9216"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://127.0.0.1:9216"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
     depends_on:
       mysql:
         condition: service_healthy
@@ -190,6 +199,12 @@ services:
     restart: always
     ports:
       - "9217:9217"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://127.0.0.1:9217"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
     depends_on:
       mysql:
         condition: service_healthy
@@ -214,6 +229,12 @@ services:
     restart: always
     ports:
       - "9218:9218"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://127.0.0.1:9218"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
     depends_on:
       mysql:
         condition: service_healthy

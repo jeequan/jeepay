@@ -1,0 +1,117 @@
+services:
+  mysql:
+    hostname: mysql
+    container_name: jeepay-swr-smoke-mysql
+    restart: always
+    image: ${MYSQL_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/mysql:8}
+    environment:
+      LANG: C.UTF-8
+      MYSQL_ROOT_PASSWORD: "rootroot"
+      MYSQL_DATABASE: "jeepaydb"
+      MYSQL_USER: "jeepay"
+      MYSQL_PASSWORD: "jeepay"
+    ports:
+      - "23306:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./docs/sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./docs/sql/patch.sql:/docker-entrypoint-initdb.d/02-patch.sql:ro
+    networks:
+      jeepay:
+        ipv4_address: 172.31.0.10
+
+  rocketmq-namesrv:
+    platform: linux/amd64
+    image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
+    hostname: rocketmq-namesrv
+    container_name: jeepay-swr-smoke-rocketmq-namesrv
+    restart: always
+    user: "0:0"
+    ports:
+      - "19876:9876"
+    environment:
+      HEAP_OPTS: "-Xms256m -Xmx256m -Xmn128m"
+    command: sh mqnamesrv
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/9876'"]
+      interval: 15s
+      timeout: 15s
+      retries: 10
+      start_period: 40s
+    volumes:
+      - rocketmq_namesrv_logs:/home/rocketmq/logs
+    networks:
+      jeepay:
+        ipv4_address: 172.31.0.11
+
+  redis:
+    platform: linux/amd64
+    hostname: redis
+    container_name: jeepay-swr-smoke-redis
+    restart: always
+    image: ${REDIS_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/redis:6.2.14}
+    ports:
+      - "16380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    volumes:
+      - redis:/data
+    networks:
+      jeepay:
+        ipv4_address: 172.31.0.12
+
+  rocketmq-broker:
+    platform: linux/amd64
+    image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
+    hostname: rocketmq-broker
+    container_name: jeepay-swr-smoke-rocketmq-broker
+    restart: always
+    user: "0:0"
+    ports:
+      - "20909:10909"
+      - "20911:10911"
+      - "20912:10912"
+    environment:
+      NAMESRV_ADDR: rocketmq-namesrv:9876
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m -Xmn256m"
+    command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
+    depends_on:
+      rocketmq-namesrv:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/10911'"]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+      start_period: 120s
+    volumes:
+      - rocketmq_broker_logs:/home/rocketmq/logs
+      - rocketmq_broker_store:/home/rocketmq/store
+      - ./docker/rocketmq/broker/conf/broker.conf:/home/rocketmq/rocketmq-5.3.1/conf/broker.conf:ro
+    networks:
+      jeepay:
+        ipv4_address: 172.31.0.13
+
+volumes:
+  mysql:
+  redis:
+  rocketmq_namesrv_logs:
+  rocketmq_broker_logs:
+  rocketmq_broker_store:
+
+networks:
+  jeepay:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.0.0/24

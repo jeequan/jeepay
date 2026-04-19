@@ -288,7 +288,7 @@ apt update && apt-get -y install docker.io && apt-get -y install git && wget -O 
 cd /your/install/path/sources/jeepay/docs/install && sh uninstall.sh
 ```
 
-> 卸载脚本会同时删除 `rocketmq-namesrv` 与 `rocketmq-broker` 容器。
+> 卸载脚本会同时删除 `rocketmq-namesrv` 与 `rocketmq-broker` 容器；脚本已做成幂等，缺失容器或网络会自动跳过。
 
 ### Shell 脚本安装常见问题
 
@@ -380,6 +380,77 @@ mvn clean package -DskipTests
 - `jeepay-manager/target/jeepay-manager.jar`
 - `jeepay-merchant/target/jeepay-merchant.jar`
 
+#### 2.1 发布到 Docker Hub
+
+先执行一次 `docker login`，然后在 `jeepay` 根目录运行：
+
+```bash
+DOCKERHUB_NAMESPACE=<你的 Docker Hub 用户名或组织> \
+IMAGE_TAG=3.2.0 \
+PUSH_LATEST=true \
+sh docker/publish-dockerhub.sh
+```
+
+说明：
+
+- `DOCKERHUB_NAMESPACE`：必填，推送目标命名空间。
+- `IMAGE_TAG`：镜像版本号，默认 `latest`。
+- `PUSH_LATEST=true`：当 `IMAGE_TAG` 不是 `latest` 时，额外推送一份 `latest` 标签。
+- `SKIP_MAVEN=true`：如 JAR 已提前打包，可跳过 `mvn clean package -DskipTests`。
+
+脚本会依次构建并推送：
+
+- `<namespace>/jeepay-manager:<tag>`
+- `<namespace>/jeepay-merchant:<tag>`
+- `<namespace>/jeepay-payment:<tag>`
+
+#### 2.2 发布到华为云 SWR（统一 tag 自动适配 amd64 / arm64）
+
+先执行一次 `docker login swr.cn-south-1.myhuaweicloud.com`，然后在 `jeepay` 根目录运行：
+
+```bash
+SWR_NAMESPACE=jeepay \
+IMAGE_TAG=3.2.0 \
+PUSH_LATEST=true \
+sh docker/publish-swr.sh
+```
+
+说明：
+
+- `publish-swr.sh` 会分别构建并推送 `amd64`、`arm64` 临时镜像，再创建统一的多架构 tag。
+- 用户最终只需要使用：
+  - `swr.cn-south-1.myhuaweicloud.com/<namespace>/jeepay-manager:3.2.0`
+  - `swr.cn-south-1.myhuaweicloud.com/<namespace>/jeepay-manager:latest`
+  - 其他两个服务同理
+- 如果已经提前完成 Maven 打包，可加 `SKIP_MAVEN=true`。
+- 如需改区域，可覆盖 `SWR_REGISTRY`，例如 `SWR_REGISTRY=swr.cn-north-4.myhuaweicloud.com`。
+
+#### 2.3 同步第三方基础镜像到华为云 SWR
+
+为避免国内部署依赖 Docker Hub，可先把 MySQL / Redis / RocketMQ / Nginx / Java 基础镜像同步到 SWR：
+
+```bash
+SWR_NAMESPACE=jeepay \
+sh docker/sync-swr-thirdparty.sh
+```
+
+默认会同步以下镜像：
+
+- `mysql:8`
+- `mysql:8.0.25`
+- `redis:6.2.14`
+- `apache/rocketmq:5.3.1`
+- `nginx:1.18.0`
+- `eclipse-temurin:17-jre`
+
+同步完成后，仓库内默认部署配置会优先使用：
+
+- `swr.cn-south-1.myhuaweicloud.com/jeepay/mysql:*`
+- `swr.cn-south-1.myhuaweicloud.com/jeepay/redis:*`
+- `swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:*`
+- `swr.cn-south-1.myhuaweicloud.com/jeepay/nginx:*`
+- `swr.cn-south-1.myhuaweicloud.com/jeepay/eclipse-temurin:17-jre`
+
 #### 3. 准备前端代码
 
 确保 `jeepay-ui` 仓库已拉取到本地，且目录结构满足上面的要求。
@@ -444,6 +515,7 @@ docker compose config
 - `conf/payment`、`conf/manager`、`conf/merchant` 已默认切换为 `rocketMQ`，MySQL / Redis 主机名配置为容器内网名 `mysql`、`redis`。
 - MySQL 映射为 `13306:3306`，避免与宿主机本地 MySQL 冲突；容器内部服务仍通过 `mysql:3306` 通信。
 - Java 服务的配置文件通过 volume 挂载，修改 `conf/` 目录下的 yml 后重启对应服务即可生效。
+- `ui-payment`、`ui-manager`、`ui-merchant` 依赖后端 `payment`、`manager`、`merchant` 的健康检查结果；如单独启动 UI，Compose 会先等待对应 Java 服务进入 `healthy`。
 - 如需回退到 ActiveMQ 或切换 RabbitMQ，需同时调整 `docker-compose.yml` 与 `conf/*.yml`。
 
 ### 启动后验证

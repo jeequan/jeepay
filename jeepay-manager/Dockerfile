@@ -3,7 +3,8 @@
 #
 
 # Eclipse Temurin JRE 17（openjdk 官方镜像已停止维护）
-FROM eclipse-temurin:17-jre
+ARG BASE_IMAGE=swr.cn-south-1.myhuaweicloud.com/jeepay/eclipse-temurin:17-jre
+FROM ${BASE_IMAGE}
 
 LABEL maintainer="Terrfly"
 
