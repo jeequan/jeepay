@@ -147,14 +147,13 @@ if [ -d $rootDir ]; then
     exit 0
 fi
 
-# MySQL / Redis 的宿主端口可通过环境变量（或 config.sh）覆盖；jeepay 服务
-# 在 jeepay-net 内部通过容器名 + 标准端口通信，host port 变化不影响业务。
-mysqlHostPort=${mysqlHostPort:-3306}
-redisHostPort=${redisHostPort:-6379}
-
 # ---------------------------------------------------------------------------
-# 宿主端口占用预检：提前识别 3306 / 6379 / 9876 / 10909-10912 / 19216-19218
-# 任一端口被占时直接退出，避免到 docker run 才失败、留下一堆半成品容器。
+# 宿主端口占用预检
+#   - MySQL / Redis：被占时脚本自动选空闲端口，打印 INFO 提示；用户显式
+#     指定的 mysqlHostPort / redisHostPort 被占则直接报错（尊重用户）。
+#   - RocketMQ / Nginx：与容器内通信耦合，不支持自动换端口，被占时退出。
+# jeepay 各服务通过 jeepay-net 内部的 mysql:3306 / redis:6379 通信，
+# 宿主 host port 变化不影响业务。
 # ---------------------------------------------------------------------------
 port_in_use() {
     portNum=$1
@@ -178,6 +177,61 @@ print_port_owner() {
     fi
 }
 
+# 依次尝试：基准端口 → 基准 + 10000 → 再逐个 +1；返回首个空闲端口，找不到返回空串。
+pick_host_port() {
+    basePort=$1
+    if ! port_in_use "$basePort"; then
+        echo "$basePort"
+        return 0
+    fi
+    candidate=$((basePort + 10000))
+    while [ "$candidate" -le 65000 ]; do
+        if ! port_in_use "$candidate"; then
+            echo "$candidate"
+            return 0
+        fi
+        candidate=$((candidate + 1))
+    done
+    echo ""
+    return 1
+}
+
+# 先识别 mysqlHostPort / redisHostPort 是否由用户显式指定，再决定是否自动换
+mysqlHostPortSource="auto"
+redisHostPortSource="auto"
+[ -n "$mysqlHostPort" ] && mysqlHostPortSource="user"
+[ -n "$redisHostPort" ] && redisHostPortSource="user"
+mysqlHostPort=${mysqlHostPort:-3306}
+redisHostPort=${redisHostPort:-6379}
+
+resolve_host_port() {
+    portLabel=$1
+    portVar=$2       # 形如 "mysqlHostPort"
+    portSource=$3    # "auto" 或 "user"
+    portValue=$4     # 当前候选端口
+    if ! port_in_use "$portValue"; then
+        return 0
+    fi
+    if [ "$portSource" = "user" ]; then
+        echo "ERROR: 您在 config.sh / 环境变量中指定的 $portVar=$portValue ($portLabel) 已被占用："
+        print_port_owner "$portValue" | sed 's/^/      /'
+        exit 1
+    fi
+    # 自动选
+    newPort=$(pick_host_port "$portValue")
+    if [ -z "$newPort" ]; then
+        echo "ERROR: 无法为 $portLabel 找到空闲的宿主端口，请手动设置 $portVar。"
+        exit 1
+    fi
+    echo "INFO: 宿主端口 $portValue 已被占，$portLabel 自动改用 $newPort（仅影响宿主机外部访问，不影响 jeepay 内部通信）。"
+    eval "$portVar=$newPort"
+}
+
+echo "检查宿主端口占用情况..."
+resolve_host_port "MySQL" mysqlHostPort "$mysqlHostPortSource" "$mysqlHostPort"
+resolve_host_port "Redis" redisHostPort "$redisHostPortSource" "$redisHostPort"
+
+# RocketMQ / Nginx 的端口不支持自动换，被占就退出
 portConflict=0
 check_port() {
     portLabel=$1
@@ -188,10 +242,6 @@ check_port() {
         portConflict=1
     fi
 }
-
-echo "检查宿主端口占用情况..."
-check_port "MySQL"                        "$mysqlHostPort"
-check_port "Redis"                        "$redisHostPort"
 check_port "RocketMQ NameServer"          9876
 check_port "RocketMQ Broker 10909"        10909
 check_port "RocketMQ Broker 10911"        10911
@@ -202,15 +252,7 @@ check_port "Nginx -> merchant"            19218
 
 if [ "$portConflict" -eq 1 ]; then
     echo
-    echo "ERROR： 上述端口被占用，安装无法继续。处理方式："
-    echo "  1) 释放占用端口（停止对应服务或容器）后重跑本脚本。"
-    echo "  2) 仅对 MySQL / Redis 支持宿主端口覆盖，安装前导出环境变量即可："
-    echo "       export mysqlHostPort=13306"
-    echo "       export redisHostPort=16379"
-    echo "       sh install.sh"
-    echo "     （jeepay 各服务通过 jeepay-net 内部访问 mysql:3306 / redis:6379，"
-    echo "      host port 变化不影响业务通信。）"
-    echo "  3) RocketMQ / Nginx 端口与容器内通信耦合，暂不支持覆盖，请先释放。"
+    echo "ERROR： 上述端口与容器内通信耦合，暂不支持自动换端口。请先释放占用进程后重跑脚本。"
     exit 1
 fi
 
@@ -277,7 +319,7 @@ rocketmqPlatform=${rocketmqPlatform:-linux/amd64}
 # 源码 ref：默认锁到 V3.2.4 release tag，保证 git clone 下来的 SQL / broker.conf.template /
 # nginx.conf / conf/* 与业务镜像（3.2.0 / V3.2.4 兼容）契合，不受 master 后续演进影响。
 # 如需用最新 master 或其他 tag，安装前导出 jeepayRef=xxx 覆盖即可（透传给 git clone --branch）。
-jeepayRef=${jeepayRef:-V3.2.4}
+jeepayRef=${jeepayRef:-V3.2.5}
 
 # 第2步：拉取项目源代码  || 拉取脚本文件
 echo "[2] 拉取项目源代码文件 (ref=$jeepayRef).... "

@@ -147,13 +147,26 @@ server {
 
 ## 宿主端口冲突
 
-`install.sh` 在进入 `[1]` 之前会预检以下宿主端口，任一被占直接退出并打印占用进程：
+`install.sh` 在进入 `[1]` 之前会预检以下宿主端口：
 
 `3306` `6379` `9876` `10909` `10911` `10912` `19216` `19217` `19218`
 
-### MySQL / Redis 冲突：**推荐方式** — 给 jeepay 换个宿主端口
+### MySQL / Redis 冲突：**脚本自动换端口**
 
-宿主机已有 MySQL / Redis 属于常见场景（往往是客户自己的业务在用）。**直接覆盖 jeepay 的 host port**，不要去动宿主机既有服务：
+宿主机已有 MySQL / Redis 是常见场景（通常是客户自己的业务在用）。`install.sh` 检测到默认端口被占会**自动挑选空闲端口**并打印 `INFO` 提示，后续流程正常继续：
+
+```
+INFO: 宿主端口 3306 已被占，MySQL 自动改用 13306（仅影响宿主机外部访问，不影响 jeepay 内部通信）。
+INFO: 宿主端口 6379 已被占，Redis 自动改用 16379（仅影响宿主机外部访问，不影响 jeepay 内部通信）。
+```
+
+自动选端口规则：先从默认端口开始，被占则跳到 `默认 + 10000`（例如 3306 → 13306），再被占则依次 +1。
+
+容器内仍是标准端口，jeepay 各服务在 `jeepay-net` 内部通过 `mysql:3306` / `redis:6379` 通信，host port 自动换只影响"从宿主机外部访问"的端口号。
+
+### 想指定固定端口（可选）
+
+如果对宿主端口有特定要求（比如防火墙规则 / 统一端口规划），可通过环境变量或 `config.sh` 覆盖：
 
 ```bash
 export mysqlHostPort=13306
@@ -161,22 +174,16 @@ export redisHostPort=16379
 sh install.sh
 ```
 
-或者在 `config.sh` 里取消对应行的注释后再执行。
-
-> 容器内仍是标准端口，jeepay 各服务在 `jeepay-net` 内部通过 `mysql:3306` / `redis:6379` 通信，host port 变化只影响"从宿主机外部访问"，**不影响业务**。
-
-### 备选方式 — 释放原服务
-
-仅在确认宿主机的 MySQL / Redis 可以停掉（测试机 / 不再需要的老服务）时再用：
-
-```bash
-systemctl stop mysqld redis    # 具体名字按发行版而定
-sh install.sh
-```
+用户**显式指定**的端口若被占，脚本会直接报错退出（不会静默换端口），以尊重用户意图。
 
 ### RocketMQ / Nginx 端口被占
 
-这几个端口与容器内通信耦合（RocketMQ broker 会向客户端广播 `brokerIP1:10911`，Nginx 的 `listen` 写进了静态配置），目前不支持覆盖。命中冲突请先释放再重跑。
+这几个端口与容器内通信耦合（RocketMQ broker 会向客户端广播 `brokerIP1:10911`，Nginx 的 `listen` 写进了静态配置），**不支持自动换端口**。命中冲突请先释放再重跑：
+
+```bash
+# 找占用进程并按需处理
+ss -lntp | grep -E ':9876|:1091[0-2]|:1921[6-8]'
+```
 
 ## 卸载
 
@@ -190,7 +197,7 @@ cd /your/install/path/sources/jeepay/docs/install && sh uninstall.sh
 
 ## 锁定源码版本
 
-`install.sh` 默认 `jeepayRef=V3.2.4`，即 `git clone --branch V3.2.4 --depth 1`，和业务镜像（`3.2.0`，V3.2.4 与之完全兼容）锁在同一版本，避免业务镜像固定而源码继续漂移出现的"老镜像 + 新配置"混装问题。
+`install.sh` 默认 `jeepayRef=V3.2.5`，即 `git clone --branch V3.2.5 --depth 1`，和业务镜像（`3.2.0`，V3.2.5 与之完全兼容）锁在同一版本，避免业务镜像固定而源码继续漂移出现的"老镜像 + 新配置"混装问题。
 
 如需临时改用最新 master 或其他 release tag，安装前导出环境变量即可：
 
