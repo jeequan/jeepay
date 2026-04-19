@@ -187,17 +187,29 @@ ss -lntp | grep -E ':9876|:1091[0-2]|:1921[6-8]'
 
 ## 卸载
 
+**推荐（一条命令）**：
+
 ```bash
-cd /your/install/path/sources/jeepay/docs/install && sh uninstall.sh
+wget -O uninstall.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/uninstall.sh && sh uninstall.sh
 ```
 
-卸载脚本会同时删除 `rocketmq-namesrv` 与 `rocketmq-broker` 容器；脚本已做成幂等，缺失容器或网络会自动跳过。
+脚本会自动从跑着的 `mysql8` 容器数据卷反推 `rootDir`，打印出来让你确认后再删容器、网络和整个 `rootDir`。幂等执行，缺失容器或网络会自动跳过。
 
-> 进入该目录后 `uninstall.sh` 读取的 `config.sh` 是 `install.sh` 在安装阶段**自动回写**的版本（包含用户真实的 `rootDir` 与镜像覆盖），不再使用仓库模板默认值 `rootDir=/jeepayhomes`，因此自定义过 `rootDir` 的安装也能正确清理。
+若 jeepay 容器已全部被手工删除、自动识别不到，可以手动指定：
+
+```bash
+rootDir=/jeepayhomes sh uninstall.sh
+```
+
+或者按原来的方式进入安装目录（install.sh 在那里回写了真实 `rootDir` 的 `config.sh`）：
+
+```bash
+cd $rootDir/sources/jeepay/docs/install && sh uninstall.sh
+```
 
 ## 锁定源码版本
 
-`install.sh` 默认 `jeepayRef=V3.2.5`，即 `git clone --branch V3.2.5 --depth 1`，和业务镜像（`3.2.0`，V3.2.5 与之完全兼容）锁在同一版本，避免业务镜像固定而源码继续漂移出现的"老镜像 + 新配置"混装问题。
+`install.sh` 默认 `jeepayRef=V3.2.6`，即 `git clone --branch V3.2.6 --depth 1`，和业务镜像（`3.2.0`，V3.2.6 与之完全兼容）锁在同一版本，避免业务镜像固定而源码继续漂移出现的"老镜像 + 新配置"混装问题。
 
 如需临时改用最新 master 或其他 release tag，安装前导出环境变量即可：
 

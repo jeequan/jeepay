@@ -320,3 +320,18 @@
    与容器内通信耦合，仍然执行"冲突即退出"策略。
 4. 文档： docs/deploy/shell.md 同步更新"宿主端口冲突"小节。
 5. 优化： install.sh 默认 jeepayRef 由 V3.2.4 跟进到 V3.2.5。
+
+[v3.2.6_20260419]
+> 卸载脚本"一条命令"升级：业务代码零改动，与 3.2.0 / V3.2.x 业务镜像
+> 完全兼容。终结 "/your/install/path/..." 占位路径误导体验。
+1. 优化： uninstall.sh 支持从跑着的 mysql8 容器数据卷自动识别 rootDir
+   （/var/lib/mysql 的宿主挂载路径去掉 /mysql/data 即为 rootDir），
+   用户可以直接在任意目录 wget + sh 一条命令卸载，不再需要先 cd 到
+   安装目录里。
+2. 新增： rootDir 获取优先级 环境变量 > 当前目录 config.sh > 容器自动
+   识别；三个都拿不到时打印明确错误，不会误删。
+3. 优化： uninstall 确认阶段明确列出即将删除的容器、网络与根目录，
+   用户按回车前能清楚知道改动范围。
+4. 文档： docs/deploy/shell.md 卸载小节改为一条命令推荐 + 原路径方式
+   作为备选，并说明何时需要手动 rootDir=xxx。
+5. 优化： install.sh 默认 jeepayRef 由 V3.2.5 跟进到 V3.2.6。

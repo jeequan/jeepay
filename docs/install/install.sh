@@ -319,7 +319,7 @@ rocketmqPlatform=${rocketmqPlatform:-linux/amd64}
 # 源码 ref：默认锁到 V3.2.4 release tag，保证 git clone 下来的 SQL / broker.conf.template /
 # nginx.conf / conf/* 与业务镜像（3.2.0 / V3.2.4 兼容）契合，不受 master 后续演进影响。
 # 如需用最新 master 或其他 tag，安装前导出 jeepayRef=xxx 覆盖即可（透传给 git clone --branch）。
-jeepayRef=${jeepayRef:-V3.2.5}
+jeepayRef=${jeepayRef:-V3.2.6}
 
 # 第2步：拉取项目源代码  || 拉取脚本文件
 echo "[2] 拉取项目源代码文件 (ref=$jeepayRef).... "
