@@ -24,21 +24,36 @@ export rocketmqPlatform=linux/arm64
 sh install.sh
 ```
 
-## CentOS
+## 前置依赖
+
+脚本运行过程中会使用以下命令；下表说明各自由谁负责，以避免 "minimal 镜像" 上一键命令跑到一半挂掉。
+
+| 命令 | 用途 | 负责方 |
+|---|---|---|
+| `wget` | 下载 `config.sh` 与前端静态资源包 `html.tar.gz` | **一键命令预装（必须）** |
+| `curl` | `install.sh` 结束前的部署自检 `[8]`；缺失只会让自检报 `WARN`，不影响部署本身 | 一键命令预装（建议） |
+| `git` | `git clone` 拉取 jeepay 源码 | CentOS / Anolis 上 `install.sh` 检测缺失会 `yum install -y git`；Ubuntu 路径需一键命令预装 |
+| `docker` | 启动所有容器 | CentOS / Anolis 上 `install.sh` 检测缺失会 `yum install -y docker-ce`；Ubuntu 路径需一键命令预装 |
+
+## CentOS / Anolis
 
 > 推荐系统：Anolis OS 8.8
 
 ```bash
-yum install -y wget && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && sh install.sh
+yum install -y wget curl && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && sh install.sh
 ```
+
+`install.sh` 内部检测到缺失会自动 `yum install` `git` 与 `docker-ce`，因此只需要预先装好 `wget` 和 `curl`。
 
 ## Ubuntu
 
 > 推荐系统：Ubuntu 22.04 64 位
 
 ```bash
-apt update && apt-get -y install docker.io && apt-get -y install git && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && sh install.sh
+apt update && apt-get -y install wget curl git docker.io && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && sh install.sh
 ```
+
+`install.sh` 对 apt 系统没有安装兜底，因此 `docker.io` / `git` / `wget` / `curl` 必须在一键命令里装齐。
 
 ## 部署后自检
 
