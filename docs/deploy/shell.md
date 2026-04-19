@@ -151,17 +151,32 @@ server {
 
 `3306` `6379` `9876` `10909` `10911` `10912` `19216` `19217` `19218`
 
-- **MySQL / Redis 的宿主端口可以改**（容器内仍是标准端口，jeepay 各服务在 `jeepay-net` 内部通过 `mysql:3306` / `redis:6379` 通信，不受 host port 影响）。例如宿主机本就有一份 MySQL 占 3306：
+### MySQL / Redis 冲突：**推荐方式** — 给 jeepay 换个宿主端口
 
-  ```bash
-  export mysqlHostPort=13306
-  export redisHostPort=16379
-  sh install.sh
-  ```
+宿主机已有 MySQL / Redis 属于常见场景（往往是客户自己的业务在用）。**直接覆盖 jeepay 的 host port**，不要去动宿主机既有服务：
 
-  同样的变量也可以在 `config.sh` 里取消注释生效。
+```bash
+export mysqlHostPort=13306
+export redisHostPort=16379
+sh install.sh
+```
 
-- **RocketMQ / Nginx 的端口与容器内通信耦合**（RocketMQ broker 会向客户端广播 `brokerIP1:10911`，Nginx 的 `listen` 写进了静态配置），目前不支持覆盖。命中冲突请先释放再重跑。
+或者在 `config.sh` 里取消对应行的注释后再执行。
+
+> 容器内仍是标准端口，jeepay 各服务在 `jeepay-net` 内部通过 `mysql:3306` / `redis:6379` 通信，host port 变化只影响"从宿主机外部访问"，**不影响业务**。
+
+### 备选方式 — 释放原服务
+
+仅在确认宿主机的 MySQL / Redis 可以停掉（测试机 / 不再需要的老服务）时再用：
+
+```bash
+systemctl stop mysqld redis    # 具体名字按发行版而定
+sh install.sh
+```
+
+### RocketMQ / Nginx 端口被占
+
+这几个端口与容器内通信耦合（RocketMQ broker 会向客户端广播 `brokerIP1:10911`，Nginx 的 `listen` 写进了静态配置），目前不支持覆盖。命中冲突请先释放再重跑。
 
 ## 卸载
 
