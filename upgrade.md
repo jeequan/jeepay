@@ -259,3 +259,20 @@
    CVE-2024-38820 / CVE-2025-22233 Dependabot 告警
 9. 修复： 商户系统默认密码说明（商户平台无内置账号，新建商户用户
    的默认密码是 jeepay666）
+
+[v3.2.2_20260419]
+> 反向代理 / HTTPS 场景加固补丁版本：业务代码零改动，与 3.2.0 / V3.2.1
+> 业务镜像完全兼容，无需重打 jeepay-manager / jeepay-merchant /
+> jeepay-payment 镜像，重启容器即可生效（或让 install.sh 重装）。
+1. 修复： docs/install/include/nginx.conf 的三段反代缺 X-Forwarded-Proto
+   等头，外层 HTTPS 反代时会让 Spring Boot 把收银台 return_url / 支付
+   回调 URL 拼成 http://，触发浏览器 mixed-content 拦截或第三方回跳
+   失败。统一补齐 X-Forwarded-Proto / X-Forwarded-Port。
+2. 优化： conf/payment / conf/manager / conf/merchant 的 application.yml
+   默认开启 server.forward-headers-strategy: framework，让 Spring Boot
+   正确识别 X-Forwarded-* 头部，保证重定向 / Cookie domain / 支付回跳
+   行为在外层 HTTPS 反代下自动正确。
+3. 新增： docs/deploy/shell.md 新增"配置域名 + HTTPS"章节，提供三种
+   部署拓扑（三子域 / 一域名 + 路径前缀 / 只暴露收银台）与外层 nginx
+   示例片段，避免"加域名就出问题"。
+4. 优化： install.sh 默认 jeepayRef 由 V3.2.1 跟进到 V3.2.2。

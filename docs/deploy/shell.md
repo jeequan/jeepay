@@ -77,6 +77,72 @@ apt update && apt-get -y install wget curl git docker.io && wget -O install.sh h
 | 商户平台 | `19218` | merchant 服务 |
 | Nginx | `80` | 前端静态资源与反向代理 |
 
+## 配置域名 + HTTPS
+
+脚本内置的 `docs/install/include/nginx.conf` 已经做了三段反代：
+
+- `19217` → 运营平台静态 + `/api/` 反代到 Spring Boot `9217`；
+- `19218` → 商户平台静态 + `/api/` 反代到 Spring Boot `9218`；
+- `19216` → 整体反代到 Spring Boot `9216`（**收银台静态资源**与支付 API 均由 `jeepay-payment` 自己提供，访问路径 `/cashier/`）。
+
+三个 `server` 块都补了 `X-Forwarded-Proto` / `X-Forwarded-Port` / `X-Forwarded-For`，配合 Spring Boot 侧 `server.forward-headers-strategy: framework`（已默认开启）即可保证外层 HTTPS 反代时，收银台 `return_url` / 支付回调 URL / 微信 H5 `redirect_url` 拼出的协议与 host 始终正确。
+
+### 拓扑一：三个子域名
+
+最简单的部署方式。外层 nginx 申请三张证书，分别把请求反代到内层的 19217 / 19218 / 19216：
+
+| 外部 | 用途 | 内部回源 |
+|---|---|---|
+| `https://admin.example.com` | 运营平台 | `http://127.0.0.1:19217` |
+| `https://mch.example.com` | 商户平台 | `http://127.0.0.1:19218` |
+| `https://pay.example.com` | 支付网关 + 收银台 | `http://127.0.0.1:19216` |
+
+外层 nginx 示例（HTTPS 终结在外层，内层按内部 80/HTTP 回源）：
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name pay.example.com;
+    ssl_certificate     /etc/ssl/jeepay/pay.crt;
+    ssl_certificate_key /etc/ssl/jeepay/pay.key;
+
+    location / {
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;   # ← 必须
+        proxy_set_header X-Forwarded-Port  $server_port;
+        proxy_pass http://127.0.0.1:19216;
+    }
+}
+# admin / mch 域名同构，仅 proxy_pass 换为 19217 / 19218
+```
+
+收银台入口：`https://pay.example.com/cashier/`。
+
+### 拓扑二：一个域名 + 路径前缀
+
+比如只有一个主域名 `https://www.example.com`，把三套前后端塞到子路径。这种拓扑需要同步前端构建时的 `publicPath`（`jeepay-ui` 的 `vue.config.js`）和 Spring Boot 的 `server.servlet.context-path`，否则静态资源 404 / API 404。适合**有前端构建能力**的团队，不建议新手使用。
+
+### 拓扑三：只对外暴露收银台
+
+电商 / SaaS 侧最常见：只把收银台对客户暴露，运营平台 / 商户平台留在内网 / VPN / 跳板机。
+
+```
+公网域名 https://pay.example.com  →  http://127.0.0.1:19216
+运营平台 http://内网 IP:19217                        （不对公网放行）
+商户平台 http://内网 IP:19218                        （不对公网放行）
+```
+
+对应的防火墙规则只放行 19216。
+
+### 注意事项
+
+- 外层反代务必传 `X-Forwarded-Proto $scheme`；否则 Spring Boot 会把回调 URL 拼成 `http://`，支付平台回跳失败。
+- 第三方支付平台后台填的 **异步通知 URL / 回跳 URL** 必须用公网域名（`https://pay.example.com/api/pay/...`）而不是 `http://<内网 IP>:19216`。
+- 外层 nginx 若开启 `gzip`，注意排除 SSE / WebSocket 类型（`text/event-stream`）。
+- 修改 `nginx.conf` 后：`docker exec nginx118 nginx -s reload`。
+
 ## 卸载
 
 ```bash
@@ -89,7 +155,7 @@ cd /your/install/path/sources/jeepay/docs/install && sh uninstall.sh
 
 ## 锁定源码版本
 
-`install.sh` 默认 `jeepayRef=V3.2.1`，即 `git clone --branch V3.2.1 --depth 1`，和业务镜像（`3.2.0`，V3.2.1 与之完全兼容）锁在同一版本，避免业务镜像固定而源码继续漂移出现的"老镜像 + 新配置"混装问题。
+`install.sh` 默认 `jeepayRef=V3.2.2`，即 `git clone --branch V3.2.2 --depth 1`，和业务镜像（`3.2.0`，V3.2.2 与之完全兼容）锁在同一版本，避免业务镜像固定而源码继续漂移出现的"老镜像 + 新配置"混装问题。
 
 如需临时改用最新 master 或其他 release tag，安装前导出环境变量即可：
 
