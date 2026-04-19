@@ -104,15 +104,39 @@ paymentImage=${paymentImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-paym
 # 其他镜像（mysql/redis/nginx）已具备多架构 manifest，不再强制 platform。
 rocketmqPlatform=${rocketmqPlatform:-linux/amd64}
 
+# 源码 ref：默认跟随 master，避免"老镜像 + 新 SQL / 新配置"漂移建议将其锁到
+# 与业务镜像同版本的 release tag。举例：生产环境可先 export jeepayRef=V3.2.1 再执行脚本；
+# 该值会透传给 git clone --branch，支持 tag 或分支名。
+jeepayRef=${jeepayRef:-master}
+
 # 第2步：拉取项目源代码  || 拉取脚本文件
-echo "[2] 拉取项目源代码文件.... "
+echo "[2] 拉取项目源代码文件 (ref=$jeepayRef).... "
 cd $rootDir/sources
-git clone https://gitee.com/jeequan/jeepay.git
-# cd jeepay && git checkout -b dev origin/dev # 切换到dev分支。
+git clone --branch "$jeepayRef" --depth 1 https://gitee.com/jeequan/jeepay.git
 echo "[2] Done. "
 
 #源码中install.sh文件目录
 sourcesInstallPath=$rootDir/sources/jeepay/docs/install
+
+# 将本次安装的"生效配置"快照写回 sources 目录下的 config.sh，
+# 使 uninstall.sh（按文档从该目录运行）读到的是用户实际使用的 rootDir，
+# 而不是仓库里 rootDir="/jeepayhomes" 的默认模板。
+cat > "$sourcesInstallPath/config.sh" <<EOF
+#! /bin/sh
+# 由 install.sh 在安装阶段自动生成，供 uninstall.sh 读取。请勿手工编辑。
+rootDir="$rootDir"
+mysql_pwd="$mysql_pwd"
+mysqlImage="$mysqlImage"
+redisImage="$redisImage"
+rocketmqImage="$rocketmqImage"
+rocketmqPlatform="$rocketmqPlatform"
+nginxImage="$nginxImage"
+managerImage="$managerImage"
+merchantImage="$merchantImage"
+paymentImage="$paymentImage"
+jeepayRef="$jeepayRef"
+currentPath=\`pwd\`
+EOF
 
 # 创建一个 bridge网络
 docker network create jeepay-net

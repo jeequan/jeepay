@@ -31,6 +31,11 @@ mysql_pwd="jeepaydb123456"
 # 若使用自行构建的 arm64 RocketMQ 镜像，请同时覆盖 rocketmqImage 并将下行改为 linux/arm64：
 # rocketmqPlatform="linux/amd64"
 
+# 源码 ref：默认跟随 master 分支；生产环境强烈建议锁到与业务镜像同版本的 release tag，
+# 防止业务镜像固定而 git clone 拿到漂移后的 SQL / broker.conf.template / nginx.conf / conf/*。
+# 确保该 ref 下的这些文件与所选镜像版本兼容。
+# jeepayRef="V3.2.1"
+
 
 #当前路径， 不要更改参数。
 currentPath=`pwd`

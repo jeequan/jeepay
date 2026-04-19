@@ -85,6 +85,21 @@ cd /your/install/path/sources/jeepay/docs/install && sh uninstall.sh
 
 卸载脚本会同时删除 `rocketmq-namesrv` 与 `rocketmq-broker` 容器；脚本已做成幂等，缺失容器或网络会自动跳过。
 
+> 进入该目录后 `uninstall.sh` 读取的 `config.sh` 是 `install.sh` 在安装阶段**自动回写**的版本（包含用户真实的 `rootDir` 与镜像覆盖），不再使用仓库模板默认值 `rootDir=/jeepayhomes`，因此自定义过 `rootDir` 的安装也能正确清理。
+
+## 锁定源码版本（生产环境建议）
+
+`install.sh` 默认 `jeepayRef=master`，每次安装都会克隆最新的 master HEAD。业务镜像默认钉在 `3.2.0`。若 master 之后继续演进（新增 SQL 列、修改 `broker.conf.template` 等），可能出现"老镜像 + 新配置"的漂移。
+
+**生产环境建议**：锁到与业务镜像同版本的 release tag（例如该版本的打包发布 tag），保证 `init.sql` / `broker.conf.template` / `nginx.conf` / `conf/*` 与镜像契合：
+
+```bash
+export jeepayRef=V3.2.1   # 示例：改为你实际想要锁定的 tag
+sh install.sh
+```
+
+`config.sh` 里也有对应的注释条目，改成非注释即可生效。
+
 ## 自定义镜像源（高级）
 
 绝大多数用户直接用脚本默认镜像（华为云 SWR 公开仓库）即可。只有以下场景需要覆盖：
