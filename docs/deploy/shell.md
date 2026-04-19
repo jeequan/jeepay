@@ -83,7 +83,7 @@ apt update && apt-get -y install wget curl git docker.io && wget -O install.sh h
 
 - `19217` → 运营平台静态 + `/api/` 反代到 Spring Boot `9217`；
 - `19218` → 商户平台静态 + `/api/` 反代到 Spring Boot `9218`；
-- `19216` → 整体反代到 Spring Boot `9216`（**收银台静态资源**与支付 API 均由 `jeepay-payment` 自己提供，访问路径 `/cashier/`）。
+- `19216` → 整体反代到 Spring Boot `9216`（**收银台静态资源**与支付 API 均由 `jeepay-payment` 自己提供；静态页面路径为 `/cashier/index.html`，Spring Boot 没有配置目录默认首页，访问 `/cashier/` 会 404）。
 
 三个 `server` 块都补了 `X-Forwarded-Proto` / `X-Forwarded-Port` / `X-Forwarded-For`，配合 Spring Boot 侧 `server.forward-headers-strategy: framework`（已默认开启）即可保证外层 HTTPS 反代时，收银台 `return_url` / 支付回调 URL / 微信 H5 `redirect_url` 拼出的协议与 host 始终正确。
 
@@ -118,7 +118,9 @@ server {
 # admin / mch 域名同构，仅 proxy_pass 换为 19217 / 19218
 ```
 
-收银台入口：`https://pay.example.com/cashier/`。
+收银台联通性验证：`https://pay.example.com/cashier/index.html` 应返回 HTTP 200。
+
+> 实际交易中，客户看到的收银台 URL 不需要手工构造——jeepay API 返回的 `payUrl` 已经是带参数的完整路径（形如 `/cashier/index.html?token=xxx`）。上面的 URL 仅用于部署联通性验证。
 
 ### 拓扑二：一个域名 + 路径前缀
 
