@@ -1,8 +1,28 @@
 # Shell 脚本一键安装
 
-> **国内用户直接使用默认镜像即可。** 脚本中 MySQL / Redis / RocketMQ / Nginx 以及 3 个 jeepay 应用镜像已全部默认指向 **华为云 SWR 公开仓库**（`swr.cn-south-1.myhuaweicloud.com/jeepay/*`），由计全官方维护，**公网可直接匿名拉取**，不依赖 Docker Hub，无需登录，也不需要镜像加速器。
+> **国内镜像来源**：MySQL / Redis / RocketMQ / Nginx 以及 3 个 jeepay 应用镜像已全部默认指向 **华为云 SWR 公开仓库**（`swr.cn-south-1.myhuaweicloud.com/jeepay/*`），由计全官方维护，**公网可直接匿名拉取**，不依赖 Docker Hub，无需登录，也不需要镜像加速器。
 
 > Shell 一键安装脚本默认部署 **RocketMQ**，会自动启动 `rocketmq-namesrv` 与 `rocketmq-broker`；如需改回 ActiveMQ / RabbitMQ，请同步调整脚本与 `conf/*.yml` 配置。
+
+## 架构前提
+
+| 宿主架构 | MySQL / Redis / Nginx | RocketMQ (namesrv + broker) | 是否一条命令直达 |
+|---|---|---|---|
+| `x86_64` / `amd64` | 原生运行 | 原生运行 | ✅ 直接跑脚本 |
+| `arm64` / Apple Silicon | 原生运行（SWR 已同步 amd64 + arm64 多架构 manifest） | 需 qemu/binfmt 或 Rosetta 2 仿真 | ⚠️ 必须先启用 amd64 仿真 |
+
+说明：
+
+- **RocketMQ 上游只发布 `linux/amd64` 镜像**，ARM64 宿主必须提前注册仿真层才能拉起 `rocketmq-namesrv` / `rocketmq-broker`；否则脚本会在第 5 步直接失败退出。
+- **Linux ARM64 宿主**（自建机 / 云厂商 arm 实例）：`docker run --privileged --rm tonistiigi/binfmt --install amd64` 一次即可。
+- **macOS Apple Silicon**：Docker Desktop 开启 **Use Rosetta for x86_64/amd64 emulation on Apple Silicon**。
+- 如果你自行构建了原生 arm64 的 RocketMQ 镜像，可同时覆盖 `rocketmqImage` 和 `rocketmqPlatform`：
+
+```bash
+export rocketmqImage=<你的 arm64 RocketMQ 镜像>
+export rocketmqPlatform=linux/arm64
+sh install.sh
+```
 
 ## CentOS
 
@@ -58,7 +78,7 @@ cd /your/install/path/sources/jeepay/docs/install && sh uninstall.sh
 - 想固定到特定版本或自行构建的镜像；
 - 一定要回到 Docker Hub 上游镜像（一般不推荐，国内拉取慢且依赖加速器）。
 
-执行前用环境变量覆盖即可，例如切回 Docker Hub 上游：
+同样的覆盖项已在 [`config.sh`](../install/config.sh) 中以注释形式列出，取消注释并修改即可；或在执行前直接用环境变量覆盖：
 
 ```bash
 export mysqlImage=mysql:8.0.25
@@ -68,6 +88,8 @@ export nginxImage=nginx:1.18.0
 export managerImage=jeepay/jeepay-manager:3.2.0
 export merchantImage=jeepay/jeepay-merchant:3.2.0
 export paymentImage=jeepay/jeepay-payment:3.2.0
+# 若使用原生 arm64 的 RocketMQ 镜像，可同时切换平台
+# export rocketmqPlatform=linux/arm64
 sh install.sh
 ```
 

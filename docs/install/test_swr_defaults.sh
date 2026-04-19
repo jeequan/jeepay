@@ -79,8 +79,18 @@ if ! grep -q 'swr.cn-south-1.myhuaweicloud.com/jeepay/nginx:1.18.0' "$INSTALL_SC
   exit 1
 fi
 
-if ! grep -q -- '--platform=linux/amd64' "$INSTALL_SCRIPT"; then
-  echo "FAIL: install.sh does not pin amd64 for third-party images that require it"
+if ! grep -q 'rocketmqPlatform=${rocketmqPlatform:-linux/amd64}' "$INSTALL_SCRIPT"; then
+  echo "FAIL: install.sh does not expose overridable rocketmqPlatform default"
+  exit 1
+fi
+
+if [ "$(grep -c -- '--platform=$rocketmqPlatform' "$INSTALL_SCRIPT")" -lt 2 ]; then
+  echo "FAIL: install.sh does not apply rocketmqPlatform to both namesrv and broker docker run"
+  exit 1
+fi
+
+if grep -qE "^--platform=linux/amd64 " "$INSTALL_SCRIPT"; then
+  echo "FAIL: install.sh still hard-codes --platform=linux/amd64 for images with multi-arch manifests"
   exit 1
 fi
 

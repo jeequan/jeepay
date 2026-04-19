@@ -100,6 +100,10 @@ managerImage=${managerImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-mana
 merchantImage=${merchantImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-merchant:3.2.0}
 paymentImage=${paymentImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-payment:3.2.0}
 
+# rocketmq 上游仅发布 linux/amd64 镜像，ARM64 宿主需借助 qemu/binfmt 仿真。
+# 其他镜像（mysql/redis/nginx）已具备多架构 manifest，不再强制 platform。
+rocketmqPlatform=${rocketmqPlatform:-linux/amd64}
+
 # 第2步：拉取项目源代码  || 拉取脚本文件
 echo "[2] 拉取项目源代码文件.... "
 cd $rootDir/sources
@@ -122,7 +126,6 @@ cd $sourcesInstallPath && cp ./include/my.cnf $rootDir/mysql/config/my.cnf
 
 # 镜像启动
 docker run -p 3306:3306 --name mysql8 --network=jeepay-net  \
---platform=linux/amd64 \
 --restart=always --privileged=true \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/mysql/log:/var/log/mysql  \
@@ -167,7 +170,6 @@ chmod 644 $rootDir/redis/config/redis.conf
 
 # 镜像启动
 docker run -p 6379:6379 --name redis6 --network=jeepay-net  \
---platform=linux/amd64 \
 --restart=always --privileged=true \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/redis/config/redis.conf:/etc/redis/redis.conf \
@@ -201,7 +203,7 @@ echo "[5] RocketMQ brokerIP1 使用当前服务器IP: $brokerHostIp"
 
 # 启动 NameServer
 docker run -d --name rocketmq-namesrv --network=jeepay-net \
---platform=linux/amd64 \
+--platform=$rocketmqPlatform \
 -p 9876:9876 \
 --restart=always \
 -v /etc/localtime:/etc/localtime:ro \
@@ -219,7 +221,7 @@ cat > $rootDir/rocketmq/broker/store/config/topicQueueMapping.json <<'EOF'
 EOF
 
 docker run -d --name rocketmq-broker --network=jeepay-net \
---platform=linux/amd64 \
+--platform=$rocketmqPlatform \
 -p 10909:10909 -p 10911:10911 -p 10912:10912 \
 --restart=always \
 -u 0:0 \
@@ -322,7 +324,6 @@ cd $sourcesInstallPath && cp ./include/nginx.conf $rootDir/nginx/conf/nginx.conf
 
 
 docker run --name nginx118  \
---platform=linux/amd64 \
 --restart=always --privileged=true --net=host \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/nginx/conf/nginx.conf:/etc/nginx/nginx.conf \
