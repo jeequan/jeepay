@@ -106,10 +106,12 @@ docker compose config
 
 ## 默认账号
 
-| 平台 | 地址 | 用户名 | 密码 |
-|---|---|---|---|
-| 运营平台 | http://localhost:9227 | jeepay | jeepay123 |
-| 商户系统 | http://localhost:9228 | jeepay | jeepay123 |
+| 平台 | 地址 | 用户名 | 密码 | 来源 |
+|---|---|---|---|---|
+| 运营平台 | http://localhost:9227 | `jeepay` | `jeepay123` | `docs/sql/init.sql` 初始化的超管账号 |
+| 商户系统 | http://localhost:9228 | 运营平台创建的商户用户 | `jeepay666` | 运营平台新建商户时的默认密码（`CS.DEFAULT_PWD`），首次登录后建议立即修改 |
+
+> 商户系统没有内置账号，需先用超管登录运营平台，创建商户及其登录用户，再用这个商户用户登录 9228 的商户平台。
 
 ## 核心组件版本
 
