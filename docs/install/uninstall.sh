@@ -5,6 +5,24 @@
 #引入config
 . ./config.sh
 
+remove_container_if_exists() {
+    containerName=$1
+    if docker ps -a --format '{{.Names}}' | grep -qx "$containerName"; then
+        docker rm -f "$containerName"
+    else
+        echo "skip container: $containerName"
+    fi
+}
+
+remove_network_if_exists() {
+    networkName=$1
+    if docker network ls --format '{{.Name}}' | grep -qx "$networkName"; then
+        docker network rm "$networkName"
+    else
+        echo "skip network: $networkName"
+    fi
+}
+
 # 第0步：提示信息
 echo "请确认全部卸载,  是否继续？"
 echo "(Confirm uninstallation, do you want to continue?)"
@@ -17,19 +35,15 @@ then
 fi
 
 
-docker stop nginx118 && docker rm nginx118
-docker stop jeepaymanager && docker rm jeepaymanager
-docker stop jeepaymerchant && docker rm jeepaymerchant
-docker stop jeepaypayment && docker rm jeepaypayment
+remove_container_if_exists nginx118
+remove_container_if_exists jeepaymanager
+remove_container_if_exists jeepaymerchant
+remove_container_if_exists jeepaypayment
+remove_container_if_exists mysql8
+remove_container_if_exists redis6
+remove_container_if_exists rocketmq-broker
+remove_container_if_exists rocketmq-namesrv
 
-docker stop mysql8 && docker rm mysql8
+remove_network_if_exists jeepay-net
 
-docker stop redis6 && docker rm redis6
-
-docker stop rocketmq-broker && docker rm rocketmq-broker
-
-docker stop rocketmq-namesrv && docker rm rocketmq-namesrv
-
-docker network rm jeepay-net
-
-rm -rf $rootDir
+rm -rf "$rootDir"

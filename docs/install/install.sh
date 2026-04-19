@@ -92,6 +92,14 @@ mkdir $rootDir/service/logs -p
 mkdir $rootDir/sources -p
 echo "[1] Done. "
 
+mysqlImage=${mysqlImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/mysql:8.0.25}
+redisImage=${redisImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/redis:6.2.14}
+rocketmqImage=${rocketmqImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
+nginxImage=${nginxImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/nginx:1.18.0}
+managerImage=${managerImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-manager:3.2.0}
+merchantImage=${merchantImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-merchant:3.2.0}
+paymentImage=${paymentImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-payment:3.2.0}
+
 # 第2步：拉取项目源代码  || 拉取脚本文件
 echo "[2] 拉取项目源代码文件.... "
 cd $rootDir/sources
@@ -114,6 +122,7 @@ cd $sourcesInstallPath && cp ./include/my.cnf $rootDir/mysql/config/my.cnf
 
 # 镜像启动
 docker run -p 3306:3306 --name mysql8 --network=jeepay-net  \
+--platform=linux/amd64 \
 --restart=always --privileged=true \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/mysql/log:/var/log/mysql  \
@@ -121,7 +130,7 @@ docker run -p 3306:3306 --name mysql8 --network=jeepay-net  \
 -v $rootDir/mysql/mysql-files:/var/lib/mysql-files \
 -v $rootDir/mysql/config:/etc/mysql/conf.d  \
 -e MYSQL_ROOT_PASSWORD=$mysql_pwd \
--id mysql:8.0.25
+-id $mysqlImage
 
 # 避免未启动完成或出现错误： ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock'
 # echo "等待重启mysql容器....... "
@@ -154,14 +163,16 @@ echo "[4] 下载并启动redis容器.... "
 
 # 将配置文件复制到对应的映射目录下
 cd $sourcesInstallPath && cp ./include/redis.conf $rootDir/redis/config/redis.conf
+chmod 644 $rootDir/redis/config/redis.conf
 
 # 镜像启动
 docker run -p 6379:6379 --name redis6 --network=jeepay-net  \
+--platform=linux/amd64 \
 --restart=always --privileged=true \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/redis/config/redis.conf:/etc/redis/redis.conf \
 -v $rootDir/redis/data:/data \
--d redis:6.2.14 redis-server /etc/redis/redis.conf
+-d $redisImage redis-server /etc/redis/redis.conf
 
 
 echo "[4] Done. "
@@ -171,16 +182,32 @@ echo "[4] Done. "
 echo "[5] 下载并启动 RocketMQ 容器.... "
 
 # 拷贝 broker 配置文件
-cd $sourcesInstallPath && cp ./../../docker/rocketmq/broker/conf/broker.conf $rootDir/rocketmq/broker/conf/broker.conf
+cd $sourcesInstallPath && cp ./../../docker/rocketmq/broker/conf/broker.conf.template $rootDir/rocketmq/broker/conf/broker.conf.template
+
+brokerHostIp=$(hostname -I 2>/dev/null | awk '{print $1}')
+if [ -z "$brokerHostIp" ]; then
+  brokerHostIp=$(ip route get 1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if ($i=="src") {print $(i+1); exit}}')
+fi
+
+if [ -z "$brokerHostIp" ]; then
+  echo "[5] ERROR: 无法自动识别当前服务器 IP，无法生成 RocketMQ broker.conf"
+  exit 1
+fi
+
+sed "s/%BROKER_IP%/$brokerHostIp/g" \
+  $rootDir/rocketmq/broker/conf/broker.conf.template > $rootDir/rocketmq/broker/conf/broker.conf
+
+echo "[5] RocketMQ brokerIP1 使用当前服务器IP: $brokerHostIp"
 
 # 启动 NameServer
 docker run -d --name rocketmq-namesrv --network=jeepay-net \
+--platform=linux/amd64 \
 -p 9876:9876 \
 --restart=always \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/rocketmq/namesrv/logs:/home/rocketmq/logs \
 -e JAVA_OPT_EXT="-Xms256m -Xmx256m -Xmn128m" \
-apache/rocketmq:5.3.1 sh mqnamesrv
+$rocketmqImage sh mqnamesrv
 
 # 启动 Broker
 mkdir -p $rootDir/rocketmq/broker/store/config
@@ -192,6 +219,7 @@ cat > $rootDir/rocketmq/broker/store/config/topicQueueMapping.json <<'EOF'
 EOF
 
 docker run -d --name rocketmq-broker --network=jeepay-net \
+--platform=linux/amd64 \
 -p 10909:10909 -p 10911:10911 -p 10912:10912 \
 --restart=always \
 -u 0:0 \
@@ -201,7 +229,7 @@ docker run -d --name rocketmq-broker --network=jeepay-net \
 -v $rootDir/rocketmq/broker/conf/broker.conf:/home/rocketmq/rocketmq-5.3.1/conf/broker.conf:ro \
 -e JAVA_OPT_EXT="-Xms512m -Xmx512m -Xmn256m" \
 -e NAMESRV_ADDR="rocketmq-namesrv:9876" \
-apache/rocketmq:5.3.1 sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
+$rocketmqImage sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
 
 rocketmqWaitCount=0
 while true
@@ -222,7 +250,7 @@ do
     echo "[5] ERROR: RocketMQ Broker 启动失败，请检查最近日志："
     docker logs --tail 100 rocketmq-broker
     echo "[5] 常见原因："
-    echo "    1. RocketMQ 镜像架构与服务器不兼容（当前使用 apache/rocketmq:5.3.1）"
+    echo "    1. RocketMQ 镜像架构与服务器不兼容（当前使用 $rocketmqImage）"
     echo "    2. Broker 存储目录权限异常：$rootDir/rocketmq/broker/store"
     echo "    3. broker.conf 配置或挂载失败：$rootDir/rocketmq/broker/conf/broker.conf"
     echo "    4. NameServer 未正常启动，可执行：docker logs --tail 50 rocketmq-namesrv"
@@ -258,7 +286,7 @@ docker run -itd --name jeepaymanager --restart=always --network=jeepay-net \
 -v $rootDir/service/logs:/jeepayhomes/service/logs \
 -v $rootDir/service/uploads:/jeepayhomes/service/uploads \
 -v $rootDir/service/configs/manager/application.yml:/jeepayhomes/service/app/application.yml \
--d jeepay/jeepay-manager
+-d $managerImage
 
 echo "[6.2] 下载并启动 java 项目 [ jeepaymerchant  ] .... "
 # 运行 java项目
@@ -268,7 +296,7 @@ docker run -itd --name jeepaymerchant --restart=always --network=jeepay-net \
 -v $rootDir/service/logs:/jeepayhomes/service/logs \
 -v $rootDir/service/uploads:/jeepayhomes/service/uploads \
 -v $rootDir/service/configs/merchant/application.yml:/jeepayhomes/service/app/application.yml \
--d jeepay/jeepay-merchant
+-d $merchantImage
 
 echo "[6.3] 下载并启动 java 项目 [ jeepaypayment  ] .... "
 # 运行 java项目
@@ -278,7 +306,7 @@ docker run -itd --name jeepaypayment --restart=always --network=jeepay-net \
 -v $rootDir/service/logs:/jeepayhomes/service/logs \
 -v $rootDir/service/uploads:/jeepayhomes/service/uploads \
 -v $rootDir/service/configs/payment/application.yml:/jeepayhomes/service/app/application.yml \
--d jeepay/jeepay-payment
+-d $paymentImage
 
 echo "[6] Done. "
 
@@ -294,17 +322,61 @@ cd $sourcesInstallPath && cp ./include/nginx.conf $rootDir/nginx/conf/nginx.conf
 
 
 docker run --name nginx118  \
+--platform=linux/amd64 \
 --restart=always --privileged=true --net=host \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/nginx/conf/nginx.conf:/etc/nginx/nginx.conf \
 -v $rootDir/nginx/conf/conf.d:/etc/nginx/conf.d \
 -v $rootDir/nginx/logs:/var/log/nginx \
 -v $rootDir/nginx/html:/usr/share/nginx/html \
--d nginx:1.18.0
+-d $nginxImage
 
 echo "[7] Done. "
 
-docker logs jeepaypayment
+# 第8步：部署后自检
+echo "[8] 部署后自检.... "
+
+# 8.1 等待三个 jeepay 应用 healthcheck 转为 healthy，最长 3 分钟
+healthTimeout=180
+healthInterval=5
+healthElapsed=0
+allHealthy=0
+while [ $healthElapsed -lt $healthTimeout ]
+do
+    managerStat=$(docker inspect --format '{{.State.Health.Status}}' jeepaymanager 2>/dev/null)
+    merchantStat=$(docker inspect --format '{{.State.Health.Status}}' jeepaymerchant 2>/dev/null)
+    paymentStat=$(docker inspect --format '{{.State.Health.Status}}' jeepaypayment 2>/dev/null)
+    if [ "$managerStat" = "healthy" ] && [ "$merchantStat" = "healthy" ] && [ "$paymentStat" = "healthy" ]; then
+        allHealthy=1
+        break
+    fi
+    echo "[8] 等待 jeepay 服务就绪... manager=$managerStat merchant=$merchantStat payment=$paymentStat (${healthElapsed}/${healthTimeout}s)"
+    sleep $healthInterval
+    healthElapsed=$((healthElapsed + healthInterval))
+done
+
+if [ $allHealthy -eq 1 ]; then
+    echo "[8] jeepay 应用容器全部 healthy"
+else
+    echo "[8] WARN: 超过 ${healthTimeout}s 仍有容器未进入 healthy，可执行 docker logs jeepaymanager/jeepaymerchant/jeepaypayment 查看详情"
+fi
+
+# 8.2 探测对外暴露的三个 HTTP 端口；未返回状态码即视为未响应
+probeEndpoint() {
+    endpointLabel=$1
+    endpointPort=$2
+    endpointCode=$(curl -s -o /dev/null -w '%{http_code}' -m 5 http://127.0.0.1:$endpointPort/ 2>/dev/null)
+    if [ -n "$endpointCode" ] && [ "$endpointCode" != "000" ]; then
+        echo "[8] $endpointLabel (http://127.0.0.1:$endpointPort) -> HTTP $endpointCode"
+    else
+        echo "[8] WARN: $endpointLabel (http://127.0.0.1:$endpointPort) 未响应"
+    fi
+}
+probeEndpoint "支付网关" 19216
+probeEndpoint "运营平台" 19217
+probeEndpoint "商户平台" 19218
+
+echo "[8] Done. "
 
 echo ">>>>>>> "
 echo ">>>>>>> "
@@ -316,5 +388,3 @@ echo ">>>>>>>支付网关： http://外网IP:19216   "
 echo ">>>>>>>若配置域名请更改 $rootDir/nginx/conf/nginx.conf 配置文件。 "
 echo ""
 echo "Complete."
-
-
