@@ -87,18 +87,18 @@ cd /your/install/path/sources/jeepay/docs/install && sh uninstall.sh
 
 > 进入该目录后 `uninstall.sh` 读取的 `config.sh` 是 `install.sh` 在安装阶段**自动回写**的版本（包含用户真实的 `rootDir` 与镜像覆盖），不再使用仓库模板默认值 `rootDir=/jeepayhomes`，因此自定义过 `rootDir` 的安装也能正确清理。
 
-## 锁定源码版本（生产环境建议）
+## 锁定源码版本
 
-`install.sh` 默认 `jeepayRef=master`，每次安装都会克隆最新的 master HEAD。业务镜像默认钉在 `3.2.0`。若 master 之后继续演进（新增 SQL 列、修改 `broker.conf.template` 等），可能出现"老镜像 + 新配置"的漂移。
+`install.sh` 默认 `jeepayRef=V3.2.1`，即 `git clone --branch V3.2.1 --depth 1`，和业务镜像（`3.2.0`，V3.2.1 与之完全兼容）锁在同一版本，避免业务镜像固定而源码继续漂移出现的"老镜像 + 新配置"混装问题。
 
-**生产环境建议**：锁到与业务镜像同版本的 release tag（例如该版本的打包发布 tag），保证 `init.sql` / `broker.conf.template` / `nginx.conf` / `conf/*` 与镜像契合：
+如需临时改用最新 master 或其他 release tag，安装前导出环境变量即可：
 
 ```bash
-export jeepayRef=V3.2.1   # 示例：改为你实际想要锁定的 tag
+export jeepayRef=master      # 或改为其他目标 tag / 分支
 sh install.sh
 ```
 
-`config.sh` 里也有对应的注释条目，改成非注释即可生效。
+`config.sh` 里也有对应的注释条目，取消注释后等价。
 
 ## 自定义镜像源（高级）
 

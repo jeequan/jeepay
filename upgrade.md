@@ -237,3 +237,25 @@
 2. 优化： RocketMQ Broker 安装时自动写入当前服务器 IP，避免静态地址失效
 3. 优化： 卸载脚本支持幂等执行，缺失容器或网络时自动跳过
 4. 新增： 增加 Docker Hub 镜像构建与推送脚本
+
+[v3.2.1_20260419]
+> 安装工具 & 文档补丁版本：业务代码零改动，与 3.2.0 业务镜像完全兼容，
+> 无需重打 jeepay-manager / jeepay-merchant / jeepay-payment 镜像。
+1. 新增： install.sh 安装结束前执行 [8] 部署自检（等待三个 jeepay 应用
+   healthcheck + 探测 19216/19217/19218 HTTP）
+2. 新增： install.sh 支持通过 jeepayRef 环境变量锁定源码 tag，默认
+   锁到 V3.2.1，避免业务镜像固定而源码继续漂移的"老镜像 + 新配置"
+   混装问题
+3. 修复： 自定义 rootDir 下，安装后 sources 目录 config.sh 自动回写
+   为真实生效值，使按文档路径执行的 uninstall.sh 不再误删默认路径
+4. 优化： install.sh 对 mysql / redis / nginx 去除多余的
+   --platform=linux/amd64 硬编码（SWR 已同步多架构 manifest），仅对
+   RocketMQ 保留 --platform 并改为 $rocketmqPlatform 可覆盖
+5. 优化： 补齐 config.sh 模板中的镜像 / 平台 / jeepayRef 覆盖项注释
+6. 优化： README 精简至 ~300 行，按主题拆分至 docs/deploy/*，并在
+   顶部新增"官方托管服务（计全付）"入口（含 100% 全额分账能力）
+7. 优化： 部署文档优先引导使用华为云 SWR 公开镜像，国内零配置直达
+8. 修复： 移除 codegen 模块未被引用的 spring-context 依赖，消除
+   CVE-2024-38820 / CVE-2025-22233 Dependabot 告警
+9. 修复： 商户系统默认密码说明（商户平台无内置账号，新建商户用户
+   的默认密码是 jeepay666）
