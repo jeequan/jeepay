@@ -1,0 +1,2 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.jeequan.jeepay.components.mq.vender.rocketmq.config.JeepayRocketMqEnvironmentPostProcessor

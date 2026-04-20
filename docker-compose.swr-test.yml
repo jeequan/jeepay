@@ -1,0 +1,76 @@
+services:
+  mysql:
+    container_name: jeepay-swr-test-mysql
+    ports:
+      - "23306:3306"
+    networks:
+      jeepay:
+        ipv4_address: 172.30.0.10
+
+  rocketmq-namesrv:
+    container_name: jeepay-swr-test-rocketmq-namesrv
+    ports:
+      - "19876:9876"
+    networks:
+      jeepay:
+        ipv4_address: 172.30.0.11
+
+  redis:
+    container_name: jeepay-swr-test-redis
+    ports:
+      - "16380:6379"
+    networks:
+      jeepay:
+        ipv4_address: 172.30.0.12
+
+  rocketmq-broker:
+    container_name: jeepay-swr-test-rocketmq-broker
+    ports:
+      - "20909:10909"
+      - "20911:10911"
+      - "20912:10912"
+    networks:
+      jeepay:
+        ipv4_address: 172.30.0.13
+
+  payment:
+    container_name: jeepay-swr-test-payment
+    networks:
+      jeepay:
+        ipv4_address: 172.30.0.21
+
+  manager:
+    container_name: jeepay-swr-test-manager
+    networks:
+      jeepay:
+        ipv4_address: 172.30.0.22
+
+  merchant:
+    container_name: jeepay-swr-test-merchant
+    networks:
+      jeepay:
+        ipv4_address: 172.30.0.23
+
+  ui-payment:
+    container_name: jeepay-swr-test-ui-payment
+    networks:
+      jeepay:
+        ipv4_address: 172.30.0.31
+
+  ui-manager:
+    container_name: jeepay-swr-test-ui-manager
+    networks:
+      jeepay:
+        ipv4_address: 172.30.0.32
+
+  ui-merchant:
+    container_name: jeepay-swr-test-ui-merchant
+    networks:
+      jeepay:
+        ipv4_address: 172.30.0.33
+
+networks:
+  jeepay:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24

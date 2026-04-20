@@ -5,6 +5,8 @@ server:
   servlet:
     context-path: / #设置应用的目录.  前缀需要带/, 无需设置后缀, 示例 【 /xxx 】 or 【 / 】
 spring:
+  application:
+    name: jeepay
   main:
     allow-circular-references: true
   servlet:
@@ -123,5 +125,12 @@ isys:
       access-key-secret: SECRET_SECRET_SECRET  #AccessKeySecret
 
   mq:
-    vender: activeMQ  #  切换MQ厂商， 支持：【 activeMQ  rabbitMQ  rocketMQ  aliYunRocketMQ 】， 需正确配置 【对应的yml参数】 和 【jeepay-components-mq项目下pom.xml中的依赖包】。
+    vender: rocketMQ  #  切换MQ厂商， 支持：【 activeMQ  rabbitMQ  rocketMQ  aliYunRocketMQ 】， 需正确配置 【对应的yml参数】 和 【jeepay-components-mq项目下pom.xml中的依赖包】。
 
+rocketmq:
+  name-server: 127.0.0.1:9876
+  producer:
+    group: PID_JEEPAY_DEV
+    send-message-timeout: 10000
+    retry-times-when-send-failed: 2
+    retry-times-when-send-async-failed: 2

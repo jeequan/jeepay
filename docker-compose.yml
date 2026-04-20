@@ -1,24 +1,18 @@
-version: '3'
-
 # Maven 依赖提前编译，修改 MQ 队列 (修改 jeepay-components-mq 依赖) 也需要重新运行此命令
-# docker build -t jeepay-deps:latest -f docs/Dockerfile .
-# 启动命令 docker-compose up
-# 启动并运行在后台  docker-compose up -d
-# 重新编译 docker-compose up --build
-# 重新创建 docker-composer up --force-recreate
-# 重新编译并覆盖之前的 docker-composer up --build --force-recreate
-
-
-# 编译前端请先执行 git submodule updata --init --recursive
-# 或者 git clone https://gitee.com/jeequan/jeepay-ui.git
+# 启动命令 docker compose up
+# 启动并运行在后台  docker compose up -d
+# 重新编译 docker compose up --build
+# 重新创建 docker compose up --force-recreate
+# 重新编译并覆盖之前的 docker compose up --build --force-recreate
+#
+# 前端目录默认使用本仓库同级的 ../jeepay-ui，可在 .env 中覆盖 UI_BASE_DIR。
 
 services:
   mysql:
     hostname: mysql
     container_name: jeepay-mysql
-    # amd64 平台
-    #image: mysql/mysql-server:latest
-    image: mysql:8
+    restart: always
+    image: ${MYSQL_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/mysql:8}
     environment:
       LANG: C.UTF-8
       MYSQL_ROOT_PASSWORD: "rootroot"
@@ -26,32 +20,82 @@ services:
       MYSQL_USER: "jeepay"
       MYSQL_PASSWORD: "jeepay"
     ports:
-      - "3306:3306"
+      - "13306:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
     volumes:
       - mysql:/var/lib/mysql
-      - ./docs/sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./docs/sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./docs/sql/patch.sql:/docker-entrypoint-initdb.d/02-patch.sql:ro
     networks:
       jeepay:
         ipv4_address: 172.20.0.10
-  activemq:
-    build:
-      context: ./docker/activemq
-      dockerfile: Dockerfile
-    hostname: activemq
-    container_name: jeepay-activemq
-    image: jeepay-activemq:latest
-    ports: #- "1883:1883"
-      #- "5672:5672"
-      - "8161:8161"
-      #- "61613:61613"
-      #- "61614:61614"
-      - "61616:61616"
+
+  # 使用 RocketMQ 作为默认 MQ 方案
+  rocketmq-namesrv:
+    platform: linux/amd64
+    image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
+    hostname: rocketmq-namesrv
+    container_name: jeepay-rocketmq-namesrv
+    restart: always
+    user: "0:0"
+    ports:
+      - "9876:9876"
+    environment:
+      # 开发环境降低 NameServer 内存占用
+      HEAP_OPTS: "-Xms256m -Xmx256m -Xmn128m"
+    command: sh mqnamesrv
+    healthcheck:
+      # arm64 模拟 amd64 时 bash 启动较慢，需增大超时
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/9876'"]
+      interval: 15s
+      timeout: 15s
+      retries: 10
+      start_period: 40s
     volumes:
-      - activemq:/opt/activemq
-      - ./docker/activemq/activemq.xml:/opt/activemq/conf/activemq.xml
+      - rocketmq_namesrv_logs:/home/rocketmq/logs
     networks:
       jeepay:
         ipv4_address: 172.20.0.11
+
+  rocketmq-broker:
+    platform: linux/amd64
+    image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
+    hostname: rocketmq-broker
+    container_name: jeepay-rocketmq-broker
+    restart: always
+    # Docker 创建的 named volume 默认 root 权限，而镜像以 rocketmq(uid=3000) 运行，需要提权
+    user: "0:0"
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+      - "10912:10912"
+    environment:
+      NAMESRV_ADDR: rocketmq-namesrv:9876
+      # 开发环境限制 Broker 堆内存，默认 2g+1g 在 Docker Desktop 上容易 OOM
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m -Xmn256m"
+    command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
+    depends_on:
+      rocketmq-namesrv:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/10911'"]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+      start_period: 120s
+    volumes:
+      - rocketmq_broker_logs:/home/rocketmq/logs
+      - rocketmq_broker_store:/home/rocketmq/store
+      - ./docker/rocketmq/broker/conf/broker.conf:/home/rocketmq/rocketmq-5.3.1/conf/broker.conf:ro
+    networks:
+      jeepay:
+        ipv4_address: 172.20.0.13
+
   # 扩展额外延迟插件的 RabbitMQ
   #rabbitmq:
   #  build:
@@ -60,6 +104,7 @@ services:
   #  hostname: rabbitmq
   #  container_name: jeepay-rabbitmq
   #  image: jeepay-rabbitmq:latest
+  #  restart: always
   #  ports:
   #    - "15672:15672"
   #    - "4369:4369"
@@ -73,175 +118,200 @@ services:
   #    - rabbitmq:/var/lib/rabbitmq
   #  networks:
   #    jeepay:
-  #      ipv4_address: 172.20.0.11
-  # 使用 activemq 如有需要请修改 docker/activemq.xml 下相关配置
-  #rocketmq-namesrv:
-  #  image: apache/rocketmq:4.9.3
-  #  container_name: rmqnamesrv
+  #      ipv4_address: 172.20.0.14
+
+  # 如需回退 ActiveMQ，可启用下面服务并同步修改 conf/*.yml 中的 MQ 配置。
+  #activemq:
+  #  build:
+  #    context: ./docker/activemq
+  #    dockerfile: Dockerfile
+  #  hostname: activemq
+  #  container_name: jeepay-activemq
+  #  image: jeepay-activemq:latest
+  #  restart: always
   #  ports:
-  #    - 9876:9876
+  #    - "8161:8161"
+  #    - "61616:61616"
   #  volumes:
-  #    - ./docker/rocketmq/namesrv/logs:/home/rocketmq/logs
-  #  command: sh mqnamesrv
+  #    - activemq:/opt/activemq
+  #    - ./docker/activemq/activemq.xml:/opt/activemq/conf/activemq.xml
   #  networks:
   #    jeepay:
-  #      ipv4_address: 172.20.0.11
-  #rocketmq-broker:
-  #  image: apache/rocketmq:4.9.3
-  #  container_name: rmqbroker
-  #  ports:
-  #    - 10909:10909
-  #    - 10911:10911
-  #    - 10912:10912
-  #  environment:
-  #    - NAMESRV_ADDR=namesrv:9876
-  #  volumes:
-  #    - ./docker/rocketmq/broker/logs:/home/rocketmq/logs
-  #    - ./docker/rocketmq/broker/store:/home/rocketmq/store
-  #    - ./docker/rocketmq/broker/conf/broker.conf:/opt/rocketmq-4.9.3/conf/broker.conf
-  #  command: sh mqbroker -c /opt/rocketmq-4.9.3/conf/broker.conf
-  #  depends_on:
-  #    - rocketmq-namesrv
-  #  networks:
-  #    jeepay:
-  #      ipv4_address: 172.20.0.13
+  #      ipv4_address: 172.20.0.15
+
   redis:
+    platform: linux/amd64
     hostname: redis
     container_name: jeepay-redis
-    image: redis:latest
+    restart: always
+    image: ${REDIS_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/redis:6.2.14}
     ports:
       - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    volumes:
+      - redis:/data
     networks:
       jeepay:
         ipv4_address: 172.20.0.12
-    volumes:
-      - redis:/data
+
   payment:
     build:
-      context: .
+      context: ./jeepay-payment
       dockerfile: Dockerfile
-      args:
-        PORT: 9216
-        PLATFORM: payment
     image: jeepay-payment:latest
     hostname: payment
     container_name: jeepay-payment
+    restart: always
     ports:
       - "9216:9216"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://127.0.0.1:9216"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
     depends_on:
-      - mysql
-      - redis
-      - activemq
-      # - rabbitmq
-      # - rocketmq-broker
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_healthy
+    volumes:
+      - ./logs/payment:/jeepayhomes/service/logs
+      - ./conf/payment/application.yml:/jeepayhomes/service/app/application.yml
     networks:
       jeepay:
         ipv4_address: 172.20.0.21
-    volumes:
-      - ./logs/payment:/workspace/logs
-      - ./conf/payment/application.yml:/workspace/application.yml
+
   manager:
     build:
-      context: .
+      context: ./jeepay-manager
       dockerfile: Dockerfile
-      args:
-        PORT: 9217
-        PLATFORM: manager
     image: jeepay-manager:latest
     hostname: manager
     container_name: jeepay-manager
+    restart: always
     ports:
       - "9217:9217"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://127.0.0.1:9217"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
     depends_on:
-      - mysql
-      - redis
-      - activemq
-      # - rabbitmq
-      # - rocketmq-broker
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_healthy
+    volumes:
+      - ./logs/manager:/jeepayhomes/service/logs
+      - ./conf/manager/application.yml:/jeepayhomes/service/app/application.yml
     networks:
       jeepay:
         ipv4_address: 172.20.0.22
-    volumes:
-      - ./logs/manager:/workspace/logs
-      - ./conf/manager/application.yml:/workspace/application.yml
+
   merchant:
     build:
-      context: .
+      context: ./jeepay-merchant
       dockerfile: Dockerfile
-      args:
-        PORT: 9218
-        PLATFORM: merchant
     image: jeepay-merchant:latest
     hostname: merchant
     container_name: jeepay-merchant
+    restart: always
     ports:
       - "9218:9218"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://127.0.0.1:9218"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
     depends_on:
-      - mysql
-      - redis
-      - activemq
-      # - rabbitmq
-      # - rocketmq-broker
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_healthy
+    volumes:
+      - ./logs/merchant:/jeepayhomes/service/logs
+      - ./conf/merchant/application.yml:/jeepayhomes/service/app/application.yml
     networks:
       jeepay:
         ipv4_address: 172.20.0.23
-    volumes:
-      - ./logs/merchant:/workspace/logs
-      - ./conf/merchant/application.yml:/workspace/application.yml
+
   ui-payment:
     build:
-      context: ${UI_BASE_DIR}/jeepay-ui
+      context: ${UI_BASE_DIR:-..}/jeepay-ui
       dockerfile: Dockerfile
       args:
         PLATFORM: cashier
     image: jeepay-ui-payment:latest
     hostname: payment-ui
     container_name: jeepay-ui-payment
+    restart: always
     environment:
       - BACKEND_HOST=172.20.0.21:9216
     ports:
       - "9226:80"
     depends_on:
-      - payment
+      payment:
+        condition: service_healthy
     networks:
       jeepay:
         ipv4_address: 172.20.0.31
+
   ui-manager:
     build:
-      context: ${UI_BASE_DIR}/jeepay-ui
+      context: ${UI_BASE_DIR:-..}/jeepay-ui
       dockerfile: Dockerfile
       args:
         PLATFORM: manager
     image: jeepay-ui-manager:latest
     hostname: manager-ui
     container_name: jeepay-ui-manager
+    restart: always
     environment:
       - BACKEND_HOST=172.20.0.22:9217
     ports:
       - "9227:80"
     depends_on:
-      - manager
+      manager:
+        condition: service_healthy
     networks:
       jeepay:
         ipv4_address: 172.20.0.32
+
   ui-merchant:
     build:
-      context: ${UI_BASE_DIR}/jeepay-ui
+      context: ${UI_BASE_DIR:-..}/jeepay-ui
       dockerfile: Dockerfile
       args:
         PLATFORM: merchant
     image: jeepay-ui-merchant:latest
     hostname: merchant-ui
     container_name: jeepay-ui-merchant
+    restart: always
     environment:
       - BACKEND_HOST=172.20.0.23:9218
     ports:
       - "9228:80"
     depends_on:
-      - merchant
+      merchant:
+        condition: service_healthy
     networks:
       jeepay:
         ipv4_address: 172.20.0.33
+
   # 如果你需要对外完整配置，可以使用下面的方式
   # https://www.digitalocean.com/community/tools/nginx?domains.0.server.domain=pay.test.com&domains.0.server.documentRoot=&domains.0.server.redirectSubdomains=false&domains.0.https.hsts=false&domains.0.https.hstsPreload=true&domains.0.php.php=false&domains.0.reverseProxy.reverseProxy=true&domains.0.reverseProxy.proxyPass=http%3A%2F%2F172.20.0.26%3A9226&domains.0.routing.index=index.html&domains.0.routing.fallbackHtml=true&domains.0.routing.fallbackPhp=false&domains.0.logging.accessLog=true&domains.0.logging.errorLog=true&global.reverseProxy.proxyCoexistenceXForwarded=remove&global.app.lang=zhCN
   # 访问并配置好所有域名和代理，下载文件放到项目根目录下取名叫做 nginx.tar.gz
@@ -270,5 +340,7 @@ networks:
 volumes:
   mysql:
   redis:
-  activemq:
+  rocketmq_namesrv_logs:
+  rocketmq_broker_logs:
+  rocketmq_broker_store:
 #  rabbitmq:

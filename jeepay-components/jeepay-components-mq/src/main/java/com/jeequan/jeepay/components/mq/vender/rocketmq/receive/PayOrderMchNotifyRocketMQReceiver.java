@@ -38,7 +38,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConditionalOnProperty(name = MQVenderCS.YML_VENDER_KEY, havingValue = MQVenderCS.ROCKET_MQ)
 @ConditionalOnBean(PayOrderMchNotifyMQ.IMQReceiver.class)
-@RocketMQMessageListener(topic = PayOrderMchNotifyMQ.MQ_NAME, consumerGroup = PayOrderMchNotifyMQ.MQ_NAME)
+@RocketMQMessageListener(topic = PayOrderMchNotifyMQ.MQ_NAME,
+        consumerGroup = "${spring.application.name:jeepay}_" + PayOrderMchNotifyMQ.MQ_NAME)
 public class PayOrderMchNotifyRocketMQReceiver implements IMQMsgReceiver, RocketMQListener<String> {
 
     @Autowired

@@ -1,12 +1,125 @@
 #! /bin/sh
 #exec 2>>build.log  ##编译过程打印到日志文件中
-## 一键启动jeepay服务，包含mysqlDB/MQ/redis/javaservice/nginx   .Power by terrfly
+## 一键启动jeepay服务，包含mysqlDB/RocketMQ/redis/javaservice/nginx   .Power by terrfly
 
 
 if [ $UID != '0' ]; then
     echo 'ERROR： 请使用root用户安装（Please install using root user）！'
     exit 0
 fi
+
+# ---------------------------------------------------------------------------
+# 跨发行版的依赖安装辅助：检测包管理器（apt/dnf/yum/apk），对 wget/curl/git/
+# docker 做自动安装并校验，无法自动安装时给出明确错误。
+# ---------------------------------------------------------------------------
+detect_pkg_mgr() {
+    if command -v apt-get >/dev/null 2>&1; then
+        echo "apt"
+    elif command -v dnf >/dev/null 2>&1; then
+        echo "dnf"
+    elif command -v yum >/dev/null 2>&1; then
+        echo "yum"
+    elif command -v apk >/dev/null 2>&1; then
+        echo "apk"
+    else
+        echo "unknown"
+    fi
+}
+
+PKG_MGR=$(detect_pkg_mgr)
+APT_UPDATED=0
+
+pkg_install() {
+    case "$PKG_MGR" in
+        apt)
+            if [ "$APT_UPDATED" -eq 0 ]; then
+                apt-get update -y >/dev/null 2>&1 || true
+                APT_UPDATED=1
+            fi
+            DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
+            ;;
+        dnf) dnf install -y "$@" ;;
+        yum) yum install -y "$@" ;;
+        apk) apk add --no-cache "$@" ;;
+        *)
+            echo "ERROR: 未识别的包管理器（非 apt/dnf/yum/apk），请手动安装：$*"
+            return 1
+            ;;
+    esac
+}
+
+ensure_cmd() {
+    cmdName=$1
+    pkgName=${2:-$cmdName}
+    if command -v "$cmdName" >/dev/null 2>&1; then
+        return 0
+    fi
+    echo "install $pkgName..."
+    if ! pkg_install "$pkgName"; then
+        echo "ERROR: 自动安装 $pkgName 失败（包管理器：$PKG_MGR），请手动安装后重试。"
+        exit 1
+    fi
+    if ! command -v "$cmdName" >/dev/null 2>&1; then
+        echo "ERROR: 已尝试安装 $pkgName 但仍找不到 $cmdName，请排查后重试。"
+        exit 1
+    fi
+}
+
+ensure_docker() {
+    if command -v docker >/dev/null 2>&1; then
+        return 0
+    fi
+    echo "install docker..."
+    case "$PKG_MGR" in
+        apt)
+            pkg_install docker.io
+            ;;
+        dnf|yum)
+            # 添加阿里云的 docker-ce 源（仅对 RHEL 系）
+            $PKG_MGR install -y yum-utils >/dev/null 2>&1 || true
+            if command -v yum-config-manager >/dev/null 2>&1; then
+                yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo >/dev/null 2>&1 || true
+            fi
+            $PKG_MGR makecache >/dev/null 2>&1 || true
+            pkg_install docker-ce
+            ;;
+        apk)
+            pkg_install docker
+            command -v rc-update >/dev/null 2>&1 && rc-update add docker default 2>/dev/null || true
+            command -v service >/dev/null 2>&1 && service docker start 2>/dev/null || true
+            ;;
+        *)
+            echo "ERROR: 未识别的系统，无法自动安装 docker。"
+            echo "       请参考 https://docs.docker.com/engine/install/ 手动安装后重试。"
+            exit 1
+            ;;
+    esac
+    if ! command -v docker >/dev/null 2>&1; then
+        echo "ERROR: docker 自动安装失败，请手动安装后重试。"
+        exit 1
+    fi
+    # 启动 docker daemon（systemd 系统）
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl start docker 2>/dev/null || true
+        systemctl enable docker 2>/dev/null || true
+    fi
+    # 校验 daemon 可用
+    if ! docker info >/dev/null 2>&1; then
+        echo "ERROR: docker 已安装但 daemon 未能启动。请执行以下命令手动启动后重试："
+        echo "       systemctl start docker   # systemd 系统"
+        echo "       service docker start     # 非 systemd 系统"
+        exit 1
+    fi
+}
+
+if [ "$PKG_MGR" = "unknown" ]; then
+    echo "WARN: 未识别到支持的包管理器（apt/dnf/yum/apk），将跳过依赖自动安装；"
+    echo "      请确保 wget / curl / git / docker 已手动安装。"
+fi
+
+# 预置 wget / curl，用于下载 config.sh / html.tar.gz 与部署自检
+ensure_cmd wget
+ensure_cmd curl
 
 # 第0步：提示信息
 echo "请确认当前是全新服务器安装,  是否继续？"
@@ -34,6 +147,115 @@ if [ -d $rootDir ]; then
     exit 0
 fi
 
+# ---------------------------------------------------------------------------
+# 宿主端口占用预检
+#   - MySQL / Redis：被占时脚本自动选空闲端口，打印 INFO 提示；用户显式
+#     指定的 mysqlHostPort / redisHostPort 被占则直接报错（尊重用户）。
+#   - RocketMQ / Nginx：与容器内通信耦合，不支持自动换端口，被占时退出。
+# jeepay 各服务通过 jeepay-net 内部的 mysql:3306 / redis:6379 通信，
+# 宿主 host port 变化不影响业务。
+# ---------------------------------------------------------------------------
+port_in_use() {
+    portNum=$1
+    if command -v ss >/dev/null 2>&1; then
+        ss -lnt 2>/dev/null | awk '{print $4}' | grep -qE "[:.]${portNum}$"
+    elif command -v netstat >/dev/null 2>&1; then
+        netstat -lnt 2>/dev/null | awk '{print $4}' | grep -qE "[:.]${portNum}$"
+    else
+        return 1
+    fi
+}
+
+print_port_owner() {
+    portNum=$1
+    if command -v ss >/dev/null 2>&1; then
+        ss -lntp 2>/dev/null | grep -E "[:.]${portNum}[[:space:]]" | head -3
+    elif command -v lsof >/dev/null 2>&1; then
+        lsof -i :"$portNum" -sTCP:LISTEN 2>/dev/null | tail -n +2 | head -3
+    elif command -v netstat >/dev/null 2>&1; then
+        netstat -lntp 2>/dev/null | grep -E "[:.]${portNum}[[:space:]]" | head -3
+    fi
+}
+
+# 依次尝试：基准端口 → 基准 + 10000 → 再逐个 +1；返回首个空闲端口，找不到返回空串。
+pick_host_port() {
+    basePort=$1
+    if ! port_in_use "$basePort"; then
+        echo "$basePort"
+        return 0
+    fi
+    candidate=$((basePort + 10000))
+    while [ "$candidate" -le 65000 ]; do
+        if ! port_in_use "$candidate"; then
+            echo "$candidate"
+            return 0
+        fi
+        candidate=$((candidate + 1))
+    done
+    echo ""
+    return 1
+}
+
+# 先识别 mysqlHostPort / redisHostPort 是否由用户显式指定，再决定是否自动换
+mysqlHostPortSource="auto"
+redisHostPortSource="auto"
+[ -n "$mysqlHostPort" ] && mysqlHostPortSource="user"
+[ -n "$redisHostPort" ] && redisHostPortSource="user"
+mysqlHostPort=${mysqlHostPort:-3306}
+redisHostPort=${redisHostPort:-6379}
+
+resolve_host_port() {
+    portLabel=$1
+    portVar=$2       # 形如 "mysqlHostPort"
+    portSource=$3    # "auto" 或 "user"
+    portValue=$4     # 当前候选端口
+    if ! port_in_use "$portValue"; then
+        return 0
+    fi
+    if [ "$portSource" = "user" ]; then
+        echo "ERROR: 您在 config.sh / 环境变量中指定的 $portVar=$portValue ($portLabel) 已被占用："
+        print_port_owner "$portValue" | sed 's/^/      /'
+        exit 1
+    fi
+    # 自动选
+    newPort=$(pick_host_port "$portValue")
+    if [ -z "$newPort" ]; then
+        echo "ERROR: 无法为 $portLabel 找到空闲的宿主端口，请手动设置 $portVar。"
+        exit 1
+    fi
+    echo "INFO: 宿主端口 $portValue 已被占，$portLabel 自动改用 $newPort（仅影响宿主机外部访问，不影响 jeepay 内部通信）。"
+    eval "$portVar=$newPort"
+}
+
+echo "检查宿主端口占用情况..."
+resolve_host_port "MySQL" mysqlHostPort "$mysqlHostPortSource" "$mysqlHostPort"
+resolve_host_port "Redis" redisHostPort "$redisHostPortSource" "$redisHostPort"
+
+# RocketMQ / Nginx 的端口不支持自动换，被占就退出
+portConflict=0
+check_port() {
+    portLabel=$1
+    portNum=$2
+    if port_in_use "$portNum"; then
+        echo "  - 端口 $portNum ($portLabel) 已被占用："
+        print_port_owner "$portNum" | sed 's/^/      /'
+        portConflict=1
+    fi
+}
+check_port "RocketMQ NameServer"          9876
+check_port "RocketMQ Broker 10909"        10909
+check_port "RocketMQ Broker 10911"        10911
+check_port "RocketMQ Broker 10912"        10912
+check_port "Nginx -> payment"             19216
+check_port "Nginx -> manager"             19217
+check_port "Nginx -> merchant"            19218
+
+if [ "$portConflict" -eq 1 ]; then
+    echo
+    echo "ERROR： 上述端口与容器内通信耦合，暂不支持自动换端口。请先释放占用进程后重跑脚本。"
+    exit 1
+fi
+
 # 第0步：提示信息
 echo "检查配置信息是否正确（配置内容在 config.sh文件）："
 echo "【项目根目录的地址】： $rootDir"
@@ -46,19 +268,9 @@ then
     exit 0
 fi
 
-# 检查 git
-if ! [ -x "$(command -v git)" ]; then
-    echo 'install git...'
-    yum install -y git
-fi
-
-# 检查 docker环境
-if ! [ -x "$(command -v docker)" ]; then
-    echo 'install docker...'
-    yum install  -y yum-utils && yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-    yum makecache && yum install  -y docker-ce
-    systemctl restart docker && systemctl enable docker
-fi
+# 检查 git、docker（基于 detect_pkg_mgr 结果自动适配 apt/dnf/yum/apk）
+ensure_cmd git
+ensure_docker
 
 
 # 第1步：创建基本目录
@@ -75,7 +287,11 @@ mkdir $rootDir/mysql/log -p
 mkdir $rootDir/mysql/data -p
 mkdir $rootDir/mysql/mysql-files -p
 
-# mkdir $rootDir/activemq -p
+mkdir $rootDir/rocketmq -p
+mkdir $rootDir/rocketmq/namesrv/logs -p
+mkdir $rootDir/rocketmq/broker/logs -p
+mkdir $rootDir/rocketmq/broker/store -p
+mkdir $rootDir/rocketmq/broker/conf -p
 
 mkdir $rootDir/redis -p
 mkdir $rootDir/redis/config -p
@@ -88,15 +304,53 @@ mkdir $rootDir/service/logs -p
 mkdir $rootDir/sources -p
 echo "[1] Done. "
 
+mysqlImage=${mysqlImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/mysql:8.0.25}
+redisImage=${redisImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/redis:6.2.14}
+rocketmqImage=${rocketmqImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
+nginxImage=${nginxImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/nginx:1.18.0}
+managerImage=${managerImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-manager:3.2.0}
+merchantImage=${merchantImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-merchant:3.2.0}
+paymentImage=${paymentImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-payment:3.2.0}
+
+# rocketmq 上游仅发布 linux/amd64 镜像，ARM64 宿主需借助 qemu/binfmt 仿真。
+# 其他镜像（mysql/redis/nginx）已具备多架构 manifest，不再强制 platform。
+rocketmqPlatform=${rocketmqPlatform:-linux/amd64}
+
+# 源码 ref：默认锁到 V3.2.4 release tag，保证 git clone 下来的 SQL / broker.conf.template /
+# nginx.conf / conf/* 与业务镜像（3.2.0 / V3.2.4 兼容）契合，不受 master 后续演进影响。
+# 如需用最新 master 或其他 tag，安装前导出 jeepayRef=xxx 覆盖即可（透传给 git clone --branch）。
+jeepayRef=${jeepayRef:-V3.2.7}
+
 # 第2步：拉取项目源代码  || 拉取脚本文件
-echo "[2] 拉取项目源代码文件.... "
+echo "[2] 拉取项目源代码文件 (ref=$jeepayRef).... "
 cd $rootDir/sources
-git clone https://gitee.com/jeequan/jeepay.git
-# cd jeepay && git checkout -b dev origin/dev # 切换到dev分支。
+git clone --branch "$jeepayRef" --depth 1 https://gitee.com/jeequan/jeepay.git
 echo "[2] Done. "
 
 #源码中install.sh文件目录
 sourcesInstallPath=$rootDir/sources/jeepay/docs/install
+
+# 将本次安装的"生效配置"快照写回 sources 目录下的 config.sh，
+# 使 uninstall.sh（按文档从该目录运行）读到的是用户实际使用的 rootDir，
+# 而不是仓库里 rootDir="/jeepayhomes" 的默认模板。
+cat > "$sourcesInstallPath/config.sh" <<EOF
+#! /bin/sh
+# 由 install.sh 在安装阶段自动生成，供 uninstall.sh 读取。请勿手工编辑。
+rootDir="$rootDir"
+mysql_pwd="$mysql_pwd"
+mysqlImage="$mysqlImage"
+redisImage="$redisImage"
+rocketmqImage="$rocketmqImage"
+rocketmqPlatform="$rocketmqPlatform"
+nginxImage="$nginxImage"
+managerImage="$managerImage"
+merchantImage="$merchantImage"
+paymentImage="$paymentImage"
+jeepayRef="$jeepayRef"
+mysqlHostPort="$mysqlHostPort"
+redisHostPort="$redisHostPort"
+currentPath=\`pwd\`
+EOF
 
 # 创建一个 bridge网络
 docker network create jeepay-net
@@ -109,7 +363,8 @@ echo "提示：  如下载进度缓慢，建议配置阿里云或其他镜像加
 cd $sourcesInstallPath && cp ./include/my.cnf $rootDir/mysql/config/my.cnf
 
 # 镜像启动
-docker run -p 3306:3306 --name mysql8 --network=jeepay-net  \
+docker run -p $mysqlHostPort:3306 --name mysql8 --network=jeepay-net  \
+--network-alias mysql \
 --restart=always --privileged=true \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/mysql/log:/var/log/mysql  \
@@ -117,7 +372,7 @@ docker run -p 3306:3306 --name mysql8 --network=jeepay-net  \
 -v $rootDir/mysql/mysql-files:/var/lib/mysql-files \
 -v $rootDir/mysql/config:/etc/mysql/conf.d  \
 -e MYSQL_ROOT_PASSWORD=$mysql_pwd \
--id mysql:8.0.25
+-id $mysqlImage
 
 # 避免未启动完成或出现错误： ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock'
 # echo "等待重启mysql容器....... "
@@ -150,27 +405,111 @@ echo "[4] 下载并启动redis容器.... "
 
 # 将配置文件复制到对应的映射目录下
 cd $sourcesInstallPath && cp ./include/redis.conf $rootDir/redis/config/redis.conf
+chmod 644 $rootDir/redis/config/redis.conf
 
 # 镜像启动
-docker run -p 6379:6379 --name redis6 --network=jeepay-net  \
+docker run -p $redisHostPort:6379 --name redis6 --network=jeepay-net  \
+--network-alias redis \
 --restart=always --privileged=true \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/redis/config/redis.conf:/etc/redis/redis.conf \
 -v $rootDir/redis/data:/data \
--d redis:6.2.14 redis-server /etc/redis/redis.conf
+-d $redisImage redis-server /etc/redis/redis.conf
 
 
 echo "[4] Done. "
 
 
-# 第5步：下载并启动activemq容器
-echo "[5] 下载并启动activemq容器.... "
+# 第5步：下载并启动 RocketMQ 容器
+echo "[5] 下载并启动 RocketMQ 容器.... "
 
-docker run -p 8161:8161 -p 61616:61616 --name activemq5 --network=jeepay-net \
+# 拷贝 broker 配置文件
+cd $sourcesInstallPath && cp ./../../docker/rocketmq/broker/conf/broker.conf.template $rootDir/rocketmq/broker/conf/broker.conf.template
+
+brokerHostIp=$(hostname -I 2>/dev/null | awk '{print $1}')
+if [ -z "$brokerHostIp" ]; then
+  brokerHostIp=$(ip route get 1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if ($i=="src") {print $(i+1); exit}}')
+fi
+
+if [ -z "$brokerHostIp" ]; then
+  echo "[5] ERROR: 无法自动识别当前服务器 IP，无法生成 RocketMQ broker.conf"
+  exit 1
+fi
+
+sed "s/%BROKER_IP%/$brokerHostIp/g" \
+  $rootDir/rocketmq/broker/conf/broker.conf.template > $rootDir/rocketmq/broker/conf/broker.conf
+
+echo "[5] RocketMQ brokerIP1 使用当前服务器IP: $brokerHostIp"
+
+# 启动 NameServer
+docker run -d --name rocketmq-namesrv --network=jeepay-net \
+--platform=$rocketmqPlatform \
+-p 9876:9876 \
 --restart=always \
 -v /etc/localtime:/etc/localtime:ro \
--d jeepay/activemq:5.15.16
+-v $rootDir/rocketmq/namesrv/logs:/home/rocketmq/logs \
+-e JAVA_OPT_EXT="-Xms256m -Xmx256m -Xmn128m" \
+$rocketmqImage sh mqnamesrv
 
+# 启动 Broker
+mkdir -p $rootDir/rocketmq/broker/store/config
+cat > $rootDir/rocketmq/broker/store/config/topics.json <<'EOF'
+{"dataVersion":{"counter":0,"timestamp":0},"topicConfigTable":{}}
+EOF
+cat > $rootDir/rocketmq/broker/store/config/topicQueueMapping.json <<'EOF'
+{"dataVersion":{"counter":0,"timestamp":0},"topicQueueMappingInfoMap":{}}
+EOF
+
+docker run -d --name rocketmq-broker --network=jeepay-net \
+--platform=$rocketmqPlatform \
+-p 10909:10909 -p 10911:10911 -p 10912:10912 \
+--restart=always \
+-u 0:0 \
+-v /etc/localtime:/etc/localtime:ro \
+-v $rootDir/rocketmq/broker/logs:/home/rocketmq/logs \
+-v $rootDir/rocketmq/broker/store:/home/rocketmq/store \
+-v $rootDir/rocketmq/broker/conf/broker.conf:/home/rocketmq/rocketmq-5.3.1/conf/broker.conf:ro \
+-e JAVA_OPT_EXT="-Xms512m -Xmx512m -Xmn256m" \
+-e NAMESRV_ADDR="rocketmq-namesrv:9876" \
+$rocketmqImage sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
+
+rocketmqWaitCount=0
+while true
+do
+  docker logs rocketmq-broker > /tmp/installrocketmq.log 2>&1
+  logContent=$(cat /tmp/installrocketmq.log | grep 'boot success')
+  failContent=$(cat /tmp/installrocketmq.log | grep -E 'NullPointerException|ERROR|Exception')
+
+  if [ -n "$logContent" ]; then
+    echo "[5] RocketMQ 启动完成 $logContent"
+    sleep 5
+    break
+  fi
+
+  rocketmqWaitCount=$((rocketmqWaitCount + 1))
+
+  if [ -n "$failContent" ] && [ $rocketmqWaitCount -ge 3 ]; then
+    echo "[5] ERROR: RocketMQ Broker 启动失败，请检查最近日志："
+    docker logs --tail 100 rocketmq-broker
+    echo "[5] 常见原因："
+    echo "    1. RocketMQ 镜像架构与服务器不兼容（当前使用 $rocketmqImage）"
+    echo "    2. Broker 存储目录权限异常：$rootDir/rocketmq/broker/store"
+    echo "    3. broker.conf 配置或挂载失败：$rootDir/rocketmq/broker/conf/broker.conf"
+    echo "    4. NameServer 未正常启动，可执行：docker logs --tail 50 rocketmq-namesrv"
+    exit 1
+  fi
+
+  if [ $rocketmqWaitCount -ge 20 ]; then
+    echo "[5] ERROR: RocketMQ Broker 启动超时，请检查日志："
+    docker logs --tail 100 rocketmq-broker
+    echo "[5] 可继续排查：docker logs rocketmq-namesrv && docker logs rocketmq-broker"
+    exit 1
+  fi
+
+  docker logs --tail 20 rocketmq-broker
+  echo "[5] 等待启动 RocketMQ Broker....... ($rocketmqWaitCount/20)"
+  sleep 15
+done
 
 echo "[5] Done. "
 
@@ -179,6 +518,16 @@ echo "[5] Done. "
 
 # 复制java配置文件
 cd $rootDir/service/configs/ && cp -r $rootDir/sources/jeepay/conf/* .
+
+# 把 conf 模板里的 Docker Compose 默认密码 rootroot 替换为本次安装实际使用的
+# mysql_pwd，保证 manager / merchant / payment 能连上脚本初始化的 MySQL。
+# 仅替换 datasource 段的密码（Redis password 为空，activemq 密码 "manager"，不受影响）。
+for svc in manager merchant payment; do
+    svcYml="$rootDir/service/configs/$svc/application.yml"
+    if [ -f "$svcYml" ]; then
+        sed -i "s|password: rootroot|password: $mysql_pwd|g" "$svcYml"
+    fi
+done
 
 
 echo "[6.1] 下载并启动 java 项目 [ jeepaymanager  ] .... "
@@ -189,7 +538,7 @@ docker run -itd --name jeepaymanager --restart=always --network=jeepay-net \
 -v $rootDir/service/logs:/jeepayhomes/service/logs \
 -v $rootDir/service/uploads:/jeepayhomes/service/uploads \
 -v $rootDir/service/configs/manager/application.yml:/jeepayhomes/service/app/application.yml \
--d jeepay/jeepay-manager
+-d $managerImage
 
 echo "[6.2] 下载并启动 java 项目 [ jeepaymerchant  ] .... "
 # 运行 java项目
@@ -199,7 +548,7 @@ docker run -itd --name jeepaymerchant --restart=always --network=jeepay-net \
 -v $rootDir/service/logs:/jeepayhomes/service/logs \
 -v $rootDir/service/uploads:/jeepayhomes/service/uploads \
 -v $rootDir/service/configs/merchant/application.yml:/jeepayhomes/service/app/application.yml \
--d jeepay/jeepay-merchant
+-d $merchantImage
 
 echo "[6.3] 下载并启动 java 项目 [ jeepaypayment  ] .... "
 # 运行 java项目
@@ -209,7 +558,7 @@ docker run -itd --name jeepaypayment --restart=always --network=jeepay-net \
 -v $rootDir/service/logs:/jeepayhomes/service/logs \
 -v $rootDir/service/uploads:/jeepayhomes/service/uploads \
 -v $rootDir/service/configs/payment/application.yml:/jeepayhomes/service/app/application.yml \
--d jeepay/jeepay-payment
+-d $paymentImage
 
 echo "[6] Done. "
 
@@ -231,11 +580,68 @@ docker run --name nginx118  \
 -v $rootDir/nginx/conf/conf.d:/etc/nginx/conf.d \
 -v $rootDir/nginx/logs:/var/log/nginx \
 -v $rootDir/nginx/html:/usr/share/nginx/html \
--d nginx:1.18.0
+-d $nginxImage
 
 echo "[7] Done. "
 
-docker logs jeepaypayment
+# 第8步：部署后自检
+echo "[8] 部署后自检.... "
+
+# 8.1 等待三个 jeepay 应用 healthcheck 转为 healthy，最长 3 分钟
+healthTimeout=180
+healthInterval=5
+healthElapsed=0
+allHealthy=0
+while [ $healthElapsed -lt $healthTimeout ]
+do
+    managerStat=$(docker inspect --format '{{.State.Health.Status}}' jeepaymanager 2>/dev/null)
+    merchantStat=$(docker inspect --format '{{.State.Health.Status}}' jeepaymerchant 2>/dev/null)
+    paymentStat=$(docker inspect --format '{{.State.Health.Status}}' jeepaypayment 2>/dev/null)
+    if [ "$managerStat" = "healthy" ] && [ "$merchantStat" = "healthy" ] && [ "$paymentStat" = "healthy" ]; then
+        allHealthy=1
+        break
+    fi
+    echo "[8] 等待 jeepay 服务就绪... manager=$managerStat merchant=$merchantStat payment=$paymentStat (${healthElapsed}/${healthTimeout}s)"
+    sleep $healthInterval
+    healthElapsed=$((healthElapsed + healthInterval))
+done
+
+if [ $allHealthy -eq 1 ]; then
+    echo "[8] jeepay 应用容器全部 healthy"
+else
+    echo "[8] WARN: 超过 ${healthTimeout}s 仍有容器未进入 healthy，可执行 docker logs jeepaymanager/jeepaymerchant/jeepaypayment 查看详情"
+fi
+
+# 8.2 探测对外暴露的三个 HTTP 端口；未返回状态码即视为未响应
+probeEndpoint() {
+    endpointLabel=$1
+    endpointPort=$2
+    endpointCode=$(curl -s -o /dev/null -w '%{http_code}' -m 5 http://127.0.0.1:$endpointPort/ 2>/dev/null)
+    if [ -n "$endpointCode" ] && [ "$endpointCode" != "000" ]; then
+        echo "[8] $endpointLabel (http://127.0.0.1:$endpointPort) -> HTTP $endpointCode"
+    else
+        echo "[8] WARN: $endpointLabel (http://127.0.0.1:$endpointPort) 未响应"
+    fi
+}
+probeEndpoint "支付网关" 19216
+probeEndpoint "运营平台" 19217
+probeEndpoint "商户平台" 19218
+
+# 8.3 DB + Redis 连通性探测：调用运营平台图形验证码接口，后端会向 Redis 写入
+# 验证码 token。如果 MySQL / Redis 容器别名解析失败或密码不对，这里会 5xx。
+vercodeCode=$(curl -s -o /dev/null -w '%{http_code}' -m 10 "http://127.0.0.1:19217/api/anon/auth/vercode?t=$(date +%s)" 2>/dev/null)
+if [ "$vercodeCode" = "200" ]; then
+    echo "[8] 运营平台图形验证码接口 OK（MySQL / Redis 连通正常）"
+else
+    echo "[8] WARN: 图形验证码接口 HTTP $vercodeCode，登录页可能拿不到验证码。"
+    echo "[8]        典型原因："
+    echo "[8]         1) 容器别名解析：application.yml 中 host 写的是 mysql / redis，"
+    echo "[8]            若对应容器未设置 --network-alias，会报 UnknownHostException。"
+    echo "[8]         2) 密码错配：application.yml 里 password 与 MySQL 实际密码不一致。"
+    echo "[8]        查看日志：docker logs --tail 50 jeepaymanager"
+fi
+
+echo "[8] Done. "
 
 echo ">>>>>>> "
 echo ">>>>>>> "
@@ -247,5 +653,3 @@ echo ">>>>>>>支付网关： http://外网IP:19216   "
 echo ">>>>>>>若配置域名请更改 $rootDir/nginx/conf/nginx.conf 配置文件。 "
 echo ""
 echo "Complete."
-
-

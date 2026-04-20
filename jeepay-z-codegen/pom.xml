@@ -21,9 +21,9 @@
     <dependencies>
 
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.28</version>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>9.1.0</version>
         </dependency>
 
         <dependency>
@@ -33,11 +33,9 @@
             <optional>true</optional>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>4.3.10.RELEASE</version>
-        </dependency>
+        <!-- 代码生成工具仅使用 mybatis-plus-generator + Velocity 模板，无需 Spring IoC 容器。
+             原先声明的 spring-context 不在任何源码中 import，反而引入已停止维护分支的 DataBinder
+             相关 CVE（CVE-2024-38820 / CVE-2025-22233）告警，这里直接移除。 -->
 
         <dependency>
             <groupId>com.baomidou</groupId>

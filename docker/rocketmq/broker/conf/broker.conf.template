@@ -1,0 +1,18 @@
+brokerClusterName=DefaultCluster
+brokerName=broker-a
+brokerId=0
+deleteWhen=04
+fileReservedTime=48
+brokerRole=ASYNC_MASTER
+flushDiskType=ASYNC_FLUSH
+# 安装时由脚本按当前服务器环境写入 brokerIP1，避免静态 IP 失效
+brokerIP1=%BROKER_IP%
+namesrvAddr=rocketmq-namesrv:9876
+autoCreateTopicEnable=true
+autoCreateSubscriptionGroup=true
+storePathRootDir=/home/rocketmq/store
+storePathCommitLog=/home/rocketmq/store/commitlog
+storePathConsumeQueue=/home/rocketmq/store/consumequeue
+storePathIndex=/home/rocketmq/store/index
+storeCheckpoint=/home/rocketmq/store/checkpoint
+abortFile=/home/rocketmq/store/abort
