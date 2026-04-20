@@ -510,20 +510,17 @@ cd $sourcesInstallPath && cp ./../../docker/rocketmq/broker/conf/broker.conf.tem
 require_ok $? "复制 RocketMQ broker 配置模板 broker.conf.template"
 assert_regular_file "$rootDir/rocketmq/broker/conf/broker.conf.template" "RocketMQ broker 配置模板"
 
-brokerHostIp=$(hostname -I 2>/dev/null | awk '{print $1}')
-if [ -z "$brokerHostIp" ]; then
-  brokerHostIp=$(ip route get 1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if ($i=="src") {print $(i+1); exit}}')
-fi
+# brokerIP1 默认写容器名 rocketmq-broker：jeepay 所有业务（manager / merchant /
+# payment）都在 jeepay-net 内，通过 Docker 内置 DNS 按容器名解析最稳，不受宿主
+# 多网卡 / 多 Docker bridge 影响（老版本用 hostname -I 首项在某些宿主上会挑到
+# 172.16.0.x 这种仅 Docker 内部可达的地址，导致业务容器连 broker 失败）。
+# 如有外部 RocketMQ 客户端需求（非 jeepay-net 内），安装前 export brokerIP1=真实IP。
+brokerIP1=${brokerIP1:-rocketmq-broker}
 
-if [ -z "$brokerHostIp" ]; then
-  echo "[5] ERROR: 无法自动识别当前服务器 IP，无法生成 RocketMQ broker.conf"
-  exit 1
-fi
-
-sed "s/%BROKER_IP%/$brokerHostIp/g" \
+sed "s/%BROKER_IP%/$brokerIP1/g" \
   $rootDir/rocketmq/broker/conf/broker.conf.template > $rootDir/rocketmq/broker/conf/broker.conf
 
-echo "[5] RocketMQ brokerIP1 使用当前服务器IP: $brokerHostIp"
+echo "[5] RocketMQ brokerIP1 设为: $brokerIP1"
 
 # 启动 NameServer
 docker run -d --name rocketmq-namesrv --network=jeepay-net \
