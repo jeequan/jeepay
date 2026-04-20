@@ -119,12 +119,20 @@ server {
     ssl_certificate_key /etc/ssl/jeepay/pay.key;
 
     location / {
+        proxy_pass http://127.0.0.1:19216;
+        proxy_http_version 1.1;                           # WebSocket 必须（默认 1.0 会让 WS 提前断开）
+
         proxy_set_header Host              $host;
         proxy_set_header X-Real-IP         $remote_addr;
         proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;   # ← 必须
+        proxy_set_header X-Forwarded-Proto $scheme;       # 必须，否则 Spring Boot 拼 http:// 回调
         proxy_set_header X-Forwarded-Port  $server_port;
-        proxy_pass http://127.0.0.1:19216;
+
+        # WebSocket（商户端支付测试 / 收银台订单状态推送用）
+        proxy_set_header Upgrade   $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout  3600s;
+        proxy_send_timeout  3600s;
     }
 }
 # admin / mch 域名同构，仅 proxy_pass 换为 19217 / 19218
@@ -153,6 +161,7 @@ server {
 ### 反代注意事项
 
 - 外层反代务必传 `X-Forwarded-Proto $scheme`；否则 Spring Boot 会把回调 URL 拼成 `http://`，支付平台回跳失败。
+- **WebSocket 必须开 `proxy_http_version 1.1` + Upgrade/Connection 头 + 长 `proxy_read_timeout`**。商户端支付测试页通过 `ws://mch.../api/anon/ws/payOrder/...` 订阅订单状态；缺任一项会导致握手显示 `101 Switching Protocols` 但后续消息收不到。
 - 第三方支付平台后台填的 **异步通知 URL / 回跳 URL** 必须用公网域名（`https://pay.example.com/api/pay/...`）而不是 `http://<内网 IP>:19216`。
 - 外层 nginx 若开启 `gzip`，注意排除 SSE / WebSocket（`text/event-stream`）。
 - 修改 `nginx.conf` 后：`docker exec nginx118 nginx -s reload`。
