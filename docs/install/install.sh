@@ -1,12 +1,62 @@
 #! /bin/sh
-#exec 2>>build.log  ##编译过程打印到日志文件中
 ## 一键启动jeepay服务，包含mysqlDB/RocketMQ/redis/javaservice/nginx   .Power by terrfly
 
+# ---------------------------------------------------------------------------
+# 命令行参数解析（放在 root 校验之前，便于非 root 也能 --help）
+# ---------------------------------------------------------------------------
+AUTO_YES=0
+show_usage() {
+    cat <<EOF
+用法: sh install.sh [选项]
 
-if [ $UID != '0' ]; then
+选项:
+  -y, --yes    自动确认所有 yes/no 提示，适合自动化 / CI 场景。
+  -h, --help   打印本帮助并退出。
+
+环境变量（可选，见 docs/deploy/shell.md "高级覆盖项"）：
+  rootDir / mysql_pwd                        根目录与 MySQL 密码
+  mysqlHostPort / redisHostPort              宿主端口覆盖
+  mysqlImage / redisImage / rocketmqImage    镜像覆盖
+  nginxImage / managerImage / merchantImage  镜像覆盖
+  paymentImage                               镜像覆盖
+  rocketmqPlatform                           RocketMQ 平台（默认 linux/amd64）
+  jeepayRef                                  源码 tag，默认 V3.2.7
+EOF
+}
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -y|--yes) AUTO_YES=1; shift ;;
+        -h|--help) show_usage; exit 0 ;;
+        *) echo "未知参数：$1"; show_usage; exit 1 ;;
+    esac
+done
+
+if [ "$(id -u)" != '0' ]; then
     echo 'ERROR： 请使用root用户安装（Please install using root user）！'
-    exit 0
+    exit 1
 fi
+
+# 把全部输出落盘到日志文件，失败时可回看完整上下文。
+# 选择 /tmp 是因为此时 rootDir 还没解析，/tmp 几乎肯定可写。
+INSTALL_LOG_FILE="/tmp/jeepay-install-$(date +%Y%m%d-%H%M%S)-$$.log"
+exec > >(tee -a "$INSTALL_LOG_FILE") 2>&1
+echo "安装日志将同时写入：$INSTALL_LOG_FILE"
+[ "$AUTO_YES" = "1" ] && echo "已启用 --yes 自动确认模式"
+
+# 统一的 yes/no 交互封装：--yes 模式下跳过并打印提示，保持日志上下文完整
+confirm_yes() {
+    promptMsg=$1
+    if [ -n "$promptMsg" ]; then
+        echo "$promptMsg"
+    fi
+    echo " [yes/no] ?"
+    if [ "$AUTO_YES" = "1" ]; then
+        echo "(auto-yes 自动确认)"
+        useryes=yes
+    else
+        read useryes
+    fi
+}
 
 # ---------------------------------------------------------------------------
 # 跨发行版的依赖安装辅助：检测包管理器（apt/dnf/yum/apk），对 wget/curl/git/
@@ -122,11 +172,9 @@ ensure_cmd wget
 ensure_cmd curl
 
 # 第0步：提示信息
-echo "请确认当前是全新服务器安装,  是否继续？"
-echo "(Please confirm if it is a brand new server installation, do you want to continue?)"
-echo " [yes/no] ?"
-read useryes
-if [ -z "$useryes" ] || [ $useryes != 'yes' ]
+confirm_yes "请确认当前是全新服务器安装,  是否继续？
+(Please confirm if it is a brand new server installation, do you want to continue?)"
+if [ -z "$useryes" ] || [ "$useryes" != 'yes' ]
 then
 	echo 'good bye'
 	exit 0
@@ -257,12 +305,10 @@ if [ "$portConflict" -eq 1 ]; then
 fi
 
 # 第0步：提示信息
-echo "检查配置信息是否正确（配置内容在 config.sh文件）："
-echo "【项目根目录的地址】： $rootDir"
-echo "【mysql root密码】： $mysql_pwd"
-echo " [yes/no] ?"
-read useryes
-if [ -z "$useryes" ] || [ $useryes != 'yes' ]
+confirm_yes "检查配置信息是否正确（配置内容在 config.sh文件）：
+【项目根目录的地址】： $rootDir
+【mysql root密码】： $mysql_pwd"
+if [ -z "$useryes" ] || [ "$useryes" != 'yes' ]
 then
     echo 'good bye'
     exit 0
@@ -643,13 +689,27 @@ fi
 
 echo "[8] Done. "
 
-echo ">>>>>>> "
-echo ">>>>>>> "
-echo ">>>>>>>安装完成， 所有的配置文件和项目文件都在：$rootDir 文件夹中。 "
-echo ">>>>>>>项目访问地址 （注意开通端口防火墙）：   "
-echo ">>>>>>>运营平台： http://外网IP:19217   账号密码： jeepay/jeepay123   "
-echo ">>>>>>>商户平台： http://外网IP:19218   账号密码： 需要登录运营平台手动创建。    "
-echo ">>>>>>>支付网关： http://外网IP:19216   "
-echo ">>>>>>>若配置域名请更改 $rootDir/nginx/conf/nginx.conf 配置文件。 "
+cat <<SUMMARY
+
+============================================================
+                 jeepay 安装完成
+============================================================
+ 安装目录    ： $rootDir
+ nginx 配置  ： $rootDir/nginx/conf/nginx.conf
+ 安装日志    ： $INSTALL_LOG_FILE
+
+ 访问地址（注意开通端口防火墙）：
+   运营平台 ： http://外网IP:19217   账号 / 密码 ： jeepay / jeepay123
+   商户平台 ： http://外网IP:19218   账号需在运营平台创建，默认密码 jeepay666
+   支付网关 ： http://外网IP:19216   收银台路径 /cashier/index.html
+
+ 常用命令：
+   docker ps                                查看 8 个容器状态
+   docker logs jeepaymanager --tail 100     查看某个服务日志
+   wget -O uninstall.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/uninstall.sh \\
+     && sh uninstall.sh                     一键卸载（自动识别 rootDir）
+============================================================
+SUMMARY
+
 echo ""
 echo "Complete."
