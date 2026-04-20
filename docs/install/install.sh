@@ -115,6 +115,36 @@ ensure_cmd() {
     fi
 }
 
+# 拷贝 / 写入目标文件后的校验：
+#   - require_ok $? "描述"                        检查上一条命令的返回值
+#   - assert_regular_file "$path" "描述"          校验路径确为普通文件（不是目录 / 不存在）
+# 避免某些 cp 失败后脚本继续运行，再后面的 docker run -v 把不存在的路径
+# 自动创建为空目录，容器拿到空配置静默错乱。
+require_ok() {
+    rc=$1
+    shift
+    if [ "$rc" -ne 0 ]; then
+        echo "ERROR: 步骤失败（exit=$rc）：$*"
+        exit 1
+    fi
+}
+assert_regular_file() {
+    filePath=$1
+    fileLabel=$2
+    if [ -f "$filePath" ]; then
+        return 0
+    fi
+    if [ -d "$filePath" ]; then
+        echo "ERROR: $fileLabel 现在是目录而不是文件：$filePath"
+        echo "       典型原因：之前一次 docker run 在该路径不存在时，把它自动创建为了目录。"
+        echo "       请执行：rm -rf \"$filePath\"，然后重跑 install.sh。"
+    else
+        echo "ERROR: $fileLabel 不存在：$filePath"
+        echo "       检查源码目录 \$rootDir/sources/jeepay 是否完整（比如 git clone 是否完成、分支是否正确）。"
+    fi
+    exit 1
+}
+
 ensure_docker() {
     if command -v docker >/dev/null 2>&1; then
         return 0
@@ -407,6 +437,8 @@ echo "提示：  如下载进度缓慢，建议配置阿里云或其他镜像加
 
 # 将Mysql的配置文件复制到对应的映射目录下
 cd $sourcesInstallPath && cp ./include/my.cnf $rootDir/mysql/config/my.cnf
+require_ok $? "复制 MySQL 配置 my.cnf"
+assert_regular_file "$rootDir/mysql/config/my.cnf" "MySQL 配置 my.cnf"
 
 # 镜像启动
 docker run -p $mysqlHostPort:3306 --name mysql8 --network=jeepay-net  \
@@ -442,7 +474,9 @@ done
 echo "[3] 初始化数据导入 ...... "
 # 创建数据库  && 导入数据
 echo "CREATE DATABASE jeepaydb DEFAULT CHARACTER SET utf8mb4" | docker exec -i mysql8 mysql -uroot -p$mysql_pwd
+assert_regular_file "$rootDir/sources/jeepay/docs/sql/init.sql" "MySQL 初始化脚本 init.sql"
 docker exec -i mysql8 sh -c "mysql -uroot -p$mysql_pwd --default-character-set=utf8mb4  jeepaydb" < $rootDir/sources/jeepay/docs/sql/init.sql
+require_ok $? "导入 MySQL 初始化脚本 init.sql"
 
 echo "[3] Done. "
 
@@ -451,6 +485,8 @@ echo "[4] 下载并启动redis容器.... "
 
 # 将配置文件复制到对应的映射目录下
 cd $sourcesInstallPath && cp ./include/redis.conf $rootDir/redis/config/redis.conf
+require_ok $? "复制 Redis 配置 redis.conf"
+assert_regular_file "$rootDir/redis/config/redis.conf" "Redis 配置 redis.conf"
 chmod 644 $rootDir/redis/config/redis.conf
 
 # 镜像启动
@@ -471,6 +507,8 @@ echo "[5] 下载并启动 RocketMQ 容器.... "
 
 # 拷贝 broker 配置文件
 cd $sourcesInstallPath && cp ./../../docker/rocketmq/broker/conf/broker.conf.template $rootDir/rocketmq/broker/conf/broker.conf.template
+require_ok $? "复制 RocketMQ broker 配置模板 broker.conf.template"
+assert_regular_file "$rootDir/rocketmq/broker/conf/broker.conf.template" "RocketMQ broker 配置模板"
 
 brokerHostIp=$(hostname -I 2>/dev/null | awk '{print $1}')
 if [ -z "$brokerHostIp" ]; then
@@ -564,15 +602,16 @@ echo "[5] Done. "
 
 # 复制java配置文件
 cd $rootDir/service/configs/ && cp -r $rootDir/sources/jeepay/conf/* .
+require_ok $? "复制 service/configs/*（来源：\$rootDir/sources/jeepay/conf）"
 
 # 把 conf 模板里的 Docker Compose 默认密码 rootroot 替换为本次安装实际使用的
 # mysql_pwd，保证 manager / merchant / payment 能连上脚本初始化的 MySQL。
 # 仅替换 datasource 段的密码（Redis password 为空，activemq 密码 "manager"，不受影响）。
+# 同时校验 yml 为真实文件，拦截"历史遗留空目录"导致 docker run -v 挂载异常。
 for svc in manager merchant payment; do
     svcYml="$rootDir/service/configs/$svc/application.yml"
-    if [ -f "$svcYml" ]; then
-        sed -i "s|password: rootroot|password: $mysql_pwd|g" "$svcYml"
-    fi
+    assert_regular_file "$svcYml" "jeepay-$svc 配置 application.yml"
+    sed -i "s|password: rootroot|password: $mysql_pwd|g" "$svcYml"
 done
 
 
@@ -617,6 +656,8 @@ tar -vxf html.tar.gz
 
 # 将配置文件复制到对应的映射目录下
 cd $sourcesInstallPath && cp ./include/nginx.conf $rootDir/nginx/conf/nginx.conf
+require_ok $? "复制 Nginx 配置 nginx.conf"
+assert_regular_file "$rootDir/nginx/conf/nginx.conf" "Nginx 配置 nginx.conf"
 
 
 docker run --name nginx118  \
