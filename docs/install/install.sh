@@ -1,5 +1,18 @@
-#! /bin/sh
+#!/usr/bin/env bash
 ## 一键启动jeepay服务，包含mysqlDB/RocketMQ/redis/javaservice/nginx   .Power by terrfly
+## 本脚本使用 bash 专有特性（process substitution / [[ ]] / /dev/tcp），不兼容
+## POSIX sh（Ubuntu/Debian 下 /bin/sh 是 dash）。如果用户习惯性 sh install.sh 执行，
+## 下面这段会自动转交给 bash 重跑，避免出现 "未预期的符号 >" 之类语法错误。
+if [ -z "${BASH_VERSION:-}" ]; then
+    if command -v bash >/dev/null 2>&1; then
+        exec bash "$0" "$@"
+    fi
+    echo 'ERROR: install.sh 需要 bash 运行（脚本使用了 process substitution / /dev/tcp 等 bash 特性）。'
+    echo '       请在系统上安装 bash 后重试，例如：'
+    echo '         Ubuntu / Debian : apt-get install -y bash  然后  bash install.sh'
+    echo '         CentOS / Anolis : 默认已安装 bash，直接 bash install.sh'
+    exit 1
+fi
 
 # ---------------------------------------------------------------------------
 # 命令行参数解析（放在 root 校验之前，便于非 root 也能 --help）
@@ -7,7 +20,7 @@
 AUTO_YES=0
 show_usage() {
     cat <<EOF
-用法: sh install.sh [选项]
+用法: bash install.sh [选项]
 
 选项:
   -y, --yes    自动确认所有 yes/no 提示，适合自动化 / CI 场景。
@@ -844,7 +857,7 @@ cat <<SUMMARY
    docker ps                                查看 8 个容器状态
    docker logs jeepaymanager --tail 100     查看某个服务日志
    wget -O uninstall.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/uninstall.sh \\
-     && sh uninstall.sh                     一键卸载（自动识别 rootDir）
+     && bash uninstall.sh                   一键卸载（自动识别 rootDir）
 ============================================================
 SUMMARY
 

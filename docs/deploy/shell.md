@@ -6,12 +6,12 @@
 
 **CentOS / Anolis**
 ```bash
-yum install -y wget curl && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && sh install.sh
+yum install -y wget curl && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && bash install.sh
 ```
 
 **Ubuntu / Debian**
 ```bash
-apt update && apt-get -y install wget curl git docker.io && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && sh install.sh
+apt update && apt-get -y install wget curl git docker.io && wget -O install.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/install.sh && bash install.sh
 ```
 
 脚本会自动识别你的系统、装齐依赖、拉镜像、起 8 个容器、跑部署自检。**默认**：
@@ -34,7 +34,7 @@ apt update && apt-get -y install wget curl git docker.io && wget -O install.sh h
 **卸载**：
 
 ```bash
-wget -O uninstall.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/uninstall.sh && sh uninstall.sh
+wget -O uninstall.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/uninstall.sh && bash uninstall.sh
 ```
 
 ---
@@ -171,7 +171,7 @@ server {
 **推荐（一条命令）**：
 
 ```bash
-wget -O uninstall.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/uninstall.sh && sh uninstall.sh
+wget -O uninstall.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/uninstall.sh && bash uninstall.sh
 ```
 
 脚本自动从跑着的 `mysql8` 容器数据卷反推 `rootDir`，打印确认后再删容器、网络、整个 `rootDir`。
@@ -179,7 +179,7 @@ wget -O uninstall.sh https://gitee.com/jeequan/jeepay/raw/master/docs/install/un
 若 jeepay 容器已全部被手工删除、自动识别不到：
 
 ```bash
-rootDir=/jeepayhomes sh uninstall.sh
+rootDir=/jeepayhomes bash uninstall.sh
 ```
 
 ## 高级覆盖项
@@ -226,7 +226,7 @@ export nginxImage=nginx:1.18.0
 export managerImage=jeepay/jeepay-manager:3.2.0
 export merchantImage=jeepay/jeepay-merchant:3.2.0
 export paymentImage=jeepay/jeepay-payment:3.2.0
-sh install.sh
+bash install.sh
 ```
 
 ## RocketMQ Broker 启动失败
