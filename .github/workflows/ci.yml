@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [master, dev]
+  pull_request:
+    branches: [master, dev]
+
+jobs:
+  shell-assertions:
+    name: Shell 安装脚本断言
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run docs/install/test_*.sh
+        run: |
+          set -e
+          for t in docs/install/test_*.sh; do
+            echo "== Running $t =="
+            sh "$t"
+          done
+      - name: Syntax check install/uninstall
+        run: |
+          bash -n docs/install/install.sh
+          bash -n docs/install/uninstall.sh
+
+  maven-compile:
+    name: Maven 编译
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Compile（skip tests）
+        run: mvn -B -DskipTests -T 1C clean compile
+      - name: Compile tests
+        run: mvn -B -DskipTests -T 1C test-compile
