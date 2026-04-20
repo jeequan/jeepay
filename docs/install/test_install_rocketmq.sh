@@ -21,8 +21,8 @@ if ! grep -q 'brokerIP1=%BROKER_IP%' "$BROKER_TEMPLATE"; then
   exit 1
 fi
 
-if ! grep -q 'hostname -I' "$INSTALL_SCRIPT"; then
-  echo "FAIL: install.sh does not detect host IP for RocketMQ broker.conf"
+if ! grep -q 'brokerIP1=\${brokerIP1:-rocketmq-broker}' "$INSTALL_SCRIPT"; then
+  echo "FAIL: install.sh does not default brokerIP1 to the broker container name (rocketmq-broker)"
   exit 1
 fi
 
