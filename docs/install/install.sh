@@ -730,6 +730,43 @@ fi
 
 echo "[8] Done. "
 
+# 识别宿主机的内网 IP（路由到公网时使用的 source IP）与外网 IP（通过公网服务反查）
+# 用于在 summary box 里同时展示"内网可访问""外网可访问"两类地址，客户复制即用。
+detect_internal_ip() {
+    candidateIP=$(ip route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") {print $(i+1); exit}}')
+    if [ -z "$candidateIP" ]; then
+        candidateIP=$(hostname -I 2>/dev/null | awk '{print $1}')
+    fi
+    echo "$candidateIP"
+}
+
+detect_external_ip() {
+    for svc in \
+        "https://ipv4.icanhazip.com" \
+        "https://api.ipify.org" \
+        "https://ifconfig.me" \
+        "https://ipinfo.io/ip"; do
+        result=$(curl -s --max-time 5 "$svc" 2>/dev/null | tr -d '\n\r ')
+        if echo "$result" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "$result"
+            return 0
+        fi
+    done
+    echo ""
+    return 1
+}
+
+internalIP=$(detect_internal_ip)
+echo "探测外网 IP（最长 20 秒，失败自动跳过）..."
+externalIP=$(detect_external_ip)
+
+internalIPLine=${internalIP:-未识别}
+if [ -n "$externalIP" ]; then
+    externalNote="外网 IP ： $externalIP（公网可达，前提是 19216/19217/19218 端口已开通防火墙）"
+else
+    externalNote="外网 IP ： 未能自动识别（可能无公网 / curl 被限制），请根据实际情况替换下方 URL 的 IP 段"
+fi
+
 cat <<SUMMARY
 
 ============================================================
@@ -739,10 +776,38 @@ cat <<SUMMARY
  nginx 配置  ： $rootDir/nginx/conf/nginx.conf
  安装日志    ： $INSTALL_LOG_FILE
 
- 访问地址（注意开通端口防火墙）：
-   运营平台 ： http://外网IP:19217   账号 / 密码 ： jeepay / jeepay123
-   商户平台 ： http://外网IP:19218   账号需在运营平台创建，默认密码 jeepay666
-   支付网关 ： http://外网IP:19216   收银台路径 /cashier/index.html
+ 内网 IP ： $internalIPLine
+ $externalNote
+
+ 访问地址：
+   运营平台 （内网）： http://$internalIPLine:19217
+SUMMARY
+
+if [ -n "$externalIP" ]; then
+    echo "            （外网）： http://$externalIP:19217"
+fi
+
+cat <<SUMMARY
+            账号 / 密码   ： jeepay / jeepay123
+
+   商户平台 （内网）： http://$internalIPLine:19218
+SUMMARY
+
+if [ -n "$externalIP" ]; then
+    echo "            （外网）： http://$externalIP:19218"
+fi
+
+cat <<SUMMARY
+            账号        ： 登录运营平台创建，默认密码 jeepay666
+
+   支付网关 （内网）： http://$internalIPLine:19216/cashier/index.html
+SUMMARY
+
+if [ -n "$externalIP" ]; then
+    echo "            （外网）： http://$externalIP:19216/cashier/index.html"
+fi
+
+cat <<SUMMARY
 
  常用命令：
    docker ps                                查看 8 个容器状态
