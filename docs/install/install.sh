@@ -563,7 +563,27 @@ do
 
   if [ -n "$logContent" ]; then
     echo "[5] RocketMQ 启动完成 $logContent"
-    sleep 5
+    # boot success 只代表进程起来了；还要等 broker 向 nameserver 完成注册 + TCP 端口真正
+    # 开始 accept 连接后才算"可用"。老版本 sleep 5 有时会让 [6] 启动的 Java 应用第一次
+    # send 撞上尚未稳定的状态，客户端缓存坏连接，直到业务重启才恢复。这里轮询 broker
+    # 容器自身的 localhost:10911，确认 TCP 就绪。
+    # 在 broker 容器内用 bash /dev/tcp 探 localhost:10911。
+    # 容器里 /bin/sh 可能是 dash，不支持 /dev/tcp，所以直接用 bash。
+    brokerTcpWait=0
+    brokerTcpReady=0
+    while [ $brokerTcpWait -lt 30 ]; do
+        if docker exec rocketmq-broker timeout 2 bash -c "echo > /dev/tcp/localhost/10911" >/dev/null 2>&1; then
+            echo "[5] RocketMQ Broker TCP 10911 已就绪（等待 ${brokerTcpWait}s）"
+            brokerTcpReady=1
+            break
+        fi
+        sleep 2
+        brokerTcpWait=$((brokerTcpWait + 2))
+    done
+    if [ $brokerTcpReady -eq 0 ]; then
+        echo "[5] WARN: 30s 后 TCP 10911 仍未就绪，可能导致业务容器第一次 send 失败，"
+        echo "         必要时安装结束后 docker restart jeepaymanager jeepaymerchant jeepaypayment 即可。"
+    fi
     break
   fi
 
@@ -723,6 +743,20 @@ else
     echo "[8]            若对应容器未设置 --network-alias，会报 UnknownHostException。"
     echo "[8]         2) 密码错配：application.yml 里 password 与 MySQL 实际密码不一致。"
     echo "[8]        查看日志：docker logs --tail 50 jeepaymanager"
+fi
+
+# 8.4 RocketMQ 连通性探针：从 jeepaymanager 容器直接 TCP 探 rocketmq-broker:10911。
+# Spring Boot RocketMQ producer 是懒加载 + 连接级缓存，如果业务首次 send 撞上 broker
+# 尚未完全稳定，会缓存坏连接直到业务容器重启。这里主动探一次，不通就提示用户操作。
+if docker exec jeepaymanager sh -c "timeout 5 bash -c 'echo > /dev/tcp/rocketmq-broker/10911'" >/dev/null 2>&1; then
+    echo "[8] RocketMQ Broker TCP 连通 OK（rocketmq-broker:10911）"
+else
+    echo "[8] WARN: jeepaymanager 连不上 rocketmq-broker:10911。"
+    echo "[8]        建议执行（清掉客户端路由缓存）："
+    echo "[8]          docker restart jeepaymanager jeepaymerchant jeepaypayment"
+    echo "[8]        仍不通则查："
+    echo "[8]          docker logs --tail 100 rocketmq-broker | grep -i boot"
+    echo "[8]          docker exec rocketmq-broker sh mqadmin clusterList -n rocketmq-namesrv:9876"
 fi
 
 echo "[8] Done. "
