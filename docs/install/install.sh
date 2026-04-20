@@ -1,18 +1,8 @@
-#!/usr/bin/env bash
+#! /bin/sh
 ## 一键启动jeepay服务，包含mysqlDB/RocketMQ/redis/javaservice/nginx   .Power by terrfly
-## 本脚本使用 bash 专有特性（process substitution / [[ ]] / /dev/tcp），不兼容
-## POSIX sh（Ubuntu/Debian 下 /bin/sh 是 dash）。如果用户习惯性 sh install.sh 执行，
-## 下面这段会自动转交给 bash 重跑，避免出现 "未预期的符号 >" 之类语法错误。
-if [ -z "${BASH_VERSION:-}" ]; then
-    if command -v bash >/dev/null 2>&1; then
-        exec bash "$0" "$@"
-    fi
-    echo 'ERROR: install.sh 需要 bash 运行（脚本使用了 process substitution / /dev/tcp 等 bash 特性）。'
-    echo '       请在系统上安装 bash 后重试，例如：'
-    echo '         Ubuntu / Debian : apt-get install -y bash  然后  bash install.sh'
-    echo '         CentOS / Anolis : 默认已安装 bash，直接 bash install.sh'
-    exit 1
-fi
+## 本脚本顶层严格遵循 POSIX sh，保证 sh install.sh / bash install.sh / dash install.sh
+## 都能跑通。内部个别依赖 bash 的 TCP 探针（/dev/tcp）通过 `docker exec <ctr> bash -c`
+## 显式调用容器内的 bash，与外层 shell 无关。
 
 # ---------------------------------------------------------------------------
 # 命令行参数解析（放在 root 校验之前，便于非 root 也能 --help）
@@ -49,10 +39,16 @@ if [ "$(id -u)" != '0' ]; then
     exit 1
 fi
 
-# 把全部输出落盘到日志文件，失败时可回看完整上下文。
-# 选择 /tmp 是因为此时 rootDir 还没解析，/tmp 几乎肯定可写。
+# 把全部输出同时落盘到日志文件，失败时可回看完整上下文。
+# 选 /tmp 是因为此时 rootDir 还没解析，/tmp 几乎肯定可写。
+# 用 POSIX 的 "mkfifo + tee 后台" 代替 bash 的 `exec > >(tee ...)` 进程替换，
+# 保证本脚本可被 dash / bash / bash-as-sh 直接执行，不挑 /bin/sh。
 INSTALL_LOG_FILE="/tmp/jeepay-install-$(date +%Y%m%d-%H%M%S)-$$.log"
-exec > >(tee -a "$INSTALL_LOG_FILE") 2>&1
+INSTALL_LOG_FIFO="$INSTALL_LOG_FILE.pipe"
+mkfifo "$INSTALL_LOG_FIFO"
+tee -a "$INSTALL_LOG_FILE" < "$INSTALL_LOG_FIFO" &
+exec > "$INSTALL_LOG_FIFO" 2>&1
+rm -f "$INSTALL_LOG_FIFO"  # 已打开的 FD 继续使用，名字可以直接删除
 echo "安装日志将同时写入：$INSTALL_LOG_FILE"
 [ "$AUTO_YES" = "1" ] && echo "已启用 --yes 自动确认模式"
 
