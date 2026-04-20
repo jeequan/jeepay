@@ -335,3 +335,24 @@
 4. 文档： docs/deploy/shell.md 卸载小节改为一条命令推荐 + 原路径方式
    作为备选，并说明何时需要手动 rootDir=xxx。
 5. 优化： install.sh 默认 jeepayRef 由 V3.2.5 跟进到 V3.2.6。
+
+[v3.2.7_20260420]
+> 关键修复版本：V3.2.0 ~ V3.2.6 的 Shell 部署实际都连不上 MySQL / Redis
+> （登录页验证码不出、任何 DB 操作报异常），[8] 部署自检没覆盖这条通路
+> 所以之前都"假通过"。强烈建议受影响部署 uninstall + 重新 install。
+> 业务代码零改动，与 3.2.0 业务镜像完全兼容。
+1. 修复： docker run mysql8 / redis6 分别加 --network-alias mysql /
+   --network-alias redis，使得 jeepay 应用在 jeepay-net 内用 Compose
+   规格的 hostname "mysql" / "redis" 也能解析到对应容器。此前 manager
+   / merchant / payment 的 application.yml 里写的是 mysql / redis，而
+   install.sh 启动的容器叫 mysql8 / redis6，DNS 解析失败导致
+   UnknownHostException。
+2. 修复： install.sh 在 cp conf/* 到 service/configs/ 之后，自动把三份
+   application.yml 里 datasource 段的占位密码 rootroot（Compose 默认）
+   替换为 config.sh 里的 mysql_pwd，消除"容器启动用新密码、应用连库
+   用旧密码"的 Access denied 错配。
+3. 新增： [8] 部署自检新增 DB + Redis 连通性探针——向运营平台
+   /api/anon/auth/vercode 发 GET 请求，后端会向 Redis 写入验证码
+   token。200 表示 MySQL / Redis 通路正常；非 200 打印 WARN 并给出
+   hostname alias / 密码两种典型原因排查指引。
+4. 优化： install.sh 默认 jeepayRef 由 V3.2.6 跟进到 V3.2.7。

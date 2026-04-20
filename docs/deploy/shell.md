@@ -209,7 +209,7 @@ cd $rootDir/sources/jeepay/docs/install && sh uninstall.sh
 
 ## 锁定源码版本
 
-`install.sh` 默认 `jeepayRef=V3.2.6`，即 `git clone --branch V3.2.6 --depth 1`，和业务镜像（`3.2.0`，V3.2.6 与之完全兼容）锁在同一版本，避免业务镜像固定而源码继续漂移出现的"老镜像 + 新配置"混装问题。
+`install.sh` 默认 `jeepayRef=V3.2.7`，即 `git clone --branch V3.2.7 --depth 1`，和业务镜像（`3.2.0`，V3.2.7 与之完全兼容）锁在同一版本，避免业务镜像固定而源码继续漂移出现的"老镜像 + 新配置"混装问题。
 
 如需临时改用最新 master 或其他 release tag，安装前导出环境变量即可：
 

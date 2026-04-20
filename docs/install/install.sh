@@ -319,7 +319,7 @@ rocketmqPlatform=${rocketmqPlatform:-linux/amd64}
 # 源码 ref：默认锁到 V3.2.4 release tag，保证 git clone 下来的 SQL / broker.conf.template /
 # nginx.conf / conf/* 与业务镜像（3.2.0 / V3.2.4 兼容）契合，不受 master 后续演进影响。
 # 如需用最新 master 或其他 tag，安装前导出 jeepayRef=xxx 覆盖即可（透传给 git clone --branch）。
-jeepayRef=${jeepayRef:-V3.2.6}
+jeepayRef=${jeepayRef:-V3.2.7}
 
 # 第2步：拉取项目源代码  || 拉取脚本文件
 echo "[2] 拉取项目源代码文件 (ref=$jeepayRef).... "
@@ -364,6 +364,7 @@ cd $sourcesInstallPath && cp ./include/my.cnf $rootDir/mysql/config/my.cnf
 
 # 镜像启动
 docker run -p $mysqlHostPort:3306 --name mysql8 --network=jeepay-net  \
+--network-alias mysql \
 --restart=always --privileged=true \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/mysql/log:/var/log/mysql  \
@@ -408,6 +409,7 @@ chmod 644 $rootDir/redis/config/redis.conf
 
 # 镜像启动
 docker run -p $redisHostPort:6379 --name redis6 --network=jeepay-net  \
+--network-alias redis \
 --restart=always --privileged=true \
 -v /etc/localtime:/etc/localtime:ro \
 -v $rootDir/redis/config/redis.conf:/etc/redis/redis.conf \
@@ -517,6 +519,16 @@ echo "[5] Done. "
 # 复制java配置文件
 cd $rootDir/service/configs/ && cp -r $rootDir/sources/jeepay/conf/* .
 
+# 把 conf 模板里的 Docker Compose 默认密码 rootroot 替换为本次安装实际使用的
+# mysql_pwd，保证 manager / merchant / payment 能连上脚本初始化的 MySQL。
+# 仅替换 datasource 段的密码（Redis password 为空，activemq 密码 "manager"，不受影响）。
+for svc in manager merchant payment; do
+    svcYml="$rootDir/service/configs/$svc/application.yml"
+    if [ -f "$svcYml" ]; then
+        sed -i "s|password: rootroot|password: $mysql_pwd|g" "$svcYml"
+    fi
+done
+
 
 echo "[6.1] 下载并启动 java 项目 [ jeepaymanager  ] .... "
 # 运行 java项目
@@ -614,6 +626,20 @@ probeEndpoint() {
 probeEndpoint "支付网关" 19216
 probeEndpoint "运营平台" 19217
 probeEndpoint "商户平台" 19218
+
+# 8.3 DB + Redis 连通性探测：调用运营平台图形验证码接口，后端会向 Redis 写入
+# 验证码 token。如果 MySQL / Redis 容器别名解析失败或密码不对，这里会 5xx。
+vercodeCode=$(curl -s -o /dev/null -w '%{http_code}' -m 10 "http://127.0.0.1:19217/api/anon/auth/vercode?t=$(date +%s)" 2>/dev/null)
+if [ "$vercodeCode" = "200" ]; then
+    echo "[8] 运营平台图形验证码接口 OK（MySQL / Redis 连通正常）"
+else
+    echo "[8] WARN: 图形验证码接口 HTTP $vercodeCode，登录页可能拿不到验证码。"
+    echo "[8]        典型原因："
+    echo "[8]         1) 容器别名解析：application.yml 中 host 写的是 mysql / redis，"
+    echo "[8]            若对应容器未设置 --network-alias，会报 UnknownHostException。"
+    echo "[8]         2) 密码错配：application.yml 里 password 与 MySQL 实际密码不一致。"
+    echo "[8]        查看日志：docker logs --tail 50 jeepaymanager"
+fi
 
 echo "[8] Done. "
 
