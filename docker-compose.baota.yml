@@ -37,6 +37,8 @@ services:
   jeepay-configs:
     image: ${JEEPAY_CONFIGS_IMAGE:-alpine/git:v2.45.2}
     container_name: jeepay-configs
+    # alpine/git 的 ENTRYPOINT 默认是 git，清空后 command 才能直接 exec sh
+    entrypoint: []
     volumes:
       - ${APP_PATH}/jeepayhomes/:/jeepayhomes
     command:
