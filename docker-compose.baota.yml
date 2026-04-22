@@ -6,6 +6,12 @@
 #     用户不 git clone 源码，所有配置文件通过 jeepay-configs 这个 init
 #     容器（alpine/git 镜像）从 git 拉下来再分发到宿主共享卷
 #
+# 镜像默认仓库：
+#   所有业务镜像 + MySQL / Redis / RocketMQ / Nginx 默认走华为云 SWR 公开仓库
+#   （swr.cn-south-1.myhuaweicloud.com/jeepay/*），由计全官方维护，国内直拉，
+#   不依赖 Docker Hub 加速器。alpine/git 仍用 Docker Hub（体积 < 20MB，一次
+#   性拉取）。想回 Docker Hub 上游镜像时，可通过下面的 *_IMAGE 环境变量覆盖。
+#
 # 环境变量（由宝塔 app 模板声明）：
 #   VERSION            业务镜像 tag（jeepay-manager/merchant/payment）
 #   CONFIG_REF         配置源 git ref（建议与 VERSION 同版本，或 master）
@@ -13,6 +19,11 @@
 #   HOST_IP            对外绑定 IP
 #   WEB_HTTP_PORT1/2/3 对外端口（分别映射到 19216 / 19217 / 19218）
 #   CPUS / MEMORY_LIMIT nginx 资源限制
+#
+# 可选环境变量（想改镜像源时覆盖，各自带合理默认值）：
+#   MYSQL_IMAGE / REDIS_IMAGE / ROCKETMQ_IMAGE / NGINX_IMAGE
+#   MANAGER_IMAGE / MERCHANT_IMAGE / PAYMENT_IMAGE
+#   JEEPAY_CONFIGS_IMAGE
 #
 # 首次安装后配置文件都在 ${APP_PATH}/jeepayhomes/jeepayConfigs/，用户可直接
 # 编辑；jeepay-configs 用 cp -n 保护已存在文件不被覆盖；最新模板始终同步
@@ -24,7 +35,7 @@ services:
   # - cp -n 铺到共享卷，已存在文件跳过（保护用户编辑）
   # - 最新模板同时刷到 .latest/，升级时 diff 对比
   jeepay-configs:
-    image: alpine/git:2.40
+    image: ${JEEPAY_CONFIGS_IMAGE:-alpine/git:2.40}
     container_name: jeepay-configs
     volumes:
       - ${APP_PATH}/jeepayhomes/:/jeepayhomes
@@ -69,7 +80,7 @@ services:
 
   # MySQL
   mysql:
-    image: mysql:8.0.25
+    image: ${MYSQL_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/mysql:8.0.25}
     container_name: mysql8
     hostname: mysql
     restart: always
@@ -100,7 +111,7 @@ services:
 
   # Redis
   redis:
-    image: redis:6.2.14
+    image: ${REDIS_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/redis:6.2.14}
     container_name: redis6
     hostname: redis
     restart: always
@@ -125,7 +136,7 @@ services:
 
   # RocketMQ NameServer
   rocketmq-namesrv:
-    image: apache/rocketmq:5.3.1
+    image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
     platform: linux/amd64
     container_name: rocketmq-namesrv
     hostname: rocketmq-namesrv
@@ -152,7 +163,7 @@ services:
 
   # RocketMQ Broker（brokerIP1 = 容器名，不依赖宿主网络布局）
   rocketmq-broker:
-    image: apache/rocketmq:5.3.1
+    image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
     platform: linux/amd64
     container_name: rocketmq-broker
     hostname: rocketmq-broker
@@ -185,7 +196,7 @@ services:
 
   # jeepay 运营平台 API
   jeepay-manager:
-    image: jeepay/jeepay-manager:${VERSION}
+    image: ${MANAGER_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-manager:${VERSION}}
     container_name: jeepaymanager
     restart: always
     depends_on:
@@ -215,7 +226,7 @@ services:
 
   # jeepay 商户平台 API
   jeepay-merchant:
-    image: jeepay/jeepay-merchant:${VERSION}
+    image: ${MERCHANT_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-merchant:${VERSION}}
     container_name: jeepaymerchant
     restart: always
     depends_on:
@@ -245,7 +256,7 @@ services:
 
   # jeepay 支付网关 API
   jeepay-payment:
-    image: jeepay/jeepay-payment:${VERSION}
+    image: ${PAYMENT_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-payment:${VERSION}}
     container_name: jeepaypayment
     restart: always
     depends_on:
@@ -275,7 +286,7 @@ services:
 
   # nginx 网关（对外映射 19216 / 19217 / 19218）
   BT_SERVICE_NAME6:
-    image: nginx:1.18.0
+    image: ${NGINX_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/nginx:1.18.0}
     container_name: nginx118
     restart: always
     deploy:

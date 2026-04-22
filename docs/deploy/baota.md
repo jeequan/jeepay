@@ -7,16 +7,49 @@
 - 位置：仓库根目录 [`docker-compose.baota.yml`](../../docker-compose.baota.yml)
 - 宝塔应用模板引用该文件作为 `docker-compose` 部分即可
 
+## 镜像默认地址
+
+所有业务镜像 + MySQL / Redis / RocketMQ / Nginx 默认走**华为云 SWR 公开仓库**（`swr.cn-south-1.myhuaweicloud.com/jeepay/*`），由计全官方维护，国内直拉不需要 Docker Hub 加速器。`alpine/git`（配置分发 init 容器）仍从 Docker Hub 拉（< 20MB，一次性）。
+
+想改回 Docker Hub 上游镜像，可通过下面"可选环境变量"覆盖。
+
 ## 宝塔应用模板要声明的变量
+
+### 必须
 
 | 变量 | 用途 | 建议默认 |
 |---|---|---|
-| `VERSION` | 业务镜像 tag（`jeepay/jeepay-manager` 等） | `3.2.0` |
+| `VERSION` | 业务镜像 tag（`jeepay-manager` 等） | `3.2.0` |
 | `CONFIG_REF` | 配置源 git ref（与 `VERSION` 同版本的 tag 或 `master`） | 当前 release tag |
 | `APP_PATH` | 宿主部署根目录 | 宝塔默认 |
 | `HOST_IP` | 对外绑定 IP | 宝塔默认 |
 | `WEB_HTTP_PORT1` / `2` / `3` | 映射到容器 `19216` / `19217` / `19218` | `19216` / `19217` / `19218` |
 | `CPUS` / `MEMORY_LIMIT` | nginx 资源限制 | `1` / `512m` |
+
+### 可选（改镜像源时覆盖）
+
+| 变量 | 默认 |
+|---|---|
+| `MYSQL_IMAGE` | `swr.cn-south-1.myhuaweicloud.com/jeepay/mysql:8.0.25` |
+| `REDIS_IMAGE` | `swr.cn-south-1.myhuaweicloud.com/jeepay/redis:6.2.14` |
+| `ROCKETMQ_IMAGE` | `swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1` |
+| `NGINX_IMAGE` | `swr.cn-south-1.myhuaweicloud.com/jeepay/nginx:1.18.0` |
+| `MANAGER_IMAGE` | `swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-manager:${VERSION}` |
+| `MERCHANT_IMAGE` | `swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-merchant:${VERSION}` |
+| `PAYMENT_IMAGE` | `swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-payment:${VERSION}` |
+| `JEEPAY_CONFIGS_IMAGE` | `alpine/git:2.40`（Docker Hub） |
+
+**切回 Docker Hub 整套示例**：
+
+```
+MYSQL_IMAGE=mysql:8.0.25
+REDIS_IMAGE=redis:6.2.14
+ROCKETMQ_IMAGE=apache/rocketmq:5.3.1
+NGINX_IMAGE=nginx:1.18.0
+MANAGER_IMAGE=jeepay/jeepay-manager:3.2.0
+MERCHANT_IMAGE=jeepay/jeepay-merchant:3.2.0
+PAYMENT_IMAGE=jeepay/jeepay-payment:3.2.0
+```
 
 ## 安装后怎么改配置
 
