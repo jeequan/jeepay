@@ -16,6 +16,8 @@
 #   VERSION            业务镜像 tag（jeepay-manager/merchant/payment）
 #   CONFIG_REF         配置源 git ref（建议与 VERSION 同版本，或 master）
 #   UI_RELEASE         前端静态资源 release（默认 V3.0.0）
+#   MYSQL_ROOT_PASSWORD MySQL root 密码（默认 jeepaydb123456），同时贯穿到
+#                      jeepay-configs 的 sed 替换，保证 yml 里 datasource 密码一致
 #   APP_PATH           宿主机部署根目录
 #   HOST_IP            对外绑定 IP
 #   WEB_HTTP_PORT1/2/3 对外端口（分别映射到 19216 / 19217 / 19218）
@@ -40,6 +42,9 @@ services:
     container_name: jeepay-configs
     # alpine/git 的 ENTRYPOINT 默认是 git，清空后 command 才能直接 exec sh
     entrypoint: []
+    environment:
+      # 贯穿到 sed 里替换 yml 的 datasource password（默认 jeepaydb123456）
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-jeepaydb123456}"
     volumes:
       - ${APP_PATH}/jeepayhomes/:/jeepayhomes
     command:
@@ -66,6 +71,20 @@ services:
         cp -n /tmp/jeepay-src/conf/manager/application.yml            /jeepayhomes/jeepayConfigs/service/manager/application.yml   || true
         cp -n /tmp/jeepay-src/conf/merchant/application.yml           /jeepayhomes/jeepayConfigs/service/merchant/application.yml  || true
         cp -n /tmp/jeepay-src/conf/payment/application.yml            /jeepayhomes/jeepayConfigs/service/payment/application.yml   || true
+
+        # 上游 conf/*/application.yml 里 datasource 密码是占位 "rootroot"（和仓库
+        # docker-compose.yml 的默认 MYSQL_ROOT_PASSWORD 一致），宝塔场景下 MySQL
+        # 初始化密码由 MYSQL_ROOT_PASSWORD 变量控制（默认 jeepaydb123456），不改
+        # 则 Access denied。用 grep 条件做幂等替换，只有还存在 "password: rootroot"
+        # 才改，尊重用户后续自定义。$$ 是给 compose 的转义，防止 compose YAML 解析
+        # 时把 shell 变量吞掉。
+        for svc in manager merchant payment; do
+            yml="/jeepayhomes/jeepayConfigs/service/$$svc/application.yml"
+            if [ -f "$$yml" ] && grep -q "password: rootroot" "$$yml"; then
+                sed -i "s|password: rootroot|password: $${MYSQL_ROOT_PASSWORD}|g" "$$yml"
+                echo "$$yml: datasource password rewrote"
+            fi
+        done
         cp -n /tmp/jeepay-src/docs/install/include/nginx.conf         /jeepayhomes/jeepayConfigs/nginx/nginx.conf                  || true
         # nginx.conf 在 install.sh 场景下用 localhost:921x（nginx --net=host 可达），
         # 但 compose 场景下 nginx 在 bridge 网络，localhost 解析不到后端。只要还能
@@ -113,7 +132,7 @@ services:
     restart: always
     environment:
       LANG: C.UTF-8
-      MYSQL_ROOT_PASSWORD: "jeepaydb123456"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-jeepaydb123456}"
       MYSQL_DATABASE: "jeepaydb"
     depends_on:
       jeepay-configs:
@@ -126,7 +145,7 @@ services:
       - ${APP_PATH}/jeepayhomes/jeepayConfigs/db:/etc/mysql/conf.d
       - ${APP_PATH}/jeepayhomes/jeepayConfigs/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pjeepaydb123456"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD}"]
       interval: 15s
       timeout: 10s
       retries: 10
