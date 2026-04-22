@@ -35,7 +35,7 @@ services:
   # - cp -n 铺到共享卷，已存在文件跳过（保护用户编辑）
   # - 最新模板同时刷到 .latest/，升级时 diff 对比
   jeepay-configs:
-    image: ${JEEPAY_CONFIGS_IMAGE:-alpine/git:2.40}
+    image: ${JEEPAY_CONFIGS_IMAGE:-alpine/git:v2.45.2}
     container_name: jeepay-configs
     volumes:
       - ${APP_PATH}/jeepayhomes/:/jeepayhomes
