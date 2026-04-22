@@ -29,6 +29,7 @@ import com.jeequan.jeepay.pay.channel.AbstractRefundService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRQ;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /*
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Service;
 * @site https://www.jeequan.com
 * @date 2021/6/17 9:38
 */
+@Slf4j
 @Service
 public class AlipayRefundService extends AbstractRefundService {
 
@@ -54,33 +56,38 @@ public class AlipayRefundService extends AbstractRefundService {
     @Override
     public ChannelRetMsg refund(RefundOrderRQ bizRQ, RefundOrder refundOrder, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
 
-        AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
-        AlipayTradeRefundModel model = new AlipayTradeRefundModel();
-        model.setOutTradeNo(refundOrder.getPayOrderId());
-        model.setTradeNo(refundOrder.getChannelPayOrderNo());
-        model.setOutRequestNo(refundOrder.getRefundOrderId());
-        model.setRefundAmount(AmountUtil.convertCent2Dollar(refundOrder.getRefundAmount().toString()));
-        model.setRefundReason(refundOrder.getRefundReason());
-        request.setBizModel(model);
+        try {
+            AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
+            AlipayTradeRefundModel model = new AlipayTradeRefundModel();
+            model.setOutTradeNo(refundOrder.getPayOrderId());
+            model.setTradeNo(refundOrder.getChannelPayOrderNo());
+            model.setOutRequestNo(refundOrder.getRefundOrderId());
+            model.setRefundAmount(AmountUtil.convertCent2Dollar(refundOrder.getRefundAmount().toString()));
+            model.setRefundReason(refundOrder.getRefundReason());
+            request.setBizModel(model);
 
-        //统一放置 isv接口必传信息
-        AlipayKit.putApiIsvInfo(mchAppConfigContext, request, model);
+            //统一放置 isv接口必传信息
+            AlipayKit.putApiIsvInfo(mchAppConfigContext, request, model);
 
-        AlipayTradeRefundResponse response = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
+            AlipayTradeRefundResponse response = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
 
-        ChannelRetMsg channelRetMsg = new ChannelRetMsg();
-        channelRetMsg.setChannelAttach(response.getBody());
+            ChannelRetMsg channelRetMsg = new ChannelRetMsg();
+            channelRetMsg.setChannelAttach(response.getBody());
 
-        // 调用成功
-        if(response.isSuccess()){
-            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
-        }else{
+            // 调用成功
+            if(response.isSuccess()){
+                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
+            }else{
 
-            channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
-            channelRetMsg.setChannelErrCode(response.getSubCode());
-            channelRetMsg.setChannelErrMsg(response.getSubMsg());
+                channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+                channelRetMsg.setChannelErrCode(response.getSubCode());
+                channelRetMsg.setChannelErrMsg(response.getSubMsg());
+            }
+            return channelRetMsg;
+        } catch (Exception e) {
+            log.error("支付宝退款异常", e);
+            return ChannelRetMsg.waiting(); // 等待补单
         }
-        return channelRetMsg;
     }
 
     @Override

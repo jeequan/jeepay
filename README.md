@@ -52,17 +52,12 @@
 # 目录
 
 - [项目简介](#项目简介)
-- [为什么选择 Jeepay](#为什么选择-jeepay)
-- [适用场景](#适用场景)
+- [Jeepay 适合谁](#jeepay-适合谁)
 - [官方托管服务（计全付）](#官方托管服务计全付)
-- [系统能力概览](#系统能力概览)
-- [快速开始](#快速开始)
 - [部署方式](#部署方式)
 - [系统架构](#系统架构)
 - [核心技术栈](#核心技术栈)
 - [文档与资源](#文档与资源)
-- [在线体验](#在线体验)
-- [版本与兼容性说明](#版本与兼容性说明)
 - [贡献与协作](#贡献与协作)
 - [更多支持](#更多支持)
 
@@ -70,41 +65,22 @@
 
 # 项目简介
 
-Jeepay 是一套面向互联网企业的开源支付系统，支持：
+Jeepay 是一套面向互联网企业的开源支付系统，支持 **普通商户模式** / **多渠道服务商模式** / **聚合码支付** / **多商户多应用接入**。已对接微信支付、支付宝、云闪付等主流渠道。
 
-- **普通商户模式**
-- **多渠道服务商模式**
-- **聚合码支付**
-- **多商户、多应用接入**
+后端 `Spring Boot 3.3.7` + `JDK 17` + `Spring Security`，前端 `Ant Design Vue`，MQ 支持 `RocketMQ` / `ActiveMQ` / `RabbitMQ`。
 
-当前已对接微信支付、支付宝、云闪付等主流渠道；后端 `Spring Boot 3.3.7` + `JDK 17`，前端 `Ant Design Vue`，权限体系 `Spring Security`。
-
-适用于支付能力平台化、商户系统建设、支付中台建设以及聚合支付业务的二次开发。
+适合自建聚合支付平台、SaaS 支付中台、多商户支付系统以及电商 / 零售 / 本地生活 / 数字内容等业务的支付接入与二次开发。
 
 ---
 
-# 为什么选择 Jeepay
+# Jeepay 适合谁
 
-- **支付能力完整**：覆盖下单、退款、通知、分账扩展、渠道管理等常见支付能力
-- **模式灵活**：同时支持普通商户与服务商模式
-- **多渠道兼容**：已具备微信、支付宝、云闪付等主流渠道接入能力
-- **架构清晰**：后端分层明确，前后端分离，适合持续迭代和二开
-- **接入效率高**：标准化 HTTP 接口 + 多语言 SDK，业务系统接入成本低
-- **可运维性好**：支持 Docker、脚本部署、分布式场景和 MQ 通知机制
-- **支付经验沉淀**：由原 `XxPay` 团队持续开发维护，具备多年实战经验
+- 想**独立掌控**支付流程、商户体系、渠道配置、回调通知，不想被托管服务绑定
+- 需要**服务商模式**管理多家商户、多家渠道的平台方
+- 计划长期**二次开发**，希望起点是一套架构清晰、代码分层明确、文档完备的开源系统
+- 需要 Docker / Shell 一键部署、分布式、多 MQ 可切换的**可运维**支付底座
 
----
-
-# 适用场景
-
-- 自建聚合支付平台
-- 多商户支付系统
-- SaaS 平台支付中台
-- 电商、零售、本地生活、数字内容等业务的支付接入
-- 服务商模式下的渠道统一管理与商户统一接入
-- 需要独立掌控支付流程、商户管理、渠道配置和回调通知的项目
-
-如果你希望快速搭建一套可控、可扩展、可二开的支付系统，Jeepay 是比较合适的基础底座。
+由原 `XxPay` 团队持续开发维护，多年支付实战沉淀。
 
 ---
 
@@ -121,63 +97,16 @@ Jeepay 是一套面向互联网企业的开源支付系统，支持：
 
 ---
 
-# 系统能力概览
-
-- **支付渠道**：微信支付（`V2`/`V3`、服务商 / 普通商户）、支付宝（`RSA`/`RSA2`、服务商 / 普通商户）、云闪付
-- **平台能力**：多商户管理、多应用接入、聚合码支付、订单管理、渠道参数配置、商户通知与回调、支付异步通知、权限与账号管理、运营平台与商户平台双端
-- **工程能力**：前后端分离、分布式部署、MQ 通知（RocketMQ / ActiveMQ / RabbitMQ）、Docker 部署与脚本化安装、可二次开发
-
----
-
-# 快速开始
-
-## 环境要求
-
-| 组件 | 要求 |
-|---|---|
-| JDK | 17 |
-| Maven | 建议 3.8+ |
-| MySQL | 5.7.x / 8.0+ |
-| Redis | 3.2.8+ |
-| MQ | RocketMQ（默认）/ ActiveMQ / RabbitMQ（按需启用） |
-| Node.js | 前端工程按 `jeepay-ui` 要求准备 |
-
-## 代码获取
-
-```bash
-git clone https://github.com/jeequan/jeepay.git
-git clone https://github.com/jeequan/jeepay-ui.git
-```
-
-## 首次启动流程
-
-1. **准备数据库与缓存**：创建 MySQL 数据库并导入 `docs/sql/init.sql`；准备 Redis（异步通知增强可按需启用 MQ）。
-2. **准备配置文件**：修改 `conf/manager/application.yml`、`conf/merchant/application.yml`、`conf/payment/application.yml`，填写 MySQL / Redis / 服务端口 / 支付渠道基础参数。
-3. **编译后端**：`mvn clean package -DskipTests`
-4. **启动核心服务**：
-   | 模块 | 说明 | 默认端口 |
-   |---|---|---|
-   | `jeepay-payment` | 支付网关 | `9216` |
-   | `jeepay-manager` | 运营平台服务端 | `9217` |
-   | `jeepay-merchant` | 商户系统服务端 | `9218` |
-5. **启动前端**：参考 <https://github.com/jeequan/jeepay-ui>
-
----
-
 # 部署方式
 
-| 方式 | 适用场景 | 详细说明 |
+| 方式 | 适用场景 | 跳转 |
 |---|---|---|
-| 宝塔面板一键安装 | 有宝塔面板（≥ 9.2.0），追求图形化操作 | 面板 Docker 应用内搜索 `jeepay`，或看 [教程](https://doc.jeequan.com/#/integrate/open/dev/108) |
-| Shell 脚本一键安装 | 干净的 CentOS / Anolis / Ubuntu 服务器，希望一条命令拉起 | [docs/deploy/shell.md](docs/deploy/shell.md) |
-| 自助源码部署 | 需要二次开发 / 接入内部基础设施的团队 | 自行准备 MySQL / Redis / MQ，按环境调整 `conf/` 后 Maven 打包部署 |
-| Docker Compose 部署 | 本地或测试环境快速起完整集群（含前端） | [docs/deploy/compose.md](docs/deploy/compose.md) |
+| **Shell 脚本一键安装** | 干净的 CentOS / Anolis / Ubuntu / Debian 服务器 | [docs/deploy/shell.md](docs/deploy/shell.md) |
+| **Docker Compose 部署** | 本地 / 测试环境起完整集群（含前端） | [docs/deploy/compose.md](docs/deploy/compose.md) |
+| 宝塔面板一键安装 | 有宝塔面板（≥ 9.2.0），Docker 应用市场一键装 | Compose 文件：[`docker-compose.baota.yml`](docker-compose.baota.yml)，用法：[docs/deploy/baota.md](docs/deploy/baota.md) |
+| 自助源码部署 | 对接内部基础设施的团队 | 自备 MySQL / Redis / MQ，按环境调整 `conf/` 后 Maven 打包部署 |
 
-> **国内镜像来源**：Shell 脚本与 Docker Compose 的默认镜像都指向 **华为云 SWR 公开仓库**（`swr.cn-south-1.myhuaweicloud.com/jeepay/*`），由计全官方维护，公网匿名可拉，不依赖 Docker Hub，**无需登录也不需要配置加速器**。
->
-> **架构提示**：x86_64 宿主直接一条命令；ARM64 / Apple Silicon 宿主需先开启 amd64 仿真（RocketMQ 上游仅发布 amd64），细节见 [docs/deploy/shell.md](docs/deploy/shell.md#架构前提)。
->
-> 部署过程中碰到问题，优先看 [docs/deploy/troubleshooting.md](docs/deploy/troubleshooting.md)。
+> 默认镜像指向**华为云 SWR 公开仓库**，国内零配置直达，不依赖 Docker Hub。部署后需域名 + HTTPS 见 [docs/deploy/https.md](docs/deploy/https.md)，出问题优先看 [docs/deploy/troubleshooting.md](docs/deploy/troubleshooting.md)。
 
 ---
 
@@ -221,14 +150,18 @@ git clone https://github.com/jeequan/jeepay-ui.git
 - 接口文档：<https://doc.jeequan.com/#/integrate/open/api/81>
 - 常见问题：<https://doc.jeequan.com/#/integrate/open/dev/107>
 
-## 本仓库拆分文档
+## 本仓库文档
 
-- 部署详解（Shell 脚本）：[docs/deploy/shell.md](docs/deploy/shell.md)
-- 部署详解（Docker Compose）：[docs/deploy/compose.md](docs/deploy/compose.md)
-- 部署常见问题：[docs/deploy/troubleshooting.md](docs/deploy/troubleshooting.md)
+- 部署 — Shell 脚本：[docs/deploy/shell.md](docs/deploy/shell.md)
+- 部署 — Docker Compose：[docs/deploy/compose.md](docs/deploy/compose.md)
+- 部署 — 宝塔面板：[docs/deploy/baota.md](docs/deploy/baota.md)
+- 部署 — 域名 + HTTPS：[docs/deploy/https.md](docs/deploy/https.md)
+- 部署 — 常见问题排查：[docs/deploy/troubleshooting.md](docs/deploy/troubleshooting.md)
+- 镜像发布（维护者）：[docs/deploy/publish.md](docs/deploy/publish.md)
 - 功能与接口市场：[docs/features.md](docs/features.md)
-- 项目结构与仓库关系：[docs/project-structure.md](docs/project-structure.md)
+- 项目结构：[docs/project-structure.md](docs/project-structure.md)
 - 系统截图：[docs/screenshots.md](docs/screenshots.md)
+- 贡献指南：[CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## SDK 资源
 
@@ -244,37 +177,11 @@ Jeepay 已提供 Java、Python SDK，以及 PHP 对接 Demo：
 
 ---
 
-# 在线体验
-
-- 支付流程体验：<https://www.jeequan.com/demo/jeepay_cashier.html>
-- 管理平台 / 商户系统演示：<https://www.jeequan.com/doc/detail_84.html>
-
----
-
-# 版本与兼容性说明
-
-- 当前项目采用 `Spring Boot 3.3.7`，要求 `JDK 17`
-- 数据库建议使用 `MySQL 5.7.x` 或 `8.0+`，Redis 建议 `3.2.8+`
-- MQ 为可选增强组件，按业务场景选择启用
-- 前端请同步使用对应版本的 `jeepay-ui`
-- SDK 对接优先使用官方 SDK 或示例代码
-
----
-
 # 贡献与协作
 
-欢迎通过以下方式参与项目共建：
-
-- 提交 Issue 反馈问题
-- 提交 Pull Request 改进功能或文档
-- 完善渠道对接能力
-- 补充部署文档、二开文档和示例代码
-
-协作建议：
-
-- 提交前确保核心功能可运行
-- 接口 / 配置项 / 数据库变更请同步更新文档与 SQL 脚本
-- 建议聚焦单一主题，便于评审与合并
+- 分支模型、commit 规范、PR 流程、测试要求：见 [CONTRIBUTING.md](CONTRIBUTING.md)
+- 反馈问题 / 提交 PR / 完善渠道对接 / 补充文档，都欢迎
+- 在线体验：[支付流程](https://www.jeequan.com/demo/jeepay_cashier.html) · [管理平台演示](https://www.jeequan.com/doc/detail_84.html)
 
 ---
 
