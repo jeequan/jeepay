@@ -217,7 +217,7 @@ services:
       - ${APP_PATH}/jeepayhomes/service/uploads:/jeepayhomes/service/uploads
       - ${APP_PATH}/jeepayhomes/jeepayConfigs/service/manager/application.yml:/jeepayhomes/service/app/application.yml
     healthcheck:
-      test: ["CMD-SHELL", "curl -fs -o /dev/null http://127.0.0.1:9217 || exit 1"]
+      test: ["CMD-SHELL", "curl -s -o /dev/null --max-time 3 http://127.0.0.1:9217 || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 12
@@ -247,7 +247,7 @@ services:
       - ${APP_PATH}/jeepayhomes/service/uploads:/jeepayhomes/service/uploads
       - ${APP_PATH}/jeepayhomes/jeepayConfigs/service/merchant/application.yml:/jeepayhomes/service/app/application.yml
     healthcheck:
-      test: ["CMD-SHELL", "curl -fs -o /dev/null http://127.0.0.1:9218 || exit 1"]
+      test: ["CMD-SHELL", "curl -s -o /dev/null --max-time 3 http://127.0.0.1:9218 || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 12
@@ -277,7 +277,7 @@ services:
       - ${APP_PATH}/jeepayhomes/service/uploads:/jeepayhomes/service/uploads
       - ${APP_PATH}/jeepayhomes/jeepayConfigs/service/payment/application.yml:/jeepayhomes/service/app/application.yml
     healthcheck:
-      test: ["CMD-SHELL", "curl -fs -o /dev/null http://127.0.0.1:9216 || exit 1"]
+      test: ["CMD-SHELL", "curl -s -o /dev/null --max-time 3 http://127.0.0.1:9216 || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 12
