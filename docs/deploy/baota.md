@@ -37,7 +37,7 @@
 | `MANAGER_IMAGE` | `swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-manager:${VERSION}` |
 | `MERCHANT_IMAGE` | `swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-merchant:${VERSION}` |
 | `PAYMENT_IMAGE` | `swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-payment:${VERSION}` |
-| `JEEPAY_CONFIGS_IMAGE` | `alpine/git:2.40`（Docker Hub） |
+| `JEEPAY_CONFIGS_IMAGE` | `alpine/git:v2.45.2`（Docker Hub） |
 
 **切回 Docker Hub 整套示例**：
 
