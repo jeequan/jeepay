@@ -1,0 +1,312 @@
+# 宝塔面板（BaoTa）"Docker 应用"专用 compose 文件
+#
+# 使用场景：
+#   - 宝塔 UI 上架 jeepay 应用，用户点击"安装"即部署
+#   - 与 docker-compose.yml（仓库自身的 Compose 部署）不同，宝塔场景下
+#     用户不 git clone 源码，所有配置文件通过 jeepay-configs 这个 init
+#     容器（alpine/git 镜像）从 git 拉下来再分发到宿主共享卷
+#
+# 环境变量（由宝塔 app 模板声明）：
+#   VERSION            业务镜像 tag（jeepay-manager/merchant/payment）
+#   CONFIG_REF         配置源 git ref（建议与 VERSION 同版本，或 master）
+#   APP_PATH           宿主机部署根目录
+#   HOST_IP            对外绑定 IP
+#   WEB_HTTP_PORT1/2/3 对外端口（分别映射到 19216 / 19217 / 19218）
+#   CPUS / MEMORY_LIMIT nginx 资源限制
+#
+# 首次安装后配置文件都在 ${APP_PATH}/jeepayhomes/jeepayConfigs/，用户可直接
+# 编辑；jeepay-configs 用 cp -n 保护已存在文件不被覆盖；最新模板始终同步
+# 到 ${APP_PATH}/jeepayhomes/jeepayConfigs/.latest/，升级时 diff 对比。
+
+services:
+  # jeepay 配置中心：一次性 init 容器
+  # - 从 git 拉 ${CONFIG_REF} tag 的配置文件
+  # - cp -n 铺到共享卷，已存在文件跳过（保护用户编辑）
+  # - 最新模板同时刷到 .latest/，升级时 diff 对比
+  jeepay-configs:
+    image: alpine/git:2.40
+    container_name: jeepay-configs
+    volumes:
+      - ${APP_PATH}/jeepayhomes/:/jeepayhomes
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        rm -rf /tmp/jeepay-src
+        git clone --branch ${CONFIG_REF:-master} --depth 1 https://gitee.com/jeequan/jeepay.git /tmp/jeepay-src
+
+        mkdir -p /jeepayhomes/jeepayConfigs/db \
+                 /jeepayhomes/jeepayConfigs/redis \
+                 /jeepayhomes/jeepayConfigs/rocketmq \
+                 /jeepayhomes/jeepayConfigs/service/manager \
+                 /jeepayhomes/jeepayConfigs/service/merchant \
+                 /jeepayhomes/jeepayConfigs/service/payment \
+                 /jeepayhomes/jeepayConfigs/nginx/conf.d \
+                 /jeepayhomes/jeepayConfigs/nginx/html
+
+        cp -n /tmp/jeepay-src/docs/install/include/my.cnf             /jeepayhomes/jeepayConfigs/db/my.cnf                         || true
+        cp -n /tmp/jeepay-src/docs/sql/init.sql                       /jeepayhomes/jeepayConfigs/db/init.sql                       || true
+        cp -n /tmp/jeepay-src/docs/install/include/redis.conf         /jeepayhomes/jeepayConfigs/redis/redis.conf                  || true
+        cp -n /tmp/jeepay-src/docker/rocketmq/broker/conf/broker.conf /jeepayhomes/jeepayConfigs/rocketmq/broker.conf              || true
+        cp -n /tmp/jeepay-src/conf/manager/application.yml            /jeepayhomes/jeepayConfigs/service/manager/application.yml   || true
+        cp -n /tmp/jeepay-src/conf/merchant/application.yml           /jeepayhomes/jeepayConfigs/service/merchant/application.yml  || true
+        cp -n /tmp/jeepay-src/conf/payment/application.yml            /jeepayhomes/jeepayConfigs/service/payment/application.yml   || true
+        cp -n /tmp/jeepay-src/docs/install/include/nginx.conf         /jeepayhomes/jeepayConfigs/nginx/nginx.conf                  || true
+
+        rm -rf /jeepayhomes/jeepayConfigs/.latest
+        mkdir -p /jeepayhomes/jeepayConfigs/.latest
+        cp -r /tmp/jeepay-src/conf                                    /jeepayhomes/jeepayConfigs/.latest/conf
+        cp -r /tmp/jeepay-src/docs/install/include                    /jeepayhomes/jeepayConfigs/.latest/include
+        cp    /tmp/jeepay-src/docker/rocketmq/broker/conf/broker.conf /jeepayhomes/jeepayConfigs/.latest/broker.conf               || true
+        cp    /tmp/jeepay-src/docs/sql/init.sql                       /jeepayhomes/jeepayConfigs/.latest/init.sql                  || true
+
+        echo "jeepay-configs ready (user edits preserved; upstream templates in .latest/)"
+    labels:
+      createdBy: "bt_apps"
+    networks:
+      - baota_net
+
+  # MySQL
+  mysql:
+    image: mysql:8.0.25
+    container_name: mysql8
+    hostname: mysql
+    restart: always
+    environment:
+      LANG: C.UTF-8
+      MYSQL_ROOT_PASSWORD: "jeepaydb123456"
+      MYSQL_DATABASE: "jeepaydb"
+    depends_on:
+      jeepay-configs:
+        condition: service_completed_successfully
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APP_PATH}/jeepayhomes/mysql/log:/var/log/mysql
+      - ${APP_PATH}/jeepayhomes/mysql/data:/var/lib/mysql
+      - ${APP_PATH}/jeepayhomes/mysql/mysql-files:/var/lib/mysql-files
+      - ${APP_PATH}/jeepayhomes/jeepayConfigs/db:/etc/mysql/conf.d
+      - ${APP_PATH}/jeepayhomes/jeepayConfigs/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pjeepaydb123456"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    labels:
+      createdBy: "bt_apps"
+    networks:
+      - baota_net
+
+  # Redis
+  redis:
+    image: redis:6.2.14
+    container_name: redis6
+    hostname: redis
+    restart: always
+    depends_on:
+      jeepay-configs:
+        condition: service_completed_successfully
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APP_PATH}/jeepayhomes/jeepayConfigs/redis/redis.conf:/etc/redis/redis.conf
+      - ${APP_PATH}/jeepayhomes/redis/data:/data
+    command: redis-server /etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    labels:
+      createdBy: "bt_apps"
+    networks:
+      - baota_net
+
+  # RocketMQ NameServer
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.3.1
+    platform: linux/amd64
+    container_name: rocketmq-namesrv
+    hostname: rocketmq-namesrv
+    restart: always
+    depends_on:
+      jeepay-configs:
+        condition: service_completed_successfully
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APP_PATH}/jeepayhomes/rocketmq/namesrv/logs:/home/rocketmq/logs
+    environment:
+      JAVA_OPT_EXT: "-Xms256m -Xmx256m -Xmn128m"
+    command: sh mqnamesrv
+    healthcheck:
+      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/9876"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    labels:
+      createdBy: "bt_apps"
+    networks:
+      - baota_net
+
+  # RocketMQ Broker（brokerIP1 = 容器名，不依赖宿主网络布局）
+  rocketmq-broker:
+    image: apache/rocketmq:5.3.1
+    platform: linux/amd64
+    container_name: rocketmq-broker
+    hostname: rocketmq-broker
+    restart: always
+    user: "0:0"
+    depends_on:
+      rocketmq-namesrv:
+        condition: service_healthy
+      jeepay-configs:
+        condition: service_completed_successfully
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APP_PATH}/jeepayhomes/rocketmq/broker/logs:/home/rocketmq/logs
+      - ${APP_PATH}/jeepayhomes/rocketmq/broker/store:/home/rocketmq/store
+      - ${APP_PATH}/jeepayhomes/jeepayConfigs/rocketmq/broker.conf:/home/rocketmq/rocketmq-5.3.1/conf/broker.conf:ro
+    environment:
+      NAMESRV_ADDR: "rocketmq-namesrv:9876"
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m -Xmn256m"
+    command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
+    healthcheck:
+      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/10911"]
+      interval: 15s
+      timeout: 5s
+      retries: 15
+      start_period: 90s
+    labels:
+      createdBy: "bt_apps"
+    networks:
+      - baota_net
+
+  # jeepay 运营平台 API
+  jeepay-manager:
+    image: jeepay/jeepay-manager:${VERSION}
+    container_name: jeepaymanager
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_healthy
+      jeepay-configs:
+        condition: service_completed_successfully
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APP_PATH}/jeepayhomes/service/logs:/jeepayhomes/service/logs
+      - ${APP_PATH}/jeepayhomes/service/uploads:/jeepayhomes/service/uploads
+      - ${APP_PATH}/jeepayhomes/jeepayConfigs/service/manager/application.yml:/jeepayhomes/service/app/application.yml
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs -o /dev/null http://127.0.0.1:9217 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    labels:
+      createdBy: "bt_apps"
+    networks:
+      - baota_net
+
+  # jeepay 商户平台 API
+  jeepay-merchant:
+    image: jeepay/jeepay-merchant:${VERSION}
+    container_name: jeepaymerchant
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_healthy
+      jeepay-configs:
+        condition: service_completed_successfully
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APP_PATH}/jeepayhomes/service/logs:/jeepayhomes/service/logs
+      - ${APP_PATH}/jeepayhomes/service/uploads:/jeepayhomes/service/uploads
+      - ${APP_PATH}/jeepayhomes/jeepayConfigs/service/merchant/application.yml:/jeepayhomes/service/app/application.yml
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs -o /dev/null http://127.0.0.1:9218 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    labels:
+      createdBy: "bt_apps"
+    networks:
+      - baota_net
+
+  # jeepay 支付网关 API
+  jeepay-payment:
+    image: jeepay/jeepay-payment:${VERSION}
+    container_name: jeepaypayment
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_healthy
+      jeepay-configs:
+        condition: service_completed_successfully
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APP_PATH}/jeepayhomes/service/logs:/jeepayhomes/service/logs
+      - ${APP_PATH}/jeepayhomes/service/uploads:/jeepayhomes/service/uploads
+      - ${APP_PATH}/jeepayhomes/jeepayConfigs/service/payment/application.yml:/jeepayhomes/service/app/application.yml
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs -o /dev/null http://127.0.0.1:9216 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    labels:
+      createdBy: "bt_apps"
+    networks:
+      - baota_net
+
+  # nginx 网关（对外映射 19216 / 19217 / 19218）
+  BT_SERVICE_NAME6:
+    image: nginx:1.18.0
+    container_name: nginx118
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: ${CPUS}
+          memory: ${MEMORY_LIMIT}
+    depends_on:
+      jeepay-payment:
+        condition: service_healthy
+      jeepay-manager:
+        condition: service_healthy
+      jeepay-merchant:
+        condition: service_healthy
+      jeepay-configs:
+        condition: service_completed_successfully
+    ports:
+      - ${HOST_IP}:${WEB_HTTP_PORT1}:19216
+      - ${HOST_IP}:${WEB_HTTP_PORT2}:19217
+      - ${HOST_IP}:${WEB_HTTP_PORT3}:19218
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APP_PATH}/jeepayhomes/jeepayConfigs/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ${APP_PATH}/jeepayhomes/jeepayConfigs/nginx/conf.d:/etc/nginx/conf.d
+      - ${APP_PATH}/jeepayhomes/nginx/logs:/var/log/nginx
+      - ${APP_PATH}/jeepayhomes/jeepayConfigs/nginx/html:/usr/share/nginx/html
+    labels:
+      createdBy: "bt_apps"
+    networks:
+      - baota_net
+
+networks:
+  baota_net:
+    external: true
