@@ -153,7 +153,8 @@ services:
       JAVA_OPT_EXT: "-Xms256m -Xmx256m -Xmn128m"
     command: sh mqnamesrv
     healthcheck:
-      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/9876"]
+      # rocketmq 镜像里 /bin/sh 是 dash，不支持 /dev/tcp，必须显式走 bash
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9876"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -186,7 +187,7 @@ services:
       JAVA_OPT_EXT: "-Xms512m -Xmx512m -Xmn256m"
     command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
     healthcheck:
-      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/10911"]
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/10911"]
       interval: 15s
       timeout: 5s
       retries: 15
