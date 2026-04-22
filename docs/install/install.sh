@@ -24,6 +24,7 @@ show_usage() {
   paymentImage                               镜像覆盖
   rocketmqPlatform                           RocketMQ 平台（默认 linux/amd64）
   jeepayRef                                  源码 tag，默认 V3.2.7
+  uiRelease                                  前端静态资源 release（默认 V3.0.0）
 EOF
 }
 while [ $# -gt 0 ]; do
@@ -676,8 +677,11 @@ echo "[6] Done. "
 
 echo "[7] 下载并启动 nginx .... "
 
+# 前端静态资源压缩包由 jeepay-ui 项目按 release 发布；可通过 uiRelease 覆盖。
+uiRelease=${uiRelease:-V3.0.0}
 cd $rootDir/nginx/html
-wget https://gitee.com/jeequan/jeepay-ui/releases/download/v1.10.0/html.tar.gz
+wget "https://gitee.com/jeequan/jeepay-ui/releases/download/${uiRelease}/html.tar.gz"
+require_ok $? "下载前端静态资源 html.tar.gz (release=${uiRelease})"
 tar -vxf html.tar.gz
 
 # 将配置文件复制到对应的映射目录下

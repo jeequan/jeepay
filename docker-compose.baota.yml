@@ -15,6 +15,7 @@
 # 环境变量（由宝塔 app 模板声明）：
 #   VERSION            业务镜像 tag（jeepay-manager/merchant/payment）
 #   CONFIG_REF         配置源 git ref（建议与 VERSION 同版本，或 master）
+#   UI_RELEASE         前端静态资源 release（默认 V3.0.0）
 #   APP_PATH           宿主机部署根目录
 #   HOST_IP            对外绑定 IP
 #   WEB_HTTP_PORT1/2/3 对外端口（分别映射到 19216 / 19217 / 19218）
@@ -66,6 +67,17 @@ services:
         cp -n /tmp/jeepay-src/conf/merchant/application.yml           /jeepayhomes/jeepayConfigs/service/merchant/application.yml  || true
         cp -n /tmp/jeepay-src/conf/payment/application.yml            /jeepayhomes/jeepayConfigs/service/payment/application.yml   || true
         cp -n /tmp/jeepay-src/docs/install/include/nginx.conf         /jeepayhomes/jeepayConfigs/nginx/nginx.conf                  || true
+        # nginx.conf 在 install.sh 场景下用 localhost:921x（nginx --net=host 可达），
+        # 但 compose 场景下 nginx 在 bridge 网络，localhost 解析不到后端。只要还能
+        # 找到 localhost:921x 就替换成 compose service 名；用户若已改过就不动。
+        if grep -q "proxy_pass http://localhost:921" /jeepayhomes/jeepayConfigs/nginx/nginx.conf 2>/dev/null; then
+            sed -i \
+                -e 's|proxy_pass http://localhost:9216|proxy_pass http://jeepaypayment:9216|g' \
+                -e 's|proxy_pass http://localhost:9217|proxy_pass http://jeepaymanager:9217|g' \
+                -e 's|proxy_pass http://localhost:9218|proxy_pass http://jeepaymerchant:9218|g' \
+                /jeepayhomes/jeepayConfigs/nginx/nginx.conf
+            echo "nginx.conf: localhost proxy_pass rewrote to compose service names"
+        fi
 
         rm -rf /jeepayhomes/jeepayConfigs/.latest
         mkdir -p /jeepayhomes/jeepayConfigs/.latest
@@ -73,6 +85,19 @@ services:
         cp -r /tmp/jeepay-src/docs/install/include                    /jeepayhomes/jeepayConfigs/.latest/include
         cp    /tmp/jeepay-src/docker/rocketmq/broker/conf/broker.conf /jeepayhomes/jeepayConfigs/.latest/broker.conf               || true
         cp    /tmp/jeepay-src/docs/sql/init.sql                       /jeepayhomes/jeepayConfigs/.latest/init.sql                  || true
+
+        # 前端静态资源（jeepay-ui 已打包发布到 gitee release）。目标目录已存在则跳过，
+        # 保护用户后续对 html/ 的改动（和 cp -n 同语义）
+        if [ ! -f /jeepayhomes/jeepayConfigs/nginx/html/jeepaymanager/index.html ]; then
+            echo "Downloading frontend html.tar.gz (release=${UI_RELEASE:-V3.0.0}) ..."
+            wget -q -O /tmp/html.tar.gz \
+                "https://gitee.com/jeequan/jeepay-ui/releases/download/${UI_RELEASE:-V3.0.0}/html.tar.gz"
+            tar xzf /tmp/html.tar.gz -C /jeepayhomes/jeepayConfigs/nginx/html/
+            rm -f /tmp/html.tar.gz
+            echo "Frontend extracted to nginx/html/"
+        else
+            echo "Frontend already present, skip download"
+        fi
 
         echo "jeepay-configs ready (user edits preserved; upstream templates in .latest/)"
     labels:

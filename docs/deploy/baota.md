@@ -21,6 +21,7 @@
 |---|---|---|
 | `VERSION` | 业务镜像 tag（`jeepay-manager` 等） | `3.2.0` |
 | `CONFIG_REF` | 配置源 git ref（与 `VERSION` 同版本的 tag 或 `master`） | 当前 release tag |
+| `UI_RELEASE` | 前端 `html.tar.gz` 的 `jeepay-ui` release tag | `V3.0.0` |
 | `APP_PATH` | 宿主部署根目录 | 宝塔默认 |
 | `HOST_IP` | 对外绑定 IP | 宝塔默认 |
 | `WEB_HTTP_PORT1` / `2` / `3` | 映射到容器 `19216` / `19217` / `19218` | `19216` / `19217` / `19218` |
