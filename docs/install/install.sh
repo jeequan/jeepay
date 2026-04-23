@@ -23,7 +23,7 @@ show_usage() {
   nginxImage / managerImage / merchantImage  镜像覆盖
   paymentImage                               镜像覆盖
   rocketmqPlatform                           RocketMQ 平台（默认 linux/amd64）
-  jeepayRef                                  源码 tag，默认 V3.2.7
+  jeepayRef                                  源码 tag，默认 V3.2.8
   uiRelease                                  前端静态资源 release（默认 V3.0.0）
 EOF
 }
@@ -402,15 +402,16 @@ paymentImage=${paymentImage:-swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-paym
 # 其他镜像（mysql/redis/nginx）已具备多架构 manifest，不再强制 platform。
 rocketmqPlatform=${rocketmqPlatform:-linux/amd64}
 
-# 源码 ref：默认锁到 V3.2.4 release tag，保证 git clone 下来的 SQL / broker.conf.template /
-# nginx.conf / conf/* 与业务镜像（3.2.0 / V3.2.4 兼容）契合，不受 master 后续演进影响。
+# 源码 ref：默认锁到 V3.2.8 release tag，保证 git clone 下来的 SQL / broker.conf.template /
+# nginx.conf / conf/* 与业务镜像（3.2.0 业务镜像与 V3.2.x 配置兼容）契合，不受 master 后续演进影响。
 # 如需用最新 master 或其他 tag，安装前导出 jeepayRef=xxx 覆盖即可（透传给 git clone --branch）。
-jeepayRef=${jeepayRef:-V3.2.7}
+jeepayRef=${jeepayRef:-V3.2.8}
 
 # 第2步：拉取项目源代码  || 拉取脚本文件
 echo "[2] 拉取项目源代码文件 (ref=$jeepayRef).... "
 cd $rootDir/sources
 git clone --branch "$jeepayRef" --depth 1 https://gitee.com/jeequan/jeepay.git
+require_ok $? "拉取 jeepay 源码 (ref=$jeepayRef)。若 tag 尚未推送到 gitee，请改用 jeepayRef=master 覆盖或稍后重试。"
 echo "[2] Done. "
 
 #源码中install.sh文件目录
