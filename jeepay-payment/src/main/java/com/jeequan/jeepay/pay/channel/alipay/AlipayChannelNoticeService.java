@@ -23,15 +23,18 @@ import com.jeequan.jeepay.core.exception.ResponseException;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayConfig;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
+import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.pay.channel.AbstractChannelNoticeService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.Map;
 
 /*
@@ -45,14 +48,14 @@ import java.util.Map;
 @Slf4j
 public class AlipayChannelNoticeService extends AbstractChannelNoticeService {
 
-
     @Override
     public String getIfCode() {
         return CS.IF_CODE.ALIPAY;
     }
 
     @Override
-    public MutablePair<String, Object> parseParams(HttpServletRequest request, String urlOrderId, NoticeTypeEnum noticeTypeEnum) {
+    public MutablePair<String, Object> parseParams(HttpServletRequest request, String urlOrderId,
+            NoticeTypeEnum noticeTypeEnum) {
 
         try {
 
@@ -66,67 +69,79 @@ public class AlipayChannelNoticeService extends AbstractChannelNoticeService {
         }
     }
 
-
-
     @Override
-    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
+    public ChannelRetMsg doNotice(HttpServletRequest request, Object params, PayOrder payOrder,
+            MchAppConfigContext mchAppConfigContext, NoticeTypeEnum noticeTypeEnum) {
         try {
 
-            //配置参数获取
+            // 配置参数获取
             Byte useCert = null;
             String alipaySignType, alipayPublicCert, alipayPublicKey = null;
-            if(mchAppConfigContext.isIsvsubMch()){
+            String alipayAppId = null;
+            String alipaySellerId = null;
+            if (mchAppConfigContext.isIsvsubMch()) {
 
                 // 获取支付参数
-                AlipayIsvParams alipayParams = (AlipayIsvParams)configContextQueryService.queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), getIfCode());
+                AlipayIsvParams alipayParams = (AlipayIsvParams) configContextQueryService
+                        .queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), getIfCode());
                 useCert = alipayParams.getUseCert();
                 alipaySignType = alipayParams.getSignType();
                 alipayPublicCert = alipayParams.getAlipayPublicCert();
                 alipayPublicKey = alipayParams.getAlipayPublicKey();
+                alipayAppId = alipayParams.getAppId();
+                alipaySellerId = alipayParams.getPid();
 
-            }else{
+            } else {
 
                 // 获取支付参数
-                AlipayNormalMchParams alipayParams = (AlipayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
+                AlipayNormalMchParams alipayParams = (AlipayNormalMchParams) configContextQueryService
+                        .queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(),
+                                getIfCode());
 
                 useCert = alipayParams.getUseCert();
                 alipaySignType = alipayParams.getSignType();
                 alipayPublicCert = alipayParams.getAlipayPublicCert();
                 alipayPublicKey = alipayParams.getAlipayPublicKey();
+                alipayAppId = alipayParams.getAppId();
             }
 
             // 获取请求参数
             JSONObject jsonParams = (JSONObject) params;
 
             boolean verifyResult;
-            if(useCert != null && useCert == CS.YES){  //证书方式
+            if (useCert != null && useCert == CS.YES) { // 证书方式
 
-                verifyResult = AlipaySignature.rsaCertCheckV1(jsonParams.toJavaObject(Map.class), getCertFilePath(alipayPublicCert),
+                verifyResult = AlipaySignature.rsaCertCheckV1(jsonParams.toJavaObject(Map.class),
+                        getCertFilePath(alipayPublicCert),
                         AlipayConfig.CHARSET, alipaySignType);
 
-            }else{
-                verifyResult = AlipaySignature.rsaCheckV1(jsonParams.toJavaObject(Map.class), alipayPublicKey, AlipayConfig.CHARSET, alipaySignType);
+            } else {
+                verifyResult = AlipaySignature.rsaCheckV1(jsonParams.toJavaObject(Map.class), alipayPublicKey,
+                        AlipayConfig.CHARSET, alipaySignType);
             }
 
-            //验签失败
-            if(!verifyResult){
+            // 验签失败
+            if (!verifyResult) {
                 throw ResponseException.buildText("ERROR");
             }
 
-            //验签成功后判断上游订单状态
+            // 验签通过后，进行业务字段二次校验（订单号/金额/appId/sellerId）
+            verifyBizParams(jsonParams, payOrder, alipayAppId, alipaySellerId);
+
+            // 验签成功后判断上游订单状态
             ResponseEntity okResponse = textResp("SUCCESS");
 
             ChannelRetMsg result = new ChannelRetMsg();
-            result.setChannelOrderId(jsonParams.getString("trade_no")); //渠道订单号
-            result.setChannelUserId(jsonParams.getString("buyer_id")); //支付用户ID
-            result.setResponseEntity(okResponse); //响应数据
+            result.setChannelOrderId(jsonParams.getString("trade_no")); // 渠道订单号
+            result.setChannelUserId(jsonParams.getString("buyer_id")); // 支付用户ID
+            result.setResponseEntity(okResponse); // 响应数据
 
             result.setChannelState(ChannelRetMsg.ChannelState.WAITING); // 默认支付中
 
-            if("TRADE_SUCCESS".equals(jsonParams.getString("trade_status"))){
+            if ("TRADE_SUCCESS".equals(jsonParams.getString("trade_status"))) {
                 result.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
 
-            }else if("TRADE_CLOSED".equals(jsonParams.getString("trade_status"))){
+            } else if ("TRADE_CLOSED".equals(jsonParams.getString("trade_status"))) {
                 result.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
 
             }
@@ -134,6 +149,44 @@ public class AlipayChannelNoticeService extends AbstractChannelNoticeService {
             return result;
         } catch (Exception e) {
             log.error("error", e);
+            throw ResponseException.buildText("ERROR");
+        }
+    }
+
+    private void verifyBizParams(JSONObject jsonParams, PayOrder payOrder, String expectedAppId,
+            String expectedSellerId) {
+
+        String reqPayOrderId = jsonParams.getString("out_trade_no");
+        if (!StringUtils.equals(payOrder.getPayOrderId(), reqPayOrderId)) {
+            log.error("支付宝回调订单号不匹配, dbPayOrderId={}, reqPayOrderId={}", payOrder.getPayOrderId(), reqPayOrderId);
+            throw ResponseException.buildText("ERROR");
+        }
+
+        String reqAmount = jsonParams.getString("total_amount");
+        String dbAmount = AmountUtil.convertCent2Dollar(payOrder.getAmount());
+        try {
+            if (StringUtils.isBlank(reqAmount) || new BigDecimal(reqAmount).compareTo(new BigDecimal(dbAmount)) != 0) {
+                log.error("支付宝回调金额不匹配, dbAmount={}, reqAmount={}, payOrderId={}", dbAmount, reqAmount,
+                        payOrder.getPayOrderId());
+                throw ResponseException.buildText("ERROR");
+            }
+        } catch (NumberFormatException ex) {
+            log.error("支付宝回调金额格式错误, reqAmount={}, payOrderId={}", reqAmount, payOrder.getPayOrderId());
+            throw ResponseException.buildText("ERROR");
+        }
+
+        String reqAppId = jsonParams.getString("app_id");
+        if (StringUtils.isNotBlank(expectedAppId) && !StringUtils.equals(expectedAppId, reqAppId)) {
+            log.error("支付宝回调appId不匹配, expectedAppId={}, reqAppId={}, payOrderId={}", expectedAppId, reqAppId,
+                    payOrder.getPayOrderId());
+            throw ResponseException.buildText("ERROR");
+        }
+
+        String reqSellerId = jsonParams.getString("seller_id");
+        if (StringUtils.isNotBlank(expectedSellerId) && StringUtils.isNotBlank(reqSellerId)
+                && !StringUtils.equals(expectedSellerId, reqSellerId)) {
+            log.error("支付宝回调sellerId不匹配, expectedSellerId={}, reqSellerId={}, payOrderId={}", expectedSellerId,
+                    reqSellerId, payOrder.getPayOrderId());
             throw ResponseException.buildText("ERROR");
         }
     }
