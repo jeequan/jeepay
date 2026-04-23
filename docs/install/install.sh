@@ -411,6 +411,7 @@ jeepayRef=${jeepayRef:-V3.2.8}
 echo "[2] 拉取项目源代码文件 (ref=$jeepayRef).... "
 cd $rootDir/sources
 git clone --branch "$jeepayRef" --depth 1 https://gitee.com/jeequan/jeepay.git
+require_ok $? "拉取 jeepay 源码 (ref=$jeepayRef)。若 tag 尚未推送到 gitee，请改用 jeepayRef=master 覆盖或稍后重试。"
 echo "[2] Done. "
 
 #源码中install.sh文件目录
