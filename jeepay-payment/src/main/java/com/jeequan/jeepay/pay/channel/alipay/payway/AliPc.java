@@ -78,6 +78,12 @@ public class AliPc extends AlipayPaymentService {
             if(CS.PAY_DATA_TYPE.FORM.equals(bizRQ.getPayDataType())){
                 res.setFormContent(configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).getAlipayClient().pageExecute(req).getBody());
             }else{
+                if (!"2".equals(bizRQ.getQrPayMode())) {
+                    // 不是订单码跳转
+                    model.setQrPayMode(bizRQ.getQrPayMode() == null ? "3" : bizRQ.getQrPayMode()); //订单码-跳转模式
+                    model.setQrcodeWidth(bizRQ.getWidth() == null ? 100L : bizRQ.getWidth().longValue()); //二维码宽度，修复类型不兼容问题
+                }
+
                 res.setPayUrl(configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).getAlipayClient().pageExecute(req, "GET").getBody());
             }
         }catch (AlipayApiException e) {

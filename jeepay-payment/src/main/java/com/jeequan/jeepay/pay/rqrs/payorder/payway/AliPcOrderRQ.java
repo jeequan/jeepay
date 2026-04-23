@@ -29,10 +29,14 @@ import lombok.Data;
  */
 @Data
 public class AliPcOrderRQ extends CommonPayDataRQ {
+    private Integer width;
+    private String qrPayMode;
 
     /** 构造函数 **/
     public AliPcOrderRQ(){
         this.setWayCode(CS.PAY_WAY_CODE.ALI_PC);
+        this.setQrPayMode("2");
+        this.setWidth(100);
     }
 
 }
