@@ -11,6 +11,8 @@
 #################################
 server:
   port: 9216 #设置端口
+  http2:
+    enabled: true
   servlet:
     context-path: / #设置应用的目录.  前缀需要带/, 无需设置后缀, 示例 【 /xxx 】 or 【 / 】
   # 开启对 X-Forwarded-* 请求头的识别，保证外层 nginx 反代（HTTPS / 域名）

@@ -8,6 +8,8 @@
 
 server:
   port: 9218
+  http2:
+    enabled: true
   servlet:
     context-path: /
   forward-headers-strategy: framework
@@ -82,13 +84,11 @@ logging:
 isys:
   allow-cors: ${ISYS_ALLOW_CORS:true}
   cache-config: ${ISYS_CACHE_CONFIG:false}
-
   # 系统URL配置
   mgrSiteUrl: ${ISYS_MGR_SITE_URL:http://localhost:9217}
   mchSiteUrl: ${ISYS_MCH_SITE_URL:http://localhost:9218}
   paySiteUrl: ${ISYS_PAY_SITE_URL:http://localhost:9216}
   ossPublicSiteUrl: ${ISYS_OSS_PUBLIC_SITE_URL:http://localhost:9217/api/anon/localOssFiles}
-
   oss:
     file-root-path: ${ISYS_OSS_FILE_ROOT_PATH:/jeepayhomes/service/uploads}
     file-public-path: ${isys.oss.file-root-path}/public
@@ -100,9 +100,13 @@ isys:
       private-bucket-name: ${ISYS_OSS_ALIYUN_PRIVATE_BUCKET:}
       access-key-id: ${ISYS_OSS_ALIYUN_ACCESS_KEY:}
       access-key-secret: ${ISYS_OSS_ALIYUN_ACCESS_SECRET:}
-
   mq:
     vender: ${ISYS_MQ_VENDER:rabbitMQ}
+
+# 关闭登录验证码（仅测试环境使用）
+jeepay:
+  captcha:
+    enabled: false
 
 rocketmq:
   name-server: ${ROCKETMQ_NAMESERVER:rocketmq:9876}
