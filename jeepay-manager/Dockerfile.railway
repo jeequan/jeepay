@@ -19,6 +19,9 @@ RUN mkdir -p /jeepayhomes/service/logs \
 
 COPY target/jeepay-manager.jar /jeepayhomes/service/app/jeepay-manager.jar
 
+# 创建空的application.yml文件（必须存在，否则Spring Boot会报错）
+RUN echo '# Minimal configuration - using environment variables' > /jeepayhomes/service/app/application.yml
+
 EXPOSE 9217
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=12 \
