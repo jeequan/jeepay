@@ -84,6 +84,7 @@ logging:
 isys:
   allow-cors: ${ISYS_ALLOW_CORS:true}
   cache-config: ${ISYS_CACHE_CONFIG:false}
+  captcha-enabled: ${ISYS_CAPTCHA_ENABLED:false}
 
   # 系统URL配置
   mgrSiteUrl: ${ISYS_MGR_SITE_URL:http://localhost:9217}

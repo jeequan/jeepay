@@ -129,13 +129,16 @@ knife4j:
 #系统业务参数
 isys:
 
-  jwt-secret: ARNXp4MzjOOQqxtv #生成jwt的秘钥。 要求每个系统有单独的秘钥管理机制。
+    jwt-secret: ARNXp4MzjOOQqxtv #生成jwt的秘钥。 要求每个系统有单独的秘钥管理机制。
 
-  #是否允许跨域请求 [生产环境建议关闭， 若api与前端项目没有在同一个域名下时，应开启此配置或在nginx统一配置允许跨域]
-  allow-cors: true
+    #是否允许跨域请求 [生产环境建议关闭， 若api与前端项目没有在同一个域名下时，应开启此配置或在nginx统一配置允许跨域]
+    allow-cors: true
 
-  #是否内存缓存配置信息: true表示开启如支付网关地址/商户应用配置/服务商配置等， 开启后需检查MQ的广播模式是否正常； false表示直接查询DB.
-  cache-config: false
+    #是否内存缓存配置信息: true表示开启如支付网关地址/商户应用配置/服务商配置等， 开启后需检查MQ的广播模式是否正常； false表示直接查询DB.
+    cache-config: false
+
+    #是否启用登录验证码 [生产环境建议开启， 测试环境可关闭]
+    captcha-enabled: false
 
   oss:
     file-root-path: /jeepayhomes/service/uploads #存储根路径 ( 无需以‘/’结尾 )
