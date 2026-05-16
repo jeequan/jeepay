@@ -1,0 +1,113 @@
+#################################
+# Jeepay Merchant (商户平台)
+# Railway Deployment Configuration
+# 
+# This file is loaded when deploying on Railway
+# Environment variables will override these settings
+#################################
+
+server:
+  port: 9218
+  servlet:
+    context-path: /
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: jeepay-merchant
+  servlet:
+    multipart:
+      enabled: true
+      max-request-size: 10MB
+      max-file-size: 10MB
+  resources:
+    static-locations: classpath:/static
+  freemarker:
+    template-loader-path: classpath:/templates
+    template-encoding: UTF-8
+    suffix: .ftl
+    settings:
+      classic_compatible: true
+      number_format: '#'
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/jeepaydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:root123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 30
+      max-wait: 60000
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      filters: stat,wall
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  cache:
+    type: redis
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      database: ${SPRING_DATA_REDIS_DATABASE:2}
+      timeout: 1000
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:admin}
+    password: ${SPRING_RABBITMQ_PASSWORD:admin123}
+    virtual-host: ${SPRING_RABBITMQ_VIRTUAL_HOST:/jeepay}
+    dynamic: true
+    listener:
+      simple:
+        acknowledge-mode: manual
+        retry:
+          enabled: true
+          initial-interval: 3000
+          max-attempts: 3
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT:info}
+    com.jeequan.jeepay: ${LOGGING_LEVEL_COM_JEEQUAN_JEEPAY:debug}
+  file:
+    path: /jeepayhomes/service/logs
+
+# Jeepay System Configuration
+isys:
+  allow-cors: ${ISYS_ALLOW_CORS:true}
+  cache-config: ${ISYS_CACHE_CONFIG:false}
+
+  # 系统URL配置
+  mgrSiteUrl: ${ISYS_MGR_SITE_URL:http://localhost:9217}
+  mchSiteUrl: ${ISYS_MCH_SITE_URL:http://localhost:9218}
+  paySiteUrl: ${ISYS_PAY_SITE_URL:http://localhost:9216}
+  ossPublicSiteUrl: ${ISYS_OSS_PUBLIC_SITE_URL:http://localhost:9217/api/anon/localOssFiles}
+
+  oss:
+    file-root-path: ${ISYS_OSS_FILE_ROOT_PATH:/jeepayhomes/service/uploads}
+    file-public-path: ${isys.oss.file-root-path}/public
+    file-private-path: ${isys.oss.file-root-path}/private
+    service-type: ${ISYS_OSS_SERVICE_TYPE:local}
+    aliyun-oss:
+      endpoint: ${ISYS_OSS_ALIYUN_ENDPOINT:oss-cn-beijing.aliyuncs.com}
+      public-bucket-name: ${ISYS_OSS_ALIYUN_PUBLIC_BUCKET:}
+      private-bucket-name: ${ISYS_OSS_ALIYUN_PRIVATE_BUCKET:}
+      access-key-id: ${ISYS_OSS_ALIYUN_ACCESS_KEY:}
+      access-key-secret: ${ISYS_OSS_ALIYUN_ACCESS_SECRET:}
+
+  mq:
+    vender: ${ISYS_MQ_VENDER:rabbitMQ}
+
+rocketmq:
+  name-server: ${ROCKETMQ_NAMESERVER:rocketmq:9876}
+  producer:
+    group: PID_JEEPAY_MERCHANT
+    send-message-timeout: 10000
+    retry-times-when-send-failed: 2
+    retry-times-when-send-async-failed: 2
