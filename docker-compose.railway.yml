@@ -1,0 +1,319 @@
+# Jeepay Docker Compose for Railway Deployment
+# This file is optimized for Railway deployment with RabbitMQ instead of RocketMQ
+# 
+# Usage:
+#   Railway CLI: railway up
+#   Local Test: docker compose -f docker-compose.railway.yml up -d
+#
+# Required Environment Variables (Railway will inject these automatically):
+#   - MYSQL_ROOT_PASSWORD
+#   - MYSQL_DATABASE
+#   - MYSQL_USER
+#   - MYSQL_PASSWORD
+#   - RABBITMQ_DEFAULT_USER
+#   - RABBITMQ_DEFAULT_PASS
+#   - RABBITMQ_DEFAULT_VHOST
+
+version: "3.8"
+
+services:
+  # ==================== MySQL Database ====================
+  mysql:
+    image: mysql:8.0
+    container_name: jeepay-mysql
+    hostname: mysql
+    restart: always
+    environment:
+      LANG: C.UTF-8
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-jeepaydb}
+      MYSQL_USER: ${MYSQL_USER:-jeepay}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-jeepay123}
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p${MYSQL_ROOT_PASSWORD:-root123456} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docs/sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./docs/sql/patch.sql:/docker-entrypoint-initdb.d/02-patch.sql:ro
+    networks:
+      - jeepay-network
+
+  # ==================== Redis Cache ====================
+  redis:
+    image: redis:6.2-alpine
+    container_name: jeepay-redis
+    hostname: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    volumes:
+      - redis_data:/data
+    networks:
+      - jeepay-network
+
+  # ==================== RabbitMQ Message Queue (替代 RocketMQ) ====================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: jeepay-rabbitmq
+    hostname: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"   # AMQP 协议端口
+      - "15672:15672" # Management UI 端口
+      - "4369:4369"   # Erlang 分布端口
+      - "25672:25672" # 集群通信端口
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-admin123}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST:-/jeepay}
+      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: "0.7"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - jeepay-network
+
+  # ==================== Jeepay Payment Gateway ====================
+  payment:
+    build:
+      context: ./jeepay-payment
+      dockerfile: Dockerfile.railway
+    image: jeepay-payment:latest
+    container_name: jeepay-payment
+    hostname: payment
+    restart: always
+    ports:
+      - "9216:9216"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9216/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 12
+      start_period: 90s
+    environment:
+      # Spring Boot DataSource 配置
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-jeepaydb}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8"
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+      # Redis 配置
+      SPRING_DATA_REDIS_HOST: "redis"
+      SPRING_DATA_REDIS_PORT: "6379"
+      SPRING_DATA_REDIS_DATABASE: "3"
+      # RabbitMQ 配置
+      SPRING_RABBITMQ_HOST: "rabbitmq"
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_DEFAULT_USER:-admin}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS:-admin123}
+      SPRING_RABBITMQ_VIRTUAL_HOST: ${RABBITMQ_DEFAULT_VHOST:-/jeepay}
+      # Jeepay 系统配置
+      ISYS_MQ_VENDER: "rabbitMQ"
+      ISYS_CACHE_CONFIG: "true"
+      ISYS_ALLOW_CORS: "true"
+      ISYS_OSS_FILE_ROOT_PATH: "/jeepayhomes/service/uploads"
+      ISYS_OSS_SERVICE_TYPE: "local"
+      # 日志配置
+      LOGGING_LEVEL_ROOT: "info"
+      LOGGING_LEVEL_COM_JEEQUAN_JEEPAY: "debug"
+      # JVM 优化
+      JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./logs/payment:/jeepayhomes/service/logs
+      - ./conf/payment/application.yml:/jeepayhomes/service/app/application.yml:ro
+      - uploads_payment:/jeepayhomes/service/uploads
+    networks:
+      - jeepay-network
+
+  # ==================== Jeepay Manager (运营平台) ====================
+  manager:
+    build:
+      context: ./jeepay-manager
+      dockerfile: Dockerfile.railway
+    image: jeepay-manager:latest
+    container_name: jeepay-manager
+    hostname: manager
+    restart: always
+    ports:
+      - "9217:9217"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9217/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 12
+      start_period: 90s
+    environment:
+      # Spring Boot DataSource 配置
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-jeepaydb}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8"
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+      # Redis 配置
+      SPRING_DATA_REDIS_HOST: "redis"
+      SPRING_DATA_REDIS_PORT: "6379"
+      SPRING_DATA_REDIS_DATABASE: "1"
+      # RabbitMQ 配置
+      SPRING_RABBITMQ_HOST: "rabbitmq"
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_DEFAULT_USER:-admin}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS:-admin123}
+      SPRING_RABBITMQ_VIRTUAL_HOST: ${RABBITMQ_DEFAULT_VHOST:-/jeepay}
+      # Jeepay 系统配置
+      ISYS_MQ_VENDER: "rabbitMQ"
+      ISYS_CACHE_CONFIG: "false"
+      ISYS_ALLOW_CORS: "true"
+      ISYS_OSS_FILE_ROOT_PATH: "/jeepayhomes/service/uploads"
+      ISYS_OSS_SERVICE_TYPE: "local"
+      ISYS_MGR_SITE_URL: "http://localhost:9217"
+      ISYS_MCH_SITE_URL: "http://localhost:9218"
+      ISYS_PAY_SITE_URL: "http://localhost:9216"
+      ISYS_OSS_PUBLIC_SITE_URL: "http://localhost:9217/api/anon/localOssFiles"
+      # 日志配置
+      LOGGING_LEVEL_ROOT: "info"
+      LOGGING_LEVEL_COM_JEEQUAN_JEEPAY: "debug"
+      # JVM 优化
+      JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseG1GC"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./logs/manager:/jeepayhomes/service/logs
+      - ./conf/manager/application.yml:/jeepayhomes/service/app/application.yml:ro
+      - uploads_manager:/jeepayhomes/service/uploads
+    networks:
+      - jeepay-network
+
+  # ==================== Jeepay Merchant (商户平台) ====================
+  merchant:
+    build:
+      context: ./jeepay-merchant
+      dockerfile: Dockerfile.railway
+    image: jeepay-merchant:latest
+    container_name: jeepay-merchant
+    hostname: merchant
+    restart: always
+    ports:
+      - "9218:9218"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9218/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 12
+      start_period: 90s
+    environment:
+      # Spring Boot DataSource 配置
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-jeepaydb}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8"
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+      # Redis 配置
+      SPRING_DATA_REDIS_HOST: "redis"
+      SPRING_DATA_REDIS_PORT: "6379"
+      SPRING_DATA_REDIS_DATABASE: "2"
+      # RabbitMQ 配置
+      SPRING_RABBITMQ_HOST: "rabbitmq"
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_DEFAULT_USER:-admin}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS:-admin123}
+      SPRING_RABBITMQ_VIRTUAL_HOST: ${RABBITMQ_DEFAULT_VHOST:-/jeepay}
+      # Jeepay 系统配置
+      ISYS_MQ_VENDER: "rabbitMQ"
+      ISYS_CACHE_CONFIG: "false"
+      ISYS_ALLOW_CORS: "true"
+      ISYS_OSS_FILE_ROOT_PATH: "/jeepayhomes/service/uploads"
+      ISYS_OSS_SERVICE_TYPE: "local"
+      ISYS_MGR_SITE_URL: "http://localhost:9217"
+      ISYS_MCH_SITE_URL: "http://localhost:9218"
+      ISYS_PAY_SITE_URL: "http://localhost:9216"
+      ISYS_OSS_PUBLIC_SITE_URL: "http://localhost:9217/api/anon/localOssFiles"
+      # 日志配置
+      LOGGING_LEVEL_ROOT: "info"
+      LOGGING_LEVEL_COM_JEEQUAN_JEEPAY: "debug"
+      # JVM 优化
+      JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseG1GC"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./logs/merchant:/jeepayhomes/service/logs
+      - ./conf/merchant/application.yml:/jeepayhomes/service/app/application.yml:ro
+      - uploads_merchant:/jeepayhomes/service/uploads
+    networks:
+      - jeepay-network
+
+  # ==================== Nginx Reverse Proxy (可选) ====================
+  # 如果需要通过统一的域名访问，使用 Nginx 反向代理
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: jeepay-nginx
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+  #     - nginx_logs:/var/log/nginx
+  #   depends_on:
+  #     - payment
+  #     - manager
+  #     - merchant
+  #   networks:
+  #     - jeepay-network
+
+# ==================== Network Configuration ====================
+networks:
+  jeepay-network:
+    driver: bridge
+    name: jeepay-network
+
+# ==================== Volume Configuration ====================
+volumes:
+  mysql_data:
+    name: jeepay-mysql-data
+  redis_data:
+    name: jeepay-redis-data
+  rabbitmq_data:
+    name: jeepay-rabbitmq-data
+  logs_payment:
+    name: jeepay-logs-payment
+  logs_manager:
+    name: jeepay-logs-manager
+  logs_merchant:
+    name: jeepay-logs-merchant
+  uploads_payment:
+    name: jeepay-uploads-payment
+  uploads_manager:
+    name: jeepay-uploads-manager
+  uploads_merchant:
+    name: jeepay-uploads-merchant
+  nginx_logs:
+    name: jeepay-nginx-logs
