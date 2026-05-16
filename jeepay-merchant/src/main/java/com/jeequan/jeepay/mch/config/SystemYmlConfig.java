@@ -40,7 +40,4 @@ public class SystemYmlConfig {
 	/** 是否内存缓存配置信息: true表示开启如支付网关地址/商户应用配置/服务商配置等， 开启后需检查MQ的广播模式是否正常； false表示直接查询DB.  **/
 	private Boolean cacheConfig;
 
-	/** 是否启用登录验证码 [生产环境建议开启， 测试环境可关闭]  **/
-	private Boolean captchaEnabled = true;
-
 }

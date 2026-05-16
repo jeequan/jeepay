@@ -13,7 +13,6 @@ spring:
 #系统业务参数
 isys:
     jwt-secret: ARNXp4MzjOOQqxtv #生成jwt的秘钥。 要求每个系统有单独的秘钥管理机制。
-    captcha-enabled: false #关闭登录验证码（仅测试环境使用）
 
 # knife4j APIDOC文档
 springdoc:

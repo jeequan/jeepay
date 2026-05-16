@@ -25,7 +25,6 @@ import com.jeequan.jeepay.core.cache.RedisUtil;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.mgr.config.SystemYmlConfig;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.mgr.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,15 +50,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController extends CommonCtrl {
 
 	@Autowired private AuthService authService;
-	@Autowired private SystemYmlConfig systemYmlConfig;
 
 	/** 用户信息认证 获取iToken  **/
 	@Operation(summary = "登录认证")
 	@Parameters({
 			@Parameter(name = "ia", description = "用户名 i account, 需要base64处理", required = true),
 			@Parameter(name = "ip", description = "密码 i passport,  需要base64处理", required = true),
-			@Parameter(name = "vc", description = "证码 vercode,  需要base64处理", required = false),
-			@Parameter(name = "vt", description = "验证码token, vercode token ,  需要base64处理", required = false)
+			@Parameter(name = "vc", description = "证码 vercode,  需要base64处理", required = true),
+			@Parameter(name = "vt", description = "验证码token, vercode token ,  需要base64处理", required = true)
 	})
 	@RequestMapping(value = "/validate", method = RequestMethod.POST)
 	@MethodLog(remark = "登录认证")
@@ -67,23 +65,19 @@ public class AuthController extends CommonCtrl {
 
 		String account = Base64.decodeStr(getValStringRequired("ia"));  //用户名 i account, 已做base64处理
 		String ipassport = Base64.decodeStr(getValStringRequired("ip"));	//密码 i passport,  已做base64处理
+        String vercode = Base64.decodeStr(getValStringRequired("vc"));	//验证码 vercode,  已做base64处理
+        String vercodeToken = Base64.decodeStr(getValStringRequired("vt"));	//验证码token, vercode token ,  已做base64处理
 
-		// 检查验证码是否启用
-		if (systemYmlConfig.getCaptchaEnabled() != null && systemYmlConfig.getCaptchaEnabled()) {
-			String vercode = Base64.decodeStr(getValStringRequired("vc"));	//验证码 vercode,  已做base64处理
-			String vercodeToken = Base64.decodeStr(getValStringRequired("vt"));	//验证码token, vercode token ,  已做base64处理
-
-			String cacheCode = RedisUtil.getString(CS.getCacheKeyImgCode(vercodeToken));
-			if (StringUtils.isEmpty(cacheCode) || !cacheCode.equalsIgnoreCase(vercode)) {
-				throw new BizException("验证码有误！");
-			}
-
-			// 删除图形验证码缓存数据
-			RedisUtil.del(CS.getCacheKeyImgCode(vercodeToken));
-		}
+        String cacheCode = RedisUtil.getString(CS.getCacheKeyImgCode(vercodeToken));
+        if(StringUtils.isEmpty(cacheCode) || !cacheCode.equalsIgnoreCase(vercode)){
+            throw new BizException("验证码有误！");
+        }
 
 		// 返回前端 accessToken
 		String accessToken = authService.auth(account, ipassport);
+
+        // 删除图形验证码缓存数据
+        RedisUtil.del(CS.getCacheKeyImgCode(vercodeToken));
 
 		return ApiRes.ok4newJson(CS.ACCESS_TOKEN_NAME, accessToken);
 	}
