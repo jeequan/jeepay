@@ -26,4 +26,4 @@ CMD ["java", "-jar", "jeepay-payment.jar", "--spring.config.additional-location=
 
 # 端口探测，不依赖 curl/wget 等外部工具
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD bash -c 'echo > /dev/tcp/localhost/9216'
+    CMD bash -c 'echo > /dev/tcp/localhost/9216'

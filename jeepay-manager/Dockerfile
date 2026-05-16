@@ -1,9 +1,9 @@
 #
-#   jeepay-manager（运营平台） java程序镜像构建脚本
+#   Jeepay Manager (运营平台) Java程序镜像构建脚本
 #
 
-# Eclipse Temurin JRE 17（openjdk 官方镜像已停止维护）
-ARG BASE_IMAGE=swr.cn-south-1.myhuaweicloud.com/jeepay/eclipse-temurin:17-jre
+# Eclipse Temurin JRE 17
+ARG BASE_IMAGE=eclipse-temurin:17-jre
 FROM ${BASE_IMAGE}
 
 LABEL maintainer="Terrfly"
@@ -25,4 +25,4 @@ CMD ["java", "-jar", "jeepay-manager.jar", "--spring.config.additional-location=
 
 # 端口探测，不依赖 curl/wget 等外部工具
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD bash -c 'echo > /dev/tcp/localhost/9217'
+    CMD bash -c 'echo > /dev/tcp/localhost/9217'
