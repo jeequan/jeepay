@@ -1,0 +1,371 @@
+# Railway Deployment Configuration
+
+# This file configures the entire Jeepay system for Railway deployment
+# All services will be deployed together using Docker Compose
+
+version = "2"
+
+[project]
+name = "jeepay"
+description = "Jeepay Payment System"
+
+# Deploy all services as a single unified deployment
+[[deployments]]
+source = "direct"
+name = "jeepay-full"
+
+# Service definitions
+[[services]]
+# ==================== MySQL Database ====================
+name = "mysql"
+image = "mysql:8.0"
+internalPort = 3306
+
+[services.resources]
+cpu = "1"
+memory = "1GiB"
+
+[services.healthCheck]
+path = "/"
+port = 3306
+interval = "10s"
+timeout = "5s"
+
+[[services.env]]
+key = "MYSQL_ROOT_PASSWORD"
+value = "root123456"
+
+[[services.env]]
+key = "MYSQL_DATABASE"
+value = "jeepaydb"
+
+[[services.env]]
+key = "MYSQL_USER"
+value = "jeepay"
+
+[[services.env]]
+key = "MYSQL_PASSWORD"
+value = "jeepay123"
+
+[[services.volume]]
+mountPath = "/var/lib/mysql"
+name = "mysql_data"
+
+[[services.persistence]]
+mountPath = "/docker-entrypoint-initdb.d"
+fromImage = "swr.cn-south-1.myhuaweicloud.com/jeepay/mysql:8"
+to = "/docker-entrypoint-initdb.d"
+
+# ==================== Redis Cache ====================
+[[services]]
+name = "redis"
+image = "redis:6.2-alpine"
+internalPort = 6379
+
+[services.resources]
+cpu = "0.5"
+memory = "512MiB"
+
+[services.healthCheck]
+path = "/"
+port = 6379
+interval = "10s"
+timeout = "5s"
+
+[[services.volume]]
+mountPath = "/data"
+name = "redis_data"
+
+# ==================== RabbitMQ Message Queue ====================
+[[services]]
+name = "rabbitmq"
+image = "rabbitmq:3-management-alpine"
+internalPort = 5672
+
+[services.resources]
+cpu = "1"
+memory = "1GiB"
+
+[services.healthCheck]
+path = "/"
+port = 5672
+interval = "15s"
+timeout = "10s"
+
+[[services.env]]
+key = "RABBITMQ_DEFAULT_USER"
+value = "admin"
+
+[[services.env]]
+key = "RABBITMQ_DEFAULT_PASS"
+value = "admin123"
+
+[[services.env]]
+key = "RABBITMQ_DEFAULT_VHOST"
+value = "/jeepay"
+
+[[services.volume]]
+mountPath = "/var/lib/rabbitmq"
+name = "rabbitmq_data"
+
+# RabbitMQ Management UI - exposed on port 15672
+[[services.ports]]
+port = 15672
+protocol = "http"
+
+# ==================== Jeepay Payment Gateway ====================
+[[services]]
+name = "jeepay-payment"
+image = "swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-payment:3.2.0"
+internalPort = 9216
+
+[services.resources]
+cpu = "1"
+memory = "2GiB"
+
+[services.healthCheck]
+path = "/"
+port = 9216
+interval = "30s"
+timeout = "5s"
+
+[[services.env]]
+key = "SPRING_DATASOURCE_URL"
+value = "jdbc:mysql://mysql:3306/jeepaydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai"
+
+[[services.env]]
+key = "SPRING_DATASOURCE_USERNAME"
+value = "root"
+
+[[services.env]]
+key = "SPRING_DATASOURCE_PASSWORD"
+value = "root123456"
+
+[[services.env]]
+key = "SPRING_DATA_REDIS_HOST"
+value = "redis"
+
+[[services.env]]
+key = "SPRING_DATA_REDIS_PORT"
+value = "6379"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_HOST"
+value = "rabbitmq"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_PORT"
+value = "5672"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_USERNAME"
+value = "admin"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_PASSWORD"
+value = "admin123"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_VIRTUAL_HOST"
+value = "/jeepay"
+
+[[services.env]]
+key = "ISYS_MQ_VENDER"
+value = "rabbitMQ"
+
+[[services.env]]
+key = "ISYS_CACHE_CONFIG"
+value = "true"
+
+[[services.volume]]
+mountPath = "/jeepayhomes/service/logs"
+name = "logs_payment"
+
+[[services.volume]]
+mountPath = "/jeepayhomes/service/uploads"
+name = "uploads_payment"
+
+# ==================== Jeepay Manager (Admin Panel) ====================
+[[services]]
+name = "jeepay-manager"
+image = "swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-manager:3.2.0"
+internalPort = 9217
+
+[services.resources]
+cpu = "0.5"
+memory = "1GiB"
+
+[services.healthCheck]
+path = "/"
+port = 9217
+interval = "30s"
+timeout = "5s"
+
+[[services.env]]
+key = "SPRING_DATASOURCE_URL"
+value = "jdbc:mysql://mysql:3306/jeepaydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai"
+
+[[services.env]]
+key = "SPRING_DATASOURCE_USERNAME"
+value = "root"
+
+[[services.env]]
+key = "SPRING_DATASOURCE_PASSWORD"
+value = "root123456"
+
+[[services.env]]
+key = "SPRING_DATA_REDIS_HOST"
+value = "redis"
+
+[[services.env]]
+key = "SPRING_DATA_REDIS_PORT"
+value = "6379"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_HOST"
+value = "rabbitmq"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_PORT"
+value = "5672"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_USERNAME"
+value = "admin"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_PASSWORD"
+value = "admin123"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_VIRTUAL_HOST"
+value = "/jeepay"
+
+[[services.env]]
+key = "ISYS_MQ_VENDER"
+value = "rabbitMQ"
+
+[[services.env]]
+key = "ISYS_CACHE_CONFIG"
+value = "false"
+
+[[services.volume]]
+mountPath = "/jeepayhomes/service/logs"
+name = "logs_manager"
+
+[[services.volume]]
+mountPath = "/jeepayhomes/service/uploads"
+name = "uploads_manager"
+
+# ==================== Jeepay Merchant (Merchant Portal) ====================
+[[services]]
+name = "jeepay-merchant"
+image = "swr.cn-south-1.myhuaweicloud.com/jeepay/jeepay-merchant:3.2.0"
+internalPort = 9218
+
+[services.resources]
+cpu = "0.5"
+memory = "1GiB"
+
+[services.healthCheck]
+path = "/"
+port = 9218
+interval = "30s"
+timeout = "5s"
+
+[[services.env]]
+key = "SPRING_DATASOURCE_URL"
+value = "jdbc:mysql://mysql:3306/jeepaydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai"
+
+[[services.env]]
+key = "SPRING_DATASOURCE_USERNAME"
+value = "root"
+
+[[services.env]]
+key = "SPRING_DATASOURCE_PASSWORD"
+value = "root123456"
+
+[[services.env]]
+key = "SPRING_DATA_REDIS_HOST"
+value = "redis"
+
+[[services.env]]
+key = "SPRING_DATA_REDIS_PORT"
+value = "6379"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_HOST"
+value = "rabbitmq"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_PORT"
+value = "5672"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_USERNAME"
+value = "admin"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_PASSWORD"
+value = "admin123"
+
+[[services.env]]
+key = "SPRING_RABBITMQ_VIRTUAL_HOST"
+value = "/jeepay"
+
+[[services.env]]
+key = "ISYS_MQ_VENDER"
+value = "rabbitMQ"
+
+[[services.env]]
+key = "ISYS_CACHE_CONFIG"
+value = "false"
+
+[[services.volume]]
+mountPath = "/jeepayhomes/service/logs"
+name = "logs_merchant"
+
+[[services.volume]]
+mountPath = "/jeepayhomes/service/uploads"
+name = "uploads_merchant"
+
+# ==================== Nginx Reverse Proxy ====================
+[[services]]
+name = "nginx"
+image = "nginx:alpine"
+internalPort = 80
+
+[services.resources]
+cpu = "0.25"
+memory = "256MiB"
+
+[services.healthCheck]
+path = "/"
+port = 80
+interval = "10s"
+timeout = "5s"
+
+[[services.ports]]
+port = 80
+protocol = "http"
+
+[[services.ports]]
+port = 443
+protocol = "https"
+
+[[services.volume]]
+mountPath = "/etc/nginx/conf.d"
+name = "nginx_config"
+
+[[services.volume]]
+mountPath = "/var/log/nginx"
+name = "nginx_logs"
+
+# ==================== Network Configuration ====================
+[networks]
+type = "public"
+
+# ==================== Regional Settings ====================
+[settings]
+region = "us-east"
+# Region options: us-east, us-west, europe-west, asia-east, asia-south

@@ -1,0 +1,27 @@
+#
+# Jeepay Payment Gateway Dockerfile for Railway
+# Optimized for Railway deployment
+#
+
+FROM eclipse-temurin:17-jre
+
+LABEL maintainer="jeepay"
+description="Jeepay Payment Gateway Service"
+
+ENV LANG=C.UTF-8
+ENV TZ=Asia/Shanghai
+ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError"
+
+WORKDIR /jeepayhomes/service/app
+
+RUN mkdir -p /jeepayhomes/service/logs \
+    /jeepayhomes/service/uploads
+
+COPY target/jeepay-payment.jar /jeepayhomes/service/app/jeepay-payment.jar
+
+EXPOSE 9216
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=12 \
+    CMD curl -f http://localhost:9216/ || exit 1
+
+CMD ["sh", "-c", "java $JAVA_OPTS -jar jeepay-payment.jar"]
