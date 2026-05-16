@@ -1,219 +1,265 @@
 #!/bin/bash
 
-################################################################################
-# Jeepay Railway 部署脚本
-# 功能：一键部署 Jeepay 到 Railway
-# 
-# 使用方法：
-#   chmod +x deploy-to-railway.sh
-#   ./deploy-to-railway.sh
-################################################################################
+echo "=========================================="
+echo "  Jeepay Manager - Railway 部署脚本"
+echo "=========================================="
+echo ""
 
-set -e
+# 检查是否安装了railway CLI
+if ! command -v railway &> /dev/null; then
+    echo "❌ 错误：Railway CLI未安装"
+    echo ""
+    echo "请先安装Railway CLI："
+    echo "  npm install -g @railway/cli"
+    echo ""
+    echo "安装后登录："
+    echo "  railway login"
+    exit 1
+fi
 
-# 颜色定义
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# 检查是否已登录
+if ! railway whoami &> /dev/null; then
+    echo "❌ 错误：未登录Railway"
+    echo ""
+    echo "请先登录："
+    echo "  railway login"
+    exit 1
+fi
 
-# 输出函数
-print_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
+echo "✅ Railway CLI已就绪"
 
-print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
+# 获取脚本所在目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
-print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
+echo ""
+echo "📋 Railway 部署选项："
+echo ""
+echo "  1. 部署 Jeepay Manager（运营平台）"
+echo "  2. 部署 Jeepay Payment（支付网关）"
+echo "  3. 部署 Jeepay Merchant（商户平台）"
+echo "  4. 部署所有服务"
+echo "  5. 查看日志"
+echo "  6. 退出"
+echo ""
 
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
+read -p "请选择 [1-6]: " choice
 
-# Banner
-echo -e "${BLUE}"
-cat << "EOF"
-    ____             __        ____          _ __          ______           
-   / __ \_________  / /_____  / __ )___     (_) /_____    / ____/___  _____
-  / /_/ / ___/ _ \/ __/ __ \/ __ \/ _ \   / / __/ __ \  / /   / __ \/ ___/
- / ____/ /  /  __/ /_/ /_/ / /_/ /  __/  / / /_/ /_/ / / /___/ /_/ / /    
-/_/   /_/   \___/\__/\____/_____/\___/  /_/\__/\____/  \____/\____/_/     
-                                                                             
-    Railway Deployment Script v1.0
+case $choice in
+    1)
+        SERVICE="manager"
+        SERVICE_NAME="Jeepay Manager"
+        SERVICE_DIR="jeepay-manager"
+        PORT=9217
+        ;;
+    2)
+        SERVICE="payment"
+        SERVICE_NAME="Jeepay Payment"
+        SERVICE_DIR="jeepay-payment"
+        PORT=9216
+        ;;
+    3)
+        SERVICE="merchant"
+        SERVICE_NAME="Jeepay Merchant"
+        SERVICE_DIR="jeepay-merchant"
+        PORT=9218
+        ;;
+    4)
+        echo ""
+        echo "📦 部署所有Jeepay服务..."
+        echo ""
+        
+        # 部署Manager
+        echo "🔨 部署 Jeepay Manager..."
+        cd jeepay-manager
+        railway up
+        cd ..
+        
+        # 部署Payment
+        echo "🔨 部署 Jeepay Payment..."
+        cd jeepay-payment
+        railway up
+        cd ..
+        
+        # 部署Merchant
+        echo "🔨 部署 Jeepay Merchant..."
+        cd jeepay-merchant
+        railway up
+        cd ..
+        
+        echo ""
+        echo "✅ 所有服务部署完成！"
+        echo ""
+        echo "📍 服务地址："
+        echo "   Manager: http://localhost:$PORT"
+        echo "   Payment: http://localhost:9216"
+        echo "   Merchant: http://localhost:9218"
+        echo ""
+        exit 0
+        ;;
+    5)
+        echo ""
+        echo "🔍 查看日志选项："
+        echo ""
+        echo "  1. Jeepay Manager"
+        echo "  2. Jeepay Payment"
+        echo "  3. Jeepay Merchant"
+        echo "  4. 所有服务"
+        echo ""
+        read -p "请选择 [1-4]: " log_choice
+        
+        case $log_choice in
+            1)
+                railway logs jeepay-manager
+                ;;
+            2)
+                railway logs jeepay-payment
+                ;;
+            3)
+                railway logs jeepay-merchant
+                ;;
+            4)
+                railway logs jeepay-manager
+                railway logs jeepay-payment
+                railway logs jeepay-merchant
+                ;;
+            *)
+                echo "无效选择"
+                exit 1
+                ;;
+        esac
+        exit 0
+        ;;
+    6)
+        echo "退出"
+        exit 0
+        ;;
+    *)
+        echo "无效选择"
+        exit 1
+        ;;
+esac
+
+echo ""
+echo "🚀 开始部署 $SERVICE_NAME..."
+
+# 进入服务目录
+cd $SERVICE_DIR
+
+# 检查Dockerfile是否存在
+if [ ! -f "Dockerfile.railway" ]; then
+    echo "❌ 错误：Dockerfile.railway 不存在"
+    echo ""
+    echo "创建Dockerfile.railway..."
+    
+    # 创建Dockerfile
+    cat > Dockerfile.railway << 'EOF'
+# Jeepay Manager Dockerfile for Railway
+# 自动构建jar文件
+
+FROM maven:3.9-eclipse-temurin-17 AS builder
+
+WORKDIR /build
+
+# 复制pom文件
+COPY pom.xml /build/
+COPY ../jeepay-z-codegen/pom.xml /build/jeepay-z-codegen/
+COPY ../jeepay-core/pom.xml /build/jeepay-core/
+COPY ../jeepay-service/pom.xml /build/jeepay-service/
+COPY ../jeepay-components/pom.xml /build/jeepay-components/
+COPY ../jeepay-components/jeepay-components-mq/pom.xml /build/jeepay-components/jeepay-components-mq/
+COPY ../jeepay-components/jeepay-components-oss/pom.xml /build/jeepay-components/jeepay-components-oss/
+COPY pom.xml /build/jeepay-manager/
+
+# 复制源码
+COPY ../jeepay-z-codegen/src /build/jeepay-z-codegen/src
+COPY ../jeepay-core/src /build/jeepay-core/src
+COPY ../jeepay-service/src /build/jeepay-service/src
+COPY ../jeepay-components/src /build/jeepay-components/src
+COPY src /build/jeepay-manager/src
+
+# 复制配置文件
+COPY ../conf/devCommons /build/conf/devCommons
+COPY src/main/resources /build/jeepay-manager/src/main/resources
+
+# 构建项目
+RUN mvn clean package -DskipTests -q
+
+# 第二阶段
+FROM eclipse-temurin:17-jre
+
+WORKDIR /jeepayhomes/service/app
+
+RUN mkdir -p /jeepayhomes/service/logs \
+    /jeepayhomes/service/uploads
+
+COPY --from=builder /build/jeepay-manager/target/jeepay-manager.jar /jeepayhomes/service/app/jeepay-manager.jar
+
+EXPOSE 9217
+
+ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC"
+
+CMD ["sh", "-c", "java $JAVA_OPTS -jar jeepay-manager.jar"]
 EOF
-echo -e "${NC}"
 
-# 检查 Railway CLI
-check_railway_cli() {
-    print_info "检查 Railway CLI..."
-    if ! command -v railway &> /dev/null; then
-        print_warning "Railway CLI 未安装，正在安装..."
-        npm install -g @railway/cli
-        if [ $? -ne 0 ]; then
-            print_error "Railway CLI 安装失败，请手动安装：npm install -g @railway/cli"
-            exit 1
-        fi
+    echo "✅ Dockerfile.railway 已创建"
+fi
+
+# 部署到Railway
+echo "📤 上传到Railway..."
+railway up
+
+# 设置端口
+echo "⚙️  设置端口..."
+railway variables set SERVER_PORT=$PORT
+
+# 设置默认环境变量（如果尚未设置）
+echo "⚙️  配置环境变量..."
+read -p "是否配置MySQL连接？[y/N]: " configure_mysql
+if [ "$configure_mysql" = "y" ]; then
+    read -p "MySQL Host: " mysql_host
+    read -p "MySQL Port [3306]: " mysql_port
+    mysql_port=${mysql_port:-3306}
+    read -p "MySQL Database [jeepaydb]: " mysql_db
+    mysql_db=${mysql_db:-jeepaydb}
+    read -p "MySQL Username: " mysql_user
+    read -s -p "MySQL Password: " mysql_pass
+    echo ""
+    
+    railway variables set SPRING_DATASOURCE_URL="jdbc:mysql://${mysql_host}:${mysql_port}/${mysql_db}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true"
+    railway variables set SPRING_DATASOURCE_USERNAME="$mysql_user"
+    railway variables set SPRING_DATASOURCE_PASSWORD="$mysql_pass"
+fi
+
+read -p "是否配置Redis连接？[y/N]: " configure_redis
+if [ "$configure_redis" = "y" ]; then
+    read -p "Redis Host: " redis_host
+    read -p "Redis Port [6379]: " redis_port
+    redis_port=${redis_port:-6379}
+    read -s -p "Redis Password (可选): " redis_pass
+    echo ""
+    
+    railway variables set SPRING_DATA_REDIS_HOST="$redis_host"
+    railway variables set SPRING_DATA_REDIS_PORT="$redis_port"
+    if [ -n "$redis_pass" ]; then
+        railway variables set SPRING_DATA_REDIS_PASSWORD="$redis_pass"
     fi
-    print_success "Railway CLI 已安装"
-}
+fi
 
-# 检查 Docker
-check_docker() {
-    print_info "检查 Docker..."
-    if ! command -v docker &> /dev/null; then
-        print_error "Docker 未安装，请先安装 Docker"
-        exit 1
-    fi
-    print_success "Docker 已安装"
-}
+read -p "是否配置RocketMQ连接？[y/N]: " configure_rocketmq
+if [ "$configure_rocketmq" = "y" ]; then
+    read -p "RocketMQ Nameserver Address: " rocketmq_addr
+    railway variables set ROCKETMQ_NAMESRV_ADDR="$rocketmq_addr"
+fi
 
-# 登录 Railway
-railway_login() {
-    print_info "登录 Railway..."
-    railway login
-    if [ $? -ne 0 ]; then
-        print_error "Railway 登录失败"
-        exit 1
-    fi
-    print_success "Railway 登录成功"
-}
-
-# 创建项目
-create_project() {
-    print_info "创建 Railway 项目..."
-    
-    # 列出所有项目
-    print_info "当前项目列表："
-    railway list
-    
-    echo ""
-    read -p "请输入项目名称（或输入 'new' 创建新项目）: " project_name
-    
-    if [ "$project_name" = "new" ]; then
-        read -p "请输入新项目名称: " new_project_name
-        railway init --name "$new_project_name"
-        print_success "项目 '$new_project_name' 创建成功"
-    else
-        railway link "$project_name"
-        print_success "已切换到项目: $project_name"
-    fi
-}
-
-# 配置环境变量
-config_env_vars() {
-    print_info "配置环境变量..."
-    
-    # MySQL 配置
-    read -p "MySQL Root 密码 [默认: root123456]: " mysql_root_password
-    mysql_root_password=${mysql_root_password:-root123456}
-    railway variables set MYSQL_ROOT_PASSWORD "$mysql_root_password"
-    
-    read -p "MySQL 数据库名 [默认: jeepaydb]: " mysql_database
-    mysql_database=${mysql_database:-jeepaydb}
-    railway variables set MYSQL_DATABASE "$mysql_database"
-    
-    # RabbitMQ 配置
-    read -p "RabbitMQ 用户名 [默认: admin]: " rabbitmq_user
-    rabbitmq_user=${rabbitmq_user:-admin}
-    railway variables set RABBITMQ_DEFAULT_USER "$rabbitmq_user"
-    
-    read -p "RabbitMQ 密码 [默认: admin123]: " rabbitmq_password
-    rabbitmq_password=${rabbitmq_password:-admin123}
-    railway variables set RABBITMQ_DEFAULT_PASSWORD "$rabbitmq_password"
-    
-    railway variables set RABBITMQ_DEFAULT_VHOST "/jeepay"
-    
-    print_success "环境变量配置完成"
-}
-
-# 部署服务
-deploy_services() {
-    print_info "开始部署服务..."
-    
-    # 部署 MySQL
-    print_info "1. 部署 MySQL..."
-    railway up --service mysql --select
-    railway deploy
-    
-    # 部署 Redis
-    print_info "2. 部署 Redis..."
-    railway up --service redis --select
-    railway deploy
-    
-    # 部署 RabbitMQ
-    print_info "3. 部署 RabbitMQ..."
-    railway up --service rabbitmq --select
-    railway deploy
-    
-    # 等待 MySQL 初始化
-    print_warning "等待 MySQL 初始化完成（约 30 秒）..."
-    sleep 30
-    
-    # 部署 Payment 服务
-    print_info "4. 部署 Jeepay Payment..."
-    cd jeepay-payment
-    railway up --service jeepay-payment --select
-    railway deploy
-    cd ..
-    
-    # 部署 Manager 服务
-    print_info "5. 部署 Jeepay Manager..."
-    cd jeepay-manager
-    railway up --service jeepay-manager --select
-    railway deploy
-    cd ..
-    
-    # 部署 Merchant 服务
-    print_info "6. 部署 Jeepay Merchant..."
-    cd jeepay-merchant
-    railway up --service jeepay-merchant --select
-    railway deploy
-    cd ..
-    
-    print_success "所有服务部署完成"
-}
-
-# 显示部署结果
-show_result() {
-    echo ""
-    echo -e "${GREEN}========================================${NC}"
-    echo -e "${GREEN}  Jeepay 部署完成！${NC}"
-    echo -e "${GREEN}========================================${NC}"
-    echo ""
-    echo -e "${BLUE}服务地址：${NC}"
-    echo "  - 运营平台: http://localhost:9217"
-    echo "  - 商户平台: http://localhost:9218"
-    echo "  - 支付网关: http://localhost:9216"
-    echo "  - RabbitMQ: http://localhost:15672"
-    echo ""
-    echo -e "${BLUE}默认账号：${NC}"
-    echo "  - 运营平台: jeepay / jeepay123"
-    echo "  - 商户平台: 需在运营平台创建"
-    echo "  - RabbitMQ: admin / admin123"
-    echo ""
-    echo -e "${BLUE}查看日志：${NC}"
-    echo "  railway logs -f"
-    echo ""
-    echo -e "${BLUE}查看状态：${NC}"
-    echo "  railway status"
-    echo ""
-}
-
-# 主函数
-main() {
-    check_docker
-    check_railway_cli
-    railway_login
-    create_project
-    config_env_vars
-    deploy_services
-    show_result
-}
-
-# 运行主函数
-main "$@"
+echo ""
+echo "✅ 部署完成！"
+echo ""
+echo "📍 $SERVICE_NAME 信息："
+echo "   端口: $PORT"
+echo ""
+echo "🔍 查看日志："
+echo "   railway logs jeepay-$SERVICE"
+echo ""
+echo "🌐 打开Dashboard："
+echo "   railway open"
