@@ -41,9 +41,70 @@ Jeepay是一套**微服务架构的Java支付系统**，包含：
 | RocketMQ | 消息队列 | 512MB+ RAM |
 
 **主要挑战**：
-1. Railway不原生支持RocketMQ
+1. Railway不原生支持RocketMQ（需要使用RabbitMQ替代或云MQ服务）
 2. 多服务需要协调部署
 3. 内存资源需要合理规划
+
+### RabbitMQ部署支持
+
+Railway**完全支持RabbitMQ部署**，有以下两种方式：
+
+#### 方式一：使用Railway官方模板（推荐）
+
+Railway提供官方的RabbitMQ模板，开箱即用：
+
+- **模板地址**：https://railway.app/template/ska4rn
+- **镜像**：`rabbitmq:management-alpine`
+- **自动配置变量**：
+  - `RABBITMQ_URL` - 公共连接地址
+  - `RABBITMQ_PRIVATE_URL` - 私有连接地址
+  - `RABBITMQ_DEFAULT_USER` - 默认用户名
+  - `RABBITMQ_DEFAULT_PASS` - 默认密码
+- **管理界面**：自动提供RabbitMQ Management UI
+
+#### 方式二：自定义Docker镜像部署
+
+在Railway中创建自定义服务：
+
+```yaml
+# railway.yml
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    port: 5672
+    env:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=yourpassword
+    volume: /var/lib/rabbitmq
+```
+
+#### Jeepay RabbitMQ配置
+
+Jeepay原生支持RabbitMQ，只需修改配置即可：
+
+```yaml
+# application.yml
+spring:
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASSWORD:admin}
+    virtual-host: /
+
+isys:
+  mq:
+    vender: rabbitMQ
+```
+
+环境变量配置：
+
+| 变量名 | 说明 | 示例值 |
+|--------|------|-------|
+| `RABBITMQ_HOST` | RabbitMQ主机 | rabbitmq.railway.internal |
+| `RABBITMQ_PORT` | 端口 | 5672 |
+| `RABBITMQ_USER` | 用户名 | admin |
+| `RABBITMQ_PASSWORD` | 密码 | ********** |
 
 ---
 
@@ -400,7 +461,7 @@ APP_ROOT_PATH=/jeepayhomes
 SITE_URL=http://localhost:8080
 ```
 
-#### 生产环境配置
+#### 生产环境配置（使用RabbitMQ）
 
 ```bash
 # .env.production
@@ -416,9 +477,11 @@ REDIS_HOST={{Redis.HOSTNAME}}
 REDIS_PORT={{Redis.PORT}}
 REDIS_PASSWORD={{Redis.PASSWORD}}
 
-# RocketMQ - 阿里云
-ROCKETMQ_NAMESRV_ADDR=rmq-cn-xxxx.aliyuncs.com:8080
-ROCKETMQ_PRODUCER_GROUP=GID_JEEPAY
+# RabbitMQ - Railway官方模板
+RABBITMQ_HOST={{RabbitMQ.HOSTNAME}}
+RABBITMQ_PORT=5672
+RABBITMQ_USER={{RabbitMQ.DEFAULT_USER}}
+RABBITMQ_PASSWORD={{RabbitMQ.DEFAULT_PASS}}
 
 APP_ROOT_PATH=/jeepayhomes
 SITE_URL=https://jeepay.yourdomain.com
@@ -686,17 +749,32 @@ railway run mysql -h $MYSQL_HOST -P $MYSQL_PORT -u $MYSQL_USER -p -e "SHOW PROCE
 railway run redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
 ```
 
-#### 4. RocketMQ消息不消费
+#### 4. RabbitMQ消息不消费（推荐使用RabbitMQ）
 
 **排查步骤**：
-1. 确认RocketMQ服务可用
-2. 检查Topic和Consumer Group配置
-3. 查看消费日志
+1. 确认RabbitMQ服务可用（访问Management UI）
+2. 检查Java服务日志中的RabbitMQ连接
+3. 验证Topic和Queue配置
 
-**替代方案**：使用RabbitMQ
+**RabbitMQ Management UI地址**：
+```
+http://rabbitmq.railway.internal:15672
+或通过Railway公共URL访问
+```
 
+**验证RabbitMQ连接**：
+```bash
+# 使用Railway CLI进入服务容器
+railway run bash
+
+# 测试RabbitMQ连接
+rabbitmq-diagnostics -p / check_running
+rabbitmq-diagnostics -p / list_queues
+```
+
+**Jeepay RabbitMQ配置检查**：
 ```yaml
-# 配置切换到RabbitMQ
+# 确保配置正确
 isys:
   mq:
     vender: rabbitMQ
@@ -707,7 +785,24 @@ spring:
     port: 5672
     username: ${RABBITMQ_USER}
     password: ${RABBITMQ_PASSWORD}
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: manual
+        retry:
+          enabled: true
+          initial-interval: 3000
+          max-attempts: 3
 ```
+
+**常见RabbitMQ问题**：
+
+| 问题 | 原因 | 解决方案 |
+|------|------|---------|
+| 连接被拒绝 | 主机地址错误 | 检查RABBITMQ_HOST变量 |
+| 认证失败 | 用户名密码错误 | 检查RABBITMQ_USER/PASSWORD |
+| Queue不存在 | 启动顺序问题 | 重启Java服务 |
+| 消息堆积 | 消费者未启动 | 检查日志，查看消费端错误 |
 
 ### 资源优化
 
