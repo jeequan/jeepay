@@ -1,893 +1,608 @@
-# Jeepay Railway 部署指南
+# Jeepay Manager Railway 部署详细指南
 
 ## 目录
 
-- [概述](#概述)
-- [部署架构](#部署架构)
-- [前期准备](#前期准备)
-- [部署步骤](#部署步骤)
-- [配置详解](#配置详解)
-- [数据库初始化](#数据库初始化)
-- [前端部署](#前端部署)
-- [HTTPS配置](#https配置)
-- [运维监控](#运维监控)
-- [故障排查](#故障排查)
+- [环境要求](#环境要求)
+- [部署方案选择](#部署方案选择)
+- [方案A：使用优化后的Dockerfile（推荐）](#方案a使用优化后的dockerfile推荐)
+- [方案B：使用Railway构建命令](#方案b使用railway构建命令)
+- [环境变量配置](#环境变量配置)
+- [数据库配置](#数据库配置)
+- [常见问题排查](#常见问题排查)
+- [验证部署](#验证部署)
 
 ---
 
-## 概述
+## 环境要求
 
-### Railway平台简介
+在开始Railway部署之前，确保你已准备好：
 
-Railway是一个现代化的云部署平台，提供以下优势：
-- Git集成自动部署
-- 原生支持Docker
-- 内置数据库插件（MySQL/PostgreSQL/Redis）
-- 自动SSL证书管理
-- 多环境支持
-- 按使用量计费
+1. **Railway账户** - [官网注册](https://railway.app)
+2. **Railway CLI** - 安装方法：
+   ```bash
+   # 安装Railway CLI
+   npm install -g @railway/cli
+   
+   # 登录
+   railway login
+   ```
 
-### Jeepay部署挑战
-
-Jeepay是一套**微服务架构的Java支付系统**，包含：
-
-| 服务 | 说明 | 资源需求 |
-|------|------|---------|
-| jeepay-payment | 支付网关 | 1GB+ RAM, 1 Core |
-| jeepay-manager | 运营平台 | 512MB+ RAM |
-| jeepay-merchant | 商户平台 | 512MB+ RAM |
-| MySQL | 数据库 | 1GB+ RAM |
-| Redis | 缓存 | 256MB+ RAM |
-| RocketMQ | 消息队列 | 512MB+ RAM |
-
-**主要挑战**：
-1. Railway不原生支持RocketMQ（需要使用RabbitMQ替代或云MQ服务）
-2. 多服务需要协调部署
-3. 内存资源需要合理规划
-
-### RabbitMQ部署支持
-
-Railway**完全支持RabbitMQ部署**，有以下两种方式：
-
-#### 方式一：使用Railway官方模板（推荐）
-
-Railway提供官方的RabbitMQ模板，开箱即用：
-
-- **模板地址**：https://railway.app/template/ska4rn
-- **镜像**：`rabbitmq:management-alpine`
-- **自动配置变量**：
-  - `RABBITMQ_URL` - 公共连接地址
-  - `RABBITMQ_PRIVATE_URL` - 私有连接地址
-  - `RABBITMQ_DEFAULT_USER` - 默认用户名
-  - `RABBITMQ_DEFAULT_PASS` - 默认密码
-- **管理界面**：自动提供RabbitMQ Management UI
-
-#### 方式二：自定义Docker镜像部署
-
-在Railway中创建自定义服务：
-
-```yaml
-# railway.yml
-services:
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    port: 5672
-    env:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=yourpassword
-    volume: /var/lib/rabbitmq
-```
-
-#### Jeepay RabbitMQ配置
-
-Jeepay原生支持RabbitMQ，只需修改配置即可：
-
-```yaml
-# application.yml
-spring:
-  rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USER:admin}
-    password: ${RABBITMQ_PASSWORD:admin}
-    virtual-host: /
-
-isys:
-  mq:
-    vender: rabbitMQ
-```
-
-环境变量配置：
-
-| 变量名 | 说明 | 示例值 |
-|--------|------|-------|
-| `RABBITMQ_HOST` | RabbitMQ主机 | rabbitmq.railway.internal |
-| `RABBITMQ_PORT` | 端口 | 5672 |
-| `RABBITMQ_USER` | 用户名 | admin |
-| `RABBITMQ_PASSWORD` | 密码 | ********** |
+3. **MySQL数据库** - Railway提供的或外部MySQL
+4. **Redis缓存** - Railway提供的或外部Redis
+5. **RocketMQ消息队列** - 需要自建或使用云服务
 
 ---
 
-## 部署架构
+## 部署方案选择
 
-### 推荐架构方案
+### 方案A：使用优化后的Dockerfile（推荐）✅
 
-#### 方案一：全云服务架构（生产环境推荐）
+这个方案使用多阶段构建，Dockerfile会自动完成Maven构建过程。
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Railway                               │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐         │
-│  │   Payment   │ │   Manager   │ │   Merchant  │         │
-│  │   (9216)   │ │   (9217)    │ │   (9218)    │         │
-│  └──────┬──────┘ └──────┬──────┘ └──────┬──────┘         │
-│         │                │                │                 │
-│         └────────────────┼────────────────┘                 │
-│                          │                                   │
-│                    ┌─────▼─────┐                            │
-│                    │   Nginx   │                            │
-│                    │  (反向代理) │                            │
-│                    └─────┬─────┘                            │
-└──────────────────────────┼──────────────────────────────────┘
-                           │
-          ┌────────────────┼────────────────┐
-          │                │                │
-    ┌─────▼─────┐   ┌─────▼─────┐   ┌─────▼─────┐
-    │   MySQL   │   │   Redis   │   │  RocketMQ │
-    │ (插件/云) │   │ (插件/云)  │   │ (阿里云)  │
-    └───────────┘   └───────────┘   └───────────┘
-```
+#### 步骤1：检查Dockerfile配置
 
-#### 方案二：简化架构（开发测试环境）
-
-使用RabbitMQ替代RocketMQ：
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Railway                               │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐         │
-│  │   Payment   │ │   Manager   │ │   Merchant  │         │
-│  └──────┬──────┘ └──────┬──────┘ └──────┬──────┘         │
-│         │                │                │                 │
-│         └────────────────┼────────────────┘                 │
-│                          │                                   │
-│                    ┌─────▼─────┐                            │
-│                    │   Nginx   │                            │
-│                    └─────┬─────┘                            │
-│         ┌────────────────┼────────────────┐                │
-│         │                │                │                │
-│   ┌─────▼─────┐   ┌─────▼─────┐   ┌─────▼─────┐         │
-│   │   MySQL   │   │   Redis   │   │  RabbitMQ │         │
-│   │  (插件)   │   │  (插件)   │   │  (Docker)  │         │
-│   └───────────┘   └───────────┘   └───────────┘         │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 前期准备
-
-### 1. 账号与工具
-
-- [ ] Railway账号（支持GitHub登录）
-- [ ] GitHub账号
-- [ ] Git客户端
-- [ ] Docker Desktop（本地测试用）
-
-### 2. 创建Railway项目
-
-1. 登录 [Railway](https://railway.app)
-2. 点击 "New Project"
-3. 选择 "Deploy from GitHub repo"
-4. 授权GitHub并选择 `jeepay` 仓库
-5. 项目创建完成
-
-### 3. 准备外部服务
-
-#### 方案A：使用Railway插件（推荐）
-
-在Railway项目中添加插件：
-
-```bash
-# 通过Railway CLI添加
-railway add mysql
-railway add redis
-
-# 或通过Dashboard添加
-# Project Settings → Add Plugin → MySQL
-# Project Settings → Add Plugin → Redis
-```
-
-#### 方案B：使用云服务
-
-**阿里云RocketMQ**：
-1. 开通阿里云RocketMQ服务
-2. 创建Topic和Consumer Group
-3. 获取SDK接入点
-
----
-
-## 部署步骤
-
-### 第一步：Fork项目
-
-```bash
-# 在GitHub上fork jeepay仓库
-# https://github.com/jeequan/jeepay/fork
-```
-
-### 第二步：连接Railway
-
-1. 登录Railway
-2. 创建新项目
-3. 选择 "Deploy from GitHub repo"
-4. 选择fork后的仓库
-
-### 第三步：配置环境变量
-
-在Railway Dashboard中配置以下变量：
-
-#### 数据库配置
-
-| 变量名 | 说明 | 示例值 |
-|--------|------|-------|
-| `DB_HOST` | MySQL主机 | 从Railway插件获取 |
-| `DB_PORT` | MySQL端口 | 3306 |
-| `DB_NAME` | 数据库名 | jeepaydb |
-| `DB_USERNAME` | 用户名 | root |
-| `DB_PASSWORD` | 密码 | ********** |
-
-#### Redis配置
-
-| 变量名 | 说明 | 示例值 |
-|--------|------|-------|
-| `REDIS_HOST` | Redis主机 | 从Railway插件获取 |
-| `REDIS_PORT` | Redis端口 | 6379 |
-| `REDIS_PASSWORD` | 密码（可选） | |
-
-#### RocketMQ配置（云服务方案）
-
-| 变量名 | 说明 | 示例值 |
-|--------|------|-------|
-| `ROCKETMQ_NAMESRV_ADDR` | RocketMQ地址 | rmq-cn-xxx.aliyuncs.com:8080 |
-| `ROCKETMQ_PRODUCER_GROUP` | 生产者组 | PID_JEEPAY |
-
-#### 系统配置
-
-| 变量名 | 说明 | 示例值 |
-|--------|------|-------|
-| `APP_ROOT_PATH` | 应用根目录 | /jeepayhomes |
-| `SITE_URL` | 站点URL | https://jeepay.xxx.railway.app |
-
-### 第四步：创建应用配置
-
-在项目中创建 `conf/railway/` 目录和配置文件：
-
-#### jeepay-payment/railway.yml
-
-```yaml
-spring:
-  application:
-    name: jeepay-payment
-  datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD:}
-      database: 3
-
-server:
-  port: 9216
-
-rocketmq:
-  name-server: ${ROCKETMQ_NAMESRV_ADDR}
-  producer:
-    group: ${ROCKETMQ_PRODUCER_GROUP}
-    send-message-timeout: 10000
-    retry-times-when-send-failed: 2
-
-isys:
-  cache-config: true
-  oss:
-    file-root-path: /jeepayhomes/uploads
-    service-type: local
-  mq:
-    vender: rocketMQ
-
-logging:
-  level:
-    root: info
-  file:
-    path: /jeepayhomes/logs
-```
-
-### 第五步：修改Dockerfile
-
-创建专门的Railway Dockerfile：
-
-#### jeepay-payment/Dockerfile.railway
+确保 `/workspace/jeepay-manager/Dockerfile.railway` 文件存在并包含以下关键配置：
 
 ```dockerfile
+# 第一阶段：使用Maven构建
+FROM maven:3.9-eclipse-temurin-17 AS builder
+
+WORKDIR /build
+
+# 复制所有必要的pom文件
+COPY pom.xml /build/
+COPY jeepay-z-codegen/pom.xml /build/jeepay-z-codegen/
+COPY jeepay-core/pom.xml /build/jeepay-core/
+COPY jeepay-service/pom.xml /build/jeepay-service/
+COPY jeepay-components/pom.xml /build/jeepay-components/
+COPY jeepay-components/jeepay-components-mq/pom.xml /build/jeepay-components/jeepay-components-mq/
+COPY jeepay-components/jeepay-components-oss/pom.xml /build/jeepay-components/jeepay-components-oss/
+COPY jeepay-manager/pom.xml /build/jeepay-manager/
+
+# 复制源码
+COPY jeepay-z-codegen/src /build/jeepay-z-codegen/src
+COPY jeepay-core/src /build/jeepay-core/src
+COPY jeepay-service/src /build/jeepay-service/src
+COPY jeepay-components/src /build/jeepay-components/src
+COPY jeepay-manager/src /build/jeepay-manager/src
+
+# 复制配置文件
+COPY conf/devCommons /build/conf/devCommons
+COPY jeepay-manager/src/main/resources /build/jeepay-manager/src/main/resources
+
+# 执行Maven构建
+RUN mvn clean package -DskipTests -q
+
+# 第二阶段：运行时镜像
 FROM eclipse-temurin:17-jre
-
-LABEL maintainer="Jeepay"
-
-ENV LANG=C.UTF-8
-ENV TZ=Asia/Shanghai
 
 WORKDIR /jeepayhomes/service/app
 
-RUN mkdir -p /jeepayhomes/uploads /jeepayhomes/logs
-
-COPY target/jeepay-payment.jar /jeepayhomes/service/app/jeepay-payment.jar
-COPY conf/railway/payment-application.yml /jeepayhomes/service/app/application.yml
-
-EXPOSE 9216
-
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD bash -c 'echo > /dev/tcp/localhost/9216'
-
-CMD ["java", "-jar", "jeepay-payment.jar"]
-```
-
-#### jeepay-manager/Dockerfile.railway
-
-```dockerfile
-FROM eclipse-temurin:17-jre
-
-LABEL maintainer="Jeepay"
-
-ENV LANG=C.UTF-8
-ENV TZ=Asia/Shanghai
-
-WORKDIR /jeepayhomes/service/app
-
-RUN mkdir -p /jeepayhomes/uploads /jeepayhomes/logs
-
-COPY target/jeepay-manager.jar /jeepayhomes/service/app/jeepay-manager.jar
-COPY conf/railway/manager-application.yml /jeepayhomes/service/app/application.yml
+# 复制构建好的jar文件
+COPY --from=builder /build/jeepay-manager/target/jeepay-manager.jar /jeepayhomes/service/app/jeepay-manager.jar
 
 EXPOSE 9217
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD bash -c 'echo > /dev/tcp/localhost/9217'
-
-CMD ["java", "-jar", "jeepay-manager.jar"]
+CMD ["sh", "-c", "java $JAVA_OPTS -jar jeepay-manager.jar"]
 ```
 
-#### jeepay-merchant/Dockerfile.railway
+#### 步骤2：在Railway Dashboard配置
 
-```dockerfile
-FROM eclipse-temurin:17-jre
+1. **连接到GitHub仓库**
+   - 进入 Railway Dashboard
+   - 点击 "New Project" → "Deploy from GitHub repo"
+   - 选择 `jeepay` 仓库
 
-LABEL maintainer="Jeepay"
+2. **配置Dockerfile路径**
+   - 在 "Settings" → "Build" 中设置：
+     ```
+     Dockerfile Path: jeepay-manager/Dockerfile.railway
+     ```
 
-ENV LANG=C.UTF-8
-ENV TZ=Asia/Shanghai
+3. **设置环境变量**（详见下文）
 
-WORKDIR /jeepayhomes/service/app
+4. **配置端口**
+   - 在 "Settings" → "Networking" 中：
+     ```
+     Port: 9217
+     ```
 
-RUN mkdir -p /jeepayhomes/uploads /jeepayhomes/logs
+#### 步骤3：部署
 
-COPY target/jeepay-merchant.jar /jeepayhomes/service/app/jeepay-merchant.jar
-COPY conf/railway/merchant-application.yml /jeepayhomes/service/app/application.yml
+Railway会自动检测Dockerfile并执行构建部署。
 
-EXPOSE 9218
+---
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD bash -c 'echo > /dev/tcp/localhost/9218'
+## 方案B：使用Railway构建命令
 
-CMD ["java", "-jar", "jeepay-merchant.jar"]
-```
+如果你想在Railway中使用自定义构建命令：
 
-### 第六步：配置构建设置
+### 配置
 
-在Railway Dashboard中为每个服务配置：
+在Railway Dashboard的 "Settings" → "Build" 中设置：
 
-#### Payment服务
+#### 构建命令
 
-```yaml
-# Build Command
-cd jeepay-payment && mvn clean package -DskipTests
-
-# Start Command
-java -jar jeepay-payment/target/jeepay-payment.jar
-
-# Dockerfile Path
-jeepay-payment/Dockerfile.railway
-```
-
-#### Manager服务
-
-```yaml
-# Build Command
+```bash
 cd jeepay-manager && mvn clean package -DskipTests
+```
 
-# Start Command
+#### Dockerfile路径
+
+```
+jeepay-manager/Dockerfile.railway.simple
+```
+
+#### 启动命令
+
+```bash
 java -jar jeepay-manager/target/jeepay-manager.jar
-
-# Dockerfile Path
-jeepay-manager/Dockerfile.railway
 ```
 
-#### Merchant服务
+### 重要说明
 
-```yaml
-# Build Command
-cd jeepay-merchant && mvn clean package -DskipTests
+⚠️ **方案B的局限性**：
+- Railway的构建命令在部署环境中执行
+- Maven构建可能需要较长时间
+- 需要确保构建完成后再启动应用
 
-# Start Command
-java -jar jeepay-merchant/target/jeepay-merchant.jar
-
-# Dockerfile Path
-jeepay-merchant/Dockerfile.railway
-```
-
-### 第七步：部署触发
-
-1. Railway自动检测代码变更
-2. 或者手动点击 "Deploy" 按钮
-3. 查看部署日志确保成功
+✅ **推荐使用方案A**，因为Dockerfile中已经包含了完整的构建流程。
 
 ---
 
-## 配置详解
+## 环境变量配置
 
-### 环境变量配置示例
+Jeepay Manager需要配置多个环境变量才能正常运行。
 
-#### 本地开发配置
+### 必需的环境变量
 
-```bash
-# .env.local
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=jeepaydb
-DB_USERNAME=root
-DB_PASSWORD=root123
-
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-
-ROCKETMQ_NAMESRV_ADDR=localhost:9876
-ROCKETMQ_PRODUCER_GROUP=PID_JEEPAY
-
-APP_ROOT_PATH=/jeepayhomes
-SITE_URL=http://localhost:8080
-```
-
-#### 生产环境配置（使用RabbitMQ）
+#### 1. 数据库配置
 
 ```bash
-# .env.production
-# MySQL - Railway插件自动注入
-MYSQL_HOST={{MySQL.HOSTNAME}}
-MYSQL_PORT={{MySQL.PORT}}
-MYSQL_DATABASE={{MySQL.DATABASE}}
-MYSQL_USERNAME={{MySQL.USERNAME}}
-MYSQL_PASSWORD={{MySQL.PASSWORD}}
+# 数据库连接URL
+SPRING_DATASOURCE_URL=jdbc:mysql://your-mysql-host:3306/jeepaydb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
 
-# Redis - Railway插件自动注入
-REDIS_HOST={{Redis.HOSTNAME}}
-REDIS_PORT={{Redis.PORT}}
-REDIS_PASSWORD={{Redis.PASSWORD}}
+# 数据库用户名
+SPRING_DATASOURCE_USERNAME=root
 
-# RabbitMQ - Railway官方模板
-RABBITMQ_HOST={{RabbitMQ.HOSTNAME}}
-RABBITMQ_PORT=5672
-RABBITMQ_USER={{RabbitMQ.DEFAULT_USER}}
-RABBITMQ_PASSWORD={{RabbitMQ.DEFAULT_PASS}}
-
-APP_ROOT_PATH=/jeepayhomes
-SITE_URL=https://jeepay.yourdomain.com
+# 数据库密码
+SPRING_DATASOURCE_PASSWORD=your_mysql_password
 ```
 
-### 多环境配置
+#### 2. Redis配置
 
-使用 `application-{profile}.yml` 支持多环境：
+```bash
+# Redis主机地址
+SPRING_DATA_REDIS_HOST=your-redis-host
 
-```yaml
-# application-prod.yml
-spring:
-  profiles:
-    active: prod
-  datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=true
+# Redis端口
+SPRING_DATA_REDIS_PORT=6379
+
+# Redis密码（如果有）
+SPRING_DATA_REDIS_PASSWORD=
+```
+
+#### 3. RocketMQ配置
+
+```bash
+# RocketMQ NameServer地址
+ROCKETMQ_NAMESRV_ADDR=your-rocketmq-host:9876
+```
+
+#### 4. 应用配置
+
+```bash
+# 应用端口
+SERVER_PORT=9217
+
+# 日志级别（可选）
+LOGGING_LEVEL_ROOT=INFO
+```
+
+### 在Railway中配置环境变量
+
+#### 方法1：通过Railway Dashboard
+
+1. 进入你的Jeepay Manager项目
+2. 点击 "Variables" 标签
+3. 点击 "New Variable"
+4. 添加键值对：
+   - Key: `SPRING_DATASOURCE_URL`
+   - Value: `jdbc:mysql://mysql.railway.internal:3306/jeepaydb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true`
+
+#### 方法2：通过Railway CLI
+
+```bash
+# 设置环境变量
+railway variables set SPRING_DATASOURCE_URL="jdbc:mysql://mysql.railway.internal:3306/jeepaydb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true"
+
+railway variables set SPRING_DATASOURCE_USERNAME="root"
+railway variables set SPRING_DATASOURCE_PASSWORD="your_password"
+railway variables set SPRING_DATA_REDIS_HOST="redis.railway.internal"
+railway variables set SPRING_DATA_REDIS_PORT="6379"
+railway variables set ROCKETMQ_NAMESRV_ADDR="rocketmq.railway.internal:9876"
 ```
 
 ---
 
-## 数据库初始化
+## 数据库配置
 
-### 1. 获取数据库连接
+### 方案1：使用Railway MySQL插件
 
-从Railway Dashboard获取MySQL连接信息：
+#### 创建MySQL数据库
+
+1. 在Railway Dashboard中，点击 "New Project"
+2. 选择 "MySQL" → "Empty Database"
+3. Railway会自动创建MySQL实例并提供连接信息
+
+#### 获取连接信息
+
+1. 点击MySQL服务
+2. 在 "Connect" 标签中查看：
+   - Hostname
+   - Port
+   - Username
+   - Password
+   - Database
+
+#### 配置Jeepay Manager
+
+在Jeepay Manager的 "Variables" 中设置：
 
 ```bash
-# 连接信息
-Host: mysql.railway.internal
-Port: 3306
-Database: railway
-Username: root
-Password: (在Variables中查看)
+SPRING_DATASOURCE_URL=jdbc:mysql://mysql.railway.internal:3306/jeepaydb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+SPRING_DATASOURCE_USERNAME=root
+SPRING_DATASOURCE_PASSWORD=你的MySQL密码
 ```
 
-### 2. 创建数据库
+#### 初始化数据库
 
-```sql
-CREATE DATABASE IF NOT EXISTS jeepaydb 
-  DEFAULT CHARACTER SET utf8mb4 
-  COLLATE utf8mb4_unicode_ci;
-```
+Jeepay需要初始化数据库表结构：
 
-### 3. 导入初始化SQL
+1. 在MySQL服务中，点击 " Executions"
+2. 点击 "New Execution"
+3. 选择 `/workspace/docs/sql/init.sql` 文件执行
+4. 再执行 `/workspace/docs/sql/patch.sql` 文件
+
+或者通过命令行：
 
 ```bash
-# 方法一：使用MySQL命令行
-mysql -h $DB_HOST -P $DB_PORT -u $DB_USERNAME -p$DB_PASSWORD jeepaydb < docs/sql/init.sql
-mysql -h $DB_HOST -P $DB_PORT -u $DB_USERNAME -p$DB_PASSWORD jeepaydb < docs/sql/patch.sql
-
-# 方法二：使用Railway CLI
-railway run mysql -h $MYSQL_HOST -P $MYSQL_PORT -u $MYSQL_USER -p$MYSQL_PASSWORD jeepaydb < docs/sql/init.sql
+# 连接到Railway MySQL
+mysql -h hostname -P 3306 -u root -p jeepaydb < docs/sql/init.sql
+mysql -h hostname -P 3306 -u root -p jeepaydb < docs/sql/patch.sql
 ```
 
-### 4. 验证初始化
+### 方案2：使用外部MySQL
 
-```sql
--- 检查表是否创建成功
-USE jeepaydb;
-SHOW TABLES;
+如果你已有外部MySQL服务（阿里云、腾讯云等）：
 
--- 检查初始用户
-SELECT * FROM t_sys_user;
-SELECT * FROM t_sys_user_auth;
+```bash
+SPRING_DATASOURCE_URL=jdbc:mysql://rm-xxxx.mysql.rds.aliyuncs.com:3306/jeepaydb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+SPRING_DATASOURCE_USERNAME=your_username
+SPRING_DATASOURCE_PASSWORD=your_password
 ```
 
 ---
 
-## 前端部署
+## Redis配置
 
-### 方案一：静态托管（推荐）
+### 方案1：使用Railway Redis插件
 
-Jeepay前端项目 `jeepay-ui` 需要单独部署：
+#### 创建Redis
 
-1. Fork `jeepay-ui` 仓库
-2. 在Railway中创建静态站点项目
-3. 配置构建命令：
-   ```bash
-   npm install
-   npm run build
+1. 在Railway Dashboard中，点击 "New Project"
+2. 选择 "Redis" → "Empty Redis"
+3. Railway会自动创建Redis实例
+
+#### 获取连接信息
+
+1. 点击Redis服务
+2. 在 "Connect" 标签中查看连接信息
+
+#### 配置Jeepay Manager
+
+```bash
+SPRING_DATA_REDIS_HOST=redis.railway.internal
+SPRING_DATA_REDIS_PORT=6379
+# 如果Redis设置了密码，取消下面这行的注释
+# SPRING_DATA_REDIS_PASSWORD=your_redis_password
+```
+
+### 方案2：使用外部Redis
+
+```bash
+SPRING_DATA_REDIS_HOST=your-redis-host
+SPRING_DATA_REDIS_PORT=6379
+SPRING_DATA_REDIS_PASSWORD=your_redis_password
+```
+
+---
+
+## RocketMQ配置
+
+Railway不提供RocketMQ插件，需要使用外部服务。
+
+### 方案1：使用阿里云MQ
+
+```bash
+ROCKETMQ_NAMESRV_ADDR=rmq-cn-xxxx.rocketmq.aliyun.com:8080
+# 或者使用TCP端口
+# ROCKETMQ_NAMESRV_ADDR=rmq-cn-xxxx.rocketmq.aliyun.com:10911
+```
+
+### 方案2：自建RocketMQ
+
+如果你有其他云服务或自建RocketMQ：
+
+```bash
+ROCKETMQ_NAMESRV_ADDR=your-rocketmq-host:9876
+```
+
+### 方案3：使用Docker Compose本地测试
+
+⚠️ 注意：Railway不支持docker-compose，只支持Docker部署。
+
+如果需要完整的RocketMQ支持，建议：
+1. 使用Railway部署Jeepay Manager
+2. 使用其他平台部署RocketMQ（如阿里云、腾讯云）
+3. 或者使用轻量级MQ替代方案
+
+---
+
+## 常见问题排查
+
+### 问题1：构建失败 - Unable to access jarfile
+
+**症状**：
+```
+Error: Unable to access jarfile target/*jar
+```
+
+**原因**：
+1. Maven构建未完成
+2. Dockerfile配置错误
+3. 构建命令不正确
+
+**解决方案**：
+
+1. **使用方案A（推荐）**：确保Dockerfile路径正确
    ```
-4. 设置环境变量：
-   ```bash
-   VITE_API_BASE_URL=https://jeepay-payment.yourdomain.com
+   jeepay-manager/Dockerfile.railway
    ```
 
-### 方案二：Nginx容器部署
+2. **检查Dockerfile内容**：确保包含Maven构建步骤
 
-创建统一的Nginx容器处理前后端：
+3. **验证构建日志**：在Railway Dashboard查看构建日志
 
-```dockerfile
-# nginx.Dockerfile
-FROM nginx:alpine
+### 问题2：数据库连接失败
 
-# 复制构建好的前端文件
-COPY dist/ /usr/share/nginx/html/
-
-# 复制nginx配置
-COPY nginx.conf /etc/nginx/nginx.conf
-
-EXPOSE 80 443
-
-CMD ["nginx", "-g", "daemon off;"]
+**症状**：
 ```
-
-### 前端nginx配置
-
-```nginx
-server {
-    listen 80;
-    server_name jeepay.yourdomain.com;
-    
-    # 前端静态文件
-    location / {
-        root /usr/share/nginx/html;
-        try_files $uri $uri/ /index.html;
-        index index.html;
-    }
-    
-    # 运营平台API代理
-    location /api/mgr/ {
-        proxy_pass http://jeepay-manager:9217/api/mgr/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-    
-    # 商户平台API代理
-    location /api/mch/ {
-        proxy_pass http://jeepay-merchant:9218/api/mch/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
----
-
-## HTTPS配置
-
-### Railway自动HTTPS
-
-Railway为所有自定义域名自动提供Let's Encrypt证书：
-
-1. 在Railway Dashboard中添加域名：
-   - `jeepay-admin.yourdomain.com` → Manager服务
-   - `jeepay-mch.yourdomain.com` → Merchant服务
-   - `jeepay-pay.yourdomain.com` → Payment服务
-
-2. 添加CNAME记录到Railway
-
-3. Railway自动申请SSL证书
-
-### 支付渠道回调配置
-
-第三方支付平台需要配置公网HTTPS回调地址：
-
-| 渠道 | 回调URL |
-|------|--------|
-| 微信支付 | `https://jeepay-pay.yourdomain.com/api/pay/notify/wxpay` |
-| 支付宝 | `https://jeepay-pay.yourdomain.com/api/pay/notify/alipay` |
-| 云闪付 | `https://jeepay-pay.yourdomain.com/api/pay/notify/ysfpay` |
-
----
-
-## 运维监控
-
-### 日志查看
-
-```bash
-# 使用Railway CLI
-railway logs -f jeepay-payment
-railway logs -f jeepay-manager
-railway logs -f jeepay-merchant
-
-# 指定时间范围
-railway logs --since=1h jeepay-payment
-
-# 查看错误日志
-railway logs jeepay-payment | grep ERROR
-```
-
-### 健康检查
-
-Railway自动进行健康检查，配置：
-
-```yaml
-# 健康检查配置
-healthCheck:
-  path: /
-  port: 9216
-  interval: 30s
-  timeout: 5s
-  retries: 3
-```
-
-### 性能监控
-
-Railway提供基础监控，可集成：
-
-- **New Relic** - 应用性能监控
-- **Datadog** - 云监控
-- **Prometheus** - 指标收集
-
-### 自动扩缩容
-
-```yaml
-# railway.toml
-[deployment]
-  autoScale = true
-  minReplicas = 1
-  maxReplicas = 3
-  cpuThreshold = 70
-  memoryThreshold = 80
-```
-
----
-
-## 故障排查
-
-### 常见问题
-
-#### 1. 服务启动失败
-
-**症状**：部署状态显示 "Failed"
-
-**排查步骤**：
-```bash
-# 查看详细日志
-railway logs jeepay-payment --verbose
-
-# 检查环境变量
-railway variables
-
-# 检查端口占用
-railway status
-```
-
-**常见原因**：
-- 环境变量未配置
-- 数据库连接失败
-- 端口被占用
-- 内存不足
-
-#### 2. 数据库连接失败
-
-**排查命令**：
-```bash
-# 测试数据库连接
-railway run mysql -h $MYSQL_HOST -P $MYSQL_PORT -u $MYSQL_USER -p -e "SELECT 1"
-
-# 检查连接数
-railway run mysql -h $MYSQL_HOST -P $MYSQL_PORT -u $MYSQL_USER -p -e "SHOW PROCESSLIST"
+Connection refused or Unknown database
 ```
 
 **解决方案**：
-- 确认MySQL插件已启动
-- 检查防火墙设置
-- 验证用户名密码正确
 
-#### 3. Redis连接失败
+1. 检查MySQL服务是否正常运行
+2. 验证环境变量配置正确
+3. 确认数据库已创建
+4. 检查数据库初始化脚本是否已执行
 
-**排查命令**：
+```bash
+# 测试数据库连接
+mysql -h hostname -P 3306 -u root -p -e "SHOW DATABASES;"
+```
+
+### 问题3：Redis连接失败
+
+**症状**：
+```
+Cannot connect to Redis
+```
+
+**解决方案**：
+
+1. 检查Redis服务是否正常运行
+2. 验证主机地址和端口
+3. 如果有密码，确保配置了密码
+
 ```bash
 # 测试Redis连接
-railway run redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
+redis-cli -h hostname -p 6379 ping
 ```
 
-#### 4. RabbitMQ消息不消费（推荐使用RabbitMQ）
+### 问题4：RocketMQ连接失败
 
-**排查步骤**：
-1. 确认RabbitMQ服务可用（访问Management UI）
-2. 检查Java服务日志中的RabbitMQ连接
-3. 验证Topic和Queue配置
-
-**RabbitMQ Management UI地址**：
+**症状**：
 ```
-http://rabbitmq.railway.internal:15672
-或通过Railway公共URL访问
+RocketMQ connection failed
 ```
 
-**验证RabbitMQ连接**：
-```bash
-# 使用Railway CLI进入服务容器
-railway run bash
+**解决方案**：
 
-# 测试RabbitMQ连接
-rabbitmq-diagnostics -p / check_running
-rabbitmq-diagnostics -p / list_queues
+1. 确认RocketMQ服务地址正确
+2. 检查NameServer是否可访问
+3. 确保防火墙开放9876端口
+
+### 问题5：内存不足
+
+**症状**：
+```
+Java heap space error or OOMKilled
 ```
 
-**Jeepay RabbitMQ配置检查**：
-```yaml
-# 确保配置正确
-isys:
-  mq:
-    vender: rabbitMQ
+**解决方案**：
 
-spring:
-  rabbitmq:
-    host: ${RABBITMQ_HOST}
-    port: 5672
-    username: ${RABBITMQ_USER}
-    password: ${RABBITMQ_PASSWORD}
-    virtual-host: /
-    listener:
-      simple:
-        acknowledge-mode: manual
-        retry:
-          enabled: true
-          initial-interval: 3000
-          max-attempts: 3
-```
-
-**常见RabbitMQ问题**：
-
-| 问题 | 原因 | 解决方案 |
-|------|------|---------|
-| 连接被拒绝 | 主机地址错误 | 检查RABBITMQ_HOST变量 |
-| 认证失败 | 用户名密码错误 | 检查RABBITMQ_USER/PASSWORD |
-| Queue不存在 | 启动顺序问题 | 重启Java服务 |
-| 消息堆积 | 消费者未启动 | 检查日志，查看消费端错误 |
-
-### 资源优化
-
-#### 内存问题
+在Railway Dashboard设置环境变量：
 
 ```bash
-# 调整JVM堆内存
-java -Xms512m -Xmx1024m -jar jeepay-payment.jar
+JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
 ```
 
-#### 数据库连接池
+或在Dockerfile中修改：
 
-```yaml
-spring:
-  datasource:
-    druid:
-      max-active: 20
-      initial-size: 5
-      min-idle: 5
+```dockerfile
+ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC"
+```
+
+### 问题6：端口冲突
+
+**症状**：
+```
+Port 9217 is already in use
+```
+
+**解决方案**：
+
+1. 检查Railway端口配置
+2. 确保SERVER_PORT环境变量设置为9217
+3. 如果本地测试，确保本地端口未被占用
+
+---
+
+## 验证部署
+
+### 1. 检查服务状态
+
+在Railway Dashboard中：
+- 确认服务状态为 "Running"
+- 确认健康检查通过
+
+### 2. 查看日志
+
+```bash
+# 查看构建日志
+railway logs jeepay-manager --verbose
+
+# 查看运行时日志
+railway logs jeepay-manager
+```
+
+### 3. 访问应用
+
+```bash
+# 获取应用URL
+railway open jeepay-manager
+
+# 或直接访问
+curl http://your-app-url.railway.app/health
+```
+
+### 4. 验证数据库连接
+
+在应用日志中搜索：
+```
+Database connection successful
+```
+
+或检查错误日志：
+```
+Failed to configure DataSource
+```
+
+### 5. 功能测试
+
+访问管理界面：
+- URL: `http://your-app-url.railway.app`
+- 默认账号: `admin` / `admin123456`
+
+---
+
+## 完整环境变量清单
+
+以下是Jeepay Manager的所有可选环境变量：
+
+```bash
+# ==================== 数据库配置 ====================
+SPRING_DATASOURCE_URL=jdbc:mysql://mysql-host:3306/jeepaydb?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+SPRING_DATASOURCE_USERNAME=root
+SPRING_DATASOURCE_PASSWORD=your_password
+
+# ==================== Redis配置 ====================
+SPRING_DATA_REDIS_HOST=redis-host
+SPRING_DATA_REDIS_PORT=6379
+SPRING_DATA_REDIS_PASSWORD=
+
+# ==================== RocketMQ配置 ====================
+ROCKETMQ_NAMESRV_ADDR=rocketmq-host:9876
+
+# ==================== 应用配置 ====================
+SERVER_PORT=9217
+SPRING_APPLICATION_NAME=jeepay-manager
+
+# ==================== 日志配置 ====================
+LOGGING_LEVEL_ROOT=INFO
+LOGGING_LEVEL_COM_JEEQUAN=DEBUG
+
+# ==================== JVM配置 ====================
+JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
+
+# ==================== 安全配置（可选）================
+# SPRING_SECURITY_ENABLED=false
 ```
 
 ---
 
-## 成本优化
+## 快速参考
 
-### Railway定价
+### Railway部署检查清单
 
-| 计划 | 价格 | 资源 |
-|------|------|------|
-| Starter | 免费 | 有限资源 |
-| Pro | 按量计费 | CPU/RAM/Disk |
-| Team | 按量计费 | 团队协作 |
-
-### 优化建议
-
-1. **开发环境**：使用Starter计划
-2. **生产环境**：选择Pro计划，按需扩展
-3. **使用Nixpacks**：减少镜像构建时间
-4. **合理配置健康检查**：避免无效容器占用资源
-5. **及时清理日志**：避免存储费用增长
-
-### 成本估算（参考）
-
-| 服务 | 内存 | 预估成本/月 |
-|------|------|-----------|
-| Payment | 1GB | $5-10 |
-| Manager | 512MB | $3-5 |
-| Merchant | 512MB | $3-5 |
-| MySQL | 1GB | $5-10 |
-| Redis | 256MB | $2-3 |
-| **总计** | **~3.5GB** | **$20-35** |
-
----
-
-## 快速检查清单
-
-### 部署前检查
-
-- [ ] Railway账号已创建
-- [ ] GitHub仓库已Fork
-- [ ] MySQL插件已添加
-- [ ] Redis插件已添加（如需要）
-- [ ] 外部RocketMQ已配置（如不使用RabbitMQ）
-- [ ] 环境变量已配置
-- [ ] 数据库初始化SQL已导入
-
-### 部署后检查
-
-- [ ] 所有服务状态为 "Running"
+- [ ] 已连接GitHub仓库
+- [ ] Dockerfile路径设置正确：`jeepay-manager/Dockerfile.railway`
+- [ ] 端口设置为：9217
+- [ ] MySQL环境变量已配置
+- [ ] Redis环境变量已配置
+- [ ] RocketMQ环境变量已配置
+- [ ] 数据库已初始化
 - [ ] 健康检查通过
-- [ ] 数据库连接正常
-- [ ] Redis连接正常
-- [ ] MQ消息正常消费
-- [ ] 前端可正常访问
-- [ ] 支付接口可正常调用
 
-### 生产环境检查
+### 常用Railway命令
 
-- [ ] HTTPS已配置
-- [ ] 域名已解析
-- [ ] 支付渠道回调已配置
-- [ ] 日志监控已设置
-- [ ] 备份策略已配置
-- [ ] 告警机制已设置
+```bash
+# 部署
+railway up
+
+# 查看日志
+railway logs jeepay-manager
+
+# 进入容器
+railway run jeepay-manager
+
+# 设置环境变量
+railway variables set KEY=VALUE
+
+# 查看变量
+railway variables
+
+# 打开Dashboard
+railway open
+
+# 重启服务
+railway redeploy jeepay-manager
+```
 
 ---
 
-*本文档详细说明了Jeepay在Railway平台上的部署方案。如有问题，请参考官方文档或提交Issue。*
+## 获取帮助
+
+如果问题仍未解决：
+
+1. **查看完整日志**：
+   ```bash
+   railway logs jeepay-manager --verbose
+   ```
+
+2. **检查Railway状态**：
+   - [Railway Status](https://status.railway.app)
+   - [Railway Documentation](https://docs.railway.app)
+
+3. **提交Issue**：
+   在GitHub仓库提交问题时，请附上：
+   - 完整的错误日志
+   - Railway部署配置截图
+   - 环境变量配置（隐藏敏感信息）
+   - 构建日志
+
+---
+
+**祝你部署顺利！** 🎉
