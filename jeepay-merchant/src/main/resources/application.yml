@@ -1,5 +1,7 @@
 server:
   port: 9218 #设置端口
+  http2:
+    enabled: true
 
 spring:
   application:
