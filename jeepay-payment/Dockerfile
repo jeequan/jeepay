@@ -1,42 +1,29 @@
 #
-#   Jeepay 多阶段构建 Dockerfiles
-#   适用于 GitHub Actions、GitLab CI 等 CI/CD 平台
+#   jeepay-payment（支付网关） java程序镜像构建脚本
 #
 
-# ==================== Jeepay Payment Gateway ====================
-FROM maven:3.9-eclipse-temurin-17 AS payment-builder
+# Eclipse Temurin JRE 17（openjdk 官方镜像已停止维护）
+ARG BASE_IMAGE=swr.cn-south-1.myhuaweicloud.com/jeepay/eclipse-temurin:17-jre
+FROM ${BASE_IMAGE}
 
-WORKDIR /build
-
-COPY pom.xml .
-COPY jeepay-core pom.xml jeepay-core/
-COPY jeepay-service pom.xml jeepay-service/
-COPY jeepay-components pom.xml jeepay-components/
-COPY jeepay-z-codegen pom.xml jeepay-z-codegen/
-COPY jeepay-payment pom.xml jeepay-payment/
-
-RUN mvn -B -DskipTests clean package -pl jeepay-payment -am
-
-FROM eclipse-temurin:17-jre
-
-LABEL maintainer="jeepay"
-description="Jeepay Payment Gateway Service"
+LABEL maintainer="Terrfly"
 
 ENV LANG=C.UTF-8
 ENV TZ=Asia/Shanghai
-ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC"
 
 EXPOSE 9216
 
-RUN mkdir -p /jeepayhomes/service/app \
-    /jeepayhomes/service/logs \
-    /jeepayhomes/service/uploads
+VOLUME ["/jeepayhomes/service/logs", "/jeepayhomes/service/uploads"]
 
-COPY --from=payment-builder /build/jeepay-payment/target/jeepay-payment.jar /jeepayhomes/service/app/jeepay-payment.jar
+RUN mkdir -p /jeepayhomes/service/app
+
+COPY ./target/jeepay-payment.jar /jeepayhomes/service/app/jeepay-payment.jar
 
 WORKDIR /jeepayhomes/service/app
 
-CMD ["sh", "-c", "java $JAVA_OPTS -jar jeepay-payment.jar"]
+# 显式指定外部配置路径，便于 Docker 部署时挂载覆盖
+CMD ["java", "-jar", "jeepay-payment.jar", "--spring.config.additional-location=file:/jeepayhomes/service/app/application.yml"]
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=12 \
-    CMD curl -f http://localhost:9216/ || exit 1
+# 端口探测，不依赖 curl/wget 等外部工具
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD bash -c 'echo > /dev/tcp/localhost/9216'
