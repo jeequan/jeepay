@@ -1,0 +1,27 @@
+#
+# Jeepay Manager (运营平台) Dockerfile for Railway
+# 适用于预构建jar文件的场景
+#
+
+FROM eclipse-temurin:17-jre
+
+LABEL maintainer="jeepay"
+description="Jeepay Manager Admin Panel"
+
+ENV LANG=C.UTF-8
+ENV TZ=Asia/Shanghai
+ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError"
+
+WORKDIR /jeepayhomes/service/app
+
+RUN mkdir -p /jeepayhomes/service/logs \
+    /jeepayhomes/service/uploads
+
+COPY jeepay-manager.jar /jeepayhomes/service/app/jeepay-manager.jar
+
+EXPOSE 9217
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=12 \
+    CMD curl -f http://localhost:9217/ || exit 1
+
+CMD ["sh", "-c", "java $JAVA_OPTS -jar jeepay-manager.jar"]
