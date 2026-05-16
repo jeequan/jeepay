@@ -142,6 +142,7 @@ services:
         condition: service_healthy
     volumes:
       - ./logs/payment:/jeepayhomes/service/logs
+      - ./conf/payment/application.yml:/jeepayhomes/service/app/application.yml:ro
       - uploads_payment:/jeepayhomes/service/uploads
     networks:
       - jeepay-network
@@ -202,6 +203,7 @@ services:
         condition: service_healthy
     volumes:
       - ./logs/manager:/jeepayhomes/service/logs
+      - ./conf/manager/application.yml:/jeepayhomes/service/app/application.yml:ro
       - uploads_manager:/jeepayhomes/service/uploads
     networks:
       - jeepay-network
@@ -262,6 +264,7 @@ services:
         condition: service_healthy
     volumes:
       - ./logs/merchant:/jeepayhomes/service/logs
+      - ./conf/merchant/application.yml:/jeepayhomes/service/app/application.yml:ro
       - uploads_merchant:/jeepayhomes/service/uploads
     networks:
       - jeepay-network

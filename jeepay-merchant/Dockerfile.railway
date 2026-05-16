@@ -21,7 +21,6 @@ COPY target/jeepay-merchant.jar /jeepayhomes/service/app/jeepay-merchant.jar
 
 # 创建空的application.yml文件（必须存在，否则Spring Boot会报错）
 RUN echo '# Minimal configuration - using environment variables' > /jeepayhomes/service/app/application.yml
-
 EXPOSE 9218
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=12 \
