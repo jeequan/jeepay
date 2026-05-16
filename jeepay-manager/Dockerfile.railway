@@ -1,8 +1,37 @@
 #
 # Jeepay Manager (运营平台) Dockerfile for Railway
-# Optimized for Railway deployment
+# 自动构建jar文件
 #
 
+FROM maven:3.9-eclipse-temurin-17 AS builder
+
+WORKDIR /build
+
+# 复制pom文件
+COPY pom.xml /build/
+COPY jeepay-z-codegen/pom.xml /build/jeepay-z-codegen/
+COPY jeepay-core/pom.xml /build/jeepay-core/
+COPY jeepay-service/pom.xml /build/jeepay-service/
+COPY jeepay-components/pom.xml /build/jeepay-components/
+COPY jeepay-components/jeepay-components-mq/pom.xml /build/jeepay-components/jeepay-components-mq/
+COPY jeepay-components/jeepay-components-oss/pom.xml /build/jeepay-components/jeepay-components-oss/
+COPY jeepay-manager/pom.xml /build/jeepay-manager/
+
+# 复制源码
+COPY jeepay-z-codegen/src /build/jeepay-z-codegen/src
+COPY jeepay-core/src /build/jeepay-core/src
+COPY jeepay-service/src /build/jeepay-service/src
+COPY jeepay-components/src /build/jeepay-components/src
+COPY jeepay-manager/src /build/jeepay-manager/src
+
+# 复制配置文件
+COPY conf/devCommons /build/conf/devCommons
+COPY jeepay-manager/src/main/resources /build/jeepay-manager/src/main/resources
+
+# 构建项目（跳过测试）
+RUN mvn clean package -DskipTests -q
+
+# 第二阶段：运行时镜像
 FROM eclipse-temurin:17-jre
 
 LABEL maintainer="jeepay"
@@ -17,7 +46,7 @@ WORKDIR /jeepayhomes/service/app
 RUN mkdir -p /jeepayhomes/service/logs \
     /jeepayhomes/service/uploads
 
-COPY target/jeepay-manager.jar /jeepayhomes/service/app/jeepay-manager.jar
+COPY --from=builder /build/jeepay-manager/target/jeepay-manager.jar /jeepayhomes/service/app/jeepay-manager.jar
 
 EXPOSE 9217
 
