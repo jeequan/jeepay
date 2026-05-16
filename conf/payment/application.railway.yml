@@ -8,6 +8,8 @@
 
 server:
   port: 9216
+  http2:
+    enabled: true
   servlet:
     context-path: /
   forward-headers-strategy: framework
