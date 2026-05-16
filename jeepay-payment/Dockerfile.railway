@@ -1,7 +1,20 @@
 #
-# Jeepay Payment Gateway Dockerfile for Railway
-# Optimized for Railway deployment
+#   Jeepay Payment Gateway Dockerfile for Railway
+#   Optimized for Railway deployment with multi-stage build
 #
+
+FROM maven:3.9-eclipse-temurin-17 AS builder
+
+WORKDIR /build
+
+COPY pom.xml .
+COPY jeepay-core pom.xml jeepay-core/
+COPY jeepay-service pom.xml jeepay-service/
+COPY jeepay-components pom.xml jeepay-components/
+COPY jeepay-z-codegen pom.xml jeepay-z-codegen/
+COPY jeepay-payment pom.xml jeepay-payment/
+
+RUN mvn -B -DskipTests clean package -pl jeepay-payment -am
 
 FROM eclipse-temurin:17-jre
 
@@ -15,12 +28,11 @@ ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError"
 WORKDIR /jeepayhomes/service/app
 
 RUN mkdir -p /jeepayhomes/service/logs \
-    /jeepayhomes/service/uploads
+    /jeepayhomes/service/uploads \
+    /jeepayhomes/service/app
 
-COPY target/jeepay-payment.jar /jeepayhomes/service/app/jeepay-payment.jar
+COPY --from=builder /build/jeepay-payment/target/jeepay-payment.jar /jeepayhomes/service/app/jeepay-payment.jar
 
-# 创建空的application.yml文件（必须存在，否则Spring Boot会报错）
-RUN echo '# Minimal configuration - using environment variables' > /jeepayhomes/service/app/application.yml
 EXPOSE 9216
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=12 \

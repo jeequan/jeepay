@@ -1,28 +1,42 @@
 #
-#   jeepay-manager（运营平台） java程序镜像构建脚本
+#   Jeepay 多阶段构建 Dockerfiles
+#   适用于 GitHub Actions、GitLab CI 等 CI/CD 平台
 #
 
-# Eclipse Temurin JRE 17（openjdk 官方镜像已停止维护）
-ARG BASE_IMAGE=swr.cn-south-1.myhuaweicloud.com/jeepay/eclipse-temurin:17-jre
-FROM ${BASE_IMAGE}
+# ==================== Jeepay Manager (运营平台) ====================
+FROM maven:3.9-eclipse-temurin-17 AS manager-builder
 
-LABEL maintainer="Terrfly"
+WORKDIR /build
+
+COPY pom.xml .
+COPY jeepay-core pom.xml jeepay-core/
+COPY jeepay-service pom.xml jeepay-service/
+COPY jeepay-components pom.xml jeepay-components/
+COPY jeepay-z-codegen pom.xml jeepay-z-codegen/
+COPY jeepay-manager pom.xml jeepay-manager/
+
+RUN mvn -B -DskipTests clean package -pl jeepay-manager -am
+
+FROM eclipse-temurin:17-jre
+
+LABEL maintainer="jeepay"
+description="Jeepay Manager Admin Panel"
 
 ENV LANG=C.UTF-8
 ENV TZ=Asia/Shanghai
+ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC"
 
 EXPOSE 9217
 
-VOLUME ["/jeepayhomes/service/logs", "/jeepayhomes/service/uploads"]
+RUN mkdir -p /jeepayhomes/service/app \
+    /jeepayhomes/service/logs \
+    /jeepayhomes/service/uploads
 
-RUN mkdir -p /jeepayhomes/service/app
-
-COPY ./target/jeepay-manager.jar /jeepayhomes/service/app/jeepay-manager.jar
+COPY --from=manager-builder /build/jeepay-manager/target/jeepay-manager.jar /jeepayhomes/service/app/jeepay-manager.jar
 
 WORKDIR /jeepayhomes/service/app
 
-CMD ["java", "-jar", "jeepay-manager.jar", "--spring.config.additional-location=file:/jeepayhomes/service/app/application.yml"]
+CMD ["sh", "-c", "java $JAVA_OPTS -jar jeepay-manager.jar"]
 
-# 端口探测，不依赖 curl/wget 等外部工具
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD bash -c 'echo > /dev/tcp/localhost/9217'
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=12 \
+    CMD curl -f http://localhost:9217/ || exit 1

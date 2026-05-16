@@ -1,7 +1,20 @@
 #
-# Jeepay Merchant (商户平台) Dockerfile for Railway
-# Optimized for Railway deployment
+#   Jeepay Merchant (商户平台) Dockerfile for Railway
+#   Optimized for Railway deployment with multi-stage build
 #
+
+FROM maven:3.9-eclipse-temurin-17 AS builder
+
+WORKDIR /build
+
+COPY pom.xml .
+COPY jeepay-core pom.xml jeepay-core/
+COPY jeepay-service pom.xml jeepay-service/
+COPY jeepay-components pom.xml jeepay-components/
+COPY jeepay-z-codegen pom.xml jeepay-z-codegen/
+COPY jeepay-merchant pom.xml jeepay-merchant/
+
+RUN mvn -B -DskipTests clean package -pl jeepay-merchant -am
 
 FROM eclipse-temurin:17-jre
 
@@ -15,12 +28,11 @@ ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError"
 WORKDIR /jeepayhomes/service/app
 
 RUN mkdir -p /jeepayhomes/service/logs \
-    /jeepayhomes/service/uploads
+    /jeepayhomes/service/uploads \
+    /jeepayhomes/service/app
 
-COPY target/jeepay-merchant.jar /jeepayhomes/service/app/jeepay-merchant.jar
+COPY --from=builder /build/jeepay-merchant/target/jeepay-merchant.jar /jeepayhomes/service/app/jeepay-merchant.jar
 
-# 创建空的application.yml文件（必须存在，否则Spring Boot会报错）
-RUN echo '# Minimal configuration - using environment variables' > /jeepayhomes/service/app/application.yml
 EXPOSE 9218
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=12 \
