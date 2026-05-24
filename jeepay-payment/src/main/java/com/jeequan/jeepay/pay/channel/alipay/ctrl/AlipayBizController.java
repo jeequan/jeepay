@@ -38,6 +38,7 @@ import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -73,10 +74,16 @@ public class AlipayBizController extends AbstractCtrl {
     @RequestMapping("/redirectAppToAppAuth/{isvAndMchAppId}")
     public void redirectAppToAppAuth(@PathVariable("isvAndMchAppId") String isvAndMchAppId) throws IOException {
 
-        String isvNo = isvAndMchAppId.split("_")[0];
+        Pair<String, String> parsed = AlipayKit.parseIsvAndMchAppIdState(isvAndMchAppId);
+        if (parsed == null) {
+            throw new BizException("授权参数非法：isvAndMchAppId 格式应为 ISVNO_MCHAPPID");
+        }
+        String isvNo = parsed.getLeft();
 
         AlipayIsvParams alipayIsvParams = (AlipayIsvParams) configContextQueryService.queryIsvParams(isvNo, CS.IF_CODE.ALIPAY);
-        alipayIsvParams.getSandbox();
+        if (alipayIsvParams == null) {
+            throw new BizException("ISV [" + isvNo + "] 未配置支付宝参数");
+        }
 
         String oauthUrl = AlipayConfig.PROD_APP_TO_APP_AUTH_URL;
         if(alipayIsvParams.getSandbox() != null && alipayIsvParams.getSandbox() == CS.YES){
@@ -101,10 +108,17 @@ public class AlipayBizController extends AbstractCtrl {
 
             if(StringUtils.isNotEmpty(isvAndMchAppId) && StringUtils.isNotEmpty(appAuthCode)){
                 isAlipaySysAuth = false;
-                String isvNo = isvAndMchAppId.split("_")[0];
-                String mchAppId = isvAndMchAppId.split("_")[1];
+
+                Pair<String, String> parsed = AlipayKit.parseIsvAndMchAppIdState(isvAndMchAppId);
+                if (parsed == null) {
+                    throw new BizException("授权回调 state 格式非法：应为 ISVNO_MCHAPPID");
+                }
+                String mchAppId = parsed.getRight();
 
                 MchApp mchApp = mchAppService.getById(mchAppId);
+                if (mchApp == null) {
+                    throw new BizException("商户应用 [" + mchAppId + "] 不存在");
+                }
 
                 MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchApp.getMchNo(), mchAppId);
                 AlipayClientWrapper alipayClientWrapper = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext);
