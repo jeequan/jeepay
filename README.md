@@ -170,6 +170,14 @@ Jeepay 已提供 Java、Python SDK，以及 PHP 对接 Demo：
 - SDK 下载地址：<https://doc.jeequan.com/#/integrate/open/api/116>
 - Java SDK 仓库：<https://github.com/jeequan/jeepay-sdk-java>
 
+## AI 接入助手
+
+如果你用 Claude / Cursor / ChatGPT 等 AI 工具接入 Jeepay，可以使用 [Jeepay Skills](https://github.com/jeequan/jeepay-skills) —— 把签名陷阱、字段大小写、wayCode 选择等 AI 容易踩坑的细节系统化整理，让 AI 一次接对。
+
+- 仓库地址：<https://github.com/jeequan/jeepay-skills>
+- 支持 Claude Code / Cursor / Cline / 网页 AI（claude.ai · ChatGPT · 通义千问 · 文心一言）
+- 也可作为纯文档浏览，不用 AI 也能直接看接入指南
+
 ## 项目地址
 
 - 服务端：[GitHub](https://github.com/jeequan/jeepay) · [Gitee](https://gitee.com/jeequan/jeepay) · [GitCode](https://gitcode.com/jeequantech/jeepay)
