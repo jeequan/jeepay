@@ -23,15 +23,18 @@ import com.jeequan.jeepay.core.exception.ResponseException;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayConfig;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
+import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.pay.channel.AbstractChannelNoticeService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.Map;
 
 /*
@@ -75,6 +78,7 @@ public class AlipayChannelNoticeService extends AbstractChannelNoticeService {
             //配置参数获取
             Byte useCert = null;
             String alipaySignType, alipayPublicCert, alipayPublicKey = null;
+            String expectedAppId; // 业务字段交叉校验用
             if(mchAppConfigContext.isIsvsubMch()){
 
                 // 获取支付参数
@@ -83,6 +87,7 @@ public class AlipayChannelNoticeService extends AbstractChannelNoticeService {
                 alipaySignType = alipayParams.getSignType();
                 alipayPublicCert = alipayParams.getAlipayPublicCert();
                 alipayPublicKey = alipayParams.getAlipayPublicKey();
+                expectedAppId = alipayParams.getAppId();
 
             }else{
 
@@ -93,6 +98,7 @@ public class AlipayChannelNoticeService extends AbstractChannelNoticeService {
                 alipaySignType = alipayParams.getSignType();
                 alipayPublicCert = alipayParams.getAlipayPublicCert();
                 alipayPublicKey = alipayParams.getAlipayPublicKey();
+                expectedAppId = alipayParams.getAppId();
             }
 
             // 获取请求参数
@@ -111,6 +117,33 @@ public class AlipayChannelNoticeService extends AbstractChannelNoticeService {
             //验签失败
             if(!verifyResult){
                 throw ResponseException.buildText("ERROR");
+            }
+
+            // 业务字段交叉校验：验签通过仅证明请求来自支付宝并由本商户密钥签名，
+            // 不保证回调内容就是这笔本地订单。多商户配置切换 / 跨订单签名穿越 / 沙箱与生产串扰
+            // 等场景下，仍可能出现 out_trade_no、金额、app_id 与本地订单上下文不一致的回调。
+            // 任一字段不一致 → 记 ERROR 日志 + 返回 SUCCESS 阻断支付宝重试 8 次 + 不更新订单状态。
+            String notifyOutTradeNo = jsonParams.getString("out_trade_no");
+            String notifyAppId = jsonParams.getString("app_id");
+            String notifyTotalAmount = jsonParams.getString("total_amount");
+            String expectedTotalAmount = AmountUtil.convertCent2Dollar(payOrder.getAmount());
+            boolean amountMatch;
+            try {
+                amountMatch = new BigDecimal(notifyTotalAmount).compareTo(new BigDecimal(expectedTotalAmount)) == 0;
+            } catch (NumberFormatException e) {
+                amountMatch = false;
+            }
+            if (!StringUtils.equals(notifyOutTradeNo, payOrder.getPayOrderId())
+                    || !StringUtils.equals(notifyAppId, expectedAppId)
+                    || !amountMatch) {
+                log.error("支付宝异步回调业务字段不匹配，已拒绝处理。out_trade_no=[{}] expected=[{}]; app_id=[{}] expected=[{}]; total_amount=[{}] expected=[{}]",
+                        notifyOutTradeNo, payOrder.getPayOrderId(),
+                        notifyAppId, expectedAppId,
+                        notifyTotalAmount, expectedTotalAmount);
+                ChannelRetMsg dropped = new ChannelRetMsg();
+                dropped.setResponseEntity(textResp("SUCCESS"));
+                dropped.setChannelState(ChannelRetMsg.ChannelState.UNKNOWN);
+                return dropped;
             }
 
             //验签成功后判断上游订单状态

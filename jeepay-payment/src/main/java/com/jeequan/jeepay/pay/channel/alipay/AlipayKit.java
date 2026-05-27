@@ -27,6 +27,8 @@ import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 /*
 * 【支付宝】支付通道工具包
@@ -106,6 +108,30 @@ public class AlipayKit {
 
     public static String appendErrCode(String code, String subCode){
         return StringUtils.defaultIfEmpty(subCode, code); //优先： subCode
+    }
+
+    /**
+     * 解析支付宝授权回调中拼接的 state 参数（格式：ISVNO_MCHAPPID）。
+     *
+     * 历史上 controller 直接写 split("_")[0]/[1]，没做边界校验：
+     * 空串、不含 "_"、或者 "_" 在首尾的输入都会触发 ArrayIndexOutOfBoundsException
+     * 或得到空字符串，进而被恶意构造的请求触发回调链路 500。
+     *
+     * 使用 indexOf 取第一个 "_" 切分，而不是 split，避免 mchAppId 内部含 "_" 时被切碎。
+     *
+     * @return ImmutablePair(isvNo, mchAppId)；解析失败返回 null，由调用方决定如何提示
+     */
+    public static Pair<String, String> parseIsvAndMchAppIdState(String state) {
+        if (StringUtils.isEmpty(state)) {
+            return null;
+        }
+        int idx = state.indexOf('_');
+        // idx <= 0：没有 "_" 或 "_" 在最前面（isvNo 为空）
+        // idx >= state.length() - 1：" _" 在最后（mchAppId 为空）
+        if (idx <= 0 || idx >= state.length() - 1) {
+            return null;
+        }
+        return ImmutablePair.of(state.substring(0, idx), state.substring(idx + 1));
     }
 
     public static String appendErrMsg(String msg, String subMsg){
