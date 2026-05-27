@@ -248,23 +248,9 @@
 7. 修复： 移除 codegen 未用的 spring-context 依赖（消除 CVE-2024-38820 / CVE-2025-22233）
 
 [v3.2.9_20260527]
-> 安全 / 健壮性补丁版本：业务代码改动集中在支付宝渠道的安全加固和 install 脚本
-> 健壮性，与 V3.2.8 业务镜像基本兼容；其中支付宝异步通知验签升级建议受影响
-> 部署重新构建并发布 jeepay-payment 镜像。
-1. 修复： 支付宝授权回调 state 参数解析鲁棒性——AlipayBizController.redirectAppToAppAuth /
-   appToAppAuthCallback 不再直接 split("_")[0]/[1]，抽出 AlipayKit.parseIsvAndMchAppIdState
-   工具方法做长度 / 空值校验，配 mchAppService.getById 空校验，异常或被构造的 state
-   不再触发 ArrayIndexOutOfBoundsException / NPE。
-2. 修复： 支付宝异步通知补业务字段交叉校验——AlipayChannelNoticeService.doNotice
-   在验签通过后再校验 out_trade_no / app_id / total_amount 三字段与本地订单一致，
-   消除多商户 / 沙箱与生产串扰 / 跨订单签名穿越场景下"看似合法但内容不匹配"通知
-   误处理风险。任一字段不一致 → 记 ERROR 日志 + 返回 SUCCESS 阻断重试 + 不更新订单状态。
-3. 修复： install.sh 在 git clone 源码后加 require_ok 断言，tag 不存在或拉取失败
-   时立即硬退出，不再出现"实际是 git clone 失败但报到下游 MySQL 配置步骤"的误报。
-4. 优化： conf/{payment,manager,merchant,devCommons/config}/application.yml 里
-   spring.activemq 段统一注释掉。默认 isys.mq.vender 已切到 rocketMQ 后，activemq
-   starter 仍会去连 activemq5:61616 重试，本次清理后启动日志不再有此类后台连接噪音。
+1. 修复： 支付宝授权回调 state 解析鲁棒性，异常或被构造的 state 不再触发 NPE / 数组越界
+2. 修复： 支付宝异步通知补 out_trade_no / app_id / total_amount 业务字段交叉校验，消除多商户 / 跨订单签名穿越场景的误处理风险（建议受影响部署重新发布 jeepay-payment 镜像）
+3. 修复： install.sh git clone 失败时立即硬退出，不再让后续步骤误报根因
+4. 优化： conf/*/application.yml 默认 MQ 切到 rocketMQ 后，统一注释掉 spring.activemq 段，消除后台连接 activemq5 的噪音
 5. 文档： README 增加"AI 接入助手"段，指向 jeepay-skills 仓库
-   （https://github.com/jeequan/jeepay-skills），供使用 Claude / Cursor / ChatGPT
-   等 AI 工具接入 Jeepay 的开发者。
-6. 优化： install.sh 默认 jeepayRef 由 V3.2.8 跟进到 V3.2.9。
+6. 优化： install.sh 默认 jeepayRef 由 V3.2.8 跟进到 V3.2.9
