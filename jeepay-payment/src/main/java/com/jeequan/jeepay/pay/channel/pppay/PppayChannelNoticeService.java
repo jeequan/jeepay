@@ -72,8 +72,8 @@ public class PppayChannelNoticeService extends AbstractChannelNoticeService {
         JSONObject object = (JSONObject) params;
         // 获取 Paypal 订单 ID
         String ppOrderId = object.getStr("token");
-        // 统一处理订单
-        return mchAppConfigContext.getPaypalWrapper().processOrder(ppOrderId, payOrder);
+        // 通过 ConfigContextQueryService 获取 PaypalWrapper，兼容缓存和非缓存模式
+        return configContextQueryService.getPaypalWrapper(mchAppConfigContext).processOrder(ppOrderId, payOrder);
     }
 
     public ChannelRetMsg doNotify(HttpServletRequest request, Object params, PayOrder payOrder,
@@ -81,7 +81,7 @@ public class PppayChannelNoticeService extends AbstractChannelNoticeService {
         JSONObject object = (JSONObject) params;
         // 获取 Paypal 订单 ID
         String ppOrderId = object.getByPath("resource.id", String.class);
-        // 统一处理订单
-        return mchAppConfigContext.getPaypalWrapper().processOrder(ppOrderId, payOrder, true);
+        // 通过 ConfigContextQueryService 获取 PaypalWrapper，兼容缓存和非缓存模式
+        return configContextQueryService.getPaypalWrapper(mchAppConfigContext).processOrder(ppOrderId, payOrder, true);
     }
 }
