@@ -1,0 +1,17 @@
+name: "🚀 Feature Request / 功能建议"
+description: "Suggest a new payment channel, manager panel styling, or Docker configuration improvement"
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Suggest enhancements for Jeepay. / 欢迎为 Jeepay 提出功能或部署优化建议。
+  - type: textarea
+    id: details
+    attributes:
+      label: "Proposed Feature Details / 功能或优化详情"
+      description: "What new integration channels or configurations should be added?"
+      placeholder: "Add support for Paypal integration channel..."
+    validations:
+      required: true
