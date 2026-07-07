@@ -249,69 +249,6 @@ services:
       jeepay:
         ipv4_address: 172.20.0.23
 
-  ui-payment:
-    build:
-      context: ${UI_BASE_DIR:-..}/jeepay-ui
-      dockerfile: Dockerfile
-      args:
-        PLATFORM: cashier
-    image: jeepay-ui-payment:latest
-    hostname: payment-ui
-    container_name: jeepay-ui-payment
-    restart: always
-    environment:
-      - BACKEND_HOST=172.20.0.21:9216
-    ports:
-      - "9226:80"
-    depends_on:
-      payment:
-        condition: service_healthy
-    networks:
-      jeepay:
-        ipv4_address: 172.20.0.31
-
-  ui-manager:
-    build:
-      context: ${UI_BASE_DIR:-..}/jeepay-ui
-      dockerfile: Dockerfile
-      args:
-        PLATFORM: manager
-    image: jeepay-ui-manager:latest
-    hostname: manager-ui
-    container_name: jeepay-ui-manager
-    restart: always
-    environment:
-      - BACKEND_HOST=172.20.0.22:9217
-    ports:
-      - "9227:80"
-    depends_on:
-      manager:
-        condition: service_healthy
-    networks:
-      jeepay:
-        ipv4_address: 172.20.0.32
-
-  ui-merchant:
-    build:
-      context: ${UI_BASE_DIR:-..}/jeepay-ui
-      dockerfile: Dockerfile
-      args:
-        PLATFORM: merchant
-    image: jeepay-ui-merchant:latest
-    hostname: merchant-ui
-    container_name: jeepay-ui-merchant
-    restart: always
-    environment:
-      - BACKEND_HOST=172.20.0.23:9218
-    ports:
-      - "9228:80"
-    depends_on:
-      merchant:
-        condition: service_healthy
-    networks:
-      jeepay:
-        ipv4_address: 172.20.0.33
-
   # 如果你需要对外完整配置，可以使用下面的方式
   # https://www.digitalocean.com/community/tools/nginx?domains.0.server.domain=pay.test.com&domains.0.server.documentRoot=&domains.0.server.redirectSubdomains=false&domains.0.https.hsts=false&domains.0.https.hstsPreload=true&domains.0.php.php=false&domains.0.reverseProxy.reverseProxy=true&domains.0.reverseProxy.proxyPass=http%3A%2F%2F172.20.0.26%3A9226&domains.0.routing.index=index.html&domains.0.routing.fallbackHtml=true&domains.0.routing.fallbackPhp=false&domains.0.logging.accessLog=true&domains.0.logging.errorLog=true&global.reverseProxy.proxyCoexistenceXForwarded=remove&global.app.lang=zhCN
   # 访问并配置好所有域名和代理，下载文件放到项目根目录下取名叫做 nginx.tar.gz
