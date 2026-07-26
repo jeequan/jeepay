@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
 import javax.crypto.Cipher;
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -93,18 +94,19 @@ class StarposSignerTest {
     }
 
     @Test
-    void rsa_protocol_uses_public_key_encrypt_then_public_key_decrypt() throws Exception {
+    void rsa_protocol_uses_public_key_encrypt_for_request_and_public_key_decrypt_for_notification()
+            throws Exception {
         KeyPair keyPair = generateKeyPair();
         Map<String, Object> request = requestFields();
 
         String publicKeyPem = pem("PUBLIC KEY", keyPair.getPublic().getEncoded());
         String publicKeyBase64 = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
-        String signature = StarposSigner.signRequest(request, publicKeyPem);
+        String requestCiphertext = StarposSigner.signRequest(request, publicKeyPem);
 
-        Cipher decryptor = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        decryptor.init(Cipher.DECRYPT_MODE, keyPair.getPublic());
+        Cipher requestDecryptor = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        requestDecryptor.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
         String decryptedHash = new String(
-                decryptor.doFinal(Base64.getDecoder().decode(signature)),
+                requestDecryptor.doFinal(Base64.getDecoder().decode(requestCiphertext)),
                 StandardCharsets.UTF_8
         );
 
@@ -114,12 +116,12 @@ class StarposSignerTest {
         );
 
         Map<String, Object> notification = new LinkedHashMap<>(request);
-        notification.put("sign", signature);
+        notification.put("sign", privateEncryptHash(request, keyPair.getPrivate()));
         assertTrue(StarposSigner.verifyNotification(notification, publicKeyBase64));
     }
 
     @Test
-    void rsa_signature_tampering_fails() {
+    void rsa_ciphertext_tampering_fails() {
         KeyPair keyPair = generateKeyPair();
         Map<String, Object> notification = signedNotification(keyPair);
         byte[] tamperedCiphertext = Base64.getDecoder().decode((String) notification.get("sign"));
@@ -156,13 +158,22 @@ class StarposSignerTest {
 
     private static Map<String, Object> signedNotification(KeyPair keyPair) {
         Map<String, Object> request = requestFields();
-        String signature = StarposSigner.signRequest(
-                request,
-                pem("PUBLIC KEY", keyPair.getPublic().getEncoded())
-        );
+        String signature = privateEncryptHash(request, keyPair.getPrivate());
         Map<String, Object> notification = new LinkedHashMap<>(request);
         notification.put("sign", signature);
         return notification;
+    }
+
+    private static String privateEncryptHash(Map<String, Object> fields, PrivateKey privateKey) {
+        try {
+            Cipher encryptor = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            encryptor.init(Cipher.ENCRYPT_MODE, privateKey);
+            byte[] hash = StarposSigner.sha256Hex(StarposSigner.canonicalJson(fields))
+                    .getBytes(StandardCharsets.UTF_8);
+            return Base64.getEncoder().encodeToString(encryptor.doFinal(hash));
+        } catch (Exception e) {
+            throw new IllegalStateException("failed to create local private-key response fixture", e);
+        }
     }
 
     private static Map<String, Object> requestFields() {

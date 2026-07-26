@@ -5,16 +5,14 @@ import com.alibaba.fastjson.JSON;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
-import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.Signature;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import javax.crypto.Cipher;
 
 /**
  * 星驿付签名边界。
@@ -26,7 +24,7 @@ import java.util.TreeMap;
 public final class StarposSigner {
 
     private static final String SIGN_FIELD = "sign";
-    private static final RsaCodec RSA_CODEC = new Sha256WithRsaCodec();
+    private static final RsaCodec RSA_CODEC = new PublicKeyRsaCodec();
 
     private StarposSigner() {
     }
@@ -69,19 +67,15 @@ public final class StarposSigner {
     }
 
     /**
-     * 对 canonical JSON 执行 RSA 签名并返回 Base64。
-     *
-     * <p>当前实现采用标准 SHA256withRSA 适配器；传入材料为 PKCS#8 私钥。
-     * 正式星驿付签名方向和协议样例由可替换 RSA 边界及 fixture 锁定。</p>
+     * 对 canonical JSON 的 SHA-256 小写 hex 摘要执行 RSA 公钥加密并返回 Base64。
      */
     public static String signRequest(Map<String, Object> fields, String keyMaterial) {
-        return RSA_CODEC.sign(canonicalJson(fields), keyMaterial);
+        String canonical = canonicalJson(fields);
+        return RSA_CODEC.sign(sha256Hex(canonical), keyMaterial);
     }
 
     /**
-     * 使用通知中的 sign 字段验证 canonical JSON。
-     *
-     * <p>传入材料为 X.509 公钥；格式错误或签名不匹配均返回 false。</p>
+     * 使用通知中的 sign 字段进行 RSA 公钥解密并验证 canonical JSON 摘要。
      */
     public static boolean verifyNotification(Map<String, Object> fields, String keyMaterial) {
         Objects.requireNonNull(fields, "fields");
@@ -89,7 +83,8 @@ public final class StarposSigner {
         if (!(signature instanceof String) || ((String) signature).isBlank()) {
             return false;
         }
-        return RSA_CODEC.verify(canonicalJson(fields), (String) signature, keyMaterial);
+        String canonical = canonicalJson(fields);
+        return RSA_CODEC.verify(sha256Hex(canonical), (String) signature, keyMaterial);
     }
 
     private interface RsaCodec {
@@ -99,38 +94,34 @@ public final class StarposSigner {
         boolean verify(String content, String signature, String keyMaterial);
     }
 
-    /**
-     * RSA 算法适配边界。正式协议资料到位时替换此实现即可。
-     */
-    private static final class Sha256WithRsaCodec implements RsaCodec {
+    private static final class PublicKeyRsaCodec implements RsaCodec {
 
         @Override
         public String sign(String content, String keyMaterial) {
             try {
-                Signature signer = Signature.getInstance("SHA256withRSA");
-                signer.initSign(readPrivateKey(keyMaterial));
-                signer.update(content.getBytes(StandardCharsets.UTF_8));
-                return Base64.getEncoder().encodeToString(signer.sign());
+                Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+                cipher.init(Cipher.ENCRYPT_MODE, readPublicKey(keyMaterial));
+                byte[] encrypted = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
+                return Base64.getEncoder().encodeToString(encrypted);
             } catch (GeneralSecurityException | IllegalArgumentException e) {
-                throw new IllegalArgumentException("RSA 私钥签名失败", e);
+                throw new IllegalArgumentException("RSA 公钥加密失败", e);
             }
         }
 
         @Override
         public boolean verify(String content, String signature, String keyMaterial) {
             try {
-                Signature verifier = Signature.getInstance("SHA256withRSA");
-                verifier.initVerify(readPublicKey(keyMaterial));
-                verifier.update(content.getBytes(StandardCharsets.UTF_8));
-                return verifier.verify(Base64.getDecoder().decode(signature));
+                Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+                cipher.init(Cipher.DECRYPT_MODE, readPublicKey(keyMaterial));
+                byte[] encrypted = Base64.getDecoder().decode(signature);
+                String decrypted = new String(
+                        cipher.doFinal(encrypted),
+                        StandardCharsets.UTF_8
+                );
+                return content.equals(decrypted);
             } catch (GeneralSecurityException | IllegalArgumentException e) {
                 return false;
             }
-        }
-
-        private static PrivateKey readPrivateKey(String keyMaterial) throws GeneralSecurityException {
-            byte[] encoded = decodePemOrBase64(keyMaterial, "PRIVATE KEY");
-            return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(encoded));
         }
 
         private static PublicKey readPublicKey(String keyMaterial) throws GeneralSecurityException {
