@@ -128,7 +128,11 @@ public final class StarposHttpClient {
 
     private static URI validateConfiguredBaseUri(String baseUrl) {
         Objects.requireNonNull(baseUrl, "baseUrl");
-        URI uri = URI.create(baseUrl);
+        return validateClientBaseUri(URI.create(baseUrl));
+    }
+
+    private static URI validateClientBaseUri(URI uri) {
+        Objects.requireNonNull(uri, "baseUri");
         if (!"https".equalsIgnoreCase(uri.getScheme())) {
             throw new IllegalArgumentException("星驿付服务地址必须使用 HTTPS");
         }
@@ -136,19 +140,6 @@ public final class StarposHttpClient {
 
         String host = normalizedHost(uri);
         if (!FIXED_HOSTS.contains(host)) {
-            throw new IllegalArgumentException("不允许的星驿付服务主机: " + host);
-        }
-        return uri;
-    }
-
-    private static URI validateClientBaseUri(URI uri) {
-        Objects.requireNonNull(uri, "baseUri");
-        validateRootUri(uri);
-        String host = normalizedHost(uri);
-        boolean fixedHttps = "https".equalsIgnoreCase(uri.getScheme()) && FIXED_HOSTS.contains(host);
-        boolean localHttp = "http".equalsIgnoreCase(uri.getScheme())
-                && ("127.0.0.1".equals(host) || "localhost".equals(host) || "::1".equals(host));
-        if (!fixedHttps && !localHttp) {
             throw new IllegalArgumentException("不允许的星驿付服务主机: " + host);
         }
         return uri;
