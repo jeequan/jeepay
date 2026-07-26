@@ -148,6 +148,7 @@ public class CS {
         String XXPAY = "xxpay";     // 小新支付
         String PPPAY = "pppay";     // Paypal 支付
         String PLSPAY = "plspay";     // 计全支付plus
+        String STARPOS = "starpos"; // 星驿付
     }
 
 
@@ -157,6 +158,7 @@ public class CS {
         // 特殊支付方式
         String QR_CASHIER = "QR_CASHIER"; //  ( 通过二维码跳转到收银台完成支付， 已集成获取用户ID的实现。  )
         String AUTO_BAR = "AUTO_BAR"; // 条码聚合支付（自动分类条码类型）
+        String STARPOS_QR = "STARPOS_QR"; // 星驿付二维码支付
 
         String ALI_BAR = "ALI_BAR";  //支付宝条码支付
         String ALI_JSAPI = "ALI_JSAPI";  //支付宝服务窗支付
