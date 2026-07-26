@@ -732,6 +732,11 @@ INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_BAR', '银联二维码(�
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_B2B', '银联企业网银支付');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_PC', '银联网关支付');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_JSAPI', '银联Js支付');
+INSERT INTO t_pay_way (way_code, way_name)
+SELECT 'STARPOS_QR', '星驿付聚合收银台'
+WHERE NOT EXISTS (
+        SELECT 1 FROM t_pay_way WHERE way_code = 'STARPOS_QR'
+);
 
 
 -- 初始化支付接口定义
@@ -776,3 +781,31 @@ VALUES ('plspay', '计全付', 1, 0, 1,
         '[{"wayCode": "ALI_APP"}, {"wayCode": "ALI_BAR"}, {"wayCode": "ALI_JSAPI"}, {"wayCode": "ALI_LITE"}, {"wayCode": "ALI_PC"}, {"wayCode": "ALI_QR"}, {"wayCode": "ALI_WAP"}, {"wayCode": "WX_APP"}, {"wayCode": "WX_BAR"}, {"wayCode": "WX_H5"}, {"wayCode": "WX_JSAPI"}, {"wayCode": "WX_LITE"}, {"wayCode": "WX_NATIVE"}]',
         'http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/plspay.svg', '#0CACFF', 1, '计全付');
 
+-- 星驿付普通商户通道
+INSERT INTO t_pay_interface_define (
+        if_code, if_name, is_mch_mode, is_isv_mode, config_page_type,
+        isv_params, isvsub_mch_params, normal_mch_params, way_codes,
+        icon, bg_color, state, remark
+)
+SELECT
+        'starpos',
+        '星驿付',
+        1,
+        0,
+        1,
+        NULL,
+        NULL,
+        '[{"name":"environment","desc":"环境配置","type":"radio","verify":"required","values":"test,uat,prod","titles":"测试环境,UAT环境,生产环境"},{"name":"agetId","desc":"代理商编号","type":"text","verify":"required"},{"name":"custId","desc":"商户编号","type":"text","verify":"required"},{"name":"publicKey","desc":"星驿付公钥","type":"textarea","verify":"required","star":"1"},{"name":"version","desc":"接口版本","type":"text","verify":"required"}]',
+        '[{"wayCode":"STARPOS_QR"}]',
+        NULL,
+        '#3B82F6',
+        1,
+        '星驿付官方通道'
+WHERE NOT EXISTS (
+        SELECT 1 FROM t_pay_interface_define WHERE if_code = 'starpos'
+);
+
+UPDATE t_pay_interface_define
+SET way_codes = JSON_ARRAY_APPEND(way_codes, '$', JSON_OBJECT('wayCode', 'STARPOS_QR'))
+WHERE if_code = 'starpos'
+  AND JSON_CONTAINS(way_codes, '{"wayCode":"STARPOS_QR"}') = 0;
