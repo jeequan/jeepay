@@ -162,6 +162,24 @@ class StarposPaymentServiceTest {
         }
     }
 
+    @Test
+    void shouldMapInvalidConfigurationToConfirmedFailureAfterOrderCreation() throws Exception {
+        try (StarposTestServer server = StarposTestServer.start()) {
+            MchAppConfigContext context = context();
+            StarposNormalMchParams params = context
+                    .getNormalMchParamsByIfCode(CS.IF_CODE.STARPOS, StarposNormalMchParams.class);
+            params.setEnvironment("invalid");
+
+            StarposQrOrderRS response = pay(service(server, Duration.ofSeconds(5)),
+                    payOrder("ORDER-BAD-CONFIG", 100L, "标题", "描述"), context);
+
+            assertEquals(ChannelRetMsg.ChannelState.CONFIRM_FAIL,
+                    response.getChannelRetMsg().getChannelState());
+            assertFalse(response.getChannelRetMsg().isNeedQuery());
+            assertFalse(response.getChannelRetMsg().getChannelErrMsg().isBlank());
+        }
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {
             "http://xyf-server-test.postar.cn/cashier/ORDER-BAD",
@@ -201,10 +219,18 @@ class StarposPaymentServiceTest {
     }
 
     private static StarposQrOrderRS pay(StarposQr service, PayOrder payOrder) throws Exception {
+        return pay(service, payOrder, context());
+    }
+
+    private static StarposQrOrderRS pay(
+            StarposQr service,
+            PayOrder payOrder,
+            MchAppConfigContext context
+    ) throws Exception {
         return (StarposQrOrderRS) service.pay(
                 new UnifiedOrderRQ(),
                 payOrder,
-                context()
+                context
         );
     }
 

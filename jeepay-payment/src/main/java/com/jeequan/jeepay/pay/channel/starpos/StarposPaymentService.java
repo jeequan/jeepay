@@ -32,6 +32,7 @@ public class StarposPaymentService extends AbstractPaymentService {
     static final String CREATE_ORDER_PATH = "/yyfsevr/order/getCodeUrl";
     static final String SUCCESS_CODE = "000000";
     static final String UNKNOWN_CODE = "-80000";
+    static final String CONFIG_ERROR_CODE = "STARPOS_CONFIG_ERROR";
     static final int MAX_REMARK_LENGTH = 128;
 
     @Override
@@ -67,9 +68,18 @@ public class StarposPaymentService extends AbstractPaymentService {
             PayOrder payOrder,
             MchAppConfigContext mchAppConfigContext
     ) {
-        StarposNormalMchParams params = getParams(mchAppConfigContext);
-        String baseUrl = StarposConfig.resolveBaseUrl(params);
-        JSONObject request = buildCreateOrderRequest(params, payOrder);
+        StarposNormalMchParams params;
+        String baseUrl;
+        JSONObject request;
+        try {
+            params = getParams(mchAppConfigContext);
+            baseUrl = StarposConfig.resolveBaseUrl(params);
+            request = buildCreateOrderRequest(params, payOrder);
+        } catch (RuntimeException e) {
+            log.error("星驿付下单配置或签名构造失败，订单标记为失败，orderNo={}",
+                    maskOrderNo(payOrder == null ? null : payOrder.getPayOrderId()), e);
+            return configurationFailure();
+        }
 
         try {
             JSONObject response = createHttpClient(baseUrl)
@@ -171,6 +181,14 @@ public class StarposPaymentService extends AbstractPaymentService {
         }
 
         retMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
+        return new StarposPayResult(retMsg, null);
+    }
+
+    private StarposPayResult configurationFailure() {
+        ChannelRetMsg retMsg = ChannelRetMsg.confirmFail(
+                CONFIG_ERROR_CODE,
+                "星驿付下单配置无效"
+        );
         return new StarposPayResult(retMsg, null);
     }
 
