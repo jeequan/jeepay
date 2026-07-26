@@ -37,17 +37,35 @@ class StarposQrOrderRQTest {
     }
 
     @Test
+    void shouldRejectMissingPayDataTypeBeforeBizRequestConversion() {
+        UnifiedOrderRQ rq = buildUnifiedOrderRQ("{}");
+
+        assertHasUnifiedOrderViolation(rq);
+    }
+
+    @Test
     void shouldRejectUnsupportedPayDataType() {
         UnifiedOrderRQ bizRQ = buildBizRQ("{\"payDataType\":\"payurl\"}");
 
         assertHasViolation(bizRQ, "payDataType", "payDataType仅支持payUrl");
     }
 
+    @Test
+    void shouldRejectUnsupportedPayDataTypeBeforeBizRequestConversion() {
+        UnifiedOrderRQ rq = buildUnifiedOrderRQ("{\"payDataType\":\"payurl\"}");
+
+        assertHasUnifiedOrderViolation(rq);
+    }
+
     private UnifiedOrderRQ buildBizRQ(String channelExtra) {
+        return buildUnifiedOrderRQ(channelExtra).buildBizRQ();
+    }
+
+    private UnifiedOrderRQ buildUnifiedOrderRQ(String channelExtra) {
         UnifiedOrderRQ rq = new UnifiedOrderRQ();
         rq.setWayCode(CS.PAY_WAY_CODE.STARPOS_QR);
         rq.setChannelExtra(channelExtra);
-        return rq.buildBizRQ();
+        return rq;
     }
 
     private void assertHasViolation(UnifiedOrderRQ bizRQ, String property, String message) {
@@ -58,6 +76,16 @@ class StarposQrOrderRQTest {
                         property.equals(violation.getPropertyPath().toString())
                                 && message.equals(violation.getMessage())),
                 () -> "未找到预期校验错误，实际为: " + violations
+        );
+    }
+
+    private void assertHasUnifiedOrderViolation(UnifiedOrderRQ rq) {
+        Set<ConstraintViolation<UnifiedOrderRQ>> violations = validator.validate(rq);
+
+        assertTrue(
+                violations.stream().anyMatch(violation ->
+                        "starposQrPayDataTypeValid".equals(violation.getPropertyPath().toString())),
+                () -> "统一下单基类校验未拦截非法 payDataType，实际为: " + violations
         );
     }
 }
