@@ -106,6 +106,10 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
             QrCashierOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), QrCashierOrderRQ.class);
             BeanUtils.copyProperties(this, bizRQ);
             return bizRQ;
+        }else if(CS.PAY_WAY_CODE.STARPOS_QR.equals(wayCode)){
+            StarposQrOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), StarposQrOrderRQ.class);
+            BeanUtils.copyProperties(this, bizRQ);
+            return bizRQ;
         }else if(CS.PAY_WAY_CODE.WX_JSAPI.equals(wayCode)){
             WxJsapiOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), WxJsapiOrderRQ.class);
             BeanUtils.copyProperties(this, bizRQ);
