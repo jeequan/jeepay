@@ -37,10 +37,15 @@
     }
   ],
   "rsa": {
-    "status": "pending_formal_starpos_material",
-    "algorithm": null,
-    "direction": null,
-    "vectors": [],
-    "replacementNotes": "正式星驿付资料接入后，仅替换本节向量与算法元数据；本地 RSA 往返测试不代表正式协议样例。"
+    "status": "protocol_locked",
+    "algorithm": "RSA/ECB/PKCS1Padding",
+    "hash": "SHA-256 lowercase hex over UTF-8 canonical parameter string",
+    "keyFormat": "X.509 PUBLIC KEY PEM/Base64",
+    "direction": {
+      "request": "public-key encrypt",
+      "notification": "public-key decrypt"
+    },
+    "source": "XyfClient.php: openssl_public_encrypt/openssl_public_decrypt; postar.cn/xyf/doc/7306848m0",
+    "testMaterial": "Generated local RSA public key; direction/implementation test, not a merchant key sample"
   }
 }

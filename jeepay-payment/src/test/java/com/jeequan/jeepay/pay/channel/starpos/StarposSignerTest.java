@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import javax.crypto.Cipher;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -70,34 +71,105 @@ class StarposSignerTest {
     }
 
     @Test
-    void rsa_boundary_is_replaceable_and_supports_local_round_trip() throws Exception {
+    void rsa_fixture_documents_public_key_protocol() {
         JSONObject rsa = loadFixture().getJSONObject("rsa");
-        assertEquals("pending_formal_starpos_material", rsa.getString("status"));
-        assertNotNull(rsa.getString("replacementNotes"));
+        assertEquals("protocol_locked", rsa.getString("status"));
+        assertEquals("RSA/ECB/PKCS1Padding", rsa.getString("algorithm"));
+        assertEquals(
+                "SHA-256 lowercase hex over UTF-8 canonical parameter string",
+                rsa.getString("hash")
+        );
+        assertEquals("X.509 PUBLIC KEY PEM/Base64", rsa.getString("keyFormat"));
+        assertEquals("public-key encrypt", rsa.getJSONObject("direction").getString("request"));
+        assertEquals("public-key decrypt", rsa.getJSONObject("direction").getString("notification"));
+        assertEquals(
+                "XyfClient.php: openssl_public_encrypt/openssl_public_decrypt; postar.cn/xyf/doc/7306848m0",
+                rsa.getString("source")
+        );
+        assertEquals(
+                "Generated local RSA public key; direction/implementation test, not a merchant key sample",
+                rsa.getString("testMaterial")
+        );
+    }
 
-        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-        generator.initialize(2048);
-        KeyPair keyPair = generator.generateKeyPair();
+    @Test
+    void rsa_protocol_uses_public_key_encrypt_then_public_key_decrypt() throws Exception {
+        KeyPair keyPair = generateKeyPair();
+        Map<String, Object> request = requestFields();
 
-        Map<String, Object> request = new LinkedHashMap<>();
-        request.put("amount", "1.00");
-        request.put("merchantNo", "LOCAL_FIXTURE");
+        String publicKeyPem = pem("PUBLIC KEY", keyPair.getPublic().getEncoded());
+        String publicKeyBase64 = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+        String signature = StarposSigner.signRequest(request, publicKeyPem);
 
-        String signature = StarposSigner.signRequest(request, pem("PRIVATE KEY", keyPair.getPrivate().getEncoded()));
-        assertFalse(signature.isBlank());
+        Cipher decryptor = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        decryptor.init(Cipher.DECRYPT_MODE, keyPair.getPublic());
+        String decryptedHash = new String(
+                decryptor.doFinal(Base64.getDecoder().decode(signature)),
+                StandardCharsets.UTF_8
+        );
+
+        assertEquals(
+                StarposSigner.sha256Hex(StarposSigner.canonicalJson(request)),
+                decryptedHash
+        );
 
         Map<String, Object> notification = new LinkedHashMap<>(request);
         notification.put("sign", signature);
-        assertTrue(StarposSigner.verifyNotification(
-                notification,
-                pem("PUBLIC KEY", keyPair.getPublic().getEncoded())
-        ));
+        assertTrue(StarposSigner.verifyNotification(notification, publicKeyBase64));
+    }
 
+    @Test
+    void rsa_signature_tampering_fails() {
+        KeyPair keyPair = generateKeyPair();
+        Map<String, Object> notification = signedNotification(keyPair);
+        byte[] tamperedCiphertext = Base64.getDecoder().decode((String) notification.get("sign"));
+        tamperedCiphertext[tamperedCiphertext.length - 1] ^= 1;
+        notification.put("sign", Base64.getEncoder().encodeToString(tamperedCiphertext));
+
+        assertFalse(StarposSigner.verifyNotification(
+                notification,
+                Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded())
+        ));
+    }
+
+    @Test
+    void rsa_field_tampering_fails() {
+        KeyPair keyPair = generateKeyPair();
+        Map<String, Object> notification = signedNotification(keyPair);
         notification.put("amount", "9.99");
+
         assertFalse(StarposSigner.verifyNotification(
                 notification,
                 pem("PUBLIC KEY", keyPair.getPublic().getEncoded())
         ));
+    }
+
+    private static KeyPair generateKeyPair() {
+        try {
+            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+            generator.initialize(2048);
+            return generator.generateKeyPair();
+        } catch (Exception e) {
+            throw new IllegalStateException("failed to generate local RSA test key pair", e);
+        }
+    }
+
+    private static Map<String, Object> signedNotification(KeyPair keyPair) {
+        Map<String, Object> request = requestFields();
+        String signature = StarposSigner.signRequest(
+                request,
+                pem("PUBLIC KEY", keyPair.getPublic().getEncoded())
+        );
+        Map<String, Object> notification = new LinkedHashMap<>(request);
+        notification.put("sign", signature);
+        return notification;
+    }
+
+    private static Map<String, Object> requestFields() {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("amount", "1.00");
+        request.put("merchantNo", "LOCAL_FIXTURE");
+        return request;
     }
 
     private static Stream<Arguments> canonicalJsonVectors() {
