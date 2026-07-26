@@ -308,17 +308,20 @@ alter table t_transfer_order add column `channel_res_data` TEXT DEFAULT NULL COM
 ## -- ++++ [20260726] ===> STARPOS
 
 -- 星驿付聚合收银台支付方式
-INSERT INTO t_pay_way (way_code, way_name)
-SELECT 'STARPOS_QR', '星驿付聚合收银台'
+INSERT INTO t_pay_way (way_code, way_name, created_at, updated_at)
+SELECT 'STARPOS_QR', '星驿付聚合收银台',
+       '2026-07-26 00:00:00.000',
+       '2026-07-26 00:00:00.000'
 WHERE NOT EXISTS (
         SELECT 1 FROM t_pay_way WHERE way_code = 'STARPOS_QR'
-);
+)
+ON DUPLICATE KEY UPDATE way_code = VALUES(way_code);
 
 -- 星驿付普通商户通道
 INSERT INTO t_pay_interface_define (
         if_code, if_name, is_mch_mode, is_isv_mode, config_page_type,
         isv_params, isvsub_mch_params, normal_mch_params, way_codes,
-        icon, bg_color, state, remark
+        icon, bg_color, state, remark, created_at, updated_at
 )
 SELECT
         'starpos',
@@ -333,12 +336,10 @@ SELECT
         NULL,
         '#3B82F6',
         1,
-        '星驿付官方通道'
+        '星驿付官方通道',
+        '2026-07-26 00:00:00.000',
+        '2026-07-26 00:00:00.000'
 WHERE NOT EXISTS (
         SELECT 1 FROM t_pay_interface_define WHERE if_code = 'starpos'
-);
-
-UPDATE t_pay_interface_define
-SET way_codes = JSON_ARRAY_APPEND(way_codes, '$', JSON_OBJECT('wayCode', 'STARPOS_QR'))
-WHERE if_code = 'starpos'
-  AND JSON_CONTAINS(way_codes, '{"wayCode":"STARPOS_QR"}') = 0;
+)
+ON DUPLICATE KEY UPDATE if_code = VALUES(if_code);
