@@ -12,6 +12,7 @@ import com.jeequan.jeepay.service.impl.PayOrderService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -33,7 +34,7 @@ public final class EpayCompatOrderService {
             return null;
         }
         if (!isCompatible(existing, command)) {
-            throw new IllegalStateException("重复订单参数冲突：金额、支付方式、回调地址或类型不一致");
+            throw new IllegalStateException("重复订单参数冲突：商户、应用、订单号、金额、支付方式、回调地址或类型不一致");
         }
         return existing;
     }
@@ -97,9 +98,20 @@ public final class EpayCompatOrderService {
                 && existing.getAmount() == command.amountFen()
                 && CS.IF_CODE.STARPOS.equals(existing.getIfCode())
                 && command.paymentType().equals(existing.getWayCode())
-                && command.notifyUrl().equals(existing.getNotifyUrl())
-                && command.returnUrl().equals(existing.getReturnUrl())
-                && metadata.map(value -> command.epayType().equals(value.type())).orElse(false);
+                && Objects.equals(command.merchantId(), existing.getMchNo())
+                && Objects.equals(command.appId(), existing.getAppId())
+                && Objects.equals(command.orderNo(), existing.getMchOrderNo())
+                && Objects.equals(command.notifyUrl(), existing.getNotifyUrl())
+                && Objects.equals(command.returnUrl(), existing.getReturnUrl())
+                && metadata.map(value ->
+                Objects.equals(command.merchantId(), value.pid())
+                        && Objects.equals(command.appId(), value.appId())
+                        && Objects.equals(command.orderNo(), value.outTradeNo())
+                        && Objects.equals(amountYuan(command.amountFen()), value.money())
+                        && Objects.equals(command.notifyUrl(), value.notifyUrl())
+                        && Objects.equals(command.returnUrl(), value.returnUrl())
+                        && Objects.equals(command.epayType(), value.type())
+        ).orElse(false);
     }
 
     private void persistMetadata(PayOrder payOrder, EpayCreateCommand command, String tradeNo, String payInfo) {

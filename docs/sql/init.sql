@@ -267,7 +267,7 @@ CREATE TABLE `t_pay_order` (
         `client_ip` VARCHAR(32) DEFAULT NULL COMMENT '客户端IP',
         `subject` VARCHAR(64) NOT NULL COMMENT '商品标题',
         `body` VARCHAR(256) NOT NULL COMMENT '商品描述信息',
-        `channel_extra` TEXT DEFAULT NULL COMMENT '特定渠道发起额外参数',
+        `channel_extra` TEXT COMMENT '特定渠道发起额外参数',
         `channel_user` VARCHAR(64) DEFAULT NULL COMMENT '渠道用户标识,如微信openId,支付宝账号',
         `channel_order_no` VARCHAR(64) DEFAULT NULL COMMENT '渠道订单号',
         `refund_state` TINYINT(6) NOT NULL DEFAULT '0' COMMENT '退款状态: 0-未发生实际退款, 1-部分退款, 2-全额退款',

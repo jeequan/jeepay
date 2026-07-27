@@ -188,6 +188,33 @@ class EpayCompatControllerTest {
                 .queryMchOrder("MCH-1001", null, "ORDER-1001");
     }
 
+    @Test
+    void uniqueKeyRaceReloadConflictUsesSameIdentityValidation() {
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        TestController controller = controller(payOrderService, new EpayCredential("merchant-key", null, null));
+        controller.apiResult = ApiRes.customFail("商户订单[ORDER-1001]已存在");
+        PayOrder racedOrder = EpayCompatOrderServiceTest.compatibleOrder(
+                EpayCompatOrderServiceTest.command("alipay", 1234L),
+                "JPAY-RACE", STARPOS_CASHIER_BASE + "JPAY-RACE");
+        JSONObject metadata = JSON.parseObject(racedOrder.getChannelExtra());
+        metadata.getJSONObject("__epay_compat").put("out_trade_no", "ORDER-OTHER");
+        racedOrder.setChannelExtra(metadata.toJSONString());
+        when(payOrderService.queryMchOrder("MCH-1001", null, "ORDER-1001"))
+                .thenReturn(null, racedOrder);
+        Map<String, String> fields = v1Fields();
+        fields.put("sign", EpaySigner.signMd5(fields, "merchant-key"));
+
+        ResponseEntity<String> response = controller.mapi(fields);
+        JSONObject body = JSON.parseObject(response.getBody());
+
+        assertThat(body.getInteger("code")).isZero();
+        assertThat(body.getString("msg")).contains("冲突");
+        assertThat(body.getString("trade_no")).isEmpty();
+        assertThat(controller.unifiedCalls).isEqualTo(1);
+        verify(payOrderService, org.mockito.Mockito.times(2))
+                .queryMchOrder("MCH-1001", null, "ORDER-1001");
+    }
+
     private static TestController controller(PayOrderService payOrderService, EpayCredential credential) {
         EpayCompatProperties properties = new EpayCompatProperties();
         properties.setDefaultAppId("APP-1001");

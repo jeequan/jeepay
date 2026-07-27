@@ -2,7 +2,7 @@
 
 ## -- EPAY 兼容下单：支付订单渠道元数据改为 TEXT，避免长回调/收银台参数被截断
 ALTER TABLE `t_pay_order`
-    MODIFY COLUMN `channel_extra` TEXT DEFAULT NULL COMMENT '特定渠道发起额外参数';
+    MODIFY COLUMN `channel_extra` TEXT COMMENT '特定渠道发起额外参数';
 
 ## -- ++++ [v1.1.0] ===> [v1.1.1] ++++
 ## -- 新增： 支付测试， 重发通知， 通知最大次数保存到数据库

@@ -60,6 +60,40 @@ class EpayCompatOrderServiceTest {
     }
 
     @Test
+    void duplicateAppIdMismatchReturnsConflict() {
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        EpayCompatOrderService service = new EpayCompatOrderService(payOrderService);
+        EpayCreateCommand command = command("alipay", 1234L);
+        PayOrder existing = compatibleOrder(command, "JPAY-EXISTING", "https://cashier.example/JPAY-EXISTING")
+                .setAppId("APP-OTHER");
+        when(payOrderService.queryMchOrder("MCH-1001", null, "ORDER-1001"))
+                .thenReturn(existing);
+
+        assertThatThrownBy(() -> service.findExisting(command))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("冲突");
+    }
+
+    @Test
+    void duplicateMetadataIdentityMismatchReturnsConflict() {
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        EpayCompatOrderService service = new EpayCompatOrderService(payOrderService);
+        EpayCreateCommand command = command("alipay", 1234L);
+        JSONObject channelExtra = JSON.parseObject(
+                compatibleOrder(command, "JPAY-EXISTING", "https://cashier.example/JPAY-EXISTING")
+                        .getChannelExtra());
+        channelExtra.getJSONObject("__epay_compat").put("pid", "MCH-OTHER");
+        PayOrder existing = compatibleOrder(command, "JPAY-EXISTING", "https://cashier.example/JPAY-EXISTING")
+                .setChannelExtra(channelExtra.toJSONString());
+        when(payOrderService.queryMchOrder("MCH-1001", null, "ORDER-1001"))
+                .thenReturn(existing);
+
+        assertThatThrownBy(() -> service.findExisting(command))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("冲突");
+    }
+
+    @Test
     void starposTimeoutReturnsUnknownAndKeepsOrderQueryable() {
         PayOrderService payOrderService = mock(PayOrderService.class);
         EpayCompatOrderService service = new EpayCompatOrderService(payOrderService);
