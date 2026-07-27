@@ -1,0 +1,19 @@
+{
+  "version": "V2",
+  "fixture_private_key": "-----BEGIN PRIVATE KEY-----\nMIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBANNbRm47OLcJ2EGI\nffn6FcuLV/UsDeS4hfjqa8ah0JsNx6XxmPvpnhfs2ZAkV4JoNETq0wuqum0zlT8Y\njtGNbGFQg/3a1o7F2xjmZBF458alzv0/uIqNYKp3qTd/CWWHSjjJwGOJRaOF1uFp\nUOvj0b+UBcy2xH7bBsP28Yi5KMYHAgMBAAECgYBXuEpC9dFUJoHasQuX9HOXRv36\ng45An1T7OlAA4KfzsoRqGxujchJrW6HwcSTgut72u39cGD/HkuEejtK3pjqUZ3L/\nGs1ihEcFj5uu3FMia/04eAEElVSyBqLjAk2rJkqAByTzI9k0VveqRSPQVJxtH7kb\nhJ0BM6+CLa6apYnWAQJBAPro/qmusrLrVINPjzX8wcshY1yqAE1ob7QH3srzke1+\nvSwicDRnpeymb04n5LBfzKNdOxjwZ8aLfM2Un6ujreMCQQDXpN+9YupdPMaVXWhv\neS+hKCNTJ974p3HsZLggpysOJXmkf0jIZxl0okdefcIAbR0kGdsgAdByl68YCbUP\nlgCNAkBe3Px7lutFLigzxT62AKwcarEwda3LlnK1NEyNmu1PR52qNBMMHSvkf0CR\n4g9ah73M/hC76xixPkefSlPcBvRVAkAYjm7oGyaDHZOjmLJ21z8ERBTZuFWczTyc\n5c9N8Jtnjf7vK4t3Pr5YWM51xS5dbA+Ad+1LFMnO8tT+kMRslPFVAkAFTH7Fhf3V\no8ybfgXqQXD9Uavv6v/ATqLoMHWNBHeZNezrWx/lWioP30aBf0EpOAy3bkQMTmzN\nZLEgVQ+L6pM3\n-----END PRIVATE KEY-----",
+  "fixture_public_key": "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDTW0ZuOzi3CdhBiH35+hXLi1f1\nLA3kuIX46mvGodCbDcel8Zj76Z4X7NmQJFeCaDRE6tMLqrptM5U/GI7RjWxhUIP9\n2taOxdsY5mQReOfGpc79P7iKjWCqd6k3fwllh0o4ycBjiUWjhdbhaVDr49G/lAXM\ntsR+2wbD9vGIuSjGBwIDAQAB\n-----END PUBLIC KEY-----",
+  "canonical": "app_id=APP_TARGET&money=8.00&name=Target order V2&notify_url=https://merchant.example/epay/notify-v2&out_trade_no=ORDER_TARGET_V2&pid=MCH_TARGET&return_url=https://merchant.example/epay/return-v2&timestamp=1750000000&type=wxpay",
+  "signature": "GQG67o47uV1ZKTPMtuFeLkytaDddOc8NLKNPARaqFCW2S6PiZpIQSUlSLqeAowyCBY+cAtPONhljvPfXX3PvSEvZNWM/S+8krtS9BkGGQn74nZ6FXpVnKJl4uIll01AXDjFqyQZ22663kj3N7Hbk99sSiYc7WGt9/wlA3SCdsjA=",
+  "fields": {
+    "pid": "MCH_TARGET",
+    "type": "wxpay",
+    "out_trade_no": "ORDER_TARGET_V2",
+    "notify_url": "https://merchant.example/epay/notify-v2",
+    "return_url": "https://merchant.example/epay/return-v2",
+    "name": "Target order V2",
+    "money": "8.00",
+    "sign_type": "RSA",
+    "timestamp": "1750000000",
+    "app_id": "APP_TARGET"
+  }
+}

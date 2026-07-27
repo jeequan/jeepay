@@ -1,0 +1,16 @@
+{
+  "version": "V2",
+  "sign_type": "RSA",
+  "trade_status": "TRADE_SUCCESS",
+  "fields": {
+    "pid": "MCH_TARGET",
+    "trade_no": "PAY_TARGET_V2",
+    "out_trade_no": "ORDER_TARGET_V2",
+    "type": "wxpay",
+    "name": "Target order V2",
+    "money": "8.00",
+    "trade_status": "TRADE_SUCCESS",
+    "timestamp": "1750000000",
+    "sign_type": "RSA"
+  }
+}

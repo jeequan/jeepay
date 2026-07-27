@@ -200,6 +200,41 @@ class EpayCompatNotifyServiceTest {
     }
 
     @Test
+    void v2OrderRejectsMd5CallbackEvenWhenMerchantKeyIsAvailable() {
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        PayOrder order = compatOrder("v2", PayOrder.STATE_ING);
+        when(payOrderService.queryMchOrder("MCH-1001", null, "ORDER-1001")).thenReturn(order);
+        EpayCompatNotifyService service = service(payOrderService,
+                new EpayCredential("merchant-key", "merchant-public", null));
+        Map<String, String> callback = callbackFields("12.34", order);
+        callback.put("sign_type", "MD5");
+        callback.put("sign", EpaySigner.signMd5(callback, "merchant-key"));
+
+        assertThat(service.handleCallback(callback)).isEqualTo("fail");
+        verify(payOrderService, never()).updateIng2Success(
+                "JPAY-1001", "JPAY-1001", null);
+    }
+
+    @Test
+    void v1OrderRejectsRsaCallbackEvenWhenMerchantKeyIsAvailable() throws Exception {
+        KeyPair merchantKeys = keyPair();
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        PayOrder order = compatOrder("v1", PayOrder.STATE_ING);
+        when(payOrderService.queryMchOrder("MCH-1001", null, "ORDER-1001")).thenReturn(order);
+        EpayCompatNotifyService service = service(payOrderService,
+                new EpayCredential("merchant-key",
+                        pem(merchantKeys.getPublic().getEncoded(), "PUBLIC"), null));
+        Map<String, String> callback = callbackFields("12.34", order);
+        callback.put("sign_type", "RSA");
+        callback.put("sign", EpaySigner.signRsa(
+                callback, pem(merchantKeys.getPrivate().getEncoded(), "PRIVATE")));
+
+        assertThat(service.handleCallback(callback)).isEqualTo("fail");
+        verify(payOrderService, never()).updateIng2Success(
+                "JPAY-1001", "JPAY-1001", null);
+    }
+
+    @Test
     void nativePayOrderStillUsesExistingJeepayNotifyShape() {
         PayOrder order = new PayOrder()
                 .setPayOrderId("JPAY-NATIVE")

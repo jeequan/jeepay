@@ -1,0 +1,12 @@
+{
+  "version": "V2",
+  "fields": {
+    "code": 0,
+    "msg": "success",
+    "trade_no": "PAY_TARGET_V2",
+    "pay_type": "redirect",
+    "pay_info": "https://xyf-server-test.postar.cn/cashier/PAY_TARGET_V2",
+    "sign_type": "RSA",
+    "sign": "fJ+vnaOHhEfnXxxjB49wqe5B810obX99WpkdFrjrpm+2VTXlN+tMa0r684jYdhtMrNqqhyHKzaND6xO3/0mSOsdLhO3emv6Y5eMC/lg27xtSIBxULNeTt1u/7C3tuPTOQmLy9sCJod3p54yrbExP5YKCwDfcSq5OAFx+1b6y1pE="
+  }
+}

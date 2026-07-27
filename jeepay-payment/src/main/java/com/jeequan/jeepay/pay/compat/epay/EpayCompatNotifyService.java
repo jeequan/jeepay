@@ -84,13 +84,17 @@ public class EpayCompatNotifyService {
         }
         String pid = required(fields, "pid");
         String outTradeNo = required(fields, "out_trade_no");
-        EpayProtocolVersion version = protocolVersion(fields.get("sign_type"));
+        EpayProtocolVersion callbackVersion = protocolVersion(fields.get("sign_type"));
         PayOrder payOrder = payOrderService.queryMchOrder(pid, null, outTradeNo);
         if (payOrder == null) {
             return Optional.empty();
         }
         Optional<EpayMetadataValue> metadata = EpayCompatMetadata.decode(payOrder.getChannelExtra());
         if (metadata.isEmpty() || !matchesIdentity(fields, metadata.get(), payOrder)) {
+            return Optional.empty();
+        }
+        EpayProtocolVersion expectedVersion = protocolVersion(metadata.get().version());
+        if (callbackVersion != expectedVersion) {
             return Optional.empty();
         }
         if (!matchesTradeNo(fields.get("trade_no"), metadata.get(), payOrder)
@@ -101,11 +105,11 @@ public class EpayCompatNotifyService {
 
         String appId = hasText(metadata.get().appId())
                 ? metadata.get().appId() : properties.resolveAppId(pid);
-        EpayCredential credential = credentialResolver.resolveForVerification(pid, appId, version);
-        if (!verify(fields, credential, version)) {
+        EpayCredential credential = credentialResolver.resolveForVerification(pid, appId, expectedVersion);
+        if (!verify(fields, credential, expectedVersion)) {
             return Optional.empty();
         }
-        return Optional.of(new CallbackContext(fields, payOrder, metadata.get(), version));
+        return Optional.of(new CallbackContext(fields, payOrder, metadata.get()));
     }
 
     private String createCallbackUrl(PayOrder payOrder, boolean notify) {
@@ -292,7 +296,6 @@ public class EpayCompatNotifyService {
 
     private record CallbackContext(Map<String, String> fields,
                                    PayOrder payOrder,
-                                   EpayMetadataValue metadata,
-                                   EpayProtocolVersion version) {
+                                   EpayMetadataValue metadata) {
     }
 }

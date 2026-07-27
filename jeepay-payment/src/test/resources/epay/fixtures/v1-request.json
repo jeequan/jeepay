@@ -1,0 +1,16 @@
+{
+  "version": "V1",
+  "merchant_key": "MCH_TARGET_KEY",
+  "canonical": "money=12.34&name=Target order&notify_url=https://merchant.example/epay/notify&out_trade_no=ORDER_TARGET&pid=MCH_TARGET&return_url=https://merchant.example/epay/return&type=alipay",
+  "signature": "8403e34176a7f96f025faf5e2c55dd51",
+  "fields": {
+    "pid": "MCH_TARGET",
+    "type": "alipay",
+    "out_trade_no": "ORDER_TARGET",
+    "notify_url": "https://merchant.example/epay/notify",
+    "return_url": "https://merchant.example/epay/return",
+    "name": "Target order",
+    "money": "12.34",
+    "sign_type": "MD5"
+  }
+}
