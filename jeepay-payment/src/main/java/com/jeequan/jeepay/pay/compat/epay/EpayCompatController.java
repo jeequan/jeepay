@@ -23,24 +23,47 @@ public class EpayCompatController extends AbstractPayOrderController {
     private final EpayCredentialResolver credentialResolver;
     private final EpayRequestNormalizer requestNormalizer;
     private final EpayCompatOrderService orderService;
+    private EpayCompatNotifyService notifyService;
     private final EpayV1Adapter v1Adapter = new EpayV1Adapter();
     private final EpayV2Adapter v2Adapter = new EpayV2Adapter();
+
+    public EpayCompatController(EpayCompatProperties properties,
+                                EpayCredentialResolver credentialResolver,
+                                EpayCompatOrderService orderService,
+                                EpayCompatNotifyService notifyService) {
+        this(properties, credentialResolver, new EpayRequestNormalizer(Clock.systemUTC(), properties),
+                orderService, notifyService);
+    }
 
     @Autowired
     public EpayCompatController(EpayCompatProperties properties,
                                 EpayCredentialResolver credentialResolver,
                                 EpayCompatOrderService orderService) {
-        this(properties, credentialResolver, new EpayRequestNormalizer(Clock.systemUTC(), properties), orderService);
+        this(properties, credentialResolver, orderService, null);
+    }
+
+    public EpayCompatController(EpayCompatProperties properties,
+                                EpayCredentialResolver credentialResolver,
+                                EpayRequestNormalizer requestNormalizer,
+                                EpayCompatOrderService orderService,
+                                EpayCompatNotifyService notifyService) {
+        this.properties = properties;
+        this.credentialResolver = credentialResolver;
+        this.requestNormalizer = requestNormalizer;
+        this.orderService = orderService;
+        this.notifyService = notifyService;
+    }
+
+    @Autowired
+    private void setNotifyService(EpayCompatNotifyService notifyService) {
+        this.notifyService = notifyService;
     }
 
     public EpayCompatController(EpayCompatProperties properties,
                                 EpayCredentialResolver credentialResolver,
                                 EpayRequestNormalizer requestNormalizer,
                                 EpayCompatOrderService orderService) {
-        this.properties = properties;
-        this.credentialResolver = credentialResolver;
-        this.requestNormalizer = requestNormalizer;
-        this.orderService = orderService;
+        this(properties, credentialResolver, requestNormalizer, orderService, null);
     }
 
     @Override
@@ -56,6 +79,16 @@ public class EpayCompatController extends AbstractPayOrderController {
     @RequestMapping(value = "/compat/epay/submit.php", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<?> submit(@RequestParam Map<String, String> fields) {
         return process(fields).asSubmitResponse();
+    }
+
+    @RequestMapping(value = "/compat/epay/notify.php", method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity<String> notify(@RequestParam Map<String, String> fields) {
+        return ResponseEntity.ok(notifyService == null ? "fail" : notifyService.handleCallback(fields));
+    }
+
+    @RequestMapping(value = "/compat/epay/return.php", method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity<String> returnCallback(@RequestParam Map<String, String> fields) {
+        return ResponseEntity.ok(notifyService == null ? "fail" : notifyService.handleCallback(fields));
     }
 
     private EpayCompatResponse process(Map<String, String> fields) {

@@ -24,6 +24,8 @@ import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.core.utils.StringKit;
+import com.jeequan.jeepay.pay.compat.epay.EpayCompatMetadata;
+import com.jeequan.jeepay.pay.compat.epay.EpayCompatNotifyService;
 import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRS;
 import com.jeequan.jeepay.pay.rqrs.refund.QueryRefundOrderRS;
 import com.jeequan.jeepay.pay.rqrs.transfer.QueryTransferOrderRS;
@@ -47,6 +49,7 @@ public class PayMchNotifyService {
     @Autowired private MchNotifyRecordService mchNotifyRecordService;
     @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private IMQSender mqSender;
+    @Autowired private EpayCompatNotifyService epayCompatNotifyService;
 
 
     /** 商户通知信息， 只有订单是终态，才会发送通知， 如明确成功和明确失败 **/
@@ -207,6 +210,9 @@ public class PayMchNotifyService {
      * 创建响应URL
      */
     public String createNotifyUrl(PayOrder payOrder, String appSecret) {
+        if (EpayCompatMetadata.decode(payOrder.getChannelExtra()).isPresent()) {
+            return epayCompatNotifyService.createNotifyUrl(payOrder);
+        }
 
         QueryPayOrderRS queryPayOrderRS = QueryPayOrderRS.buildByPayOrder(payOrder);
         JSONObject jsonObject = (JSONObject)JSONObject.toJSON(queryPayOrderRS);
@@ -258,6 +264,9 @@ public class PayMchNotifyService {
      * 创建响应URL
      */
     public String createReturnUrl(PayOrder payOrder, String appSecret) {
+        if (EpayCompatMetadata.decode(payOrder.getChannelExtra()).isPresent()) {
+            return epayCompatNotifyService.createReturnUrl(payOrder);
+        }
 
         if(StringUtils.isEmpty(payOrder.getReturnUrl())){
             return "";

@@ -61,6 +61,10 @@ public final class EpaySigner {
         }
     }
 
+    public static boolean verifyRsa(Map<String, ?> fields, EpayCredential credential, String signature) {
+        return credential != null && verifyRsa(fields, credential.merchantPublicKey(), signature);
+    }
+
     private static byte[] md5Bytes(String text) {
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");
