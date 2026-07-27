@@ -32,7 +32,6 @@ import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.channel.IPaymentService;
-import com.jeequan.jeepay.pay.compat.epay.EpayCompatMetadata;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.exception.ChannelException;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
@@ -75,6 +74,14 @@ public abstract class AbstractPayOrderController extends ApiController {
     /** 统一下单 (新建订单模式) **/
     protected ApiRes unifiedOrder(String wayCode, UnifiedOrderRQ bizRQ){
         return unifiedOrder(wayCode, bizRQ, null);
+    }
+
+    /**
+     * 仅由明确的协议适配入口允许把协议元数据写入订单。
+     * 原生统一下单入口默认不接收该类保留元数据。
+     */
+    protected boolean shouldPersistChannelExtra(UnifiedOrderRQ rq) {
+        return false;
     }
 
     /** 统一下单 **/
@@ -258,7 +265,7 @@ public abstract class AbstractPayOrderController extends ApiController {
         payOrder.setClientIp(StringUtils.defaultIfEmpty(rq.getClientIp(), getClientIp())); //客户端IP
         payOrder.setSubject(rq.getSubject()); //商品标题
         payOrder.setBody(rq.getBody()); //商品描述信息
-        if (EpayCompatMetadata.decode(rq.getChannelExtra()).isPresent()) {
+        if (shouldPersistChannelExtra(rq)) {
             payOrder.setChannelExtra(rq.getChannelExtra());
         }
         payOrder.setChannelUser(rq.getChannelUserId()); //渠道用户标志

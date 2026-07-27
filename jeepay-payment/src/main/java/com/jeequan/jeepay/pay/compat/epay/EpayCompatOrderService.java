@@ -103,8 +103,10 @@ public final class EpayCompatOrderService {
     }
 
     private void persistMetadata(PayOrder payOrder, EpayCreateCommand command, String tradeNo, String payInfo) {
-        payOrder.setChannelExtra(channelExtra(command, tradeNo, payInfo));
-        payOrderService.updateById(payOrder);
+        PayOrder patch = new PayOrder()
+                .setPayOrderId(payOrder.getPayOrderId())
+                .setChannelExtra(channelExtra(command, tradeNo, payInfo));
+        payOrderService.updateById(patch);
     }
 
     private String channelExtra(EpayCreateCommand command, String tradeNo, String payInfo) {

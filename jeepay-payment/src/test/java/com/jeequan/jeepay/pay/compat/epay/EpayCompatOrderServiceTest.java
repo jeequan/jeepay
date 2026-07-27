@@ -141,6 +141,10 @@ class EpayCompatOrderServiceTest {
         PayOrder persisted = orderCaptor.getValue();
         JSONObject channelExtra = JSON.parseObject(persisted.getChannelExtra());
         assertThat(result.success()).isTrue();
+        assertThat(persisted.getPayOrderId()).isEqualTo("JPAY-1001");
+        assertThat(persisted.getState()).isNull();
+        assertThat(persisted.getChannelOrderNo()).isNull();
+        assertThat(persisted.getAmount()).isNull();
         assertThat(EpayCompatMetadata.decode(persisted.getChannelExtra())).isPresent();
         assertThat(channelExtra.getString("payDataType")).isEqualTo("payUrl");
         assertThat(channelExtra.getJSONObject("__epay_compat").getString("pay_info"))

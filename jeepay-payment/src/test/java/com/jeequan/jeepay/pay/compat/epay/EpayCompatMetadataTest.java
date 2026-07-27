@@ -54,6 +54,29 @@ class EpayCompatMetadataTest {
         assertThat(EpayCompatMetadata.decode("{\"__epay_compat\":{\"version\":\"v1\"}}" )).isEmpty();
     }
 
+    @Test
+    void longMetadataRoundTripsBeyondLegacyVarcharLimit() {
+        String longSubject = "subject-".concat("x".repeat(700));
+        EpayMetadataValue value = new EpayMetadataValue(
+                "v1",
+                "MCH_TARGET",
+                "APP_TARGET",
+                "alipay",
+                "ORDER_TARGET",
+                "https://merchant.example/notify/" + "n".repeat(180),
+                "https://merchant.example/return/" + "r".repeat(180),
+                longSubject,
+                "12.34",
+                "203.0.113.9",
+                "pc",
+                "JPAY_ORDER");
+
+        String encoded = EpayCompatMetadata.encode(value);
+
+        assertThat(encoded.length()).isGreaterThan(512);
+        assertThat(EpayCompatMetadata.decode(encoded)).contains(value);
+    }
+
     private static EpayMetadataValue valueWithTradeNo(String tradeNo) {
         return new EpayMetadataValue(
                 "v1",

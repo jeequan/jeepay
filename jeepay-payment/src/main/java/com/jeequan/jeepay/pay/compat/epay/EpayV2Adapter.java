@@ -30,20 +30,32 @@ public final class EpayV2Adapter {
         body.put("pay_type", payType == null ? "" : payType);
         body.put("pay_info", payInfo == null ? "" : payInfo);
         body.put("sign_type", "RSA");
-        body.put("sign", sign(body, credential));
-        return new EpayCompatResponse(code == 0, JSON.toJSONString(body), payInfo);
+        try {
+            body.put("sign", sign(body, credential));
+            return new EpayCompatResponse(code == 0, JSON.toJSONString(body), payInfo);
+        } catch (IllegalArgumentException e) {
+            if (code == 0) {
+                JSONObject failure = new JSONObject(true);
+                failure.put("code", 1);
+                failure.put("msg", "V2 RSA响应签名失败");
+                failure.put("trade_no", "");
+                failure.put("pay_type", "");
+                failure.put("pay_info", "");
+                failure.put("sign_type", "RSA");
+                failure.put("sign", "");
+                return new EpayCompatResponse(false, JSON.toJSONString(failure), "");
+            }
+            body.put("sign", "");
+            return new EpayCompatResponse(false, JSON.toJSONString(body), "");
+        }
     }
 
     private static String sign(JSONObject body, EpayCredential credential) {
         String privateKey = credential == null ? null : credential.platformPrivateKey();
         if (!hasText(privateKey)) {
-            return "";
+            throw new IllegalArgumentException("V2 RSA响应私钥未配置");
         }
-        try {
-            return EpaySigner.signRsa(body, privateKey);
-        } catch (IllegalArgumentException e) {
-            return "";
-        }
+        return EpaySigner.signRsa(body, privateKey);
     }
 
     private static boolean hasText(String value) {

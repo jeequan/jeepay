@@ -1,6 +1,7 @@
 package com.jeequan.jeepay.pay.compat.epay;
 
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.ctrl.payorder.AbstractPayOrderController;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,11 @@ public class EpayCompatController extends AbstractPayOrderController {
         this.orderService = orderService;
     }
 
+    @Override
+    protected boolean shouldPersistChannelExtra(UnifiedOrderRQ rq) {
+        return EpayCompatMetadata.decode(rq.getChannelExtra()).isPresent();
+    }
+
     @PostMapping("/compat/epay/mapi.php")
     public ResponseEntity<String> mapi(@RequestParam Map<String, String> fields) {
         return process(fields).asJson();
@@ -72,6 +78,12 @@ public class EpayCompatController extends AbstractPayOrderController {
                 UnifiedOrderRQ request = orderService.toUnifiedOrderRequest(command);
                 ApiRes apiRes = unifiedOrder(request.getWayCode(), request);
                 result = orderService.fromApiResult(apiRes, command);
+                if (!result.success()) {
+                    PayOrder raced = orderService.findExisting(command);
+                    if (raced != null) {
+                        result = orderService.fromExisting(raced, command);
+                    }
+                }
             }
             return result.success()
                     ? success(version, result, credential)
