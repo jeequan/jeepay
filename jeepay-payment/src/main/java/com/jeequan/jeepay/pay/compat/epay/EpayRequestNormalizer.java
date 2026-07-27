@@ -1,10 +1,11 @@
 package com.jeequan.jeepay.pay.compat.epay;
 
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.utils.StringKit;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Map;
@@ -112,10 +113,22 @@ public final class EpayRequestNormalizer {
 
     private static String callbackUrl(Map<String, String> fields, String key) {
         String value = required(fields, key);
-        if (!StringKit.isAvailableUrl(value)) {
+        if (!isValidHttpUrl(value)) {
             throw new IllegalArgumentException(key + " must be a valid HTTP(S) URL");
         }
         return value;
+    }
+
+    private static boolean isValidHttpUrl(String value) {
+        try {
+            URI uri = new URI(value);
+            String scheme = uri.getScheme();
+            return ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))
+                    && uri.getHost() != null
+                    && !uri.getHost().trim().isEmpty();
+        } catch (URISyntaxException e) {
+            return false;
+        }
     }
 
     private static String required(Map<String, String> fields, String key) {

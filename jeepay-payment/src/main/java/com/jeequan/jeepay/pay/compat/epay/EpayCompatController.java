@@ -1,6 +1,7 @@
 package com.jeequan.jeepay.pay.compat.epay;
 
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.ctrl.payorder.AbstractPayOrderController;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
@@ -78,7 +79,7 @@ public class EpayCompatController extends AbstractPayOrderController {
                 UnifiedOrderRQ request = orderService.toUnifiedOrderRequest(command);
                 ApiRes apiRes = unifiedOrder(request.getWayCode(), request);
                 result = orderService.fromApiResult(apiRes, command);
-                if (!result.success()) {
+                if (!result.success() && isDuplicateOrderFailure(apiRes, command)) {
                     PayOrder raced = orderService.findExisting(command);
                     if (raced != null) {
                         result = orderService.fromExisting(raced, command);
@@ -91,6 +92,15 @@ public class EpayCompatController extends AbstractPayOrderController {
         } catch (RuntimeException e) {
             return failure(version, e.getMessage(), credential);
         }
+    }
+
+    private static boolean isDuplicateOrderFailure(ApiRes apiRes, EpayCreateCommand command) {
+        if (apiRes == null || apiRes.getCode() == null
+                || apiRes.getCode() == ApiCodeEnum.SUCCESS.getCode()
+                || apiRes.getMsg() == null) {
+            return false;
+        }
+        return apiRes.getMsg().contains("商户订单[" + command.orderNo() + "]已存在");
     }
 
     private EpayProtocolVersion protocolVersion(Map<String, String> fields) {

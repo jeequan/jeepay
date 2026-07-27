@@ -118,6 +118,15 @@ class EpayRequestNormalizerTest {
     }
 
     @Test
+    void rejectsHttpUrlsWithoutAnAuthority() {
+        assertThatThrownBy(() -> normalizer.normalize(fields(
+                        "pid", "MCH_TARGET", "type", "alipay", "out_trade_no", "ORDER_TARGET", "money", "1.00",
+                        "notify_url", "https://", "return_url", "https://merchant.example/return.php"),
+                "APP_TARGET", credential("secret"), EpayProtocolVersion.V1))
+                .hasMessageContaining("notify_url");
+    }
+
+    @Test
     void enforcesVersionSpecificSignType() {
         assertThatThrownBy(() -> normalizer.normalize(validFields("sign_type", "RSA"),
                         "APP_TARGET", credential("secret"), EpayProtocolVersion.V1))

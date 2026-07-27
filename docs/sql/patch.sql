@@ -1,8 +1,10 @@
 #####    增量发布SQL   #####
 
-## -- EPAY 兼容下单：支付订单渠道元数据改为 TEXT，避免长回调/收银台参数被截断
+## -- EPAY 兼容下单：支付订单渠道元数据与回调地址改为 TEXT，避免长参数被截断
 ALTER TABLE `t_pay_order`
-    MODIFY COLUMN `channel_extra` TEXT COMMENT '特定渠道发起额外参数';
+    MODIFY COLUMN `channel_extra` TEXT COMMENT '特定渠道发起额外参数',
+    MODIFY COLUMN `notify_url` TEXT NOT NULL COMMENT '异步通知地址',
+    MODIFY COLUMN `return_url` TEXT COMMENT '页面跳转地址';
 
 ## -- ++++ [v1.1.0] ===> [v1.1.1] ++++
 ## -- 新增： 支付测试， 重发通知， 通知最大次数保存到数据库

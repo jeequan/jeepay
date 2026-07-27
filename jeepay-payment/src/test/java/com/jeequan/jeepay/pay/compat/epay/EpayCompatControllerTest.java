@@ -189,6 +189,22 @@ class EpayCompatControllerTest {
     }
 
     @Test
+    void nonDuplicateFailurePreservesOriginalMessageWithoutSecondLookup() {
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        TestController controller = controller(payOrderService, new EpayCredential("merchant-key", null, null));
+        controller.apiResult = ApiRes.customFail("商户应用参数未配置");
+        when(payOrderService.queryMchOrder("MCH-1001", null, "ORDER-1001")).thenReturn(null);
+        Map<String, String> fields = v1Fields();
+        fields.put("sign", EpaySigner.signMd5(fields, "merchant-key"));
+
+        JSONObject body = JSON.parseObject(controller.mapi(fields).getBody());
+
+        assertThat(body.getInteger("code")).isZero();
+        assertThat(body.getString("msg")).isEqualTo("商户应用参数未配置");
+        verify(payOrderService).queryMchOrder("MCH-1001", null, "ORDER-1001");
+    }
+
+    @Test
     void uniqueKeyRaceReloadConflictUsesSameIdentityValidation() {
         PayOrderService payOrderService = mock(PayOrderService.class);
         TestController controller = controller(payOrderService, new EpayCredential("merchant-key", null, null));
