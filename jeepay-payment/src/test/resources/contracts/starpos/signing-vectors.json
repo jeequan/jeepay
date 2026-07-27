@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "canonicalJsonVectors": [
+    {
+      "name": "ascii-key-order-is-case-sensitive",
+      "fields": {
+        "z": "last",
+        "a": "lower",
+        "A": "upper",
+        "10": "numeric-key"
+      },
+      "canonicalJson": "{\"10\":\"numeric-key\",\"A\":\"upper\",\"a\":\"lower\",\"z\":\"last\"}",
+      "sha256Hex": "112fdf80e172a181bf2c9db8a8bce5156f51e3c61ea5b87aac83236120f19939"
+    },
+    {
+      "name": "null-is-excluded-empty-and-sign-are-handled",
+      "fields": {
+        "sign": "ignored-signature",
+        "nullable": null,
+        "present": "value",
+        "empty": ""
+      },
+      "canonicalJson": "{\"empty\":\"\",\"present\":\"value\"}",
+      "sha256Hex": "d10b29fb47e6a57488ffda159b40fb5613509b62c35c6a231e04526ff6174dc4"
+    },
+    {
+      "name": "nested-object-keeps-input-order",
+      "fields": {
+        "alpha": "first",
+        "outer": {
+          "z": 1,
+          "a": 2
+        }
+      },
+      "canonicalJson": "{\"alpha\":\"first\",\"outer\":{\"z\":1,\"a\":2}}",
+      "sha256Hex": "c072577cb63b2b0925ae530c9628371c9cbb8161252ac6c002df22d5df7b7642"
+    }
+  ],
+  "rsa": {
+    "status": "protocol_locked",
+    "algorithm": "RSA/ECB/PKCS1Padding",
+    "hash": "SHA-256 lowercase hex over UTF-8 canonical parameter string",
+    "keyFormat": "X.509 PUBLIC KEY PEM/Base64",
+    "direction": {
+      "request": "public-key encrypt",
+      "notification": "public-key decrypt"
+    },
+    "source": "XyfClient.php: openssl_public_encrypt/openssl_public_decrypt; postar.cn/xyf/doc/7306848m0",
+    "testMaterial": "Generated local RSA public key; direction/implementation test, not a merchant key sample"
+  }
+}

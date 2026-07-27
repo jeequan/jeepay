@@ -1,0 +1,15 @@
+{
+  "version": "V1",
+  "trade_status": "TRADE_SUCCESS",
+  "success_body": "success",
+  "fields": {
+    "pid": "MCH_TARGET",
+    "trade_no": "PAY_TARGET",
+    "out_trade_no": "ORDER_TARGET",
+    "type": "alipay",
+    "name": "Target order",
+    "money": "12.34",
+    "trade_status": "TRADE_SUCCESS",
+    "sign_type": "MD5"
+  }
+}

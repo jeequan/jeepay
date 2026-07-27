@@ -267,7 +267,7 @@ CREATE TABLE `t_pay_order` (
         `client_ip` VARCHAR(32) DEFAULT NULL COMMENT '客户端IP',
         `subject` VARCHAR(64) NOT NULL COMMENT '商品标题',
         `body` VARCHAR(256) NOT NULL COMMENT '商品描述信息',
-        `channel_extra` VARCHAR(512) DEFAULT NULL COMMENT '特定渠道发起额外参数',
+        `channel_extra` TEXT COMMENT '特定渠道发起额外参数',
         `channel_user` VARCHAR(64) DEFAULT NULL COMMENT '渠道用户标识,如微信openId,支付宝账号',
         `channel_order_no` VARCHAR(64) DEFAULT NULL COMMENT '渠道订单号',
         `refund_state` TINYINT(6) NOT NULL DEFAULT '0' COMMENT '退款状态: 0-未发生实际退款, 1-部分退款, 2-全额退款',
@@ -279,8 +279,8 @@ CREATE TABLE `t_pay_order` (
         `err_code` VARCHAR(128) DEFAULT NULL COMMENT '渠道支付错误码',
         `err_msg` VARCHAR(256) DEFAULT NULL COMMENT '渠道支付错误描述',
         `ext_param` VARCHAR(128) DEFAULT NULL COMMENT '商户扩展参数',
-        `notify_url` VARCHAR(128) NOT NULL default '' COMMENT '异步通知地址',
-        `return_url` VARCHAR(128) DEFAULT '' COMMENT '页面跳转地址',
+        `notify_url` TEXT NOT NULL COMMENT '异步通知地址',
+        `return_url` TEXT COMMENT '页面跳转地址',
         `expired_time` DATETIME DEFAULT NULL COMMENT '订单失效时间',
         `success_time` DATETIME DEFAULT NULL COMMENT '订单支付成功时间',
         `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
@@ -732,6 +732,14 @@ INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_BAR', '银联二维码(�
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_B2B', '银联企业网银支付');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_PC', '银联网关支付');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_JSAPI', '银联Js支付');
+INSERT INTO t_pay_way (way_code, way_name, created_at, updated_at)
+SELECT 'STARPOS_QR', '星驿付聚合收银台',
+       '2026-07-26 00:00:00.000',
+       '2026-07-26 00:00:00.000'
+WHERE NOT EXISTS (
+        SELECT 1 FROM t_pay_way WHERE way_code = 'STARPOS_QR'
+)
+ON DUPLICATE KEY UPDATE way_code = VALUES(way_code);
 
 
 -- 初始化支付接口定义
@@ -776,3 +784,29 @@ VALUES ('plspay', '计全付', 1, 0, 1,
         '[{"wayCode": "ALI_APP"}, {"wayCode": "ALI_BAR"}, {"wayCode": "ALI_JSAPI"}, {"wayCode": "ALI_LITE"}, {"wayCode": "ALI_PC"}, {"wayCode": "ALI_QR"}, {"wayCode": "ALI_WAP"}, {"wayCode": "WX_APP"}, {"wayCode": "WX_BAR"}, {"wayCode": "WX_H5"}, {"wayCode": "WX_JSAPI"}, {"wayCode": "WX_LITE"}, {"wayCode": "WX_NATIVE"}]',
         'http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/plspay.svg', '#0CACFF', 1, '计全付');
 
+-- 星驿付普通商户通道
+INSERT INTO t_pay_interface_define (
+        if_code, if_name, is_mch_mode, is_isv_mode, config_page_type,
+        isv_params, isvsub_mch_params, normal_mch_params, way_codes,
+        icon, bg_color, state, remark, created_at, updated_at
+)
+SELECT
+        'starpos',
+        '星驿付',
+        1,
+        0,
+        1,
+        NULL,
+        NULL,
+        '[{"name":"environment","desc":"环境配置","type":"radio","verify":"required","values":"test,uat,prod","titles":"测试环境,UAT环境,生产环境"},{"name":"agetId","desc":"代理商编号","type":"text","verify":"required"},{"name":"custId","desc":"商户编号","type":"text","verify":"required"},{"name":"publicKey","desc":"星驿付公钥","type":"textarea","verify":"required","star":"1"},{"name":"version","desc":"接口版本","type":"text","verify":"required"}]',
+        '[{"wayCode":"STARPOS_QR"}]',
+        NULL,
+        '#3B82F6',
+        1,
+        '星驿付官方通道',
+        '2026-07-26 00:00:00.000',
+        '2026-07-26 00:00:00.000'
+WHERE NOT EXISTS (
+        SELECT 1 FROM t_pay_interface_define WHERE if_code = 'starpos'
+)
+ON DUPLICATE KEY UPDATE if_code = VALUES(if_code);

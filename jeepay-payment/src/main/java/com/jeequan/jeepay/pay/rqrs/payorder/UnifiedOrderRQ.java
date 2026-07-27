@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.beans.BeanUtils;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -87,6 +88,25 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
     @Range(min = 0, max = 2, message = "分账模式设置值有误")
     private Byte divisionMode;
 
+    /**
+     * 统一下单入口先校验 UnifiedOrderRQ，再转换为具体支付方式请求。
+     * 因此 STARPOS_QR 的 payDataType 约束需要在基类阶段同步执行。
+     */
+    @AssertTrue(message = "STARPOS_QR 的 payDataType 必须为 payUrl")
+    @JSONField(serialize = false, deserialize = false)
+    public boolean isStarposQrPayDataTypeValid() {
+        if (!CS.PAY_WAY_CODE.STARPOS_QR.equals(wayCode)) {
+            return true;
+        }
+
+        try {
+            JSONObject extra = JSONObject.parseObject(StringUtils.defaultIfEmpty(channelExtra, "{}"));
+            return extra != null && "payUrl".equals(extra.getString("payDataType"));
+        } catch (RuntimeException ignored) {
+            return false;
+        }
+    }
+
     /** 返回真实的bizRQ **/
     public UnifiedOrderRQ buildBizRQ(){
 
@@ -104,6 +124,10 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
             return bizRQ;
         }else if(CS.PAY_WAY_CODE.QR_CASHIER.equals(wayCode)){
             QrCashierOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), QrCashierOrderRQ.class);
+            BeanUtils.copyProperties(this, bizRQ);
+            return bizRQ;
+        }else if(CS.PAY_WAY_CODE.STARPOS_QR.equals(wayCode)){
+            StarposQrOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), StarposQrOrderRQ.class);
             BeanUtils.copyProperties(this, bizRQ);
             return bizRQ;
         }else if(CS.PAY_WAY_CODE.WX_JSAPI.equals(wayCode)){

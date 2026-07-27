@@ -1,0 +1,13 @@
+{
+  "version": "V1",
+  "fields": {
+    "code": 1,
+    "msg": "success",
+    "trade_no": "PAY_TARGET",
+    "payurl": "https://xyf-server-test.postar.cn/cashier/PAY_TARGET",
+    "qrcode": "",
+    "urlscheme": "",
+    "sign_type": "MD5",
+    "sign": "23aa80203d80b246a52518694d83bb9c"
+  }
+}

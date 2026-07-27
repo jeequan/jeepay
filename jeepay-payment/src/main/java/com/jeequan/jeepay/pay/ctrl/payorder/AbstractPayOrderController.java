@@ -76,6 +76,14 @@ public abstract class AbstractPayOrderController extends ApiController {
         return unifiedOrder(wayCode, bizRQ, null);
     }
 
+    /**
+     * 仅由明确的协议适配入口允许把协议元数据写入订单。
+     * 原生统一下单入口默认不接收该类保留元数据。
+     */
+    protected boolean shouldPersistChannelExtra(UnifiedOrderRQ rq) {
+        return false;
+    }
+
     /** 统一下单 **/
     protected ApiRes unifiedOrder(String wayCode, UnifiedOrderRQ bizRQ, PayOrder payOrder){
 
@@ -257,7 +265,9 @@ public abstract class AbstractPayOrderController extends ApiController {
         payOrder.setClientIp(StringUtils.defaultIfEmpty(rq.getClientIp(), getClientIp())); //客户端IP
         payOrder.setSubject(rq.getSubject()); //商品标题
         payOrder.setBody(rq.getBody()); //商品描述信息
-//        payOrder.setChannelExtra(rq.getChannelExtra()); //特殊渠道发起的附件额外参数,  是否应该删除该字段了？？ 比如authCode不应该记录， 只是在传输阶段存在的吧？  之前的为了在payOrder对象需要传参。
+        if (shouldPersistChannelExtra(rq)) {
+            payOrder.setChannelExtra(rq.getChannelExtra());
+        }
         payOrder.setChannelUser(rq.getChannelUserId()); //渠道用户标志
         payOrder.setExtParam(rq.getExtParam()); //商户扩展参数
         payOrder.setNotifyUrl(rq.getNotifyUrl()); //异步通知地址
