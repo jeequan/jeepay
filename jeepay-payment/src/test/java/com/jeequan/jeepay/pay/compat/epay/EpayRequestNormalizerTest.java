@@ -97,10 +97,17 @@ class EpayRequestNormalizerTest {
     }
 
     @Test
-    void rejectsNonHttpsNotifyAndReturnUrls() {
+    void acceptsHttpAndHttpsNotifyAndReturnUrlsButRejectsOtherSchemes() {
+        EpayCreateCommand httpCommand = normalizer.normalize(fields(
+                        "pid", "MCH_TARGET", "type", "alipay", "out_trade_no", "ORDER_TARGET", "money", "1.00",
+                        "notify_url", "http://merchant.example/notify.php", "return_url", "http://merchant.example/return.php"),
+                "APP_TARGET", credential("secret"), EpayProtocolVersion.V1);
+        assertThat(httpCommand.notifyUrl()).isEqualTo("http://merchant.example/notify.php");
+        assertThat(httpCommand.returnUrl()).isEqualTo("http://merchant.example/return.php");
+
         assertThatThrownBy(() -> normalizer.normalize(fields(
                         "pid", "MCH_TARGET", "type", "alipay", "out_trade_no", "ORDER_TARGET", "money", "1.00",
-                        "notify_url", "http://merchant.example/notify.php", "return_url", "https://merchant.example/return.php"),
+                        "notify_url", "ftp://merchant.example/notify.php", "return_url", "https://merchant.example/return.php"),
                 "APP_TARGET", credential("secret"), EpayProtocolVersion.V1))
                 .hasMessageContaining("notify_url");
         assertThatThrownBy(() -> normalizer.normalize(fields(
@@ -108,6 +115,23 @@ class EpayRequestNormalizerTest {
                         "notify_url", "https://merchant.example/notify.php", "return_url", "ftp://merchant.example/return.php"),
                 "APP_TARGET", credential("secret"), EpayProtocolVersion.V1))
                 .hasMessageContaining("return_url");
+    }
+
+    @Test
+    void enforcesVersionSpecificSignType() {
+        assertThatThrownBy(() -> normalizer.normalize(validFields("sign_type", "RSA"),
+                        "APP_TARGET", credential("secret"), EpayProtocolVersion.V1))
+                .hasMessageContaining("sign_type");
+
+        assertThatThrownBy(() -> normalizer.normalize(validFields(
+                                "timestamp", String.valueOf(NOW.getEpochSecond()), "sign_type", "MD5"),
+                        "APP_TARGET", credential("secret"), EpayProtocolVersion.V2))
+                .hasMessageContaining("sign_type");
+
+        assertThatThrownBy(() -> normalizer.normalize(validFields(
+                                "timestamp", String.valueOf(NOW.getEpochSecond())),
+                        "APP_TARGET", credential("secret"), EpayProtocolVersion.V2))
+                .hasMessageContaining("sign_type");
     }
 
     @Test
@@ -120,6 +144,7 @@ class EpayRequestNormalizerTest {
                         "notify_url", "https://merchant.example/notify.php",
                         "return_url", "https://merchant.example/return.php",
                         "timestamp", String.valueOf(NOW.getEpochSecond()),
+                        "sign_type", "RSA",
                         "method", "web"),
                 "APP_TARGET", credential("secret"), EpayProtocolVersion.V2);
 
@@ -129,13 +154,39 @@ class EpayRequestNormalizerTest {
         assertThatThrownBy(() -> normalizer.normalize(fields(
                         "pid", "MCH_TARGET", "type", "alipay", "out_trade_no", "ORDER_TARGET", "money", "1.00",
                         "notify_url", "https://merchant.example/notify.php", "return_url", "https://merchant.example/return.php",
-                        "timestamp", String.valueOf(NOW.minusSeconds(301).getEpochSecond())),
+                        "timestamp", String.valueOf(NOW.minusSeconds(301).getEpochSecond()), "sign_type", "RSA"),
                 "APP_TARGET", credential("secret"), EpayProtocolVersion.V2))
                 .hasMessageContaining("timestamp");
         assertThatThrownBy(() -> normalizer.normalize(fields(
                         "pid", "MCH_TARGET", "type", "alipay", "out_trade_no", "ORDER_TARGET", "money", "1.00",
                         "notify_url", "https://merchant.example/notify.php", "return_url", "https://merchant.example/return.php",
-                        "timestamp", "2026-07-27T12:00:00Z"),
+                        "timestamp", "2026-07-27T12:00:00Z", "sign_type", "RSA"),
+                "APP_TARGET", credential("secret"), EpayProtocolVersion.V2))
+                .hasMessageContaining("timestamp");
+    }
+
+    @Test
+    void rejectsTimestampArithmeticOverflow() {
+        assertThatThrownBy(() -> normalizer.normalize(fields(
+                        "pid", "MCH_TARGET",
+                        "type", "alipay",
+                        "out_trade_no", "ORDER_TARGET",
+                        "money", "1.00",
+                        "notify_url", "https://merchant.example/notify.php",
+                        "return_url", "https://merchant.example/return.php",
+                        "timestamp", String.valueOf(Long.MIN_VALUE),
+                        "sign_type", "RSA"),
+                "APP_TARGET", credential("secret"), EpayProtocolVersion.V2))
+                .hasMessageContaining("timestamp");
+        assertThatThrownBy(() -> normalizer.normalize(fields(
+                        "pid", "MCH_TARGET",
+                        "type", "alipay",
+                        "out_trade_no", "ORDER_TARGET",
+                        "money", "1.00",
+                        "notify_url", "https://merchant.example/notify.php",
+                        "return_url", "https://merchant.example/return.php",
+                        "timestamp", String.valueOf(Long.MAX_VALUE),
+                        "sign_type", "RSA"),
                 "APP_TARGET", credential("secret"), EpayProtocolVersion.V2))
                 .hasMessageContaining("timestamp");
     }
@@ -176,6 +227,15 @@ class EpayRequestNormalizerTest {
         EpayCompatProperties empty = new EpayCompatProperties();
         assertThatThrownBy(() -> empty.resolveAppId("MCH_TARGET"))
                 .hasMessageContaining("epay.compat.default-app-id");
+    }
+
+    @Test
+    void rejectsNegativeClockSkewConfiguration() {
+        EpayCompatProperties properties = new EpayCompatProperties();
+
+        assertThatThrownBy(() -> properties.setClockSkewSeconds(-1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("clockSkewSeconds");
     }
 
     private static Map<String, String> signedFields(String... values) {

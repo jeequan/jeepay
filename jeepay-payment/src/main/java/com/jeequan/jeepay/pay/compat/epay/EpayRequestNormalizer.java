@@ -34,13 +34,14 @@ public final class EpayRequestNormalizer {
         }
 
         long amountFen = amountFen(required(fields, "money"));
-        String notifyUrl = httpsUrl(fields, "notify_url");
-        String returnUrl = httpsUrl(fields, "return_url");
+        EpayProtocolVersion effectiveVersion = version == null ? EpayProtocolVersion.V1 : version;
+        validateSignType(fields.get("sign_type"), effectiveVersion);
+        String notifyUrl = callbackUrl(fields, "notify_url");
+        String returnUrl = callbackUrl(fields, "return_url");
         String subject = trimToNull(fields.get("name"));
         if (subject == null) {
             subject = orderNo;
         }
-        EpayProtocolVersion effectiveVersion = version == null ? EpayProtocolVersion.V1 : version;
         if (effectiveVersion == EpayProtocolVersion.V2) {
             validateV2Timestamp(fields.get("timestamp"));
         }
@@ -85,15 +86,34 @@ public final class EpayRequestNormalizer {
             throw new IllegalArgumentException("timestamp must be Unix seconds", e);
         }
         long now = Instant.now(clock).getEpochSecond();
-        if (Math.abs(now - epochSeconds) > properties.getClockSkewSeconds()) {
+        final long difference;
+        try {
+            difference = Math.subtractExact(now, epochSeconds);
+        } catch (ArithmeticException e) {
+            throw new IllegalArgumentException("timestamp is outside allowed clock skew", e);
+        }
+        if (Math.abs(difference) > properties.getClockSkewSeconds()) {
             throw new IllegalArgumentException("timestamp is outside allowed clock skew");
         }
     }
 
-    private static String httpsUrl(Map<String, String> fields, String key) {
+    private static void validateSignType(String signType, EpayProtocolVersion version) {
+        String normalized = trimToNull(signType);
+        if (version == EpayProtocolVersion.V1) {
+            if (normalized != null && !"MD5".equalsIgnoreCase(normalized)) {
+                throw new IllegalArgumentException("sign_type must be MD5 for V1");
+            }
+            return;
+        }
+        if (!"RSA".equalsIgnoreCase(normalized)) {
+            throw new IllegalArgumentException("sign_type must be RSA for V2");
+        }
+    }
+
+    private static String callbackUrl(Map<String, String> fields, String key) {
         String value = required(fields, key);
-        if (!StringKit.isAvailableUrl(value) || !value.startsWith("https://")) {
-            throw new IllegalArgumentException(key + " must be a valid HTTPS URL");
+        if (!StringKit.isAvailableUrl(value)) {
+            throw new IllegalArgumentException(key + " must be a valid HTTP(S) URL");
         }
         return value;
     }

@@ -55,6 +55,9 @@ public class EpayCompatProperties {
     }
 
     public void setClockSkewSeconds(long clockSkewSeconds) {
+        if (clockSkewSeconds < 0) {
+            throw new IllegalArgumentException("clockSkewSeconds must be non-negative");
+        }
         this.clockSkewSeconds = clockSkewSeconds;
     }
 
