@@ -58,6 +58,7 @@ public final class EpayRequestNormalizer {
                 trimToNull(fields.get("device")),
                 effectiveVersion == EpayProtocolVersion.V1 ? "v1" : "v2",
                 trimToNull(fields.get("method")),
+                epayType,
                 credential);
     }
 

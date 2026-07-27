@@ -3,6 +3,7 @@ package com.jeequan.jeepay.pay.channel.starpos;
 import com.jeequan.jeepay.core.model.params.starpos.StarposNormalMchParams;
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.URI;
 import java.util.Map;
 
 /**
@@ -38,6 +39,29 @@ public final class StarposConfig {
             throw new IllegalArgumentException("不支持的星驿付环境: " + params.getEnvironment());
         }
         return baseUrl;
+    }
+
+    /**
+     * 校验收银台地址是否满足任一已知星驿付环境的地址约束。
+     */
+    public static boolean isKnownCashierUrl(String cashierUrl) {
+        if (StringUtils.isBlank(cashierUrl)) {
+            return false;
+        }
+        try {
+            URI cashierUri = URI.create(cashierUrl);
+            return "https".equalsIgnoreCase(cashierUri.getScheme())
+                    && cashierUri.getHost() != null
+                    && cashierUri.getUserInfo() == null
+                    && cashierUri.getPort() == -1
+                    && cashierUri.getQuery() == null
+                    && cashierUri.getFragment() == null
+                    && BASE_URLS.values().stream()
+                    .map(URI::create)
+                    .anyMatch(baseUri -> baseUri.getHost().equalsIgnoreCase(cashierUri.getHost()));
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private static void requireNotBlank(String value, String field) {
