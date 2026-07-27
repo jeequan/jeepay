@@ -32,6 +32,7 @@ public class DefaultEpayCredentialResolver implements EpayCredentialResolver {
         if (!hasText(credential.getMerchantPublicKey()) || !hasText(credential.getPlatformPrivateKey())) {
             throw new IllegalStateException("商户应用 V2 RSA 凭据未配置");
         }
+        EpaySigner.validateRsaPrivateKey(credential.getPlatformPrivateKey());
         return new EpayCredential(
                 null,
                 credential.getMerchantPublicKey(),

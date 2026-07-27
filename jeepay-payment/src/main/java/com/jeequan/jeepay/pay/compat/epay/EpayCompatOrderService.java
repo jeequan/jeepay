@@ -51,7 +51,7 @@ public final class EpayCompatOrderService {
         rq.setBody(command.subject());
         rq.setNotifyUrl(command.notifyUrl());
         rq.setReturnUrl(command.returnUrl());
-        rq.setChannelExtra(channelExtra(command, command.orderNo(), null));
+        rq.setChannelExtra(channelExtra(command, null, null));
         rq.setExtParam(null);
         return rq;
     }

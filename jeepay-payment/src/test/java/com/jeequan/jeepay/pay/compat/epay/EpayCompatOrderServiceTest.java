@@ -14,6 +14,9 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -95,6 +98,28 @@ class EpayCompatOrderServiceTest {
     }
 
     @Test
+    void initialMetadataLeavesTradeNoEmptyAndKeepsInitOrderIdempotent() {
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        EpayCompatOrderService service = new EpayCompatOrderService(payOrderService);
+        EpayCreateCommand command = command("wxpay", 1234L);
+        PayOrder initialOrder = compatibleOrder(command, null, null)
+                .setPayOrderId("JPAY-INIT")
+                .setState(PayOrder.STATE_INIT);
+        when(payOrderService.queryMchOrder("MCH-1001", null, "ORDER-1001")).thenReturn(initialOrder);
+
+        var request = service.toUnifiedOrderRequest(command);
+        EpayMetadataValue initialMetadata = EpayCompatMetadata.decode(request.getChannelExtra()).orElseThrow();
+        PayOrder existing = service.findExisting(command);
+        EpayCreateResult result = service.fromExisting(existing, command);
+
+        assertThat(initialMetadata.tradeNo()).isNull();
+        assertThat(existing).isSameAs(initialOrder);
+        assertThat(result.success()).isFalse();
+        assertThat(result.tradeNo()).isEqualTo("JPAY-INIT");
+        assertThat(result.message()).contains("可通过交易号查询");
+    }
+
+    @Test
     void apiResultPersistsEpayMetadataInPayOrderChannelExtraWithoutExtParam() {
         PayOrderService payOrderService = mock(PayOrderService.class);
         EpayCompatOrderService service = new EpayCompatOrderService(payOrderService);
@@ -132,12 +157,13 @@ class EpayCompatOrderServiceTest {
     }
 
     @Test
-    void credentialResolverUsesAppSecretForV1AndExternalRsaKeysForV2() {
+    void credentialResolverUsesAppSecretForV1AndExternalRsaKeysForV2() throws Exception {
         MchApp mchApp = new MchApp().setAppSecret("v1-merchant-key");
         EpayCompatProperties properties = new EpayCompatProperties();
         EpayCompatProperties.CredentialProperties rsa = new EpayCompatProperties.CredentialProperties();
+        KeyPair platformKeys = keyPair();
         rsa.setMerchantPublicKey("merchant-public");
-        rsa.setPlatformPrivateKey("platform-private");
+        rsa.setPlatformPrivateKey(pem(platformKeys.getPrivate().getEncoded(), "PRIVATE"));
         properties.setCredentials(Map.of("MCH-1001", Map.of("APP-1001", rsa)));
         var queryService = mock(com.jeequan.jeepay.pay.service.ConfigContextQueryService.class);
         when(queryService.queryMchApp("MCH-1001", "APP-1001")).thenReturn(mchApp);
@@ -146,7 +172,21 @@ class EpayCompatOrderServiceTest {
         assertThat(resolver.resolve("MCH-1001", "APP-1001", EpayProtocolVersion.V1))
                 .isEqualTo(new EpayCredential("v1-merchant-key", null, null));
         assertThat(resolver.resolve("MCH-1001", "APP-1001", EpayProtocolVersion.V2))
-                .isEqualTo(new EpayCredential(null, "merchant-public", "platform-private"));
+                .isEqualTo(new EpayCredential(null, "merchant-public", rsa.getPlatformPrivateKey()));
+    }
+
+    @Test
+    void credentialResolverRejectsMalformedV2PlatformPrivateKey() {
+        EpayCompatProperties properties = new EpayCompatProperties();
+        EpayCompatProperties.CredentialProperties rsa = new EpayCompatProperties.CredentialProperties();
+        rsa.setMerchantPublicKey("merchant-public");
+        rsa.setPlatformPrivateKey("not-a-private-key");
+        properties.setCredentials(Map.of("MCH-1001", Map.of("APP-1001", rsa)));
+        var queryService = mock(com.jeequan.jeepay.pay.service.ConfigContextQueryService.class);
+        DefaultEpayCredentialResolver resolver = new DefaultEpayCredentialResolver(queryService, properties);
+
+        assertThatThrownBy(() -> resolver.resolve("MCH-1001", "APP-1001", EpayProtocolVersion.V2))
+                .hasMessageContaining("私钥");
     }
 
     static EpayCreateCommand command(String type, long amountFen) {
@@ -178,5 +218,17 @@ class EpayCompatOrderServiceTest {
                 .setNotifyUrl(command.notifyUrl())
                 .setReturnUrl(command.returnUrl())
                 .setChannelExtra(channelExtra.toJSONString());
+    }
+
+    private static KeyPair keyPair() throws Exception {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+        generator.initialize(1024);
+        return generator.generateKeyPair();
+    }
+
+    private static String pem(byte[] encoded, String type) {
+        return "-----BEGIN " + type + " KEY-----\n"
+                + Base64.getMimeEncoder(64, new byte[]{'\n'}).encodeToString(encoded)
+                + "\n-----END " + type + " KEY-----";
     }
 }

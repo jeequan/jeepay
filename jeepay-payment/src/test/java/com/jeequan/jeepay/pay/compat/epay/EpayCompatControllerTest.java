@@ -18,6 +18,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -123,6 +124,45 @@ class EpayCompatControllerTest {
         JSONObject v2Body = JSON.parseObject(v2.mapi(v2Fields()).getBody());
         assertThat(v2Body.getInteger("code")).isEqualTo(1);
         assertThat(v2Body.getString("trade_no")).isEmpty();
+    }
+
+    @Test
+    void malformedV2PlatformPrivateKeyReturnsFailureWithoutCallingUnifiedOrder() throws Exception {
+        KeyPair merchantKeys = keyPair();
+        EpayCredential invalidCredential = new EpayCredential(
+                null, pem(merchantKeys.getPublic().getEncoded(), "PUBLIC"), "not-a-private-key");
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        TestController controller = controller(payOrderService, invalidCredential);
+        Map<String, String> fields = v2Fields();
+        fields.put("sign", EpaySigner.signRsa(fields, pem(merchantKeys.getPrivate().getEncoded(), "PRIVATE")));
+
+        ResponseEntity<String> response = controller.mapi(fields);
+        JSONObject body = JSON.parseObject(response.getBody());
+
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(body.getInteger("code")).isEqualTo(1);
+        assertThat(body.getString("sign")).isEmpty();
+        assertThat(controller.unifiedCalls).isZero();
+        verify(payOrderService, never()).queryMchOrder("MCH-1001", null, "ORDER-1001");
+    }
+
+    @Test
+    void duplicateControllerRequestReturnsExistingOrderWithoutCallingUnifiedOrder() {
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        TestController controller = controller(payOrderService, new EpayCredential("merchant-key", null, null));
+        PayOrder existing = EpayCompatOrderServiceTest.compatibleOrder(
+                EpayCompatOrderServiceTest.command("alipay", 1234L),
+                "JPAY-EXISTING", STARPOS_CASHIER_BASE + "JPAY-EXISTING");
+        when(payOrderService.queryMchOrder("MCH-1001", null, "ORDER-1001")).thenReturn(existing);
+        Map<String, String> fields = v1Fields();
+        fields.put("sign", EpaySigner.signMd5(fields, "merchant-key"));
+
+        ResponseEntity<String> response = controller.mapi(fields);
+        JSONObject body = JSON.parseObject(response.getBody());
+
+        assertThat(body.getInteger("code")).isEqualTo(1);
+        assertThat(body.getString("trade_no")).isEqualTo("JPAY-EXISTING");
+        assertThat(controller.unifiedCalls).isZero();
     }
 
     private static TestController controller(PayOrderService payOrderService, EpayCredential credential) {

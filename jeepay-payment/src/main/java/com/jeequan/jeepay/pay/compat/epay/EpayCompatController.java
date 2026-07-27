@@ -58,6 +58,7 @@ public class EpayCompatController extends AbstractPayOrderController {
             String merchantId = required(fields, "pid");
             String appId = properties.resolveAppId(merchantId);
             credential = credentialResolver.resolve(merchantId, appId, version);
+            validateResponseCredential(version, credential);
             if (!verify(fields, credential, version)) {
                 return failure(version, "验签失败", credential);
             }
@@ -89,6 +90,16 @@ public class EpayCompatController extends AbstractPayOrderController {
         return version == EpayProtocolVersion.V2
                 ? v2Adapter.verify(fields, credential)
                 : v1Adapter.verify(fields, credential);
+    }
+
+    private static void validateResponseCredential(EpayProtocolVersion version, EpayCredential credential) {
+        if (version == EpayProtocolVersion.V2) {
+            if (credential == null || credential.platformPrivateKey() == null
+                    || credential.platformPrivateKey().trim().isEmpty()) {
+                throw new IllegalStateException("商户应用 V2 RSA 凭据未配置");
+            }
+            EpaySigner.validateRsaPrivateKey(credential.platformPrivateKey());
+        }
     }
 
     private EpayCompatResponse success(EpayProtocolVersion version, EpayCreateResult result,

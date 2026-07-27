@@ -32,6 +32,7 @@ import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.channel.IPaymentService;
+import com.jeequan.jeepay.pay.compat.epay.EpayCompatMetadata;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.exception.ChannelException;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
@@ -257,7 +258,9 @@ public abstract class AbstractPayOrderController extends ApiController {
         payOrder.setClientIp(StringUtils.defaultIfEmpty(rq.getClientIp(), getClientIp())); //客户端IP
         payOrder.setSubject(rq.getSubject()); //商品标题
         payOrder.setBody(rq.getBody()); //商品描述信息
-//        payOrder.setChannelExtra(rq.getChannelExtra()); //特殊渠道发起的附件额外参数,  是否应该删除该字段了？？ 比如authCode不应该记录， 只是在传输阶段存在的吧？  之前的为了在payOrder对象需要传参。
+        if (EpayCompatMetadata.decode(rq.getChannelExtra()).isPresent()) {
+            payOrder.setChannelExtra(rq.getChannelExtra());
+        }
         payOrder.setChannelUser(rq.getChannelUserId()); //渠道用户标志
         payOrder.setExtParam(rq.getExtParam()); //商户扩展参数
         payOrder.setNotifyUrl(rq.getNotifyUrl()); //异步通知地址

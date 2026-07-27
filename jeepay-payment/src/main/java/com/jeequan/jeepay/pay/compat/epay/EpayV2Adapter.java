@@ -30,9 +30,20 @@ public final class EpayV2Adapter {
         body.put("pay_type", payType == null ? "" : payType);
         body.put("pay_info", payInfo == null ? "" : payInfo);
         body.put("sign_type", "RSA");
-        body.put("sign", hasText(credential == null ? null : credential.platformPrivateKey())
-                ? EpaySigner.signRsa(body, credential.platformPrivateKey()) : "");
+        body.put("sign", sign(body, credential));
         return new EpayCompatResponse(code == 0, JSON.toJSONString(body), payInfo);
+    }
+
+    private static String sign(JSONObject body, EpayCredential credential) {
+        String privateKey = credential == null ? null : credential.platformPrivateKey();
+        if (!hasText(privateKey)) {
+            return "";
+        }
+        try {
+            return EpaySigner.signRsa(body, privateKey);
+        } catch (IllegalArgumentException e) {
+            return "";
+        }
     }
 
     private static boolean hasText(String value) {

@@ -42,6 +42,14 @@ public final class EpaySigner {
         }
     }
 
+    public static void validateRsaPrivateKey(String privateKeyPem) {
+        try {
+            privateKey(privateKeyPem);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("RSA私钥格式错误", e);
+        }
+    }
+
     public static boolean verifyRsa(Map<String, ?> fields, String publicKeyPem, String signature) {
         try {
             Signature verifier = Signature.getInstance("SHA256withRSA");
