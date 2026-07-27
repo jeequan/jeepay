@@ -214,6 +214,19 @@ class EpayCompatOrderServiceTest {
     }
 
     @Test
+    void credentialResolverForInboundV2OnlyRequiresMerchantPublicKey() {
+        EpayCompatProperties properties = new EpayCompatProperties();
+        EpayCompatProperties.CredentialProperties rsa = new EpayCompatProperties.CredentialProperties();
+        rsa.setMerchantPublicKey("merchant-public");
+        properties.setCredentials(Map.of("MCH-1001", Map.of("APP-1001", rsa)));
+        var queryService = mock(com.jeequan.jeepay.pay.service.ConfigContextQueryService.class);
+        DefaultEpayCredentialResolver resolver = new DefaultEpayCredentialResolver(queryService, properties);
+
+        assertThat(resolver.resolveForVerification("MCH-1001", "APP-1001", EpayProtocolVersion.V2))
+                .isEqualTo(new EpayCredential(null, "merchant-public", null));
+    }
+
+    @Test
     void credentialResolverRejectsMalformedV2PlatformPrivateKey() {
         EpayCompatProperties properties = new EpayCompatProperties();
         EpayCompatProperties.CredentialProperties rsa = new EpayCompatProperties.CredentialProperties();

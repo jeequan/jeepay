@@ -2,8 +2,11 @@ package com.jeequan.jeepay.pay.compat.epay;
 
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.utils.StringKit;
+import com.jeequan.jeepay.pay.service.PayOrderProcessService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,13 +22,23 @@ public class EpayCompatNotifyService {
     private final PayOrderService payOrderService;
     private final EpayCompatProperties properties;
     private final EpayCredentialResolver credentialResolver;
+    private final PayOrderProcessService payOrderProcessService;
+
+    @Autowired
+    public EpayCompatNotifyService(PayOrderService payOrderService,
+                                   EpayCompatProperties properties,
+                                   EpayCredentialResolver credentialResolver,
+                                   @Lazy PayOrderProcessService payOrderProcessService) {
+        this.payOrderService = payOrderService;
+        this.properties = properties;
+        this.credentialResolver = credentialResolver;
+        this.payOrderProcessService = payOrderProcessService;
+    }
 
     public EpayCompatNotifyService(PayOrderService payOrderService,
                                    EpayCompatProperties properties,
                                    EpayCredentialResolver credentialResolver) {
-        this.payOrderService = payOrderService;
-        this.properties = properties;
-        this.credentialResolver = credentialResolver;
+        this(payOrderService, properties, credentialResolver, null);
     }
 
     public String createNotifyUrl(PayOrder payOrder) {
@@ -38,44 +51,61 @@ public class EpayCompatNotifyService {
 
     public String handleCallback(Map<String, String> fields) {
         try {
-            if (fields == null) {
+            Optional<CallbackContext> context = validateCallback(fields);
+            if (context.isEmpty()) {
                 return "fail";
             }
-            String pid = required(fields, "pid");
-            String outTradeNo = required(fields, "out_trade_no");
-            EpayProtocolVersion version = protocolVersion(fields.get("sign_type"));
-            String appId = properties.resolveAppId(pid);
-            EpayCredential credential = credentialResolver.resolve(pid, appId, version);
-            if (!verify(fields, credential, version)) {
-                return "fail";
-            }
-
-            PayOrder payOrder = payOrderService.queryMchOrder(pid, null, outTradeNo);
-            if (payOrder == null) {
-                return "fail";
-            }
-            Optional<EpayMetadataValue> metadata = EpayCompatMetadata.decode(payOrder.getChannelExtra());
-            if (metadata.isEmpty() || !matchesIdentity(fields, metadata.get(), payOrder)) {
-                return "fail";
-            }
-            if (!matchesTradeNo(fields.get("trade_no"), metadata.get(), payOrder)
-                    || !matchesMoney(fields.get("money"), payOrder)
-                    || !safeEquals(fields.get("type"), metadata.get().type())) {
-                return "fail";
-            }
-
             String status = fields.get("trade_status");
             if ("TRADE_SUCCESS".equalsIgnoreCase(status)) {
-                return confirmSuccess(payOrder, fields);
+                return confirmSuccess(context.get());
             }
             if ("TRADE_CLOSED".equalsIgnoreCase(status)) {
-                return confirmClosed(payOrder, fields);
+                return confirmClosed(context.get());
             }
             return "success";
         } catch (RuntimeException e) {
             log.warn("EPAY兼容回调处理失败", e);
             return "fail";
         }
+    }
+
+    public String handleReturn(Map<String, String> fields) {
+        try {
+            return validateCallback(fields).isPresent() ? "success" : "fail";
+        } catch (RuntimeException e) {
+            log.warn("EPAY兼容同步返回处理失败", e);
+            return "fail";
+        }
+    }
+
+    private Optional<CallbackContext> validateCallback(Map<String, String> fields) {
+        if (fields == null) {
+            return Optional.empty();
+        }
+        String pid = required(fields, "pid");
+        String outTradeNo = required(fields, "out_trade_no");
+        EpayProtocolVersion version = protocolVersion(fields.get("sign_type"));
+        PayOrder payOrder = payOrderService.queryMchOrder(pid, null, outTradeNo);
+        if (payOrder == null) {
+            return Optional.empty();
+        }
+        Optional<EpayMetadataValue> metadata = EpayCompatMetadata.decode(payOrder.getChannelExtra());
+        if (metadata.isEmpty() || !matchesIdentity(fields, metadata.get(), payOrder)) {
+            return Optional.empty();
+        }
+        if (!matchesTradeNo(fields.get("trade_no"), metadata.get(), payOrder)
+                || !matchesMoney(fields.get("money"), payOrder)
+                || !safeEquals(fields.get("type"), metadata.get().type())) {
+            return Optional.empty();
+        }
+
+        String appId = hasText(metadata.get().appId())
+                ? metadata.get().appId() : properties.resolveAppId(pid);
+        EpayCredential credential = credentialResolver.resolveForVerification(pid, appId, version);
+        if (!verify(fields, credential, version)) {
+            return Optional.empty();
+        }
+        return Optional.of(new CallbackContext(fields, payOrder, metadata.get(), version));
     }
 
     private String createCallbackUrl(PayOrder payOrder, boolean notify) {
@@ -115,27 +145,56 @@ public class EpayCompatNotifyService {
         return StringKit.appendUrlQuery(callbackUrl, fields);
     }
 
-    private String confirmSuccess(PayOrder payOrder, Map<String, String> fields) {
+    private String confirmSuccess(CallbackContext context) {
+        PayOrder payOrder = context.payOrder();
+        Map<String, String> fields = context.fields();
         if (payOrder.getState() == PayOrder.STATE_SUCCESS) {
             return "success";
         }
         if (payOrder.getState() != PayOrder.STATE_ING) {
             return "fail";
         }
-        return payOrderService.updateIng2Success(
-                payOrder.getPayOrderId(), fields.get("trade_no"), null) ? "success" : "fail";
+        if (payOrderService.updateIng2Success(
+                payOrder.getPayOrderId(), fields.get("trade_no"), null)) {
+            if (payOrderProcessService != null) {
+                payOrderProcessService.confirmSuccess(payOrder);
+            }
+            return "success";
+        }
+        PayOrder refreshed = payOrderService.queryMchOrder(
+                context.metadata().pid(), null, context.metadata().outTradeNo());
+        return refreshed != null
+                && refreshed.getState() == PayOrder.STATE_SUCCESS
+                && matchesCallbackSnapshot(context, refreshed) ? "success" : "fail";
     }
 
-    private String confirmClosed(PayOrder payOrder, Map<String, String> fields) {
+    private String confirmClosed(CallbackContext context) {
+        PayOrder payOrder = context.payOrder();
+        Map<String, String> fields = context.fields();
         if (payOrder.getState() == PayOrder.STATE_FAIL || payOrder.getState() == PayOrder.STATE_CLOSED) {
             return "success";
         }
         if (payOrder.getState() != PayOrder.STATE_ING) {
             return "fail";
         }
-        return payOrderService.updateIng2Fail(
+        if (payOrderService.updateIng2Fail(
                 payOrder.getPayOrderId(), fields.get("trade_no"), null,
-                "TRADE_CLOSED", "EPAY交易关闭") ? "success" : "fail";
+                "TRADE_CLOSED", "EPAY交易关闭")) {
+            return "success";
+        }
+        PayOrder refreshed = payOrderService.queryMchOrder(
+                context.metadata().pid(), null, context.metadata().outTradeNo());
+        return refreshed != null
+                && (refreshed.getState() == PayOrder.STATE_FAIL
+                || refreshed.getState() == PayOrder.STATE_CLOSED)
+                && matchesCallbackSnapshot(context, refreshed) ? "success" : "fail";
+    }
+
+    private static boolean matchesCallbackSnapshot(CallbackContext context, PayOrder payOrder) {
+        return matchesIdentity(context.fields(), context.metadata(), payOrder)
+                && matchesTradeNo(context.fields().get("trade_no"), context.metadata(), payOrder)
+                && matchesMoney(context.fields().get("money"), payOrder)
+                && safeEquals(context.fields().get("type"), context.metadata().type());
     }
 
     private static Map<String, Object> callbackFields(EpayMetadataValue metadata, PayOrder payOrder) {
@@ -229,5 +288,11 @@ public class EpayCompatNotifyService {
 
     private static boolean hasText(String value) {
         return value != null && !value.trim().isEmpty();
+    }
+
+    private record CallbackContext(Map<String, String> fields,
+                                   PayOrder payOrder,
+                                   EpayMetadataValue metadata,
+                                   EpayProtocolVersion version) {
     }
 }

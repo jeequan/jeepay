@@ -88,7 +88,7 @@ public class EpayCompatController extends AbstractPayOrderController {
 
     @RequestMapping(value = "/compat/epay/return.php", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<String> returnCallback(@RequestParam Map<String, String> fields) {
-        return ResponseEntity.ok(notifyService == null ? "fail" : notifyService.handleCallback(fields));
+        return ResponseEntity.ok(notifyService == null ? "fail" : notifyService.handleReturn(fields));
     }
 
     private EpayCompatResponse process(Map<String, String> fields) {

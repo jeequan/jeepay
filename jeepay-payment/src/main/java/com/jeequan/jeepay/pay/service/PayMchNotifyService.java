@@ -75,6 +75,10 @@ public class PayMchNotifyService {
 
             // 封装通知url
             String notifyUrl = createNotifyUrl(dbPayOrder, appSecret);
+            if(StringUtils.isEmpty(notifyUrl)){
+                log.warn("订单[{}]通知地址生成为空，本次不创建通知记录。", dbPayOrder.getPayOrderId());
+                return;
+            }
             mchNotifyRecord = new MchNotifyRecord();
             mchNotifyRecord.setOrderId(dbPayOrder.getPayOrderId());
             mchNotifyRecord.setOrderType(MchNotifyRecord.TYPE_PAY_ORDER);

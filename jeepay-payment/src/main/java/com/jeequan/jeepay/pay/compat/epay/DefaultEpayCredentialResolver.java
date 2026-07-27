@@ -40,6 +40,21 @@ public class DefaultEpayCredentialResolver implements EpayCredentialResolver {
         );
     }
 
+    @Override
+    public EpayCredential resolveForVerification(String merchantId,
+                                                 String appId,
+                                                 EpayProtocolVersion version) {
+        if (version == EpayProtocolVersion.V1) {
+            return resolve(merchantId, appId, version);
+        }
+
+        EpayCompatProperties.CredentialProperties credential = credentialProperties(merchantId, appId);
+        if (!hasText(credential.getMerchantPublicKey())) {
+            throw new IllegalStateException("商户应用 V2 RSA 公钥未配置");
+        }
+        return new EpayCredential(null, credential.getMerchantPublicKey(), null);
+    }
+
     private EpayCompatProperties.CredentialProperties credentialProperties(String merchantId, String appId) {
         Map<String, Map<String, EpayCompatProperties.CredentialProperties>> all = properties.getCredentials();
         Map<String, EpayCompatProperties.CredentialProperties> byApp = all.get(merchantId);

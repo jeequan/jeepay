@@ -8,6 +8,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 class EpayCompatCallbackControllerTest {
 
@@ -27,7 +28,7 @@ class EpayCompatCallbackControllerTest {
     @Test
     void returnEndpointReturnsProtocolFailureBody() {
         EpayCompatNotifyService notifyService = mock(EpayCompatNotifyService.class);
-        when(notifyService.handleCallback(Map.of("trade_status", "TRADE_CLOSED")))
+        when(notifyService.handleReturn(Map.of("trade_status", "TRADE_CLOSED")))
                 .thenReturn("fail");
         EpayCompatController controller = controller(notifyService);
 
@@ -35,6 +36,7 @@ class EpayCompatCallbackControllerTest {
 
         assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody()).isEqualTo("fail");
+        verify(notifyService).handleReturn(Map.of("trade_status", "TRADE_CLOSED"));
     }
 
     private static EpayCompatController controller(EpayCompatNotifyService notifyService) {

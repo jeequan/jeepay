@@ -1,6 +1,7 @@
 package com.jeequan.jeepay.pay.compat.epay;
 
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.pay.service.PayOrderProcessService;
 import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRS;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import org.junit.jupiter.api.Test;
@@ -67,6 +68,38 @@ class EpayCompatNotifyServiceTest {
     }
 
     @Test
+    void v2CallbackVerifiesWithMerchantPublicKeyWhenPlatformPrivateKeyIsAbsent() throws Exception {
+        KeyPair merchantKeys = keyPair();
+        EpayCredential credential = new EpayCredential(
+                null,
+                pem(merchantKeys.getPublic().getEncoded(), "PUBLIC"),
+                null);
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        PayOrder order = compatOrder("v2", PayOrder.STATE_ING);
+        when(payOrderService.queryMchOrder("MCH-1001", null, "ORDER-1001")).thenReturn(order);
+        when(payOrderService.updateIng2Success("JPAY-1001", "JPAY-1001", null)).thenReturn(true);
+        EpayCompatProperties properties = properties();
+        properties.setDefaultAppId("WRONG-APP");
+        EpayCompatNotifyService service = new EpayCompatNotifyService(
+                payOrderService,
+                properties,
+                (pid, appId, version) -> {
+                    if (!"APP-1001".equals(appId)) {
+                        throw new IllegalStateException("metadata app id was not used");
+                    }
+                    return credential;
+                });
+
+        Map<String, String> callback = callbackFields("12.34", order);
+        callback.put("sign_type", "RSA");
+        callback.put("sign", EpaySigner.signRsa(
+                callback, pem(merchantKeys.getPrivate().getEncoded(), "PRIVATE")));
+
+        assertThat(service.handleCallback(callback)).isEqualTo("success");
+        verify(payOrderService).updateIng2Success("JPAY-1001", "JPAY-1001", null);
+    }
+
+    @Test
     void returnUrlIsEmptyWhenCompatMetadataHasNoReturnUrl() {
         PayOrder order = compatOrder("v1", PayOrder.STATE_SUCCESS)
                 .setChannelExtra(EpayCompatMetadata.encode(new EpayMetadataValue(
@@ -99,6 +132,57 @@ class EpayCompatNotifyServiceTest {
         assertThat(service.handleCallback(callback)).isEqualTo("success");
         verify(payOrderService, never()).updateIng2Success(
                 "JPAY-1001", "JPAY-1001", null);
+    }
+
+    @Test
+    void validReturnCallbackDoesNotTransitionOrderState() {
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        PayOrder order = compatOrder("v1", PayOrder.STATE_ING);
+        when(payOrderService.queryMchOrder("MCH-1001", null, "ORDER-1001")).thenReturn(order);
+        EpayCompatNotifyService service = service(payOrderService,
+                new EpayCredential("merchant-key", null, null));
+        Map<String, String> callback = callbackFields("12.34", order);
+        callback.put("sign", EpaySigner.signMd5(callback, "merchant-key"));
+
+        assertThat(service.handleReturn(callback)).isEqualTo("success");
+        verify(payOrderService, never()).updateIng2Success(
+                "JPAY-1001", "JPAY-1001", null);
+        verify(payOrderService, never()).updateIng2Fail(
+                "JPAY-1001", "JPAY-1001", null, "TRADE_CLOSED", "EPAY交易关闭");
+    }
+
+    @Test
+    void successfulCallbackRunsCommonSuccessPostProcessingOnce() {
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        PayOrderProcessService processService = mock(PayOrderProcessService.class);
+        PayOrder order = compatOrder("v1", PayOrder.STATE_ING);
+        when(payOrderService.queryMchOrder("MCH-1001", null, "ORDER-1001")).thenReturn(order);
+        when(payOrderService.updateIng2Success("JPAY-1001", "JPAY-1001", null)).thenReturn(true);
+        EpayCompatNotifyService service = service(payOrderService,
+                new EpayCredential("merchant-key", null, null), processService);
+        Map<String, String> callback = callbackFields("12.34", order);
+        callback.put("sign", EpaySigner.signMd5(callback, "merchant-key"));
+
+        assertThat(service.handleCallback(callback)).isEqualTo("success");
+        verify(payOrderService).updateIng2Success("JPAY-1001", "JPAY-1001", null);
+        verify(processService).confirmSuccess(order);
+    }
+
+    @Test
+    void concurrentSuccessfulCallbackReturnsSuccessAfterStateRefresh() {
+        PayOrderService payOrderService = mock(PayOrderService.class);
+        PayOrder order = compatOrder("v1", PayOrder.STATE_ING);
+        PayOrder refreshed = compatOrder("v1", PayOrder.STATE_SUCCESS);
+        when(payOrderService.queryMchOrder("MCH-1001", null, "ORDER-1001"))
+                .thenReturn(order, refreshed);
+        when(payOrderService.updateIng2Success("JPAY-1001", "JPAY-1001", null)).thenReturn(false);
+        EpayCompatNotifyService service = service(payOrderService,
+                new EpayCredential("merchant-key", null, null));
+        Map<String, String> callback = callbackFields("12.34", order);
+        callback.put("sign", EpaySigner.signMd5(callback, "merchant-key"));
+
+        assertThat(service.handleCallback(callback)).isEqualTo("success");
+        verify(payOrderService).updateIng2Success("JPAY-1001", "JPAY-1001", null);
     }
 
     @Test
@@ -139,6 +223,13 @@ class EpayCompatNotifyServiceTest {
 
     private static EpayCompatNotifyService service(PayOrderService payOrderService, EpayCredential credential) {
         return new EpayCompatNotifyService(payOrderService, properties(), (pid, appId, version) -> credential);
+    }
+
+    private static EpayCompatNotifyService service(PayOrderService payOrderService,
+                                                   EpayCredential credential,
+                                                   PayOrderProcessService processService) {
+        return new EpayCompatNotifyService(
+                payOrderService, properties(), (pid, appId, version) -> credential, processService);
     }
 
     private static EpayCompatProperties properties() {
