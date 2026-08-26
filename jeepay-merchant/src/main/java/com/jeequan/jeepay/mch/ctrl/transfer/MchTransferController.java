@@ -74,6 +74,11 @@ public class MchTransferController extends CommonCtrl {
     @GetMapping("/ifCodes/{appId}")
     public ApiRes<List<PayInterfaceDefine>> ifCodeList(@PathVariable("appId") String appId) {
 
+        MchApp mchApp = mchAppService.getById(appId);
+        if (mchApp == null || !getCurrentMchNo().equals(mchApp.getMchNo())) {
+            throw new BizException("商户应用不存在或不可用");
+        }
+
         List<String> ifCodeList = new ArrayList<>();
         List<PayInterfaceConfig> list = payInterfaceConfigService.list(
                 PayInterfaceConfig.gw().select(PayInterfaceConfig::getIfCode)
