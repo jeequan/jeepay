@@ -15,7 +15,6 @@
  */
 package com.jeequan.jeepay.pay.bootstrap;
 
-import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import com.baomidou.mybatisplus.annotation.DbType;
@@ -72,8 +71,8 @@ public class JeepayPayApplication {
         //新建fast-json转换器
         FastJsonHttpMessageConverterEx converter = new FastJsonHttpMessageConverterEx();
 
-        // 开启 FastJSON 安全模式！
-        ParserConfig.getGlobalInstance().setSafeMode(true);
+        // fastjson 2.x 兼容层默认禁用 @type 自动反序列化（autoType），等价于原 safeMode，
+        // 且不再提供 setSafeMode API（调用会抛 not support operation）。
 
         //fast-json 配置信息
         FastJsonConfig config = new FastJsonConfig();
