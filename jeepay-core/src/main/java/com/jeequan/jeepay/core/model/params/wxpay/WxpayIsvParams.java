@@ -21,6 +21,7 @@ import com.jeequan.jeepay.core.model.params.IsvParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import com.jeequan.jeepay.core.utils.JsonKit;
 
 /*
 * 微信官方支付 配置参数
@@ -91,6 +92,6 @@ public class WxpayIsvParams extends IsvParams {
         if (StringUtils.isNotBlank(this.serialNo)) {
             isvParams.setSerialNo(StringKit.str2Star(this.serialNo, 4, 4, 6));
         }
-        return ((JSONObject)JSON.toJSON(isvParams)).toJSONString();
+        return JsonKit.toJSONObject(isvParams).toJSONString();
     }
 }

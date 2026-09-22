@@ -21,6 +21,7 @@ import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import com.jeequan.jeepay.core.utils.JsonKit;
 
 /*
  * 微信官方支付 配置参数
@@ -109,7 +110,7 @@ public class WxpayNormalMchParams extends NormalMchParams {
         if (StringUtils.isNotBlank(this.serialNo)) {
             mchParams.setSerialNo(StringKit.str2Star(this.serialNo, 4, 4, 6));
         }
-        return ((JSONObject) JSON.toJSON(mchParams)).toJSONString();
+        return JsonKit.toJSONObject(mchParams).toJSONString();
     }
 
 }
