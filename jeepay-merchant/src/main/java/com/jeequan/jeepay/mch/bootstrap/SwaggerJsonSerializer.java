@@ -16,8 +16,6 @@
 package com.jeequan.jeepay.mch.bootstrap;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.DefaultJSONParser;
-import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.ObjectSerializer;
 import com.alibaba.fastjson.serializer.SerializeWriter;
@@ -26,7 +24,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import java.lang.reflect.Type;
 
 // 实现FastJson序列号接口
-public class SwaggerJsonSerializer implements ObjectSerializer, ObjectDeserializer {
+public class SwaggerJsonSerializer implements ObjectSerializer {
 
     public final static SwaggerJsonSerializer instance = new SwaggerJsonSerializer();
 
@@ -37,10 +35,6 @@ public class SwaggerJsonSerializer implements ObjectSerializer, ObjectDeserializ
 
         try {
             String result = new String(byteArr);
-            // OpenAPI openAPI = JSON.parseObject(result, OpenAPI.class);
-            // if (openAPI != null && new OpenAPI().getOpenapi().equals(openAPI.getOpenapi())) {
-            //     out.write(result);
-            // }
 
             JSONObject jsonObject = JSONObject.parseObject(result);
             if (jsonObject != null && new OpenAPI().getOpenapi().equals(jsonObject.getString("openapi"))) {
@@ -48,17 +42,7 @@ public class SwaggerJsonSerializer implements ObjectSerializer, ObjectDeserializ
             }
 
         }catch (Exception e) {
-            out.writeByteArray(byteArr);
+            out.write(new String(byteArr));
         }
-    }
-
-    @Override
-    public <T> T deserialze(DefaultJSONParser parser, Type type, Object fieldName) {
-        return null;
-    }
-
-    @Override
-    public int getFastMatchToken() {
-        return 0;
     }
 }

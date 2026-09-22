@@ -43,7 +43,7 @@
 
     <!-- 其他工具包 -->
     <jeepay.sdk.java.version>1.6.1</jeepay.sdk.java.version>
-    <fastjson.version>1.2.83</fastjson.version> <!-- fastjson -->
+    <fastjson.version>2.0.57</fastjson.version> <!-- fastjson 1.x API 兼容层（内核为 fastjson2），修复 CVE RCE（1.2.83 及以下无修复版） -->
     <mybatis.plus.starter.version>3.5.7</mybatis.plus.starter.version>  <!-- mybatis plus -->
     <hutool.util.version>5.8.26</hutool.util.version>  <!-- hutool -->
     <jjwt.version>0.9.1</jjwt.version>
