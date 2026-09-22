@@ -21,6 +21,7 @@ import com.jeequan.jeepay.core.model.params.IsvParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import com.jeequan.jeepay.core.utils.JsonKit;
 
 /*
  * 云闪付 配置信息
@@ -60,7 +61,7 @@ public class YsfpayIsvParams extends IsvParams {
         if (StringUtils.isNotBlank(this.ysfpayPublicKey)) {
             isvParams.setYsfpayPublicKey(StringKit.str2Star(this.ysfpayPublicKey, 6, 6, 6));
         }
-        return ((JSONObject) JSON.toJSON(isvParams)).toJSONString();
+        return JsonKit.toJSONObject(isvParams).toJSONString();
     }
 
 }

@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import com.jeequan.jeepay.core.utils.JsonKit;
 
 /*
 * 当前登录者的信息相关接口
@@ -89,7 +90,7 @@ public class CurrentUserController extends CommonCtrl{
 		}
 
 		//4. 转换为json树状结构
-		JSONArray jsonArray = (JSONArray) JSON.toJSON(allMenuList);
+		JSONArray jsonArray = JsonKit.toJSONArray(allMenuList);
 		List<JSONObject> allMenuRouteTree = new TreeDataBuilder(jsonArray,
 				"entId", "pid", "children", "entSort", true)
 				.buildTreeObject();

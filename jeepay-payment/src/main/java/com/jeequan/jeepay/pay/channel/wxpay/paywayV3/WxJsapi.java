@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import com.jeequan.jeepay.core.utils.JsonKit;
 
 /*
  * 微信 jsapi支付
@@ -118,7 +119,7 @@ public class WxJsapi extends WxpayPaymentService {
                                     wxPayUnifiedOrderV3Result.getPayInfo(TradeTypeEnum.JSAPI, resultAppId, null,
                                             PemUtils.loadPrivateKey(fis));
 
-                            JSONObject jsonRes = (JSONObject)JSON.toJSON(jsapiResult);
+                            JSONObject jsonRes = JsonKit.toJSONObject(jsapiResult);
                             jsonRes.put("package", jsonRes.getString("packageValue"));
                             jsonRes.remove("packageValue");
 
