@@ -37,6 +37,7 @@ import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import com.jeequan.jeepay.core.utils.JsonKit;
 
 /*
  * 微信 小程序支付
@@ -85,7 +86,7 @@ public class WxLite extends WxpayPaymentService {
         WxPayService wxPayService = wxServiceWrapper.getWxPayService();
         try {
             WxPayMpOrderResult payResult = wxPayService.createOrder(req);
-            JSONObject resJSON = (JSONObject) JSON.toJSON(payResult);
+            JSONObject resJSON = JsonKit.toJSONObject(payResult);
             resJSON.put("package", payResult.getPackageValue());
 
             res.setPayInfo(resJSON.toJSONString());

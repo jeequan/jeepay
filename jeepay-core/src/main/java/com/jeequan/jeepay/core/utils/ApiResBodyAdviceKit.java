@@ -78,43 +78,49 @@ public class ApiResBodyAdviceKit {
     /** 处理扩展字段 and 转换为json格式 **/
     private static Object procAndConvertJSON(Object object){
 
-        Object json = JSON.toJSON(object); //转换为JSON格式
+        // fastjson 2.x 兼容层说明：
+        // 1) 树模式 toJSON() 可能产出 fastjson2 原生类型，且对泛型字段嵌套的 bean（如 ApiRes<T>.data 为实体）
+        //    会序列化为空对象；字符串往返无此问题，统一走 parseObject(toJSONString(x)) 保证内容完整且为兼容类型
+        Object json = JSON.parseObject(JSON.toJSONString(object));
+        return processTreeNode(json);
+    }
 
-        if(json instanceof JSONObject){  //对象类型
-            processExtFieldByJSONObject((JSONObject) json);
-            return json;
+    /**
+     * 递归处理 JSON 树节点：ext 扩展字段提升 + 节点归一化为 1.x 兼容类型。
+     * 注意：不再对已是树节点的值重复调用 JSON.toJSON —— fastjson 1.x 下该操作幂等，
+     * 但 2.x 兼容层对 JSONObject（Wrapper）会重新解包转换，导致内容丢失。
+     */
+    private static Object processTreeNode(Object node) {
+
+        JSONObject jsonObject = JsonKit.wrap(node);
+        if(jsonObject != null){  //对象类型
+
+            //如果包含ext字段， 则赋值到外层然后删除该字段
+            if(jsonObject.containsKey(API_EXTEND_FIELD_NAME)){
+                JSONObject exFieldMap = JsonKit.wrap(jsonObject.get(API_EXTEND_FIELD_NAME));
+                if(exFieldMap != null){ //包含字段
+                    for (String s : exFieldMap.keySet()) {  //遍历赋值到外层
+                        jsonObject.put(s, exFieldMap.get(s));
+                    }
+                }
+                jsonObject.remove(API_EXTEND_FIELD_NAME);  //删除字段
+            }
+
+            //处理所有值
+            for (String key : jsonObject.keySet()) {
+                jsonObject.put(key, processTreeNode(jsonObject.get(key)));
+            }
+            return jsonObject;
         }
 
-        if(json instanceof Collection){  //数组类型
-
+        if(node instanceof Collection){  //数组类型
             JSONArray result = new JSONArray();
-            for (Object itemObj : (Collection) json) {
-                result.add(procAndConvertJSON(itemObj));
+            for (Object itemObj : (Collection) node) {
+                result.add(processTreeNode(itemObj));
             }
             return result;
         }
 
-        return json;
-    }
-
-
-    /** 处理jsonObject格式 **/
-    private static void processExtFieldByJSONObject(JSONObject jsonObject){
-
-        //如果包含字段， 则赋值到外层然后删除该字段
-        if(jsonObject.containsKey(API_EXTEND_FIELD_NAME)){
-            JSONObject exFieldMap = jsonObject.getJSONObject(API_EXTEND_FIELD_NAME);
-            if(exFieldMap != null){ //包含字段
-                for (String s : exFieldMap.keySet()) {  //遍历赋值到外层
-                    jsonObject.put(s, exFieldMap.get(s));
-                }
-            }
-            jsonObject.remove(API_EXTEND_FIELD_NAME);  //删除字段
-        }
-
-        //处理所有值
-        for (String key : jsonObject.keySet()) {
-            jsonObject.put(key, procAndConvertJSON(jsonObject.get(key)));
-        }
+        return node;
     }
 }
