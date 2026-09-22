@@ -30,11 +30,12 @@
       <artifactId>mysql-connector-j</artifactId>
     </dependency>
 
-    <!-- Druid 连接池 -->
+    <!-- Druid 连接池（Spring Boot 3 必须使用 -3 专用 starter：Boot2 版的自动配置在 Boot3 下不生效，
+         不生效时 Spring Boot 会回退到默认的 HikariCP，导致 druid 配置段形同虚设） -->
     <dependency>
       <groupId>com.alibaba</groupId>
-      <artifactId>druid-spring-boot-starter</artifactId>
-      <version>1.2.6</version>
+      <artifactId>druid-spring-boot-3-starter</artifactId>
+      <version>1.2.28</version>
     </dependency>
 
     <!-- orm映射框架：mybatis-plus,  自动引入spring-tx -->
