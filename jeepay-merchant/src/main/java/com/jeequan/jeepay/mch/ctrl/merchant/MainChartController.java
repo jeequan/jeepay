@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.jeequan.jeepay.core.utils.JsonKit;
 
 /**
  * 主页数据类
@@ -133,7 +134,7 @@ public class MainChartController extends CommonCtrl {
     public ApiRes userDetail() {
         SysUser sysUser = sysUserService.getById(getCurrentUser().getSysUser().getSysUserId());
         MchInfo mchInfo = mchInfoService.getById(getCurrentMchNo());
-        JSONObject json = (JSONObject) JSON.toJSON(mchInfo);
+        JSONObject json = JsonKit.toJSONObject(mchInfo);
         json.put("loginUsername", sysUser.getLoginUsername());
         json.put("realname", sysUser.getRealname());
         return ApiRes.ok(json);

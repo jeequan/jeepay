@@ -33,6 +33,7 @@ import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.springframework.stereotype.Service;
+import com.jeequan.jeepay.core.utils.JsonKit;
 
 /*
 * 微信 app支付
@@ -67,7 +68,7 @@ public class WxApp extends WxpayPaymentService {
         WxPayService wxPayService = wxServiceWrapper.getWxPayService();
         try {
             WxPayAppOrderResult payResult = wxPayService.createOrder(req);
-            JSONObject resJSON = (JSONObject) JSON.toJSON(payResult);
+            JSONObject resJSON = JsonKit.toJSONObject(payResult);
             resJSON.put("package", payResult.getPackageValue());
 
             res.setPayInfo(resJSON.toJSONString());

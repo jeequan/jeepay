@@ -21,6 +21,7 @@ import com.jeequan.jeepay.core.model.params.IsvParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import com.jeequan.jeepay.core.utils.JsonKit;
 
 /*
 * 支付宝 isv参数定义
@@ -72,7 +73,7 @@ public class AlipayIsvParams extends IsvParams {
         if (StringUtils.isNotBlank(this.alipayPublicKey)) {
             isvParams.setAlipayPublicKey(StringKit.str2Star(this.alipayPublicKey, 6, 6, 6));
         }
-        return ((JSONObject) JSON.toJSON(isvParams)).toJSONString();
+        return JsonKit.toJSONObject(isvParams).toJSONString();
     }
 
 }

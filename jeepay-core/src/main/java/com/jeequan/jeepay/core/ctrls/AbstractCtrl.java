@@ -40,6 +40,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import com.jeequan.jeepay.core.utils.JsonKit;
 
 /*
 * 抽象公共Ctrl
@@ -209,7 +210,7 @@ public abstract class AbstractCtrl {
         T result = params.toJavaObject(clazz);
 
         if(result instanceof BaseModel){  //如果属于BaseModel, 处理apiExtVal
-            JSONObject resultTemp = (JSONObject) JSON.toJSON(result);
+            JSONObject resultTemp = JsonKit.toJSONObject(result);
             for (Map.Entry<String, Object> entry : params.entrySet()) {  //遍历原始参数
                 if(!resultTemp.containsKey(entry.getKey())){
                     ((BaseModel) result).addExt(entry.getKey(), entry.getValue());

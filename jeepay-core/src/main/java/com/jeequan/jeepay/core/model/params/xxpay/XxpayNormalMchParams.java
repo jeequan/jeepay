@@ -21,6 +21,7 @@ import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import com.jeequan.jeepay.core.utils.JsonKit;
 
 /*
  * 小新支付 普通商户参数定义
@@ -47,7 +48,7 @@ public class XxpayNormalMchParams extends NormalMchParams {
         if (StringUtils.isNotBlank(this.key)) {
             mchParams.setKey(StringKit.str2Star(this.key, 4, 4, 6));
         }
-        return ((JSONObject) JSON.toJSON(mchParams)).toJSONString();
+        return JsonKit.toJSONObject(mchParams).toJSONString();
     }
 
 }

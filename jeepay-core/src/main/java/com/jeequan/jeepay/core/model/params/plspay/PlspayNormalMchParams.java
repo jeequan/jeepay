@@ -21,6 +21,7 @@ import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import com.jeequan.jeepay.core.utils.JsonKit;
 
 /*
  * 计全支付plus， 普通商户参数定义
@@ -58,7 +59,7 @@ public class PlspayNormalMchParams extends NormalMchParams {
         if (StringUtils.isNotBlank(this.appSecret)) {
             mchParams.setAppSecret(StringKit.str2Star(this.appSecret, 4, 4, 6));
         }
-        return ((JSONObject) JSON.toJSON(mchParams)).toJSONString();
+        return JsonKit.toJSONObject(mchParams).toJSONString();
     }
 
 }

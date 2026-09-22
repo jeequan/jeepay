@@ -44,12 +44,12 @@ public class TreeDataBuilder {
     private TreeDataBuilder(){}
     public TreeDataBuilder(Collection nodes) {
         super();
-        this.nodes = nodes;
+        this.nodes = JsonKit.wrapList(nodes);
     }
 
     public TreeDataBuilder(Collection nodes, String idName, String pidName, String childrenName) {
         super();
-        this.nodes = nodes;
+        this.nodes = JsonKit.wrapList(nodes);
         this.idName = idName;
         this.sortName = idName;  //排序字段，按照idName
         this.pidName = pidName;
@@ -59,7 +59,7 @@ public class TreeDataBuilder {
     /** 自定义字段 + 排序标志 **/
     public TreeDataBuilder(Collection nodes, String idName, String pidName, String childrenName, String sortName, boolean isAscSort) {
         super();
-        this.nodes = nodes;
+        this.nodes = JsonKit.wrapList(nodes);
         this.idName = idName;
         this.pidName = pidName;
         this.childrenName = childrenName;
