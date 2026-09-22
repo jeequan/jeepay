@@ -50,6 +50,7 @@ spring:
       test-on-return: false # 归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。
       time-between-eviction-runs-millis: 60000 #配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
       min-evictable-idle-time-millis: 300000 #连接保持空闲而不被驱逐的最小时间
+      keep-alive: true #对 minIdle 以内的空闲连接定期保活校验，防止空闲连接被 MySQL wait_timeout 等提前关闭
       validation-query: SELECT 1 FROM DUAL
       # 是否缓存preparedStatement
       pool-prepared-statements: false # 是否缓存preparedStatement，也就是PSCache。PSCache对支持游标的数据库性能提升巨大，比如说oracle。在mysql下建议关闭。
