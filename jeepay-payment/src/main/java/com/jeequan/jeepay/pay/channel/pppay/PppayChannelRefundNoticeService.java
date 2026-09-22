@@ -51,7 +51,8 @@ public class PppayChannelRefundNoticeService extends AbstractChannelRefundNotice
             JSONObject object = (JSONObject) params;
             String orderId = object.getByPath("resource.id", String.class);
 
-            PaypalWrapper wrapper = mchAppConfigContext.getPaypalWrapper();
+            // 通过 ConfigContextQueryService 获取 PaypalWrapper，兼容缓存和非缓存模式
+            PaypalWrapper wrapper = configContextQueryService.getPaypalWrapper(mchAppConfigContext);
             PayPalHttpClient client = wrapper.getClient();
 
             // 查询退款详情以及状态

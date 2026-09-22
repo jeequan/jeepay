@@ -80,6 +80,13 @@
       <artifactId>commons-lang3</artifactId>
     </dependency>
 
+    <!-- 单元测试（fastjson 兼容性等） -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>

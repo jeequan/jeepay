@@ -1,0 +1,76 @@
+name: CI 审批提醒
+
+# 扫描等待维护者批准的 fork PR CI 运行（action_required），
+# 有积压时自动创建/更新提醒 issue，处理完自动关闭。
+on:
+  schedule:
+    - cron: '0 1 * * *' # UTC 01:00 = 北京时间 09:00
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  actions: read
+  contents: read
+
+concurrency:
+  group: ci-approval-reminder
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      LABEL: ci-approval-reminder
+    steps:
+      - name: 扫描待审批的 fork PR CI
+        id: scan
+        run: |
+          pending=$(gh api "repos/$GH_REPO/actions/runs?per_page=100" --jq '
+            [.workflow_runs[]
+              | select(.conclusion == "action_required" and .event == "pull_request")
+              | {title: .display_title, url: .html_url}]')
+          count=$(echo "$pending" | jq 'length')
+          {
+            echo "pending<<EOF"
+            echo "$pending"
+            echo "EOF"
+            echo "count=$count"
+          } >> "$GITHUB_OUTPUT"
+          echo "待审批数量: $count"
+
+      - name: 更新提醒 issue
+        env:
+          PENDING: ${{ steps.scan.outputs.pending }}
+          COUNT: ${{ steps.scan.outputs.count }}
+        run: |
+          gh label create "$LABEL" --color FBCA04 --description "fork PR CI 审批提醒" 2>/dev/null || true
+          existing=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty')
+
+          if [ "$COUNT" -eq 0 ]; then
+            if [ -n "$existing" ]; then
+              gh issue close "$existing" --comment "所有 fork PR 的 CI 已处理完毕，关闭提醒 ✅"
+            fi
+            echo "无待审批项"
+            exit 0
+          fi
+
+          body_file=$(mktemp)
+          {
+            echo "以下 fork PR 的 CI 正在等待维护者批准（首次贡献需手动放行）："
+            echo
+            echo "$PENDING" | jq -r '.[] | "- [\(.title)](\(.url)) — 打开 PR 页面后在检查区点击 **Approve and run**"'
+            echo
+            echo "---"
+            echo "_此 issue 由定时任务自动维护：新增积压会更新内容，全部处理完后自动关闭。_"
+          } > "$body_file"
+
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --body-file "$body_file"
+            gh issue comment "$existing" --body "更新：当前有 $COUNT 个待审批 ⏳"
+          else
+            gh issue create \
+              --title "🔔 有 $COUNT 个 fork PR 的 CI 等待批准" \
+              --body-file "$body_file" \
+              --label "$LABEL"
+          fi
