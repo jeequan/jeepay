@@ -303,3 +303,8 @@ alter table t_transfer_order add column `channel_res_data` TEXT DEFAULT NULL COM
 
 
 ## -- ++++ [v3.1.0] ===> NEXT
+ALTER TABLE `t_pay_order`
+    MODIFY COLUMN `ext_param` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '商户扩展参数' AFTER `err_msg`;
+
+ALTER TABLE `t_refund_order`
+    MODIFY COLUMN `ext_param` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '商户扩展参数' AFTER `notify_url`;
