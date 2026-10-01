@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [master, dev]
 
+permissions:
+  contents: read
+
 jobs:
   shell-assertions:
     name: Shell 安装脚本断言
@@ -39,5 +42,5 @@ jobs:
         run: mvn -B -DskipTests -T 1C clean compile
       - name: Compile tests
         run: mvn -B -DskipTests -T 1C test-compile
-      - name: Run merchant authorization regression tests
-        run: mvn -B -pl jeepay-merchant -am -Dtest='*AuthorizationTest' -Dsurefire.failIfNoSpecifiedTests=false test
+      - name: Run unit and authorization regression tests
+        run: mvn -B test
