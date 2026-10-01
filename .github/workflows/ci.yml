@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [master, dev]
 
+permissions:
+  contents: read
+
 jobs:
   shell-assertions:
     name: Shell 安装脚本断言
@@ -39,3 +42,5 @@ jobs:
         run: mvn -B -DskipTests -T 1C clean compile
       - name: Compile tests
         run: mvn -B -DskipTests -T 1C test-compile
+      - name: Run available unit regression tests
+        run: mvn -B test
