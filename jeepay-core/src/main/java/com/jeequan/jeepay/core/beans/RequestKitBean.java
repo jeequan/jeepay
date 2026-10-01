@@ -63,7 +63,8 @@ public class RequestKitBean {
                 return body;
 
             } catch (Exception e) {
-                log.error("请求参数转换异常！ params=[{}]", body);
+                // 不记录原始请求或解析异常详情，避免畸形输入中的密码进入日志。
+                log.error("请求参数转换异常！");
                 throw new BizException(ApiCodeEnum.PARAMS_ERROR, "转换异常");
             }
         }else {
@@ -88,7 +89,8 @@ public class RequestKitBean {
                 return JSONObject.parseObject(body);
 
             } catch (Exception e) {
-                log.error("请求参数转换异常！ params=[{}]", body);
+                // 不记录原始请求或解析异常详情，避免畸形输入中的密码进入日志。
+                log.error("请求参数转换异常！");
                 throw new BizException(ApiCodeEnum.PARAMS_ERROR, "转换异常");
             }
         }

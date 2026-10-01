@@ -66,4 +66,7 @@
     <!-- 项目日志级别配置 -->
     <logger name="com.jeequan.jeepay" level="${currentProjectLevel}"/>
 
+    <!-- 认证表 SQL 参数和 TRACE 结果可能含密码摘要，不能随项目 DEBUG 一起输出。 -->
+    <logger name="com.jeequan.jeepay.service.mapper.SysUserAuthMapper" level="INFO"/>
+
 </configuration>

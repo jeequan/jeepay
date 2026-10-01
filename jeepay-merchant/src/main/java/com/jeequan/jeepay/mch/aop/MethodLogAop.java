@@ -15,13 +15,13 @@
  */
 package com.jeequan.jeepay.mch.aop;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.beans.RequestKitBean;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.SysLog;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.security.JeeUserDetails;
+import com.jeequan.jeepay.core.utils.LogSanitizer;
 import com.jeequan.jeepay.service.impl.SysLogService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -90,7 +90,7 @@ public class MethodLogAop{
         try {
             // 基础日志信息
             setBaseLogInfo(point, sysLog, JeeUserDetails.getCurrentUserDetails());
-            sysLog.setOptResInfo(JSONObject.toJSON(result).toString());
+            sysLog.setOptResInfo(LogSanitizer.toJson(result));
             scheduledThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -98,7 +98,8 @@ public class MethodLogAop{
                 }
             });
         } catch (Exception e) {
-            logger.error("methodLogError", e);
+            // 异常详情可能携带序列化前的请求内容。
+            logger.error("methodLogError");
         }
 
         return result;
@@ -114,7 +115,8 @@ public class MethodLogAop{
         final SysLog sysLog = new SysLog();
         // 基础日志信息
         setBaseLogInfo(joinPoint, sysLog, JeeUserDetails.getCurrentUserDetails());
-        sysLog.setOptResInfo(e instanceof BizException ? e.getMessage() : "请求异常");
+        sysLog.setOptResInfo(e instanceof BizException
+                ? "业务异常(code=" + ((BizException) e).getApiRes().getCode() + ")" : "请求异常");
         scheduledThreadPool.execute(() -> sysLogService.save(sysLog));
     }
 
@@ -146,7 +148,7 @@ public class MethodLogAop{
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
         //请求参数
-        sysLog.setOptReqParam( requestKitBean.getReqParamJSON().toJSONString() );
+        sysLog.setOptReqParam( LogSanitizer.toJson(requestKitBean.getReqParamJSON()) );
 
         //注解备注
         sysLog.setMethodRemark(getAnnotationRemark(joinPoint));
