@@ -39,3 +39,5 @@ jobs:
         run: mvn -B -DskipTests -T 1C clean compile
       - name: Compile tests
         run: mvn -B -DskipTests -T 1C test-compile
+      - name: Run merchant authorization regression tests
+        run: mvn -B -pl jeepay-merchant -am -Dtest='*AuthorizationTest' -Dsurefire.failIfNoSpecifiedTests=false test
