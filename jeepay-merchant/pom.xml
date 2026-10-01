@@ -18,6 +18,13 @@
     <!-- 项目依赖声明 -->
     <dependencies>
 
+        <!-- 控制器回归测试不启动应用或连接外部服务。 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- 依赖[ service ]包, 会自动传递依赖[ core ]包。  -->
         <dependency>
             <groupId>com.jeequan</groupId>
