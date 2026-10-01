@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.cache.ITokenService;
+import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.SysEntitlement;
 import com.jeequan.jeepay.core.entity.SysUser;
@@ -154,7 +155,11 @@ public class CurrentUserController extends CommonCtrl{
 	@RequestMapping(value="modifyPwd", method = RequestMethod.PUT)
 	public ApiRes modifyPwd() throws BizException{
 
-		Long opSysUserId = getValLongRequired("recordId");   //操作员ID
+		// 修改密码的目标只能来自登录身份，保留 recordId 以兼容现有客户端。
+		Long opSysUserId = getCurrentUser().getSysUser().getSysUserId();
+		if (!opSysUserId.equals(getValLongRequired("recordId"))) {
+			throw new BizException(ApiCodeEnum.SYS_PERMISSION_ERROR);
+		}
 
 		//更改密码，验证当前用户信息
 		String currentUserPwd = Base64.decodeStr(getValStringRequired("originalPwd")); //当前用户登录密码

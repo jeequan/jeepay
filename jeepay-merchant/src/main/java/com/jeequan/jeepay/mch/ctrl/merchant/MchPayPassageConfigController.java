@@ -23,12 +23,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.MchPayPassage;
 import com.jeequan.jeepay.core.entity.PayWay;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
+import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.MchPayPassageService;
 import com.jeequan.jeepay.service.impl.PayWayService;
@@ -60,6 +62,7 @@ public class MchPayPassageConfigController extends CommonCtrl {
 
     @Autowired private MchPayPassageService mchPayPassageService;
     @Autowired private PayWayService payWayService;
+    @Autowired private MchAppService mchAppService;
     @Autowired private MchInfoService mchInfoService;
 
     /**
@@ -141,6 +144,11 @@ public class MchPayPassageConfigController extends CommonCtrl {
         String mchNo = getCurrentUser().getSysUser().getBelongInfoId();
         MchInfo mchInfo = mchInfoService.getById(mchNo);
         if (mchInfo == null || mchInfo.getState() != CS.YES) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+
+        MchApp mchApp = mchAppService.getById(appId);
+        if (mchApp == null || !mchNo.equals(mchApp.getMchNo())) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
 
