@@ -40,6 +40,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import com.jeequan.jeepay.core.utils.JsonKit;
 
 /*
@@ -60,6 +61,9 @@ public abstract class AbstractCtrl {
 
     private static final String SORT_FIELD_PARAM_NAME = "sortField";  //排序字段
     private static final String SORT_ORDER_FLAG_PARAM_NAME = "sortOrder";  // 排序正序， 倒序标志
+
+    /** 排序字段的合法格式：标准SQL标识符（字母开头，可含数字和下划线）。排序字段会被拼接进ORDER BY语句，此处不放行其他字符 **/
+    private static final Pattern SORT_FIELD_PATTERN = Pattern.compile("^[A-Za-z_][A-Za-z0-9_]{0,63}$");
 
     @Autowired
     protected HttpServletRequest request;   //自动注入request
@@ -117,8 +121,14 @@ public abstract class AbstractCtrl {
 
         String sortField = getReqParamJSON().getString(SORT_FIELD_PARAM_NAME);
         String sortOrderFlag = getReqParamJSON().getString(SORT_ORDER_FLAG_PARAM_NAME);
-        if(StringUtils.isAllEmpty(sortField, sortField)){
+        if(StringUtils.isBlank(sortField)){
             return null;
+        }
+
+        sortField = sortField.trim();
+        // 排序字段由前端传入并被拼接进ORDER BY语句，只允许标准SQL标识符，避免其被当作SQL片段执行
+        if(!SORT_FIELD_PATTERN.matcher(sortField).matches()){
+            throw new BizException(ApiCodeEnum.PARAMS_ERROR, "排序字段不合法");
         }
 
         return MutablePair.of("ascend".equalsIgnoreCase(sortOrderFlag), CharSequenceUtil.toUnderlineCase(sortField).toLowerCase());
