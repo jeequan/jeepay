@@ -49,6 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /*
 * 角色管理
@@ -66,6 +67,9 @@ public class SysRoleController extends CommonCtrl {
 	@Autowired SysUserRoleRelaService sysUserRoleRelaService;
 	@Autowired private AuthService authService;
 	@Autowired private SysRoleEntRelaService sysRoleEntRelaService;
+
+	/** 角色列表允许排序的字段（数据库字段名）。前端传入的排序字段必须命中白名单才会生效，否则使用默认排序 **/
+	private static final Set<String> SORT_FIELD_ALLOWLIST = Set.of("role_id", "role_name", "updated_at");
 
 
 	/** list */
@@ -98,8 +102,12 @@ public class SysRoleController extends CommonCtrl {
 
 		//是否有排序字段
 		MutablePair<Boolean, String> orderInfo = getSortInfo();
-		if(orderInfo != null){
-			condition.orderBy(true, orderInfo.getLeft(), orderInfo.getRight());
+		if(orderInfo != null && SORT_FIELD_ALLOWLIST.contains(orderInfo.getRight())){
+			if(orderInfo.getLeft()){
+				condition.orderByAsc(orderInfo.getRight());
+			}else{
+				condition.orderByDesc(orderInfo.getRight());
+			}
 		}else{
 			lambdaCondition.orderByDesc(SysRole::getUpdatedAt);
 		}
