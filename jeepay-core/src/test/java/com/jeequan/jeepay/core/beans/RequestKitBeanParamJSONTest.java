@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
  * <p>
  * 该方法是运营端/商户端/开放接口所有 getReqParamJSON() 取值的入口，
  * Servlet 容器对同名多值参数返回 String[]，转换规则必须保证：
- * 多值按逗号完整拼接（与 selectedIds 这类“逗号分隔多ID”参数的约定一致），
+ * 多值按逗号完整拼接（与 wayCodeStrs 这类“若干个取值用英文逗号拼接”参数的约定一致），
  * 空值数组取空串，不沿用上一个参数的残留值。
  */
 public class RequestKitBeanParamJSONTest {
@@ -56,13 +56,13 @@ public class RequestKitBeanParamJSONTest {
     public void multiValueParamShouldBeJoined() {
 
         Map<String, String[]> paramMap = new LinkedHashMap<>();
-        // 与批量删除接口的约定一致： DELETE /api/sysLogs/{selectedIds} 期望拿到 "1,2,3"
-        paramMap.put("selectedIds", new String[]{"1", "2", "3"});
+        // PayInterfaceDefineController#add 以 getValStringRequired("wayCodeStrs").split(",") 消费，期望拿到完整的多值
+        paramMap.put("wayCodeStrs", new String[]{"WX_LITE", "WX_BAR", "WX_JSAPI"});
         paramMap.put("state", new String[]{"1"});
 
         JSONObject json = toParamJSON(paramMap);
 
-        assertEquals("1,2,3", json.getString("selectedIds"));
+        assertEquals("WX_LITE,WX_BAR,WX_JSAPI", json.getString("wayCodeStrs"));
         assertEquals("1", json.getString("state"));
     }
 
@@ -72,13 +72,13 @@ public class RequestKitBeanParamJSONTest {
 
         Map<String, String[]> paramMap = new LinkedHashMap<>();
         // 单个空值参数：历史实现会对循环外声明的 value 做 substring(0, -1) 而抛异常
-        paramMap.put("unionOrderId", new String[0]);
-        paramMap.put("mchNo", new String[]{"M1001"});
+        paramMap.put("wayCodeStrs", new String[0]);
+        paramMap.put("ifCode", new String[]{"WX_PAY"});
 
         JSONObject json = assertDoesNotThrow(() -> toParamJSON(paramMap));
 
-        assertEquals("", json.getString("unionOrderId"));
-        assertEquals("M1001", json.getString("mchNo"));
+        assertEquals("", json.getString("wayCodeStrs"));
+        assertEquals("WX_PAY", json.getString("ifCode"));
     }
 
     @Test
