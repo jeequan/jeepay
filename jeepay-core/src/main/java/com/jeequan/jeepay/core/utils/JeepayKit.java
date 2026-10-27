@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -144,10 +145,10 @@ public class JeepayKit {
     }
 
     static String doEncode(String str) {
-        if(str.contains("+")) {
-            return URLEncoder.encode(str);
-        }
-        return str;
+        // 生成的查询串直接拼接在请求地址之后, 参数值必须完整做百分号编码:
+        // 值中的 & = 空格 等保留字符会截断参数甚至凭空产生额外参数, 非 ASCII 字符还会使请求行非法。
+        // 此前仅对包含 "+" 的值做编码, 属于同一问题的特例处理, 现统一按 UTF-8 编码。
+        return URLEncoder.encode(str, StandardCharsets.UTF_8);
     }
 
     /** 校验微信/支付宝二维码是否符合规范， 并根据支付类型返回对应的支付方式  **/

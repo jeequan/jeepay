@@ -129,6 +129,12 @@
             <artifactId>jeepay-sdk-java</artifactId>
             <version>pls-1.3.0</version>
         </dependency>
+        <!-- 渠道签名与传输编码的离线契约回归，不连接真实渠道。 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 
