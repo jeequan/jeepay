@@ -47,13 +47,23 @@ public class StringKit {
 			return url;
 		}
 
-		StringBuilder sb = new StringBuilder(url);
-		if(url.indexOf("?") < 0){
+		// 回调地址可能带 fragment（如 SPA 的 http://abc.com/#/abc），query 必须拼在 fragment 之前，
+		// 否则 ?a=1 会被浏览器当成 fragment 的一部分，服务端根本收不到参数。
+		int fragmentIndex = url.indexOf('#');
+		String fragment = "";
+		String baseUrl = url;
+		if(fragmentIndex >= 0){
+			fragment = url.substring(fragmentIndex);
+			baseUrl = url.substring(0, fragmentIndex);
+		}
+
+		StringBuilder sb = new StringBuilder(baseUrl);
+		if(baseUrl.indexOf("?") < 0){
 			sb.append("?");
 		}
 
 		//是否包含query条件
-		boolean isHasCondition = url.indexOf("=") >= 0;
+		boolean isHasCondition = baseUrl.indexOf("=") >= 0;
 
 		for (String k : map.keySet()) {
 			if(k != null && map.get(k) != null){
@@ -62,10 +72,13 @@ public class StringKit {
 				}else{
 					isHasCondition = true; //变更为： 已存在query条件
 				}
-				sb.append(k).append("=").append(URLUtil.encodeQuery(map.get(k).toString()));
+				// 这里编码的是单个参数值，必须用 encodeAll：encodeQuery 的语义是编码整条 query
+				// string，会刻意保留 & = + ? / 等分隔符，导致值里的 & 把参数拆开、= 截断取值、
+				// + 被服务端解码成空格。
+				sb.append(k).append("=").append(URLUtil.encodeAll(map.get(k).toString()));
 			}
 		}
-		return sb.toString();
+		return sb.append(fragment).toString();
 	}
 
 
