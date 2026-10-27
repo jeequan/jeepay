@@ -110,11 +110,10 @@ public class RequestKitBean {
             if(null == valueObj){
                 value = "";
             }else if(valueObj instanceof String[]){
-                String[] values = (String[])valueObj;
-                for(int i=0;i<values.length;i++){
-                    value = values[i] + ",";
-                }
-                value = value.substring(0, value.length()-1);
+                // 同名参数多值时按逗号完整拼接, 与 selectedIds 这类“逗号分隔多ID”参数约定一致。
+                // 原实现每次循环都覆盖 value 而不是累加, 多值时只会保留最后一个取值;
+                // 且 value 声明在循环外, 空值数组会沿用上一个参数的残留值并被 substring 截断越界。
+                value = String.join(",", (String[])valueObj);
             }else{
                 value = valueObj.toString();
             }
