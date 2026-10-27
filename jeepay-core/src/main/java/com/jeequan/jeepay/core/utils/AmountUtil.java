@@ -16,8 +16,7 @@
 package com.jeequan.jeepay.core.utils;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.FieldPosition;
+import java.math.RoundingMode;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,19 +35,12 @@ public class AmountUtil {
      * @return
      */
     public static String convertDollar2Cent(String str) {
-        DecimalFormat df = new DecimalFormat("0.00");
-        StringBuffer sb = df.format(Double.parseDouble(str),
-                new StringBuffer(), new FieldPosition(0));
-        int idx = sb.toString().indexOf(".");
-        sb.deleteCharAt(idx);
-        for (; sb.length() != 1;) {
-            if(sb.charAt(0) == '0') {
-                sb.deleteCharAt(0);
-            } else {
-                break;
-            }
-        }
-        return sb.toString();
+        // 金额换算统一按十进制精确计算, 不再经 double + DecimalFormat 中转:
+        // 1. double 会先丢精度再按 HALF_EVEN 舍入, 如 1.115 元被换算成 111 分(按十进制四舍五入应为 112 分);
+        // 2. DecimalFormat 跟随 JVM 默认 Locale, 小数点分隔符不是 "." 的环境(如 de_DE)取不到 "." 直接抛
+        //    StringIndexOutOfBoundsException, 导致支付宝退款回调金额校验中断。
+        // 舍入方式与 AmountUtil 其它方法保持一致, 采用 ROUND_HALF_UP。
+        return new BigDecimal(str.trim()).movePointRight(2).setScale(0, RoundingMode.HALF_UP).toPlainString();
     }
 
     /**
