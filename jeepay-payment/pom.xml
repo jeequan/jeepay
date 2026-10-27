@@ -24,6 +24,13 @@
     <!-- 项目依赖声明 -->
     <dependencies>
 
+        <!-- 退款查询金额校验：仅用模拟渠道响应，不连接数据库或支付渠道。 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- 依赖[ service ]包, 会自动传递依赖[ core ]包。  -->
         <dependency>
             <groupId>com.jeequan</groupId>

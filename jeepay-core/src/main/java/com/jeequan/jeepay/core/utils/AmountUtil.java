@@ -17,6 +17,8 @@ package com.jeequan.jeepay.core.utils;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import java.text.FieldPosition;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,7 +38,8 @@ public class AmountUtil {
      * @return
      */
     public static String convertDollar2Cent(String str) {
-        DecimalFormat df = new DecimalFormat("0.00");
+        // 只固定小数点符号，保留既有 double 与 HALF_EVEN 舍入行为。
+        DecimalFormat df = new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.ROOT));
         StringBuffer sb = df.format(Double.parseDouble(str),
                 new StringBuffer(), new FieldPosition(0));
         int idx = sb.toString().indexOf(".");
