@@ -4,7 +4,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,10 +61,11 @@ public class AmountUtilDollar2CentTest {
         assertEquals("0", AmountUtil.convertDollar2Cent("0.00"));
         assertEquals("-150", AmountUtil.convertDollar2Cent("-1.5"));
 
-        // 大额退款单也必须保持十进制精确（double 中转会在 15 位以上丢精度）
-        String bigYuan = "12345678901234.56";
-        String cents = AmountUtil.convertDollar2Cent(bigYuan);
-        assertEquals(new BigDecimal(bigYuan).movePointRight(2).toPlainString(), cents);
-        assertTrue(cents.chars().allMatch(ch -> Character.isDigit(ch) || ch == '-'));
+        // 大额退款单也必须保持十进制精确（double 中转会在 15 位以上丢精度）。
+        // 期望值写成字面量：用 movePointRight(2) 反推等于拿实现验实现，换不动的断言。
+        assertEquals("1234567890123456", AmountUtil.convertDollar2Cent("12345678901234.56"));
+        assertEquals("-1234567890123456", AmountUtil.convertDollar2Cent("-12345678901234.56"));
+        assertTrue(AmountUtil.convertDollar2Cent("12345678901234.56").chars()
+                .allMatch(ch -> Character.isDigit(ch) || ch == '-'));
     }
 }
