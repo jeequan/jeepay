@@ -37,6 +37,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -240,7 +241,7 @@ public abstract class AbstractCtrl {
     /** 得到前端传入的金额元,转换成长整型分 **/
     public Long getRequiredAmountL(String name) {
         String amountStr = getValStringRequired(name);  // 前端填写的为元,可以为小数点2位
-        Long amountL = new BigDecimal(amountStr.trim()).multiply(new BigDecimal(100)).longValue(); // // 转成分
+        Long amountL = new BigDecimal(amountStr.trim()).multiply(new BigDecimal(100)).setScale(0, RoundingMode.HALF_UP).longValue(); // 转成分(四舍五入)
         return amountL;
     }
 
@@ -250,7 +251,7 @@ public abstract class AbstractCtrl {
         if(StringUtils.isEmpty(amountStr)) {
             return null;
         }
-        Long amountL = new BigDecimal(amountStr.trim()).multiply(new BigDecimal(100)).longValue(); // // 转成分
+        Long amountL = new BigDecimal(amountStr.trim()).multiply(new BigDecimal(100)).setScale(0, RoundingMode.HALF_UP).longValue(); // 转成分(四舍五入)
         return amountL;
     }
 
@@ -263,7 +264,7 @@ public abstract class AbstractCtrl {
         for(String name : names) {
             String amountStr = getValString(name);  // 前端填写的为元,可以为小数点2位
             if(StringUtils.isNotBlank(amountStr)) {
-                Long amountL = new BigDecimal(amountStr.trim()).multiply(new BigDecimal(100)).longValue(); // // 转成分
+                Long amountL = new BigDecimal(amountStr.trim()).multiply(new BigDecimal(100)).setScale(0, RoundingMode.HALF_UP).longValue(); // 转成分(四舍五入)
                 if(name.indexOf(".") < 0 ){
                     getReqParamJSON().put(name, amountL);
                     continue;
