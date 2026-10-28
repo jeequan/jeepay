@@ -119,7 +119,8 @@ public class RequestKitBean {
                 value = valueObj.toString();
             }
 
-            if(!name.contains("[")){
+            if(!name.contains("[") || name.indexOf("]") < name.indexOf("[")){
+                // 缺少 "]"，或 "]" 位于 "[" 之前时不是对象属性语法，按普通键处理。
                 returnObject.put(name, value);
                 continue;
             }
