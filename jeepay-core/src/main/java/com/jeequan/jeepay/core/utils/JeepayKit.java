@@ -18,7 +18,6 @@ package com.jeequan.jeepay.core.utils;
 import cn.hutool.crypto.SecureUtil;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.exception.BizException;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -38,7 +37,6 @@ import java.util.regex.Pattern;
 * @site https://www.jeequan.com
 * @date 2021/6/8 16:50
 */
-@Slf4j
 public class JeepayKit {
 
     public static byte[] AES_KEY = "4ChT08phkz59hquD795X7w==".getBytes();
@@ -79,9 +77,7 @@ public class JeepayKit {
         }
         String result = sb.toString();
         result += "key=" + key;
-        log.info("signStr:{}", result);
         result = md5(result, encodingCharset).toUpperCase();
-        log.info("sign:{}", result);
         return result;
     }
 

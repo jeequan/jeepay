@@ -23,6 +23,11 @@
 
     <!-- 项目依赖声明 -->
     <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- 依赖[ service ]包, 会自动传递依赖[ core ]包。  -->
         <dependency>
