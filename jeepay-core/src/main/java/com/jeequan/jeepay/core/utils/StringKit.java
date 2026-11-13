@@ -62,7 +62,9 @@ public class StringKit {
 				}else{
 					isHasCondition = true; //变更为： 已存在query条件
 				}
-				sb.append(k).append("=").append(URLUtil.encodeQuery(map.get(k).toString()));
+				// 单个参数值必须编码保留字符，避免 & 拆分参数及 + 被解码为空格。
+				// 不移动 query 与 fragment 的位置，保留既有商户 hash 路由契约。
+				sb.append(k).append("=").append(URLUtil.encodeAll(map.get(k).toString()));
 			}
 		}
 		return sb.toString();
