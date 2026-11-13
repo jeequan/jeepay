@@ -129,6 +129,13 @@
             <artifactId>jeepay-sdk-java</artifactId>
             <version>pls-1.3.0</version>
         </dependency>
+
+        <!-- 单元测试依赖（JUnit5 / Mockito / spring-test） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 

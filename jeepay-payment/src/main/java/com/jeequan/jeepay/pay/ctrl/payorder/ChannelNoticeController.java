@@ -40,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 /*
 * 渠道侧的通知入口Controller 【分为同步跳转（doReturn）和异步回调(doNotify) 】
@@ -88,8 +87,7 @@ public class ChannelNoticeController extends AbstractCtrl {
 
             // 仅做跳转，直接跳转订单的returnUrl
             if (StringUtils.isNotBlank(urlOrderId) && urlOrderId.startsWith(CS.PAY_RETURNURL_FIX_ONLY_JUMP_PREFIX)) {
-                onlyJump(urlOrderId, logPrefix);
-                return null;
+                return onlyJump(urlOrderId, logPrefix);
             }
 
             // 解析订单号 和 请求参数
@@ -141,9 +139,8 @@ public class ChannelNoticeController extends AbstractCtrl {
 
             //包含通知地址时
             if(hasReturnUrl){
-                // 重定向
-                response.sendRedirect(payMchNotifyService.createReturnUrl(payOrder, mchAppConfigContext.getMchApp().getAppSecret()));
-                return null;
+                // 重定向（交由 Spring MVC 处理，避免响应已提交后仍去解析视图与静态资源）
+                return "redirect:" + payMchNotifyService.createReturnUrl(payOrder, mchAppConfigContext.getMchApp().getAppSecret());
             }else{
 
                 //跳转到支付成功页面
@@ -280,7 +277,7 @@ public class ChannelNoticeController extends AbstractCtrl {
         return "cashier/returnPage";
     }
 
-    private void onlyJump(String urlOrderId, String logPrefix) throws IOException {
+    private String onlyJump(String urlOrderId, String logPrefix) {
 
         if (StringUtils.isNotBlank(urlOrderId) && urlOrderId.startsWith(CS.PAY_RETURNURL_FIX_ONLY_JUMP_PREFIX)) {
 
@@ -292,17 +289,19 @@ public class ChannelNoticeController extends AbstractCtrl {
             // 订单不存在
             if(payOrder == null){
                 log.error("{}, 订单不存在. payOrderId={} ", logPrefix, payOrderId);
-                this.toReturnPage("支付订单不存在");
+                return this.toReturnPage("支付订单不存在");
             }
 
             //查询出商户应用的配置信息
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
 
             if (StringUtils.isBlank(payOrder.getReturnUrl())) {
-                this.toReturnPage(null);
+                return this.toReturnPage(null);
             }
-            response.sendRedirect(payMchNotifyService.createReturnUrl(payOrder, mchAppConfigContext.getMchApp().getAppSecret()));
+            // 重定向（交由 Spring MVC 处理，避免响应已提交后仍去解析视图与静态资源）
+            return "redirect:" + payMchNotifyService.createReturnUrl(payOrder, mchAppConfigContext.getMchApp().getAppSecret());
         }
+        return this.toReturnPage(null);
     }
 
 }
