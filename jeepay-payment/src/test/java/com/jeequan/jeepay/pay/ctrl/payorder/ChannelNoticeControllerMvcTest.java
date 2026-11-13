@@ -122,6 +122,38 @@ class ChannelNoticeControllerMvcTest {
         verifyNoInteractions(notifications, channel);
     }
 
+    @Test
+    void normalReturnMissingOrderDoesNotQueryConfigurationOrSign() throws Exception {
+        when(channel.parseParams(any(), isNull(), eq(IChannelNoticeService.NoticeTypeEnum.DO_RETURN)))
+                .thenReturn(MutablePair.of(ORDER_ID, Collections.emptyMap()));
+        assertReturnPage("/api/pay/return/alipay");
+        verifyNoInteractions(configs, notifications);
+        verify(channel, never()).doNotice(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void mismatchedOrderStopsBeforeOrderLookup() throws Exception {
+        when(channel.parseParams(any(), eq("different-order"), eq(IChannelNoticeService.NoticeTypeEnum.DO_RETURN)))
+                .thenReturn(MutablePair.of(ORDER_ID, Collections.emptyMap()));
+        assertReturnPage("/api/pay/return/alipay/different-order");
+        verifyNoInteractions(orders, configs, notifications);
+        verify(channel, never()).doNotice(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void invalidChannelResultDoesNotSignOrRedirect() throws Exception {
+        PayOrder order = order(RETURN_URL);
+        MchAppConfigContext config = config();
+        when(channel.parseParams(any(), isNull(), eq(IChannelNoticeService.NoticeTypeEnum.DO_RETURN)))
+                .thenReturn(MutablePair.of(ORDER_ID, Collections.emptyMap()));
+        when(orders.getById(ORDER_ID)).thenReturn(order);
+        when(configs.queryMchInfoAndAppInfo("synthetic-mch", "synthetic-app")).thenReturn(config);
+        // 渠道返回 null 时必须展示结果页，不能继续签名跳转。
+        assertReturnPage("/api/pay/return/alipay");
+        verifyNoInteractions(notifications);
+        assertNull(order.getState());
+    }
+
     private void assertRedirect(String path) throws Exception {
         Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         ListAppender<ILoggingEvent> events = new ListAppender<>();
@@ -147,8 +179,12 @@ class ChannelNoticeControllerMvcTest {
     }
 
     private void assertReturnPage() throws Exception {
+        assertReturnPage(onlyJumpPath());
+    }
+
+    private void assertReturnPage(String path) throws Exception {
         try (MockedStatic<SpringBeansUtil> beans = channelBean()) {
-            MvcResult result = mvc.perform(get(onlyJumpPath()))
+            MvcResult result = mvc.perform(get(path))
                     .andExpect(status().isOk())
                     .andExpect(view().name("cashier/returnPage"))
                     .andExpect(forwardedUrl("/templates/cashier/returnPage.html"))
